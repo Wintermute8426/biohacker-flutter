@@ -22,7 +22,7 @@ jobs:
         run: flutter build apk --release
       
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: biohacker-apk
           path: build/app/outputs/flutter-app/release/app-release.apk
