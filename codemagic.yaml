@@ -1,0 +1,31 @@
+workflows:
+  android-apk:
+    name: Build Android APK
+    max_build_duration: 120
+    environment:
+      flutter: stable
+      xcode: latest
+      android_sdk: 34
+    triggering:
+      events:
+        - push
+      branch:
+        - main
+    scripts:
+      - name: Get Flutter dependencies
+        script: flutter pub get
+      
+      - name: Build APK
+        script: flutter build apk --release
+    
+    artifacts:
+      - build/app/outputs/flutter-app/release/app-release.apk
+    
+    publishing:
+      email:
+        recipients:
+          - ebbadi@gmail.com
+        subject: "Biohacker APK Build Complete"
+        notify:
+          success: true
+          failure: true
