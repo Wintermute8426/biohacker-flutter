@@ -10,8 +10,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   await Supabase.initialize(
-    url: 'https://kjzxvqiodwfvzvpnxgop.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtqenh2cWlvZHdmdnp2cG54Z29wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDY2MzI5MTksImV4cCI6MjAyMjIwODkxOX0.WVGVb8pjdPFLXyKhM7Y-L0VbxJL8KXAf1QEYPncsVvk',
+    url: 'https://eqyfvqfgbkydmgafh.supabase.co',
+    anonKey: 'sb_publishable_uBBKiQnHacwaS9HuDids0g_Hk2qtSWC',
   );
 
   runApp(
