@@ -26,4 +26,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: biohacker-apk
-          path: build/app/outputs/flutter-app/release/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+      
+      - name: Upload to transfer.sh
+        if: success()
+        run: |
+          curl --upload-file build/app/outputs/flutter-apk/app-release.apk https://transfer.sh/biohacker-app.apk
+          echo "APK uploaded to transfer.sh"
