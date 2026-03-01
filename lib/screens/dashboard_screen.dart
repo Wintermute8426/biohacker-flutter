@@ -41,7 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.pill),
+            icon: Icon(Icons.medical_information),
             label: 'Cycles',
           ),
           BottomNavigationBarItem(
