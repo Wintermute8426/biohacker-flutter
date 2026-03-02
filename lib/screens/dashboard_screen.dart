@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
-import 'cycles_screen.dart';
-import 'labs_screen.dart';
-import 'settings_screen.dart';
+import '../services/cycles_database.dart';
+import '../services/dose_logs_database.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -14,52 +13,35 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedIndex = 0;
+  final cycleDb = CyclesDatabase();
+  final doseDb = DoseLogsDatabase();
 
-  final List<Widget> _screens = [
-    const DashboardTab(),
-    const CyclesScreen(),
-    const LabsScreen(),
-    const SettingsScreen(),
-  ];
+  late Future<List<Cycle>> activeCycles;
+  late Future<List<DoseLog>> recentDoses;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
-        backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textMid,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medical_information),
-            label: 'Cycles',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.science),
-            label: 'Labs',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-      ),
-    );
+  void initState() {
+    super.initState();
+    _loadData();
   }
-}
 
-class DashboardTab extends StatelessWidget {
-  const DashboardTab({Key? key}) : super(key: key);
+  void _loadData() {
+    activeCycles = cycleDb.getActiveCycles();
+    recentDoses = doseDb.getAllDoseLogs();
+    setState(() {});
+  }
+
+  String _getNextInjectionDue(Cycle cycle) {
+    // Simple logic: if 1x weekly, next injection is in 7 days, etc.
+    int daysPerDose = 7; // default
+    if (cycle.frequency.contains('2x')) daysPerDose = 3;
+    if (cycle.frequency.contains('3x')) daysPerDose = 2;
+    if (cycle.frequency.contains('Daily')) daysPerDose = 1;
+
+    final nextDue = DateTime.now().add(Duration(days: daysPerDose));
+    final diff = nextDue.difference(DateTime.now()).inDays;
+    return 'In $diff days';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,127 +55,211 @@ class DashboardTab extends StatelessWidget {
           children: [
             // Header
             Text(
-              '🧊 BIOHACKER',
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              'DASHBOARD',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
+                letterSpacing: 2,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
-              'Welcome back',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              'Welcome back, ${user?.email?.split('@')[0] ?? 'User'}',
+              style: TextStyle(
                 color: AppColors.textMid,
+                fontSize: 14,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
-            // Active Cycle Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ACTIVE CYCLE',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.textMid,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'No active cycle',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Create one in the Cycles tab',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textDim,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Quick Stats
+            // ACTIVE CYCLES
             Text(
-              'QUICK STATS',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.textMid,
+              'ACTIVE CYCLES',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
                 letterSpacing: 1,
               ),
             ),
             const SizedBox(height: 12),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              children: [
-                _StatCard('Weight', '185', 'lbs'),
-                _StatCard('Protein', '160', 'g'),
-                _StatCard('Water', '3.2', 'L'),
-                _StatCard('Sleep', '7.5', 'h'),
-              ],
+            FutureBuilder<List<Cycle>>(
+              future: activeCycles,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                    ),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'No active cycles. Go to Cycles tab to create one.',
+                      style: TextStyle(color: AppColors.textMid),
+                    ),
+                  );
+                }
+
+                final cycles = snapshot.data!;
+                return Column(
+                  children: cycles.map((cycle) {
+                    final daysRemaining =
+                        cycle.endDate.difference(DateTime.now()).inDays;
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            cycle.peptideName.toUpperCase(),
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${cycle.dose}mg • ${cycle.frequency}',
+                                style: TextStyle(
+                                  color: AppColors.textMid,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(
+                                '$daysRemaining days left',
+                                style: TextStyle(
+                                  color: AppColors.accent,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Next injection: ${_getNextInjectionDue(cycle)}',
+                            style: TextStyle(
+                              color: AppColors.textDim,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // RECENT DOSES
+            Text(
+              'RECENT INJECTIONS',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 12),
+            FutureBuilder<List<DoseLog>>(
+              future: recentDoses,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                    ),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'No logged doses yet.',
+                      style: TextStyle(color: AppColors.textMid),
+                    ),
+                  );
+                }
+
+                final doses = snapshot.data!.take(5).toList(); // Show last 5
+                return Column(
+                  children: doses.map((dose) {
+                    final date = dose.loggedAt;
+                    final formatted =
+                        '${date.month}/${date.day} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${dose.doseAmount}mg',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                dose.route ?? 'Unknown route',
+                                style: TextStyle(
+                                  color: AppColors.textDim,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            formatted,
+                            style: TextStyle(
+                              color: AppColors.textMid,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final String unit;
-
-  const _StatCard(this.label, this.value, this.unit);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textMid,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            unit,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textDim,
-            ),
-          ),
-        ],
       ),
     );
   }

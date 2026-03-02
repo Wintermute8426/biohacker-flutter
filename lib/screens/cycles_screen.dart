@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../data/peptides.dart';
 import '../services/cycles_database.dart';
+import '../services/dose_logs_database.dart';
+import '../services/side_effects_database.dart';
 
 class CyclesScreen extends StatefulWidget {
   const CyclesScreen({Key? key}) : super(key: key);
@@ -16,7 +18,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
   final _weeksController = TextEditingController(text: '8');
   final _bacWaterMlController = TextEditingController();
   final _notesController = TextEditingController();
+  final _doseAmountController = TextEditingController();
+  final _sideEffectNotesController = TextEditingController();
   final db = CyclesDatabase();
+  final doseDb = DoseLogsDatabase();
+  final sideEffectDb = SideEffectsDatabase();
   
   List<Cycle> savedCycles = [];
   List<String> filteredPeptides = PEPTIDE_LIST;
@@ -462,6 +468,158 @@ class _CyclesScreenState extends State<CyclesScreen> {
           },
         );
       },
+    );
+  }
+
+  void _showLogDoseDialog(Cycle cycle) {
+    _doseAmountController.clear();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('LOG DOSE', style: TextStyle(color: AppColors.primary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _doseAmountController,
+              style: const TextStyle(color: Colors.white),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                hintText: 'Dose amount (mg)',
+                hintStyle: TextStyle(color: AppColors.textDim),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('CANCEL', style: TextStyle(color: AppColors.textDim)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final dose = double.tryParse(_doseAmountController.text);
+              if (dose != null) {
+                await doseDb.logDose(
+                  cycleId: cycle.id,
+                  doseAmount: dose,
+                  loggedAt: DateTime.now(),
+                  route: cycle.route,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('✓ Dose logged: ${dose}mg'),
+                    backgroundColor: AppColors.primary,
+                  ),
+                );
+                Navigator.pop(context);
+              }
+            },
+            child: Text('LOG', style: TextStyle(color: AppColors.primary)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogSideEffectDialog(Cycle cycle) {
+    _sideEffectNotesController.clear();
+    String selectedSymptom = SideEffectsDatabase.SYMPTOM_OPTIONS.first;
+    int severity = 5;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: Text('LOG SYMPTOM', style: TextStyle(color: AppColors.primary)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButton<String>(
+                  value: selectedSymptom,
+                  isExpanded: true,
+                  dropdownColor: AppColors.surface,
+                  items: SideEffectsDatabase.SYMPTOM_OPTIONS.map((s) {
+                    return DropdownMenuItem<String>(
+                      value: s,
+                      child: Text(s, style: const TextStyle(color: Colors.white)),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setDialogState(() => selectedSymptom = value);
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Severity', style: TextStyle(color: AppColors.textMid)),
+                    Text('$severity/10', style: TextStyle(color: AppColors.primary)),
+                  ],
+                ),
+                Slider(
+                  value: severity.toDouble(),
+                  min: 1,
+                  max: 10,
+                  divisions: 9,
+                  onChanged: (value) {
+                    setDialogState(() => severity = value.toInt());
+                  },
+                  activeColor: AppColors.primary,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _sideEffectNotesController,
+                  style: const TextStyle(color: Colors.white),
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: 'Notes (optional)',
+                    hintStyle: TextStyle(color: AppColors.textDim),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('CANCEL', style: TextStyle(color: AppColors.textDim)),
+            ),
+            TextButton(
+              onPressed: () async {
+                await sideEffectDb.logSideEffect(
+                  cycleId: cycle.id,
+                  symptom: selectedSymptom,
+                  severity: severity,
+                  loggedAt: DateTime.now(),
+                  notes: _sideEffectNotesController.text.isEmpty
+                      ? null
+                      : _sideEffectNotesController.text,
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('✓ Symptom logged: $selectedSymptom'),
+                    backgroundColor: AppColors.primary,
+                  ),
+                );
+                Navigator.pop(context);
+              },
+              child: Text('LOG', style: TextStyle(color: AppColors.primary)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1067,7 +1225,66 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                 ),
                                 const SizedBox(height: 24),
 
-                                // Action Buttons
+                                // Action Buttons Row 1
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    if (cycle.isActive) ...[
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          onPressed: () =>
+                                              _showLogDoseDialog(cycle),
+                                          style: OutlinedButton.styleFrom(
+                                            side: BorderSide(
+                                              color: AppColors.accent,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'LOG DOSE',
+                                            style: TextStyle(
+                                              color: AppColors.accent,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          onPressed: () =>
+                                              _showLogSideEffectDialog(cycle),
+                                          style: OutlinedButton.styleFrom(
+                                            side: BorderSide(
+                                              color: AppColors.accent,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'LOG SYMPTOM',
+                                            style: TextStyle(
+                                              color: AppColors.accent,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                    ],
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+
+                                // Action Buttons Row 2
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
@@ -1090,13 +1307,13 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                             'EDIT',
                                             style: TextStyle(
                                               color: AppColors.primary,
-                                              fontSize: 11,
+                                              fontSize: 10,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 6),
                                       Expanded(
                                         child: ElevatedButton(
                                           onPressed: () =>
@@ -1112,13 +1329,13 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                             'COMPLETE',
                                             style: TextStyle(
                                               color: AppColors.background,
-                                              fontSize: 11,
+                                              fontSize: 10,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 6),
                                     ],
                                     Expanded(
                                       child: OutlinedButton(
@@ -1137,7 +1354,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                           'DELETE',
                                           style: TextStyle(
                                             color: AppColors.error,
-                                            fontSize: 11,
+                                            fontSize: 10,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -1164,6 +1381,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
     _weeksController.dispose();
     _bacWaterMlController.dispose();
     _notesController.dispose();
+    _doseAmountController.dispose();
+    _sideEffectNotesController.dispose();
     super.dispose();
   }
 }
