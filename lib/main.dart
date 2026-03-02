@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
-import 'screens/dashboard_screen.dart';
+import 'screens/home_screen.dart';
 import 'theme/colors.dart';
 
 void main() async {
@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
           }
 
           if (authProvider.user != null) {
-            return const DashboardScreen();
+            return const HomeScreen();
           }
 
           return const LoginScreen();
