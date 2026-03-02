@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../data/peptides.dart';
+import '../data/dosing_calculator.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
 import '../services/side_effects_database.dart';
@@ -20,6 +21,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
   final _notesController = TextEditingController();
   final _doseAmountController = TextEditingController();
   final _sideEffectNotesController = TextEditingController();
+  final _advancedStartDoseController = TextEditingController();
+  final _advancedEndDoseController = TextEditingController();
   final db = CyclesDatabase();
   final doseDb = DoseLogsDatabase();
   final sideEffectDb = SideEffectsDatabase();
@@ -30,6 +33,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   String _selectedFrequency = '1x weekly';
   String _selectedRoute = 'SC (subcutaneous)';
   bool _showAdvanced = false;
+  bool _useAdvancedDosing = false;
   bool _isLoading = true;
 
   @override
