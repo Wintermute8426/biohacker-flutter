@@ -310,134 +310,156 @@ class _CyclesScreenState extends State<CyclesScreen> {
 
   void _showCompleteCycle(Cycle cycle) {
     _notesController.clear();
+    double effectiveness = 5;
 
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'COMPLETE CYCLE',
+                        style: TextStyle(
+                          color: AppColors.accent,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        color: AppColors.textMid,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
                   Text(
-                    'COMPLETE CYCLE',
+                    'End of Cycle Log',
                     style: TextStyle(
-                      color: AppColors.accent,
-                      fontSize: 18,
+                      color: AppColors.primary,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    color: AppColors.textMid,
-                    onPressed: () => Navigator.pop(context),
+                  const SizedBox(height: 16),
+
+                  // Effectiveness
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Effectiveness',
+                        style: TextStyle(
+                          color: AppColors.textMid,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        '${effectiveness.toStringAsFixed(1)}/10',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 12),
+                  Slider(
+                    value: effectiveness,
+                    min: 1,
+                    max: 10,
+                    divisions: 9,
+                    label: effectiveness.toStringAsFixed(1),
+                    activeColor: AppColors.primary,
+                    onChanged: (value) {
+                      setModalState(() => effectiveness = value);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Notes
+                  Text(
+                    'Notes & Observations',
+                    style: TextStyle(
+                      color: AppColors.textMid,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _notesController,
+                    style: const TextStyle(color: Colors.white),
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      hintText: 'How did you feel? Any side effects? Results?',
+                      hintStyle: TextStyle(color: AppColors.textDim, fontSize: 12),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      contentPadding: const EdgeInsets.all(12),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await db.updateCycle(
+                          cycleId: cycle.id,
+                          isActive: false,
+                        );
+                        _loadCycles();
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('✓ ${cycle.peptideName} cycle completed (${effectiveness.toStringAsFixed(1)}/10)'),
+                            backgroundColor: AppColors.accent,
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      child: Text(
+                        'MARK COMPLETE',
+                        style: TextStyle(
+                          color: AppColors.background,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
-              const SizedBox(height: 20),
-
-              Text(
-                'End of Cycle Log',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Effectiveness
-              Text(
-                'Effectiveness (1-10)',
-                style: TextStyle(
-                  color: AppColors.textMid,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Slider(
-                value: 5,
-                min: 1,
-                max: 10,
-                divisions: 9,
-                label: '5/10',
-                activeColor: AppColors.primary,
-                onChanged: (value) {},
-              ),
-              const SizedBox(height: 20),
-
-              // Notes
-              Text(
-                'Notes & Observations',
-                style: TextStyle(
-                  color: AppColors.textMid,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _notesController,
-                style: const TextStyle(color: Colors.white),
-                maxLines: 4,
-                decoration: InputDecoration(
-                  hintText: 'How did you feel? Any side effects? Results?',
-                  hintStyle: TextStyle(color: AppColors.textDim, fontSize: 12),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.border),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  contentPadding: const EdgeInsets.all(12),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await db.updateCycle(
-                      cycleId: cycle.id,
-                      isActive: false,
-                    );
-                    _loadCycles();
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('✓ ${cycle.peptideName} cycle completed'),
-                        backgroundColor: AppColors.accent,
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  child: Text(
-                    'MARK COMPLETE',
-                    style: TextStyle(
-                      color: AppColors.background,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -1043,7 +1065,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 20),
 
                                 // Action Buttons
                                 Row(
