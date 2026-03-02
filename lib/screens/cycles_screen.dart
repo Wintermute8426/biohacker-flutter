@@ -5,6 +5,7 @@ import '../data/dosing_calculator.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
 import '../services/side_effects_database.dart';
+import '../widgets/advanced_dosing_widget.dart';
 
 class CyclesScreen extends StatefulWidget {
   const CyclesScreen({Key? key}) : super(key: key);
@@ -29,11 +30,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
   
   List<Cycle> savedCycles = [];
   List<String> filteredPeptides = PEPTIDE_LIST;
+  DosingSchedule? _selectedDosingSchedule;
   
   String _selectedFrequency = '1x weekly';
   String _selectedRoute = 'SC (subcutaneous)';
   bool _showAdvanced = false;
-  bool _useAdvancedDosing = false;
   bool _isLoading = true;
 
   @override
@@ -475,6 +476,27 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
   }
 
+  void _showAdvancedDosingModal(StateSetter setModalState) {
+    final weeks = int.tryParse(_weeksController.text) ?? 8;
+    final dose = double.tryParse(_doseController.text) ?? 250;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      builder: (context) => AdvancedDosingWidget(
+        totalWeeks: weeks,
+        frequency: _selectedFrequency,
+        defaultDose: dose,
+        onScheduleSet: (schedule) {
+          setModalState(() {
+            _selectedDosingSchedule = schedule;
+          });
+        },
+      ),
+    );
+  }
+
   void _showLogDoseDialog(Cycle cycle) {
     _doseAmountController.clear();
     showDialog(
@@ -893,6 +915,34 @@ class _CyclesScreenState extends State<CyclesScreen> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     ),
                   ),
+                  const SizedBox(height: 20),
+
+                  // Advanced Dosing Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 40,
+                    child: ElevatedButton(
+                      onPressed: () => _showAdvancedDosingModal(setModalState),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent.withOpacity(0.2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          side: BorderSide(color: AppColors.accent),
+                        ),
+                      ),
+                      child: Text(
+                        _selectedDosingSchedule == null
+                            ? 'SET ADVANCED DOSING (Optional)'
+                            : '✓ ADVANCED DOSING SET',
+                        style: TextStyle(
+                          color: AppColors.accent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 24),
 
                   SizedBox(
@@ -921,6 +971,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           frequency: _selectedFrequency,
                           durationWeeks: weeks,
                           startDate: DateTime.now(),
+                          advancedSchedule: _selectedDosingSchedule?.toJson(),
                         );
 
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -934,6 +985,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         _weeksController.text = '8';
                         _selectedFrequency = '1x weekly';
                         _selectedRoute = 'SC (subcutaneous)';
+                        _selectedDosingSchedule = null;
                         _loadCycles();
                         Navigator.pop(context);
                       },
