@@ -10,26 +10,41 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
       
-      - uses: subosito/flutter-action@v2
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.2'
+          channel: stable
+          cache: true
+      
+      - name: Verify Flutter installation
+        run: flutter --version && flutter doctor -v
       
       - name: Get dependencies
         run: flutter pub get
       
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Analyze code
+        run: flutter analyze --no-fatal-infos
       
-      - name: Upload APK
+      - name: Build APK (debug split-per-abi for testing)
+        run: flutter build apk --split-per-abi
+      
+      - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: biohacker-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: biohacker-apk-artifacts
+          path: build/app/outputs/flutter-apk/
+          retention-days: 30
       
-      - name: Upload to transfer.sh
-        if: success()
-        run: |
-          curl --upload-file build/app/outputs/flutter-apk/app-release.apk https://transfer.sh/biohacker-app.apk
-          echo "APK uploaded to transfer.sh"
+      - name: Build Release APK (unsigned for manual signing)
+        run: flutter build apk --release --no-sign
+      
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: biohacker-apk-release-unsigned
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7

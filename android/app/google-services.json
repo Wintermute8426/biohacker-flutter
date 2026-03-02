@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "597734941366",
+    "project_id": "biohacker-9a929",
+    "storage_bucket": "biohacker-9a929.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:597734941366:android:c5d529ed6c5f0b3ff77c17",
+        "android_client_info": {
+          "package_name": "com.example.biohacker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAGQkcBfGxX3Bfs0P6gV9dNbQsFCvYqAo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

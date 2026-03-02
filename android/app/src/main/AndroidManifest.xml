@@ -42,4 +42,7 @@
             <data android:mimeType="text/plain"/>
         </intent>
     </queries>
+    
+    <!-- Required for Supabase authentication and API calls -->
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
