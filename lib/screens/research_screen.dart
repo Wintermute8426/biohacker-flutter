@@ -119,6 +119,10 @@ class _ResearchScreenState extends State<ResearchScreen> {
             ),
             const SizedBox(height: 20),
 
+            // PepScore
+            _buildPepScoreSection(peptide),
+            const SizedBox(height: 20),
+
             // Dosing info
             _buildInfoSection('DOSING', [
               '${peptide.commonDoseRange} ${peptide.unit}',
@@ -288,6 +292,136 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     ),
                   ))
               .toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPepScoreSection(PeptideInfo peptide) {
+    final score = peptide.pepScore;
+    final overall = score.overallScore;
+    final rating = score.rating;
+    
+    // Color based on score
+    Color scoreColor;
+    if (overall >= 80) {
+      scoreColor = AppColors.accent; // Green
+    } else if (overall >= 60) {
+      scoreColor = Color(0xFFFFB700); // Orange
+    } else {
+      scoreColor = AppColors.error; // Red
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: scoreColor.withOpacity(0.08),
+        border: Border.all(color: scoreColor.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Overall score row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'RESEARCH QUALITY (PepScore)',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Text(
+                '$overall/100',
+                style: TextStyle(
+                  color: scoreColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Score bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: overall / 100,
+              minHeight: 6,
+              backgroundColor: AppColors.surface.withOpacity(0.5),
+              valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          // Rating label
+          Text(
+            rating,
+            style: TextStyle(
+              color: scoreColor,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Component breakdown
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            childAspectRatio: 2.2,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            children: [
+              _buildScoreMetric('Publication', score.publication, 25),
+              _buildScoreMetric('Evidence', score.evidence, 35),
+              _buildScoreMetric('Methodology', score.methodology, 25),
+              _buildScoreMetric('Relevance', score.relevance, 15),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScoreMetric(String label, int score, int weight) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: AppColors.textDim,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              '${score}%',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          '($weight%)',
+          style: TextStyle(
+            color: AppColors.textDim,
+            fontSize: 9,
+          ),
         ),
       ],
     );
