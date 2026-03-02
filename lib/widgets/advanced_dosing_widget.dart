@@ -83,7 +83,12 @@ class _AdvancedDosingWidgetState extends State<AdvancedDosingWidget> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 60,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

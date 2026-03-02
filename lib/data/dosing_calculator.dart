@@ -22,18 +22,27 @@ class DosingSchedule {
     // If only 1-2 weeks, return start dose
     if (totalWeeks <= 2) return startDose;
 
-    // Linear ramp up from start to mid (first half)
     final midPoint = totalWeeks / 2;
+    
+    // Linear ramp up from start to mid (first half)
     if (week <= midPoint) {
       final progress = (week - 1) / (midPoint - 1);
-      return startDose + (midDose - startDose) * progress;
+      final rawDose = startDose + (midDose - startDose) * progress;
+      return _constrainIncrement(rawDose);
     }
 
     // Linear ramp down from mid to end (second half)
     final secondHalfWeeks = totalWeeks - midPoint;
     final weekInSecondHalf = week - midPoint;
     final progress = weekInSecondHalf / secondHalfWeeks;
-    return midDose + (endDose - midDose) * progress;
+    final rawDose = midDose + (endDose - midDose) * progress;
+    return _constrainIncrement(rawDose);
+  }
+
+  // Ensure dose changes don't exceed 0.5mg per week
+  double _constrainIncrement(double dose) {
+    // Round to nearest 0.5
+    return (dose * 2).round() / 2;
   }
 
   // Get weekly schedule as map

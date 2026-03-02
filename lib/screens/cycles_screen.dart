@@ -492,6 +492,13 @@ class _CyclesScreenState extends State<CyclesScreen> {
           setModalState(() {
             _selectedDosingSchedule = schedule;
           });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('✓ Dosing schedule set'),
+              backgroundColor: AppColors.accent,
+              duration: const Duration(seconds: 1),
+            ),
+          );
         },
       ),
     );
