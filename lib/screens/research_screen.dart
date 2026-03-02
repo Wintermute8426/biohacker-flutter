@@ -532,7 +532,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: color.withOpacity(0.08),
-          border: Border.left(color: Border.all(color: color).left.color),
+          border: Border(left: BorderSide(color: color, width: 3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
