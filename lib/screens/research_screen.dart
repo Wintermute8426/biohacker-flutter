@@ -13,7 +13,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
   final _searchController = TextEditingController();
   late List<PeptideInfo> _displayedPeptides;
   String? _selectedCategory;
-  int _tabIndex = 0; // 0 = Peptides, 1 = Quality Guide
+  int _tabIndex = 0; // 0 = Peptides, 1 = Quality Guide, 2 = Methodology
 
   @override
   void initState() {
@@ -62,7 +62,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
           left: 16,
           right: 16,
           top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 80,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 120,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,13 +371,23 @@ class _ResearchScreenState extends State<ResearchScreen> {
           const SizedBox(height: 12),
 
           // Component breakdown
+          Text(
+            'SCORE BREAKDOWN',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 2.2,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
+            childAspectRatio: 2.5,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
             children: [
               _buildScoreMetric('Publication', score.publication, 25),
               _buildScoreMetric('Evidence', score.evidence, 35),
@@ -424,6 +434,155 @@ class _ResearchScreenState extends State<ResearchScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPepScoreMethodology() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'PEPSCORE METHODOLOGY',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          Text(
+            'PepScore is a research quality framework that evaluates peptide evidence across 4 dimensions:',
+            style: TextStyle(
+              color: AppColors.textLight,
+              fontSize: 12,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          _buildMetricExplanation(
+            'PUBLICATION (25%)',
+            'Peer-reviewed journal citations and mainstream scientific presence. Higher = more published research.',
+            AppColors.primary,
+          ),
+          _buildMetricExplanation(
+            'EVIDENCE (35%)',
+            'Quality of human clinical data. Highest weight because real-world results matter most.',
+            AppColors.accent,
+          ),
+          _buildMetricExplanation(
+            'METHODOLOGY (25%)',
+            'Research rigor and experimental design. Proper controls, sample sizes, and statistical analysis.',
+            Color(0xFFFFB700),
+          ),
+          _buildMetricExplanation(
+            'RELEVANCE (15%)',
+            'Applicability to human biohacking and health optimization. Theory is great, but practical benefit matters.',
+            Color(0xFF00FFFF),
+          ),
+
+          const SizedBox(height: 24),
+          Text(
+            'OVERALL SCORE',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '(Publication × 0.25) + (Evidence × 0.35) + (Methodology × 0.25) + (Relevance × 0.15)',
+            style: TextStyle(
+              color: AppColors.textMid,
+              fontSize: 11,
+              fontFamily: 'monospace',
+            ),
+          ),
+
+          const SizedBox(height: 20),
+          Text(
+            'RATINGS',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildRatingBadge('Excellent', 80, AppColors.accent),
+          _buildRatingBadge('Good', 60, Color(0xFFFFB700)),
+          _buildRatingBadge('Fair', 40, Color(0xFFFF9500)),
+          _buildRatingBadge('Limited', 0, AppColors.error),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricExplanation(String title, String description, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          border: Border.left(color: Border.all(color: color).left.color),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              description,
+              style: TextStyle(
+                color: AppColors.textMid,
+                fontSize: 11,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRatingBadge(String label, int minScore, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '$label ($minScore+)',
+            style: TextStyle(
+              color: AppColors.textMid,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -580,6 +739,8 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     _buildTab('Peptides', 0),
                     const SizedBox(width: 12),
                     _buildTab('Quality Guide', 1),
+                    const SizedBox(width: 12),
+                    _buildTab('Methodology', 2),
                   ],
                 ),
               ],
@@ -725,6 +886,8 @@ class _ResearchScreenState extends State<ResearchScreen> {
             ),
           ] else if (_tabIndex == 1) ...[
             Expanded(child: _buildQualityGuide()),
+          ] else if (_tabIndex == 2) ...[
+            Expanded(child: _buildPepScoreMethodology()),
           ],
         ],
       ),
