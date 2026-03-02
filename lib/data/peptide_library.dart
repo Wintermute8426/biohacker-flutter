@@ -1,17 +1,32 @@
 // Comprehensive peptide library with detailed information
 
+class StudyLink {
+  final String title;
+  final String url;
+  final String source;
+  final int year;
+
+  const StudyLink({
+    required this.title,
+    required this.url,
+    required this.source,
+    required this.year,
+  });
+}
+
 class PeptideInfo {
   final String name;
   final String category;
-  final String commonDoseRange; // e.g., "250-500"
-  final String unit; // mg, mcg, etc.
-  final String timing; // e.g., "1x weekly"
-  final String route; // SC, IM, IV, etc.
+  final String commonDoseRange;
+  final String unit;
+  final String timing;
+  final String route;
   final String description;
   final List<String> effects;
   final List<String> sideEffects;
   final String safetyNotes;
-  final int halfLife; // in hours, 0 if not applicable
+  final int halfLife;
+  final List<StudyLink> studyLinks;
 
   const PeptideInfo({
     required this.name,
@@ -25,6 +40,7 @@ class PeptideInfo {
     required this.sideEffects,
     required this.safetyNotes,
     required this.halfLife,
+    required this.studyLinks,
   });
 }
 
@@ -43,6 +59,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     safetyNotes:
         'Well studied in humans. No major safety concerns at therapeutic doses.',
     halfLife: 8,
+    studyLinks: [],
+    studyLinks: [],
   ),
   'TB-500': PeptideInfo(
     name: 'TB-500',
@@ -57,6 +75,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     sideEffects: ['Minimal', 'Well tolerated'],
     safetyNotes: 'Long-standing research. Safe at therapeutic doses.',
     halfLife: 0,
+    studyLinks: [],
+    studyLinks: [],
   ),
   'Semaglutide': PeptideInfo(
     name: 'Semaglutide',
@@ -82,6 +102,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     safetyNotes:
         'Approved by FDA. Monitor for GI issues. Start low. Risk of pancreatitis at high doses.',
     halfLife: 168,
+    studyLinks: [],
+    studyLinks: [],
   ),
   'Tirzepatide': PeptideInfo(
     name: 'Tirzepatide',
@@ -107,6 +129,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     safetyNotes:
         'Newer than semaglutide. Stronger side effect profile. Monitor closely.',
     halfLife: 168,
+    studyLinks: [],
+    studyLinks: [],
   ),
   'Epitalon': PeptideInfo(
     name: 'Epitalon',
@@ -127,6 +151,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     safetyNotes:
         'Well tolerated. Long history of use in Russia. Limited human studies.',
     halfLife: 4,
+    studyLinks: [],
+    studyLinks: [],
   ),
   'CJC-1295': PeptideInfo(
     name: 'CJC-1295',
@@ -145,6 +171,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     sideEffects: ['Hunger increase', 'Water retention', 'Numbness/tingling'],
     safetyNotes: 'Monitor prolactin levels. Can cause hunger.',
     halfLife: 8,
+    studyLinks: [],
+    studyLinks: [],
   ),
   'Ipamorelin': PeptideInfo(
     name: 'Ipamorelin',
@@ -159,6 +187,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     sideEffects: ['Minimal', 'Mild hunger'],
     safetyNotes: 'Safer profile than other GH secretagogues.',
     halfLife: 2,
+    studyLinks: [],
+    studyLinks: [],
   ),
   'Semax': PeptideInfo(
     name: 'Semax',
@@ -173,6 +203,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     sideEffects: ['Minimal', 'Possible headache initially'],
     safetyNotes: 'Well tolerated. Russian research backing.',
     halfLife: 1,
+    studyLinks: [],
+    studyLinks: [],
   ),
   'GHK-Cu': PeptideInfo(
     name: 'GHK-Cu (Copper Peptide)',
@@ -192,6 +224,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     sideEffects: ['Minimal'],
     safetyNotes: 'Topical is safest. Injectable requires monitoring.',
     halfLife: 0,
+    studyLinks: [],
+    studyLinks: [],
   ),
   'Melanotan II': PeptideInfo(
     name: 'Melanotan II',
@@ -206,6 +240,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     sideEffects: ['Nausea', 'Flushing', 'Dark moles potential'],
     safetyNotes: 'Banned in many countries. Mole monitoring essential.',
     halfLife: 0,
+    studyLinks: [],
+    studyLinks: [],
   ),
   'PT-141': PeptideInfo(
     name: 'PT-141 (Bremelanotide)',
@@ -223,6 +259,8 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     sideEffects: ['Nausea', 'Flushing', 'Darkening of moles'],
     safetyNotes: 'FDA approved for women. Monitor blood pressure.',
     halfLife: 0,
+    studyLinks: [],
+    studyLinks: [],
   ),
 };
 
