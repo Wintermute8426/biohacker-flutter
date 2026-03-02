@@ -1065,38 +1065,38 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 20),
+                                const SizedBox(height: 24),
 
                                 // Action Buttons
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    Expanded(
-                                      child: OutlinedButton(
-                                        onPressed: () =>
-                                            _showEditCycle(cycle),
-                                        style: OutlinedButton.styleFrom(
-                                          side: BorderSide(
-                                            color: AppColors.primary,
+                                    if (cycle.isActive) ...[
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          onPressed: () =>
+                                              _showEditCycle(cycle),
+                                          style: OutlinedButton.styleFrom(
+                                            side: BorderSide(
+                                              color: AppColors.primary,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
+                                            ),
                                           ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(3),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'EDIT',
-                                          style: TextStyle(
-                                            color: AppColors.primary,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
+                                          child: Text(
+                                            'EDIT',
+                                            style: TextStyle(
+                                              color: AppColors.primary,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    if (cycle.isActive)
+                                      const SizedBox(width: 8),
                                       Expanded(
                                         child: ElevatedButton(
                                           onPressed: () =>
@@ -1118,7 +1118,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                           ),
                                         ),
                                       ),
-                                    const SizedBox(width: 8),
+                                      const SizedBox(width: 8),
+                                    ],
                                     Expanded(
                                       child: OutlinedButton(
                                         onPressed: () =>
@@ -1144,6 +1145,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 16),
                               ],
                             ),
                           );
