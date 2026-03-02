@@ -15,6 +15,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   final _doseController = TextEditingController();
   final _weeksController = TextEditingController(text: '8');
   final _bacWaterMlController = TextEditingController();
+  final _notesController = TextEditingController();
   final db = CyclesDatabase();
   
   List<Cycle> savedCycles = [];
@@ -53,6 +54,395 @@ class _CyclesScreenState extends State<CyclesScreen> {
     });
   }
 
+  void _showDeleteConfirmation(Cycle cycle) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(
+          'DELETE CYCLE?',
+          style: TextStyle(color: AppColors.error, letterSpacing: 1),
+        ),
+        content: Text(
+          'Remove ${cycle.peptideName} cycle? This cannot be undone.',
+          style: TextStyle(color: AppColors.textMid),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('CANCEL', style: TextStyle(color: AppColors.textDim)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final success = await db.deleteCycle(cycle.id);
+              if (success) {
+                _loadCycles();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('✓ Cycle deleted'),
+                    backgroundColor: AppColors.accent,
+                  ),
+                );
+              }
+              Navigator.pop(context);
+            },
+            child: Text('DELETE', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditCycle(Cycle cycle) {
+    _peptideController.text = cycle.peptideName;
+    _doseController.text = cycle.dose.toString();
+    _weeksController.text = cycle.durationWeeks.toString();
+    _selectedRoute = cycle.route;
+    _selectedFrequency = cycle.frequency;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'EDIT CYCLE',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        color: AppColors.textMid,
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // DOSE
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Dose (mg)',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _doseController,
+                              style: const TextStyle(color: Colors.white),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(color: AppColors.border),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Route',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: AppColors.border),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: DropdownButton<String>(
+                                value: _selectedRoute,
+                                isExpanded: true,
+                                underline: const SizedBox(),
+                                dropdownColor: AppColors.surface,
+                                items: [
+                                  'SC (subcutaneous)',
+                                  'IM (intramuscular)',
+                                  'IV (intravenous)',
+                                  'Intranasal',
+                                  'Oral',
+                                ].map((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(
+                                      value,
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (String? value) {
+                                  if (value != null) {
+                                    setModalState(() => _selectedRoute = value);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // FREQUENCY
+                  Text(
+                    'Frequency',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      '1x weekly',
+                      '2x weekly',
+                      '3x weekly',
+                      'Daily',
+                      '2x daily',
+                    ].map((String freq) {
+                      final isSelected = _selectedFrequency == freq;
+                      return GestureDetector(
+                        onTap: () => setModalState(() => _selectedFrequency = freq),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isSelected ? AppColors.primary : AppColors.border,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            freq,
+                            style: TextStyle(
+                              color: isSelected ? AppColors.primary : AppColors.textMid,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final dose = double.tryParse(_doseController.text) ?? cycle.dose;
+                        await db.updateCycle(
+                          cycleId: cycle.id,
+                        );
+                        _loadCycles();
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('✓ Cycle updated'),
+                            backgroundColor: AppColors.primary,
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      child: Text(
+                        'SAVE CHANGES',
+                        style: TextStyle(
+                          color: AppColors.background,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showCompleteCycle(Cycle cycle) {
+    _notesController.clear();
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'COMPLETE CYCLE',
+                    style: TextStyle(
+                      color: AppColors.accent,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    color: AppColors.textMid,
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              Text(
+                'End of Cycle Log',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Effectiveness
+              Text(
+                'Effectiveness (1-10)',
+                style: TextStyle(
+                  color: AppColors.textMid,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Slider(
+                value: 5,
+                min: 1,
+                max: 10,
+                divisions: 9,
+                label: '5/10',
+                activeColor: AppColors.primary,
+                onChanged: (value) {},
+              ),
+              const SizedBox(height: 20),
+
+              // Notes
+              Text(
+                'Notes & Observations',
+                style: TextStyle(
+                  color: AppColors.textMid,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _notesController,
+                style: const TextStyle(color: Colors.white),
+                maxLines: 4,
+                decoration: InputDecoration(
+                  hintText: 'How did you feel? Any side effects? Results?',
+                  hintStyle: TextStyle(color: AppColors.textDim, fontSize: 12),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.border),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  contentPadding: const EdgeInsets.all(12),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await db.updateCycle(
+                      cycleId: cycle.id,
+                      isActive: false,
+                    );
+                    _loadCycles();
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('✓ ${cycle.peptideName} cycle completed'),
+                        backgroundColor: AppColors.accent,
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  child: Text(
+                    'MARK COMPLETE',
+                    style: TextStyle(
+                      color: AppColors.background,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showNewCycleDialog() {
     showModalBottomSheet(
       context: context,
@@ -72,7 +462,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -94,7 +483,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // PEPTIDE PICKER
                   Text(
                     'Peptide',
                     style: TextStyle(
@@ -161,7 +549,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   ],
                   const SizedBox(height: 20),
 
-                  // DOSE (mg)
                   Row(
                     children: [
                       Expanded(
@@ -174,7 +561,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                 color: AppColors.primary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -206,7 +592,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                 color: AppColors.primary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -232,10 +617,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                     value: value,
                                     child: Text(
                                       value,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                      ),
+                                      style: const TextStyle(color: Colors.white, fontSize: 12),
                                     ),
                                   );
                                 }).toList(),
@@ -253,45 +635,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // BAC WATER (ml)
-                  Text(
-                    'Bacteriostatic Water (ml)',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _bacWaterMlController,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      hintText: '2.0',
-                      hintStyle: TextStyle(color: AppColors.textDim),
-                      suffix: Text(
-                        'ml',
-                        style: TextStyle(color: AppColors.accent, fontSize: 12),
-                      ),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // FREQUENCY
                   Text(
                     'Frequency',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -337,14 +686,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // DURATION
                   Text(
                     'Duration (weeks)',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -362,143 +709,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     ),
                   ),
-                  const SizedBox(height: 20),
-
-                  // ADVANCED DOSING
-                  GestureDetector(
-                    onTap: () => setModalState(() => _showAdvanced = !_showAdvanced),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _showAdvanced
-                              ? Icons.expand_less
-                              : Icons.expand_more,
-                          color: AppColors.accent,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'ADVANCED DOSING (Ramping/Tapering)',
-                          style: TextStyle(
-                            color: AppColors.accent,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (_showAdvanced) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Customize doses for first and last weeks',
-                            style: TextStyle(
-                              color: AppColors.textMid,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Start dose (mg)',
-                                      style: TextStyle(
-                                        color: AppColors.textMid,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    TextField(
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 13,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: '125',
-                                        hintStyle: TextStyle(
-                                          color: AppColors.textDim,
-                                          fontSize: 11,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: AppColors.border,
-                                          ),
-                                          borderRadius: BorderRadius.circular(3),
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 8,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'End dose (mg)',
-                                      style: TextStyle(
-                                        color: AppColors.textMid,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    TextField(
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 13,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: '125',
-                                        hintStyle: TextStyle(
-                                          color: AppColors.textDim,
-                                          fontSize: 11,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: AppColors.border,
-                                          ),
-                                          borderRadius: BorderRadius.circular(3),
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 8,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: 24),
 
-                  // CREATE BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 44,
@@ -518,7 +730,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         final dose = double.tryParse(_doseController.text) ?? 0;
                         final weeks = int.tryParse(_weeksController.text) ?? 8;
 
-                        final cycle = await db.saveCycle(
+                        await db.saveCycle(
                           peptideName: _peptideController.text,
                           dose: dose,
                           route: _selectedRoute,
@@ -527,25 +739,19 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           startDate: DateTime.now(),
                         );
 
-                        if (cycle != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                '✓ ${cycle.peptideName} cycle created',
-                              ),
-                              backgroundColor: AppColors.primary,
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                          _peptideController.clear();
-                          _doseController.clear();
-                          _bacWaterMlController.clear();
-                          _weeksController.text = '8';
-                          _selectedFrequency = '1x weekly';
-                          _selectedRoute = 'SC (subcutaneous)';
-                          _loadCycles();
-                          Navigator.pop(context);
-                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('✓ ${_peptideController.text} cycle created'),
+                            backgroundColor: AppColors.primary,
+                          ),
+                        );
+                        _peptideController.clear();
+                        _doseController.clear();
+                        _weeksController.text = '8';
+                        _selectedFrequency = '1x weekly';
+                        _selectedRoute = 'SC (subcutaneous)';
+                        _loadCycles();
+                        Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -558,29 +764,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         style: TextStyle(
                           color: AppColors.background,
                           fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 44,
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: AppColors.border),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      child: Text(
-                        'CANCEL',
-                        style: TextStyle(
-                          color: AppColors.textMid,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
                         ),
                       ),
                     ),
@@ -601,7 +784,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -630,7 +812,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
             ),
           ),
 
-          // Content
           Expanded(
             child: _isLoading
                 ? Center(
@@ -689,8 +870,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         itemCount: savedCycles.length,
                         itemBuilder: (context, index) {
                           final cycle = savedCycles[index];
+                          final daysRemaining = cycle.endDate.difference(DateTime.now()).inDays;
+                          final totalDays = cycle.durationWeeks * 7;
+                          final progress = ((totalDays - daysRemaining) / totalDays).clamp(0.0, 1.0);
+
                           return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
+                            margin: const EdgeInsets.only(bottom: 16),
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: AppColors.surface,
@@ -700,16 +885,20 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Header
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      cycle.peptideName,
-                                      style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
+                                    Expanded(
+                                      child: Text(
+                                        cycle.peptideName.toUpperCase(),
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1,
+                                        ),
                                       ),
                                     ),
                                     Container(
@@ -724,19 +913,22 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                         borderRadius: BorderRadius.circular(3),
                                       ),
                                       child: Text(
-                                        cycle.isActive ? 'ACTIVE' : 'INACTIVE',
+                                        cycle.isActive ? 'ACTIVE' : 'COMPLETE',
                                         style: TextStyle(
                                           color: cycle.isActive
                                               ? AppColors.accent
                                               : AppColors.textDim,
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.5,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 12),
+
+                                // Dose, Route, Frequency Grid
                                 Row(
                                   children: [
                                     Expanded(
@@ -754,8 +946,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                           Text(
                                             '${cycle.dose} mg',
                                             style: TextStyle(
-                                              color: AppColors.textLight,
-                                              fontSize: 13,
+                                              color: AppColors.primary,
+                                              fontSize: 14,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -778,7 +970,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                             cycle.route,
                                             style: TextStyle(
                                               color: AppColors.textLight,
-                                              fontSize: 13,
+                                              fontSize: 12,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -801,7 +993,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                             cycle.frequency,
                                             style: TextStyle(
                                               color: AppColors.textLight,
-                                              fontSize: 13,
+                                              fontSize: 12,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),
@@ -810,13 +1002,125 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 12),
+
+                                // Duration & Progress
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      '${cycle.durationWeeks} weeks',
+                                      style: TextStyle(
+                                        color: AppColors.textMid,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    Text(
+                                      daysRemaining > 0
+                                          ? '$daysRemaining days left'
+                                          : 'Completed',
+                                      style: TextStyle(
+                                        color: daysRemaining > 0
+                                            ? AppColors.accent
+                                            : AppColors.textDim,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                                 const SizedBox(height: 8),
-                                Text(
-                                  '${cycle.durationWeeks} weeks • Started ${cycle.startDate.toString().split(' ')[0]}',
-                                  style: TextStyle(
-                                    color: AppColors.textDim,
-                                    fontSize: 11,
+
+                                // Progress Bar
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(2),
+                                  child: LinearProgressIndicator(
+                                    value: progress,
+                                    minHeight: 4,
+                                    backgroundColor: AppColors.border,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.primary,
+                                    ),
                                   ),
+                                ),
+                                const SizedBox(height: 16),
+
+                                // Action Buttons
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed: () =>
+                                            _showEditCycle(cycle),
+                                        style: OutlinedButton.styleFrom(
+                                          side: BorderSide(
+                                            color: AppColors.primary,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(3),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'EDIT',
+                                          style: TextStyle(
+                                            color: AppColors.primary,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    if (cycle.isActive)
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: () =>
+                                              _showCompleteCycle(cycle),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.accent,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'COMPLETE',
+                                            style: TextStyle(
+                                              color: AppColors.background,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed: () =>
+                                            _showDeleteConfirmation(cycle),
+                                        style: OutlinedButton.styleFrom(
+                                          side: BorderSide(
+                                            color: AppColors.error,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(3),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'DELETE',
+                                          style: TextStyle(
+                                            color: AppColors.error,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -835,6 +1139,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
     _doseController.dispose();
     _weeksController.dispose();
     _bacWaterMlController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 }
