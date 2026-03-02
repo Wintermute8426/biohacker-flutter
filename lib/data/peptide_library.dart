@@ -1151,7 +1151,7 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     pepScore: PepScore(publication: 80, evidence: 85, methodology: 80, relevance: 75),
     studyLinks: [StudyLink(title: "Wolverine Stack Clinical Trial", url: "https://pubmed.ncbi.nlm.nih.gov", source: "PubMed", year: 2023), StudyLink(title: "Safety and Efficacy Data", url: "https://pubmed.ncbi.nlm.nih.gov", source: "Research Journal", year: 2022)],
   ),
-;
+};
 
 List<PeptideInfo> searchPeptides(String query) {
   return PEPTIDE_LIBRARY.values
