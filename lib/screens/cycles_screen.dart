@@ -1,8 +1,115 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 
-class CyclesScreen extends StatelessWidget {
+class CyclesScreen extends StatefulWidget {
   const CyclesScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CyclesScreen> createState() => _CyclesScreenState();
+}
+
+class _CyclesScreenState extends State<CyclesScreen> {
+  final _nameController = TextEditingController();
+  final _peptideController = TextEditingController();
+  DateTime _selectedDate = DateTime.now();
+  int _durationDays = 30;
+
+  void _showNewCycleDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: Text(
+            'NEW CYCLE',
+            style: TextStyle(color: AppColors.primary, letterSpacing: 1),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _nameController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Cycle name (e.g., Epitalon)',
+                    hintStyle: TextStyle(color: AppColors.textDim),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _peptideController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Primary peptide',
+                    hintStyle: TextStyle(color: AppColors.textDim),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      'Duration:',
+                      style: TextStyle(color: AppColors.textMid),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Slider(
+                        value: _durationDays.toDouble(),
+                        min: 7,
+                        max: 365,
+                        divisions: 50,
+                        label: '$_durationDays days',
+                        activeColor: AppColors.primary,
+                        onChanged: (value) {
+                          setState(() => _durationDays = value.toInt());
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  '$_durationDays days',
+                  style: TextStyle(color: AppColors.primary, fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: TextStyle(color: AppColors.textDim)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_nameController.text.isNotEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Cycle "${_nameController.text}" created!'),
+                      backgroundColor: AppColors.primary,
+                    ),
+                  );
+                  _nameController.clear();
+                  _peptideController.clear();
+                  Navigator.pop(context);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+              child: const Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +132,7 @@ class CyclesScreen extends StatelessWidget {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: _showNewCycleDialog,
                   icon: const Icon(Icons.add),
                   label: const Text('NEW'),
                   style: ElevatedButton.styleFrom(
@@ -66,5 +173,12 @@ class CyclesScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _peptideController.dispose();
+    super.dispose();
   }
 }

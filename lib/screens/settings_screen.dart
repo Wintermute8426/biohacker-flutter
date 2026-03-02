@@ -68,6 +68,65 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
+            // Health Metrics Section
+            Text(
+              'HEALTH METRICS',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.textMid,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border.all(color: AppColors.border),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Weight',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textMid,
+                        ),
+                      ),
+                      Text(
+                        '185 lbs',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Goal Weight',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textMid,
+                        ),
+                      ),
+                      Text(
+                        '180 lbs',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+
             // Notifications Section
             Text(
               'NOTIFICATIONS',
@@ -88,7 +147,9 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   _SettingRow('Dose Reminders', true),
                   const Divider(color: AppColors.border),
-                  _SettingRow('Cycle Reminders', true),
+                  _SettingRow('Lab Reminders', true),
+                  const Divider(color: AppColors.border),
+                  _SettingRow('Cycle Alerts', true),
                 ],
               ),
             ),
