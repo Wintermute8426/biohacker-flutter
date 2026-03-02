@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import 'dashboard_screen.dart';
 import 'cycles_screen.dart';
+import 'research_screen.dart';
 import 'labs_screen.dart';
 import 'settings_screen.dart';
 
@@ -18,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const DashboardScreen(),
     const CyclesScreen(),
+    const ResearchScreen(),
     const LabsScreen(),
     const SettingsScreen(),
   ];
@@ -38,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppColors.surface,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textMid,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -46,6 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.schedule),
             label: 'Cycles',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            label: 'Research',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.science),
