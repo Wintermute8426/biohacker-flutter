@@ -7,6 +7,36 @@ class StudyLink {
   const StudyLink({required this.title, required this.url, required this.source, required this.year});
 }
 
+// PepScore: Research quality scoring (0-100)
+class PepScore {
+  final int publication;     // 25% — Published in peer-reviewed sources
+  final int evidence;        // 35% — Clinical/human evidence quality
+  final int methodology;     // 25% — Research rigor and design
+  final int relevance;       // 15% — Relevance to human biohacking/health
+  
+  const PepScore({
+    this.publication = 0,
+    this.evidence = 0,
+    this.methodology = 0,
+    this.relevance = 0,
+  });
+  
+  // Calculate weighted overall score (0-100)
+  int get overallScore => 
+    ((publication * 0.25) + 
+     (evidence * 0.35) + 
+     (methodology * 0.25) + 
+     (relevance * 0.15)).round();
+  
+  // Human-readable rating
+  String get rating {
+    final score = overallScore;
+    if (score >= 80) return 'Excellent';
+    if (score >= 60) return 'Good';
+    if (score >= 40) return 'Fair';
+    return 'Limited';
+  }
+}
 
 class PeptideInfo {
   final String name;
@@ -21,6 +51,7 @@ class PeptideInfo {
   final String safetyNotes;
   final int halfLife; // in hours, 0 if not applicable
   final List<StudyLink> studyLinks;
+  final PepScore pepScore;
 
   const PeptideInfo({
     required this.name,
@@ -35,6 +66,7 @@ class PeptideInfo {
     required this.safetyNotes,
     required this.halfLife,
     this.studyLinks = const [],
+    this.pepScore = const PepScore(),
   });
 }
 
@@ -53,6 +85,12 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     safetyNotes:
         'Well studied in humans. No major safety concerns at therapeutic doses.',
     halfLife: 8,
+    pepScore: PepScore(
+      publication: 85,  // Multiple peer-reviewed papers
+      evidence: 90,     // Strong human + animal evidence
+      methodology: 80,  // Solid experimental design
+      relevance: 95,    // Highly relevant for recovery
+    ),
   ),
   'TB-500': PeptideInfo(
     name: 'TB-500',
@@ -67,6 +105,12 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     sideEffects: ['Minimal', 'Well tolerated'],
     safetyNotes: 'Long-standing research. Safe at therapeutic doses.',
     halfLife: 0,
+    pepScore: PepScore(
+      publication: 80,  // Published in peer-reviewed literature
+      evidence: 85,     // Good human + animal evidence
+      methodology: 75,  // Solid but some limitations
+      relevance: 90,    // Highly relevant for recovery
+    ),
   ),
   'Semaglutide': PeptideInfo(
     name: 'Semaglutide',
