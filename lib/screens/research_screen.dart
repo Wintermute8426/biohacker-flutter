@@ -62,7 +62,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
           left: 16,
           right: 16,
           top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 80,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
