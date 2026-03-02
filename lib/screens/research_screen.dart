@@ -13,7 +13,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
   final _searchController = TextEditingController();
   late List<PeptideInfo> _displayedPeptides;
   String? _selectedCategory;
-  bool _showDetails = false;
+  int _tabIndex = 0; // 0 = Peptides, 1 = Quality Guide
 
   @override
   void initState() {
@@ -137,7 +137,86 @@ class _ResearchScreenState extends State<ResearchScreen> {
 
             // Safety notes
             _buildInfoSection('SAFETY', [peptide.safetyNotes]),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+
+            // Study links
+            if (peptide.studyLinks.isNotEmpty) ...[
+              Text(
+                'RESEARCH',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...peptide.studyLinks.map((study) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: GestureDetector(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Link: ${study.url}'),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.05),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.2),
+                        ),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            study.title,
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Text(
+                                study.source,
+                                style: TextStyle(
+                                  color: AppColors.textDim,
+                                  fontSize: 10,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${study.year}',
+                                style: TextStyle(
+                                  color: AppColors.textDim,
+                                  fontSize: 10,
+                                ),
+                              ),
+                              const Spacer(),
+                              Icon(
+                                Icons.link,
+                                color: AppColors.accent,
+                                size: 12,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 20),
+            ],
           ],
         ),
       ),
@@ -214,6 +293,131 @@ class _ResearchScreenState extends State<ResearchScreen> {
     );
   }
 
+  Widget _buildQualityGuide() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'PEPTIDE QUALITY GUIDE',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          _buildQualityCriterion(
+            'PURITY & TESTING',
+            'Look for 3rd-party testing (HPLC, Mass Spec). Reputable suppliers test every batch. Minimum 98% purity.',
+            '⭐⭐⭐',
+          ),
+          _buildQualityCriterion(
+            'SOURCE & REPUTATION',
+            'Check company history, customer reviews, and transparency. Established suppliers with consistent quality are safer.',
+            '⭐⭐⭐',
+          ),
+          _buildQualityCriterion(
+            'CERTIFICATES OF ANALYSIS',
+            'Always request CoA. Should include purity %, impurity identification, and microbiological testing.',
+            '⭐⭐⭐',
+          ),
+          _buildQualityCriterion(
+            'STORAGE CONDITIONS',
+            'Peptides degrade in heat/light. Check if supplier uses proper cold storage (2-8°C or frozen). Ask about shipment conditions.',
+            '⭐⭐',
+          ),
+          _buildQualityCriterion(
+            'PRICE INDICATORS',
+            'If price is significantly cheaper than others, quality may be compromised. Legitimate peptides cost money to synthesize.',
+            '⭐⭐',
+          ),
+          _buildQualityCriterion(
+            'RECONSTITUTION & STABILITY',
+            'Request info on reconstitution protocol and shelf life after reconstitution. Varies by peptide (3-14 days typically).',
+            '⭐',
+          ),
+
+          const SizedBox(height: 24),
+
+          Text(
+            'RED FLAGS ⚠️',
+            style: TextStyle(
+              color: AppColors.error,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...['No CoA available', 'No 3rd-party testing', 'Suspiciously cheap', 'Poor packaging/storage', 'No company info', 'Overpromised results']
+              .map((flag) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        Icon(Icons.close, color: AppColors.error, size: 16),
+                        const SizedBox(width: 8),
+                        Text(flag, style: TextStyle(color: AppColors.textMid, fontSize: 12)),
+                      ],
+                    ),
+                  ))
+              .toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQualityCriterion(String title, String description, String importance) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  importance,
+                  style: TextStyle(
+                    color: AppColors.accent,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              description,
+              style: TextStyle(
+                color: AppColors.textMid,
+                fontSize: 11,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final categories = getAllCategories().toList()..sort();
@@ -222,154 +426,202 @@ class _ResearchScreenState extends State<ResearchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
+          // Header + Tabs
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(
-              'RESEARCH',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'RESEARCH',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _buildTab('Peptides', 0),
+                    const SizedBox(width: 12),
+                    _buildTab('Quality Guide', 1),
+                  ],
+                ),
+              ],
             ),
           ),
 
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
-              controller: _searchController,
-              style: const TextStyle(color: Colors.white),
-              onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'Search peptides...',
-                hintStyle: TextStyle(color: AppColors.textDim),
-                prefixIcon: Icon(Icons.search, color: AppColors.textMid),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.border),
-                  borderRadius: BorderRadius.circular(4),
+          if (_tabIndex == 0) ...[
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _searchController,
+                style: const TextStyle(color: Colors.white),
+                onChanged: _onSearchChanged,
+                decoration: InputDecoration(
+                  hintText: 'Search peptides...',
+                  hintStyle: TextStyle(color: AppColors.textDim),
+                  prefixIcon: Icon(Icons.search, color: AppColors.textMid),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.border),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          // Category filter
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildCategoryChip(null, 'All'),
-                  ...categories.map((cat) => _buildCategoryChip(cat, cat)),
-                ],
+            // Category filter
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildCategoryChip(null, 'All'),
+                    ...categories.map((cat) => _buildCategoryChip(cat, cat)),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // Peptide list
-          Expanded(
-            child: _displayedPeptides.isEmpty
-                ? Center(
-                    child: Text(
-                      'No peptides found',
-                      style: TextStyle(color: AppColors.textMid),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: _displayedPeptides.length,
-                    itemBuilder: (context, index) {
-                      final peptide = _displayedPeptides[index];
-                      return GestureDetector(
-                        onTap: () => _showPeptideDetails(peptide),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            border: Border.all(color: AppColors.border),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      peptide.name,
+            // Peptide list
+            Expanded(
+              child: _displayedPeptides.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No peptides found',
+                        style: TextStyle(color: AppColors.textMid),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: _displayedPeptides.length,
+                      itemBuilder: (context, index) {
+                        final peptide = _displayedPeptides[index];
+                        return GestureDetector(
+                          onTap: () => _showPeptideDetails(peptide),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              border: Border.all(color: AppColors.border),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        peptide.name,
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
+                                      child: Text(
+                                        peptide.category,
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  peptide.description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: AppColors.textMid,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      '${peptide.commonDoseRange} ${peptide.unit}',
                                       style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontSize: 14,
+                                        color: AppColors.accent,
+                                        fontSize: 11,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
-                                    child: Text(
-                                      peptide.category,
+                                    Text(
+                                      peptide.studyLinks.isNotEmpty
+                                          ? '${peptide.studyLinks.length} studies'
+                                          : 'No studies',
                                       style: TextStyle(
-                                        color: AppColors.primary,
+                                        color: AppColors.textDim,
                                         fontSize: 10,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                peptide.description,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: AppColors.textMid,
-                                  fontSize: 12,
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    '${peptide.commonDoseRange} ${peptide.unit}',
-                                    style: TextStyle(
-                                      color: AppColors.accent,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Tap for details →',
-                                    style: TextStyle(
-                                      color: AppColors.textDim,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
+                        );
+                      },
+                    ),
+            ),
+          ] else if (_tabIndex == 1) ...[
+            Expanded(child: _buildQualityGuide()),
+          ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildTab(String label, int index) {
+    final isSelected = _tabIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _tabIndex = index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.2)
+              : Colors.transparent,
+          border: Border(
+            bottom: BorderSide(
+              color: isSelected ? AppColors.primary : AppColors.border,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? AppColors.primary : AppColors.textMid,
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
       ),
     );
   }
