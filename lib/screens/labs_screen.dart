@@ -471,25 +471,28 @@ class _LabsScreenState extends State<LabsScreen> {
 
           // Content
           Expanded(
-            child: _isLoading
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation(AppColors.primary),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Loading lab results...',
-                          style: TextStyle(color: AppColors.textDim),
-                        ),
-                      ],
-                    ),
-                  )
-                : _labResults.isEmpty
-                    ? _buildEmptyState()
-                    : _buildResultsList(),
+            child: Container(
+              color: AppColors.background,
+              child: _isLoading
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Loading lab results...',
+                            style: TextStyle(color: AppColors.textDim),
+                          ),
+                        ],
+                      ),
+                    )
+                  : _labResults.isEmpty
+                      ? _buildEmptyState()
+                      : _buildResultsList(),
+            ),
           ),
         ],
       ),
@@ -498,44 +501,37 @@ class _LabsScreenState extends State<LabsScreen> {
 
   /// Build empty state
   Widget _buildEmptyState() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          const SizedBox(height: 40),
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border.all(color: AppColors.border),
-              borderRadius: BorderRadius.circular(4),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.science_outlined,
+              color: AppColors.primary,
+              size: 64,
             ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.favorite_border,
-                  color: AppColors.primary,
-                  size: 48,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No lab results yet',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textMid,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Upload your lab report to extract biomarkers',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textDim,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 24),
+            Text(
+              'No lab results yet',
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 80), // Bottom padding for nav bar
-        ],
+            const SizedBox(height: 12),
+            Text(
+              'Tap UPLOAD to add your lab report',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.textDim,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
