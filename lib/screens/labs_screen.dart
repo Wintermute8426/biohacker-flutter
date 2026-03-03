@@ -27,13 +27,26 @@ class _LabsScreenState extends State<LabsScreen> {
     super.initState();
     _userId = Supabase.instance.client.auth.currentUser?.id ?? '';
     print('=== DEBUG: Labs screen initialized. User ID: $_userId ===');
-    // Delay loading by 500ms to ensure UI renders first
-    Future.delayed(Duration(milliseconds: 500), () {
-      if (mounted) _loadLabResults();
-    });
+    // Load in background WITHOUT showing loading state
+    _loadLabResultsBackground();
   }
 
-  /// Load all lab results for user
+  /// Load lab results in background (no loading state)
+  Future<void> _loadLabResultsBackground() async {
+    try {
+      print('DEBUG: Loading lab results in background for user: $_userId');
+      final results = await _labsDb.getUserLabResults(_userId);
+      print('DEBUG: Loaded ${results.length} lab results in background');
+      if (mounted) {
+        setState(() => _labResults = results);
+      }
+    } catch (e) {
+      print('DEBUG: Error loading lab results in background: $e');
+      // Silently fail - show empty state
+    }
+  }
+
+  /// Load all lab results for user (shows loading state)
   Future<void> _loadLabResults() async {
     print('DEBUG: _loadLabResults() START');
     if (!mounted) return;
