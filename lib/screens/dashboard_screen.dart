@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
+import 'weight_tracker_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -258,6 +259,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 );
               },
             ),
+            
+            const SizedBox(height: 24),
+            
+            // WEIGHT TRACKER
+            const WeightTrackerWidget(),
           ],
         ),
       ),
