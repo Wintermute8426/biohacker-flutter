@@ -34,14 +34,8 @@ jobs:
       - name: Analyze code
         run: flutter analyze --no-fatal-infos || true
       
-      - name: Clean Android build
-        run: |
-          cd android
-          ./gradlew clean
-          cd ..
-      
       - name: Build APK (split-per-abi for testing on your phone)
-        run: flutter build apk --split-per-abi --release --no-shrink
+        run: flutter build apk --split-per-abi --release
       
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
