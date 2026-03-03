@@ -5,6 +5,8 @@ import 'cycles_screen.dart';
 import 'research_screen.dart';
 import 'protocols_screen.dart';
 import 'labs_screen.dart';
+import 'reports_screen.dart';
+import 'calendar_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,6 +25,8 @@ class _HomeScreenState extends State<HomeScreen> {
     const ResearchScreen(),
     const ProtocolsScreen(),
     const LabsScreen(),
+    const ReportsScreen(),
+    const CalendarScreen(),
     const SettingsScreen(),
   ];
 
@@ -63,6 +67,14 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.science),
             label: 'Labs',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.analytics),
+            label: 'Reports',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Calendar',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
