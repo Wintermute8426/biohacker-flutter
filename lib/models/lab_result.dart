@@ -46,10 +46,33 @@ class LabResult {
   }
 
   // Convenience getters for common biomarkers
-  double? get testosterone => (extractedData['testosterone'] as num?)?.toDouble();
-  double? get cortisol => (extractedData['cortisol'] as num?)?.toDouble();
-  double? get glucose => (extractedData['glucose'] as num?)?.toDouble();
-  double? get testosterone_percent => (extractedData['testosterone_percent'] as num?)?.toDouble();
-  String? get testosteroneStatus => extractedData['testosterone_status'];
-  String? get cortisolStatus => extractedData['cortisol_status'];
+  double? get testosterone {
+    final val = extractedData['testosterone'];
+    if (val is Map) return (val['value'] as num?)?.toDouble();
+    return (val as num?)?.toDouble();
+  }
+
+  double? get cortisol {
+    final val = extractedData['cortisol'];
+    if (val is Map) return (val['value'] as num?)?.toDouble();
+    return (val as num?)?.toDouble();
+  }
+
+  double? get glucose {
+    final val = extractedData['glucose'];
+    if (val is Map) return (val['value'] as num?)?.toDouble();
+    return (val as num?)?.toDouble();
+  }
+
+  String? get testosteroneStatus {
+    final val = extractedData['testosterone'];
+    if (val is Map) return val['status'];
+    return extractedData['testosterone_status'];
+  }
+
+  String? get cortisolStatus {
+    final val = extractedData['cortisol'];
+    if (val is Map) return val['status'];
+    return extractedData['cortisol_status'];
+  }
 }
