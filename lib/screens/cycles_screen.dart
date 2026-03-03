@@ -517,55 +517,101 @@ class _CyclesScreenState extends State<CyclesScreen> {
 
   void _showLogDoseDialog(Cycle cycle) {
     _doseAmountController.clear();
-    showDialog(
+    _notesController.clear();
+    String selectedRoute = cycle.route;
+    String selectedSite = 'Left shoulder';
+
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text('LOG DOSE', style: TextStyle(color: AppColors.primary)),
-        content: Column(
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      builder: (context) => SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text(
+              'LOG DOSE',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: _doseAmountController,
               style: const TextStyle(color: Colors.white),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
-                hintText: 'Dose amount (mg)',
+                labelText: 'Dose (mg)',
+                labelStyle: TextStyle(color: AppColors.textMid),
+                hintText: '${cycle.dose}',
                 hintStyle: TextStyle(color: AppColors.textDim),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.border),
-                ),
+                border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
               ),
             ),
+            const SizedBox(height: 12),
+            Text(
+              'Route: $selectedRoute',
+              style: TextStyle(color: AppColors.textMid, fontSize: 11),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Site: $selectedSite',
+              style: TextStyle(color: AppColors.textMid, fontSize: 11),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _notesController,
+              style: const TextStyle(color: Colors.white),
+              maxLines: 2,
+              decoration: InputDecoration(
+                labelText: 'Notes (optional)',
+                labelStyle: TextStyle(color: AppColors.textMid),
+                border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton(
+                onPressed: () async {
+                  final dose = double.tryParse(_doseAmountController.text) ?? cycle.dose;
+                  await doseDb.logDose(
+                    cycleId: cycle.id,
+                    doseAmount: dose,
+                    loggedAt: DateTime.now(),
+                    route: selectedRoute,
+                    location: selectedSite,
+                    notes: _notesController.text.isEmpty ? null : _notesController.text,
+                  );
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('✓ Dose logged (${dose}mg)'),
+                      backgroundColor: AppColors.primary,
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                ),
+                child: const Text('SAVE DOSE', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+            const SizedBox(height: 20),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('CANCEL', style: TextStyle(color: AppColors.textDim)),
-          ),
-          TextButton(
-            onPressed: () async {
-              final dose = double.tryParse(_doseAmountController.text);
-              if (dose != null) {
-                await doseDb.logDose(
-                  cycleId: cycle.id,
-                  doseAmount: dose,
-                  loggedAt: DateTime.now(),
-                  route: cycle.route,
-                );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('✓ Dose logged: ${dose}mg'),
-                    backgroundColor: AppColors.primary,
-                  ),
-                );
-                Navigator.pop(context);
-              }
-            },
-            child: Text('LOG', style: TextStyle(color: AppColors.primary)),
-          ),
-        ],
       ),
     );
   }
@@ -1444,364 +1490,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                       ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showLogDoseDialog(Cycle cycle) {
-    final doseController = TextEditingController();
-    final notesController = TextEditingController();
-    String selectedRoute = cycle.route;
-    String selectedSite = 'Left shoulder';
-    
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surface,
-      isScrollControlled: true,
-      builder: (context) => SingleChildScrollView(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'LOG DOSE',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  color: AppColors.textMid,
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Dose amount
-            Text(
-              'Dose (mg)',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: doseController,
-              style: const TextStyle(color: Colors.white),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                hintText: '${cycle.dose}',
-                hintStyle: TextStyle(color: AppColors.textDim),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.border),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Route
-            Text(
-              'Route',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.border),
-              ),
-              child: DropdownButton<String>(
-                value: selectedRoute,
-                isExpanded: true,
-                underline: const SizedBox(),
-                items: ['SC (subcutaneous)', 'IM (intramuscular)', 'IV (intravenous)', 'Intranasal', 'Oral']
-                    .map((r) => DropdownMenuItem(value: r, child: Text(r, style: TextStyle(color: Colors.white))))
-                    .toList(),
-                onChanged: (val) {
-                  if (val != null) selectedRoute = val;
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Injection site
-            Text(
-              'Injection Site',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.border),
-              ),
-              child: DropdownButton<String>(
-                value: selectedSite,
-                isExpanded: true,
-                underline: const SizedBox(),
-                items: [
-                  'Left shoulder', 'Right shoulder', 'Left quad', 'Right quad',
-                  'Left glute', 'Right glute', 'Left abdomen', 'Right abdomen',
-                  'Left arm', 'Right arm', 'Left leg', 'Right leg'
-                ]
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s, style: TextStyle(color: Colors.white))))
-                    .toList(),
-                onChanged: (val) {
-                  if (val != null) selectedSite = val;
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Notes
-            Text(
-              'Notes (optional)',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: notesController,
-              style: const TextStyle(color: Colors.white),
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: 'How do you feel? Any observations?',
-                hintStyle: TextStyle(color: AppColors.textDim),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.border),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Save button
-            SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final dose = double.tryParse(doseController.text) ?? cycle.dose;
-                  await doseDb.logDose(
-                    cycleId: cycle.id,
-                    doseAmount: dose,
-                    loggedAt: DateTime.now(),
-                    route: selectedRoute,
-                    location: selectedSite,
-                    notes: notesController.text,
-                  );
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('✓ Dose logged (${dose}mg ${selectedRoute})'),
-                      backgroundColor: AppColors.primary,
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                child: const Text(
-                  'SAVE DOSE',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showLogSideEffectDialog(Cycle cycle) {
-    final notesController = TextEditingController();
-    String selectedSymptom = 'Fatigue';
-    int severity = 5;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surface,
-      isScrollControlled: true,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'LOG SIDE EFFECT',
-                    style: TextStyle(
-                      color: AppColors.error,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    color: AppColors.textMid,
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Symptom dropdown
-              Text(
-                'Symptom',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: DropdownButton<String>(
-                  value: selectedSymptom,
-                  isExpanded: true,
-                  underline: const SizedBox(),
-                  items: [
-                    'Fatigue', 'Acne', 'Headache', 'Nausea', 'Insomnia',
-                    'Joint pain', 'Muscle soreness', 'Mood changes', 'Anxiety',
-                    'Brain fog', 'Appetite change', 'Water retention', 'Irritability', 'Other'
-                  ]
-                      .map((s) => DropdownMenuItem(value: s, child: Text(s, style: TextStyle(color: Colors.white))))
-                      .toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      setModalState(() => selectedSymptom = val);
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Severity slider
-              Text(
-                'Severity: $severity/10',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Slider(
-                value: severity.toDouble(),
-                min: 1,
-                max: 10,
-                divisions: 9,
-                activeColor: severity > 7 ? AppColors.error : severity > 4 ? Color(0xFFFFB700) : AppColors.accent,
-                onChanged: (val) {
-                  setModalState(() => severity = val.toInt());
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Notes
-              Text(
-                'Notes (optional)',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: notesController,
-                style: const TextStyle(color: Colors.white),
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: 'Additional details...',
-                  hintStyle: TextStyle(color: AppColors.textDim),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Save button
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await sideEffectDb.logSideEffect(
-                      cycleId: cycle.id,
-                      symptom: selectedSymptom,
-                      severity: severity,
-                      loggedAt: DateTime.now(),
-                      notes: notesController.text,
-                    );
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('✓ Side effect logged ($selectedSymptom - $severity/10)'),
-                        backgroundColor: AppColors.error,
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.error,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  child: const Text(
-                    'SAVE SIDE EFFECT',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
       ),
     );
   }
