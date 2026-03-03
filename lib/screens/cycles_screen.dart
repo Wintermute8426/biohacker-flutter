@@ -283,10 +283,20 @@ class _CyclesScreenState extends State<CyclesScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         final dose = double.tryParse(_doseController.text) ?? cycle.dose;
+                        final weeks = int.tryParse(_weeksController.text) ?? cycle.durationWeeks;
+                        
                         await db.updateCycle(
                           cycleId: cycle.id,
+                          peptideName: _peptideController.text,
+                          dose: dose,
+                          route: _selectedRoute,
+                          frequency: _selectedFrequency,
+                          durationWeeks: weeks,
                         );
                         _loadCycles();
+                        _peptideController.clear();
+                        _doseController.clear();
+                        _weeksController.clear();
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -440,6 +450,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         await db.updateCycle(
                           cycleId: cycle.id,
                           isActive: false,
+                          endDate: DateTime.now(),
                         );
                         _loadCycles();
                         Navigator.pop(context);

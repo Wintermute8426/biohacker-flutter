@@ -149,7 +149,13 @@ class CyclesDatabase {
   // Update cycle
   Future<Cycle?> updateCycle({
     required String cycleId,
+    String? peptideName,
+    double? dose,
+    String? route,
+    String? frequency,
+    int? durationWeeks,
     bool? isActive,
+    DateTime? endDate,
     Map<String, dynamic>? advancedSchedule,
   }) async {
     try {
@@ -157,8 +163,15 @@ class CyclesDatabase {
       if (user == null) throw Exception('User not authenticated');
 
       final updateData = <String, dynamic>{};
+      if (peptideName != null) updateData['peptide_name'] = peptideName;
+      if (dose != null) updateData['dose'] = dose;
+      if (route != null) updateData['route'] = route;
+      if (frequency != null) updateData['frequency'] = frequency;
+      if (durationWeeks != null) updateData['duration_weeks'] = durationWeeks;
       if (isActive != null) updateData['is_active'] = isActive;
+      if (endDate != null) updateData['end_date'] = endDate.toIso8601String();
       if (advancedSchedule != null) updateData['advanced_schedule'] = advancedSchedule;
+      updateData['updated_at'] = DateTime.now().toIso8601String();
 
       final response = await supabase
           .from(tableName)
