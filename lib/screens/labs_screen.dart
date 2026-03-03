@@ -163,13 +163,12 @@ class _LabsScreenState extends State<LabsScreen> {
       await _labsDb.saveLabResult(labResult);
       print('DEBUG: Lab result saved successfully');
 
-      // Reload results
-      print('DEBUG: Reloading lab results...');
-      await _loadLabResults();
-      print('DEBUG: Lab results reloaded. Count: ${_labResults.length}');
-      
+      // Add to local list instead of reloading from DB
       if (mounted) {
-        setState(() => _isUploading = false); // Clear loading state BEFORE snackbar
+        setState(() {
+          _labResults.insert(0, labResult);
+          _isUploading = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Lab PDF uploaded and processed'),
@@ -180,7 +179,10 @@ class _LabsScreenState extends State<LabsScreen> {
     } catch (e) {
       print('DEBUG: PDF upload error: $e');
       _showError('PDF upload failed: $e');
-      if (mounted) setState(() => _isUploading = false);
+      if (mounted) {
+        setState(() => _isUploading = false);
+        setState(() => _isLoading = false); // Also clear loading state
+      }
     }
   }
 
@@ -212,13 +214,12 @@ class _LabsScreenState extends State<LabsScreen> {
       await _labsDb.saveLabResult(labResult);
       print('DEBUG: Lab result saved successfully');
 
-      // Reload results
-      print('DEBUG: Reloading lab results...');
-      await _loadLabResults();
-      print('DEBUG: Lab results reloaded. Count: ${_labResults.length}');
-      
+      // Add to local list instead of reloading from DB
       if (mounted) {
-        setState(() => _isUploading = false); // Clear loading state BEFORE snackbar
+        setState(() {
+          _labResults.insert(0, labResult);
+          _isUploading = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Lab report uploaded and processed'),
@@ -229,7 +230,9 @@ class _LabsScreenState extends State<LabsScreen> {
     } catch (e) {
       print('DEBUG: Upload error: $e');
       _showError('Upload failed: $e');
-      if (mounted) setState(() => _isUploading = false);
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
     }
   }
 
