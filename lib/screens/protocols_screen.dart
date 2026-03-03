@@ -279,6 +279,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                     route: protocol.route,
                     frequency: protocol.frequency,
                     durationWeeks: duration,
+                    startDate: DateTime.now(),
                   );
 
                   await protocolDb.incrementUsage(protocol.id!);
