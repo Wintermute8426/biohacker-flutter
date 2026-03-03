@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:async';
 import '../models/lab_result.dart';
 
 class LabsDatabase {
@@ -23,11 +24,21 @@ class LabsDatabase {
   Future<List<LabResult>> getUserLabResults(String userId) async {
     try {
       print('DEBUG (LabsDatabase): getUserLabResults START for userId: $userId');
-      final response = await supabase
+      
+      // Wrap query with timeout
+      final queryFuture = supabase
           .from('labs_results')
           .select()
           .eq('user_id', userId)
           .order('upload_date', ascending: false);
+      
+      final response = await queryFuture.timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          print('DEBUG (LabsDatabase): Query TIMEOUT after 10 seconds');
+          throw TimeoutException('Lab results query timed out');
+        },
+      );
 
       print('DEBUG (LabsDatabase): Query succeeded. Response: $response');
       if (response.isEmpty) {
@@ -40,10 +51,13 @@ class LabsDatabase {
           .toList();
       print('DEBUG (LabsDatabase): Mapped ${results.length} results');
       return results;
+    } on TimeoutException catch (e) {
+      print('DEBUG (LabsDatabase): TIMEOUT: $e');
+      return [];
     } catch (e, stackTrace) {
       print('DEBUG (LabsDatabase): Error: $e');
       print('DEBUG (LabsDatabase): StackTrace: $stackTrace');
-      throw Exception('Failed to fetch lab results: $e');
+      return []; // Return empty list instead of throwing
     }
   }
 
