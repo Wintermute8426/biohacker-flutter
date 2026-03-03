@@ -172,9 +172,11 @@ class _LabsScreenState extends State<LabsScreen> {
 
       // Add to local list instead of reloading from DB
       if (mounted) {
+        print('DEBUG: Adding result to local list. Total results: ${_labResults.length + 1}');
         setState(() {
           _labResults.insert(0, labResult);
           _isUploading = false;
+          print('DEBUG: setState complete. Total results now: ${_labResults.length}');
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -222,9 +224,11 @@ class _LabsScreenState extends State<LabsScreen> {
 
       // Add to local list instead of reloading from DB
       if (mounted) {
+        print('DEBUG: Adding result to local list. Total results: ${_labResults.length + 1}');
         setState(() {
           _labResults.insert(0, labResult);
           _isUploading = false;
+          print('DEBUG: setState complete. Total results now: ${_labResults.length}');
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -496,7 +500,9 @@ class _LabsScreenState extends State<LabsScreen> {
             child: Container(
               color: AppColors.background,
               child: _labResults.isEmpty
-                  ? _buildEmptyState()
+                  ? SingleChildScrollView(
+                      child: _buildEmptyState(),
+                    )
                   : _buildResultsList(),
             ),
           ),
