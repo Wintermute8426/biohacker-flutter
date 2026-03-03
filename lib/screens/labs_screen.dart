@@ -19,7 +19,6 @@ class _LabsScreenState extends State<LabsScreen> {
   final LabsDatabase _labsDb = LabsDatabase();
   late String _userId;
   List<LabResult> _labResults = [];
-  bool _isLoading = false;
   bool _isUploading = false;
 
   @override
@@ -46,26 +45,21 @@ class _LabsScreenState extends State<LabsScreen> {
     }
   }
 
-  /// Load all lab results for user (shows loading state)
+  /// Load all lab results for user
   Future<void> _loadLabResults() async {
     print('DEBUG: _loadLabResults() START');
     if (!mounted) return;
     
-    setState(() => _isLoading = true);
     try {
       print('DEBUG: Loading lab results for user: $_userId');
       final results = await _labsDb.getUserLabResults(_userId);
       print('DEBUG: Loaded ${results.length} lab results');
       if (mounted) {
-        setState(() {
-          _labResults = results;
-          _isLoading = false;
-        });
+        setState(() => _labResults = results);
       }
     } catch (e) {
       print('DEBUG: Error loading lab results: $e');
       if (mounted) {
-        setState(() => _isLoading = false);
         _showError('Failed to load lab results: $e');
       }
     }
@@ -181,7 +175,6 @@ class _LabsScreenState extends State<LabsScreen> {
         setState(() {
           _labResults.insert(0, labResult);
           _isUploading = false;
-          _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -194,10 +187,7 @@ class _LabsScreenState extends State<LabsScreen> {
       print('DEBUG: PDF upload error: $e');
       _showError('PDF upload failed: $e');
       if (mounted) {
-        setState(() {
-          _isUploading = false;
-          _isLoading = false;
-        });
+        setState(() => _isUploading = false);
       }
     }
   }
@@ -235,7 +225,6 @@ class _LabsScreenState extends State<LabsScreen> {
         setState(() {
           _labResults.insert(0, labResult);
           _isUploading = false;
-          _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -248,10 +237,7 @@ class _LabsScreenState extends State<LabsScreen> {
       print('DEBUG: Upload error: $e');
       _showError('Upload failed: $e');
       if (mounted) {
-        setState(() {
-          _isUploading = false;
-          _isLoading = false;
-        });
+        setState(() => _isUploading = false);
       }
     }
   }
@@ -509,25 +495,9 @@ class _LabsScreenState extends State<LabsScreen> {
           Expanded(
             child: Container(
               color: AppColors.background,
-              child: _isLoading
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(AppColors.primary),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Loading lab results...',
-                            style: TextStyle(color: AppColors.textDim),
-                          ),
-                        ],
-                      ),
-                    )
-                  : _labResults.isEmpty
-                      ? _buildEmptyState()
-                      : _buildResultsList(),
+              child: _labResults.isEmpty
+                  ? _buildEmptyState()
+                  : _buildResultsList(),
             ),
           ),
         ],
