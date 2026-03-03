@@ -18,129 +18,56 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
   List<ProtocolTemplate> communityProtocols = [];
   bool isLoading = true;
 
-  // Biohacker official protocols with detailed descriptions
-  final Map<String, String> protocolDetails = {
-    'bh-bpc157': 'BPC-157 (Body Protection Compound-157) is a pentadecapeptide that accelerates healing of damaged tissues, improves gut health, and promotes recovery from injuries. Ideal for joint pain, tendon damage, and muscle strains. Works best when combined with proper rest and mobility work.',
-    'bh-tb500': 'Thymosin Beta-4 (TB-500) is a naturally occurring peptide that promotes tissue repair and regeneration. Excellent for muscle recovery, wound healing, and joint support. Can be stacked with BPC-157 for synergistic effects.',
-    'bh-ghkcu': 'GHK-Cu (Copper Tripeptide) stimulates collagen synthesis and skin regeneration. Ideal for hair growth, skin elasticity, and anti-aging. Can be used topically or systemically for enhanced results.',
-    'bh-epitalon': 'Epitalon is a pineal peptide that activates telomerase and extends telomere length. Promotes cellular rejuvenation, improves sleep quality, and supports immune function. The ultimate longevity protocol.',
-    'bh-thymosin': 'Thymosin Alpha-1 enhances immune function and supports vaccine response. Essential for preventative health and immune optimization. Particularly useful during cold/flu season.',
-    'bh-full-recovery': 'Complete injury recovery protocol combining BPC-157 + TB-500 for maximum healing. Targets joint repair, muscle recovery, and tissue regeneration. 12-week protocol for serious injuries.',
-    'bh-hair-growth': 'Hair growth protocol using GHK-Cu + Semax. Stimulates follicle activation while improving scalp health and circulation. Best results over 12-16 weeks.',
-    'bh-longevity': 'Ultimate longevity stack: Epitalon for telomere extension + NAD+ for cellular energy + immune support. Comprehensive anti-aging protocol.',
-    'bh-immune-boost': 'Preventative immune protocol: Thymosin Alpha-1 + seasonal immune support. Strengthens immune defenses before illness onset.',
+  // Protocol stacks - each protocol contains multiple peptides
+  final Map<String, Map<String, dynamic>> protocolStacks = {
+    'bh-injury-recovery': {
+      'name': 'INJURY RECOVERY STACK',
+      'description': 'Complete injury recovery combining BPC-157 for tissue repair + TB-500 for regeneration. Synergistic stack for joint damage, muscle strains, and serious injuries.',
+      'peptides': [
+        {'name': 'BPC-157', 'dose': 250, 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
+        {'name': 'TB-500', 'dose': 5, 'route': 'SC', 'frequency': '2x weekly', 'weeks': 12},
+      ],
+    },
+    'bh-hair-health': {
+      'name': 'HAIR HEALTH STACK',
+      'description': 'Hair growth optimization combining GHK-Cu for collagen synthesis + Semax for follicle activation. Best results over 12-16 weeks with consistent use.',
+      'peptides': [
+        {'name': 'GHK-Cu', 'dose': 5, 'route': 'SC', 'frequency': '1x daily', 'weeks': 16},
+        {'name': 'Semax', 'dose': 5, 'route': 'Intranasal', 'frequency': '2x daily', 'weeks': 16},
+      ],
+    },
+    'bh-longevity': {
+      'name': 'LONGEVITY STACK',
+      'description': 'Ultimate anti-aging combining Epitalon for telomere extension + thymic peptides for immune support. Comprehensive cellular rejuvenation protocol.',
+      'peptides': [
+        {'name': 'Epitalon', 'dose': 1, 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
+        {'name': 'Thymosin Alpha-1', 'dose': 1.6, 'route': 'SC', 'frequency': '3x weekly', 'weeks': 12},
+      ],
+    },
+    'bh-preventative-health': {
+      'name': 'PREVENTATIVE HEALTH STACK',
+      'description': 'Proactive immune optimization for year-round wellness. Thymosin Alpha-1 strengthens immune defenses before illness onset. Use seasonally or continuously.',
+      'peptides': [
+        {'name': 'Thymosin Alpha-1', 'dose': 1.6, 'route': 'SC', 'frequency': '3x weekly', 'weeks': 10},
+      ],
+    },
+    'bh-skin-recovery': {
+      'name': 'SKIN RECOVERY STACK',
+      'description': 'Skin regeneration combining GHK-Cu for collagen + BPC-157 for tissue repair. Ideal for acne recovery, wound healing, and skin elasticity.',
+      'peptides': [
+        {'name': 'GHK-Cu', 'dose': 5, 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
+        {'name': 'BPC-157', 'dose': 250, 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
+      ],
+    },
   };
 
-  final List<ProtocolTemplate> biohackerProtocols = [
-    ProtocolTemplate(
-      id: 'bh-bpc157',
-      name: 'BPC-157 Recovery',
-      description: 'Tissue repair and injury healing',
-      peptideName: 'BPC-157',
-      dose: 250,
-      route: 'SC (subcutaneous)',
-      frequency: '1x daily',
-      durationWeeks: 8,
-      usageCount: 0,
-      isPublic: true,
-    ),
-    ProtocolTemplate(
-      id: 'bh-tb500',
-      name: 'TB-500 Healing',
-      description: 'Accelerated tissue and muscle recovery',
-      peptideName: 'TB-500',
-      dose: 5,
-      route: 'SC (subcutaneous)',
-      frequency: '2x weekly',
-      durationWeeks: 12,
-      usageCount: 0,
-      isPublic: true,
-    ),
-    ProtocolTemplate(
-      id: 'bh-ghkcu',
-      name: 'GHK-Cu Hair & Skin',
-      description: 'Collagen synthesis for hair and skin regeneration',
-      peptideName: 'GHK-Cu',
-      dose: 5,
-      route: 'SC (subcutaneous)',
-      frequency: '1x daily',
-      durationWeeks: 12,
-      usageCount: 0,
-      isPublic: true,
-    ),
-    ProtocolTemplate(
-      id: 'bh-epitalon',
-      name: 'Epitalon Longevity',
-      description: 'Telomere extension and cellular rejuvenation',
-      peptideName: 'Epitalon',
-      dose: 1,
-      route: 'SC (subcutaneous)',
-      frequency: '1x daily',
-      durationWeeks: 10,
-      usageCount: 0,
-      isPublic: true,
-    ),
-    ProtocolTemplate(
-      id: 'bh-thymosin',
-      name: 'Thymosin Alpha-1 Immune',
-      description: 'Preventative immune optimization',
-      peptideName: 'Thymosin Alpha-1',
-      dose: 1.6,
-      route: 'SC (subcutaneous)',
-      frequency: '3x weekly',
-      durationWeeks: 8,
-      usageCount: 0,
-      isPublic: true,
-    ),
-    ProtocolTemplate(
-      id: 'bh-full-recovery',
-      name: 'STACK: Complete Injury Recovery',
-      description: 'BPC-157 + TB-500 for maximum healing potential',
-      peptideName: 'BPC-157 + TB-500',
-      dose: 250,
-      route: 'SC (subcutaneous)',
-      frequency: '1x daily + 2x weekly',
-      durationWeeks: 12,
-      usageCount: 0,
-      isPublic: true,
-    ),
-    ProtocolTemplate(
-      id: 'bh-hair-growth',
-      name: 'STACK: Hair Growth Protocol',
-      description: 'GHK-Cu + Semax for follicle activation',
-      peptideName: 'GHK-Cu + Semax',
-      dose: 5,
-      route: 'SC + Intranasal',
-      frequency: '1x daily',
-      durationWeeks: 16,
-      usageCount: 0,
-      isPublic: true,
-    ),
-    ProtocolTemplate(
-      id: 'bh-longevity',
-      name: 'STACK: Ultimate Longevity',
-      description: 'Epitalon for telomeres + NAD+ for energy',
-      peptideName: 'Epitalon',
-      dose: 1,
-      route: 'SC (subcutaneous)',
-      frequency: '1x daily',
-      durationWeeks: 12,
-      usageCount: 0,
-      isPublic: true,
-    ),
-    ProtocolTemplate(
-      id: 'bh-immune-boost',
-      name: 'Preventative Immune Protocol',
-      description: 'Strengthen defenses before illness onset',
-      peptideName: 'Thymosin Alpha-1',
-      dose: 1.6,
-      route: 'SC (subcutaneous)',
-      frequency: '3x weekly',
-      durationWeeks: 8,
-      usageCount: 0,
-      isPublic: true,
-    ),
-  ];
+  // Convert protocol stacks to display format
+  List<Map<String, dynamic>> getBiohackerProtocols() {
+    return protocolStacks.entries.map((e) => {
+      'id': e.key,
+      ...e.value,
+    }).toList();
+  }
 
   @override
   void initState() {
@@ -431,8 +358,8 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
     );
   }
 
-  void _showProtocolDetail(ProtocolTemplate protocol) {
-    final detail = protocolDetails[protocol.id] ?? protocol.description ?? 'No details available.';
+  void _showStackDetail(Map<String, dynamic> stack) {
+    final peptides = stack['peptides'] as List<dynamic>;
 
     showModalBottomSheet(
       context: context,
@@ -454,7 +381,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    protocol.name.toUpperCase(),
+                    (stack['name'] as String).toUpperCase(),
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 16,
@@ -472,7 +399,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Protocol details
+            // Stack description
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -481,7 +408,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                detail,
+                stack['description'] as String,
                 style: TextStyle(
                   color: AppColors.textLight,
                   fontSize: 12,
@@ -491,32 +418,50 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Specs
+            // Peptides in stack
             Text(
-              'PROTOCOL SPECS',
+              'PEPTIDES IN STACK',
               style: TextStyle(
-                color: AppColors.primary,
+                color: AppColors.accent,
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,
               ),
             ),
             const SizedBox(height: 12),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: Column(
-                children: [
-                  _buildSpecRow('Peptide(s)', protocol.peptideName),
-                  _buildSpecRow('Dose', '${protocol.dose}mg'),
-                  _buildSpecRow('Route', protocol.route),
-                  _buildSpecRow('Frequency', protocol.frequency),
-                  _buildSpecRow('Duration', '${protocol.durationWeeks} weeks'),
-                ],
-              ),
-            ),
+            ...peptides.map((pep) {
+              final peptide = pep as Map<String, dynamic>;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      peptide['name'] as String,
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('${peptide['dose']}mg', style: TextStyle(color: AppColors.textMid, fontSize: 11)),
+                        Text(peptide['route'] as String, style: TextStyle(color: AppColors.textMid, fontSize: 11)),
+                        Text(peptide['frequency'] as String, style: TextStyle(color: AppColors.textMid, fontSize: 11)),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
             const SizedBox(height: 20),
 
             // Start button
@@ -526,13 +471,18 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  _showStartFromProtocolModal(protocol);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('✓ Stack "${stack['name']}" — create individual cycles for each peptide'),
+                      backgroundColor: AppColors.primary,
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.accent,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                 ),
-                child: const Text('START CYCLE', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text('CREATE STACK', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
             const SizedBox(height: 20),
@@ -542,33 +492,94 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
     );
   }
 
-  Widget _buildSpecRow(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: AppColors.border.withOpacity(0.5)),
+  void _showProtocolDetail(ProtocolTemplate protocol) {
+    _showStackDetail({});
+  }
+
+  Widget _buildStackCard(Map<String, dynamic> stack) {
+    final peptides = stack['peptides'] as List<dynamic>;
+    final peptideNames = peptides.map((p) => (p as Map<String, dynamic>)['name']).join(' + ');
+
+    return GestureDetector(
+      onTap: () => _showStackDetail(stack),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(4),
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: AppColors.textMid,
-              fontSize: 11,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              stack['name'] as String,
+              style: TextStyle(
+                color: AppColors.accent,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
+            const SizedBox(height: 6),
+            Text(
+              'Peptides: $peptideNames',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 11,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              stack['description'] as String,
+              style: TextStyle(
+                color: AppColors.textDim,
+                fontSize: 11,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _showStackDetail(stack),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+                    ),
+                    child: Text(
+                      'DETAILS',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _showStackDetail(stack),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+                    ),
+                    child: Text(
+                      'START',
+                      style: TextStyle(
+                        color: AppColors.background,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -733,9 +744,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Biohacker Protocols
+                  // Biohacker Protocols (Stacks)
                   Text(
-                    'BIOHACKER PROTOCOLS',
+                    'BIOHACKER PROTOCOL STACKS',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 12,
@@ -744,7 +755,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ...biohackerProtocols.map((protocol) => _buildProtocolCard(protocol)),
+                  ...getBiohackerProtocols().map((stack) => _buildStackCard(stack)),
                   const SizedBox(height: 24),
 
                   // My Protocols
