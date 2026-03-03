@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:document_picker/document_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/colors.dart';
 import '../models/lab_result.dart';
@@ -41,12 +40,13 @@ class _LabsScreenState extends State<LabsScreen> {
     }
   }
 
-  /// Handle file upload (PDF, photo, or gallery)
+  /// Handle file upload (photo or gallery)
   Future<void> _handleUpload() async {
     try {
       final picker = ImagePicker();
       
-      // Show choice: PDF, Camera, or Gallery
+      // Show choice: Camera or Gallery
+      // Phase 7: Add real PDF + BloodworkAI API integration
       showModalBottomSheet(
         context: context,
         backgroundColor: AppColors.surface,
@@ -64,15 +64,6 @@ class _LabsScreenState extends State<LabsScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              ListTile(
-                leading: const Icon(Icons.description),
-                title: const Text('PDF File'),
-                subtitle: const Text('Select lab PDF from device'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await _uploadPDF();
-                },
-              ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
                 title: const Text('Take Photo'),
@@ -101,62 +92,8 @@ class _LabsScreenState extends State<LabsScreen> {
     }
   }
 
-  /// Upload PDF file
-  Future<void> _uploadPDF() async {
-    try {
-      setState(() => _isUploading = true);
-
-      // Pick PDF document
-      final document = await DocumentPicker.pickDocument(
-        allowedExtensions: ['pdf'],
-        allowMultiple: false,
-      );
-
-      if (document == null || document.isEmpty) return;
-
-      final file = document.first;
-      final filePath = file.path ?? '';
-
-      if (filePath.isEmpty) {
-        _showError('Failed to read PDF file');
-        return;
-      }
-
-      // Create lab result with mock data (Phase 7: real BloodworkAI API)
-      final mockData = BloodworkService.getMockResponse();
-      
-      final labResult = LabResult(
-        id: 'lab_${DateTime.now().millisecondsSinceEpoch}',
-        userId: _userId,
-        pdfPath: filePath,
-        extractedData: mockData['biomarkers'] as Map<String, dynamic>,
-        uploadDate: DateTime.now(),
-        processedDate: DateTime.now(),
-        notes: 'Lab report uploaded on ${DateTime.now().toString().split(' ')[0]}',
-      );
-
-      // Save to Supabase
-      await _labsDb.saveLabResult(labResult);
-
-      // Reload results
-      await _loadLabResults();
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lab PDF uploaded and processed'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      _showError('PDF upload failed: $e');
-    } finally {
-      if (mounted) setState(() => _isUploading = false);
-    }
-  }
-
   /// Upload from camera or gallery
+  /// MVP uses mock biomarker data - Phase 7 will add real PDF + BloodworkAI API
   Future<void> _uploadFromSource(ImagePicker picker, ImageSource source) async {
     try {
       setState(() => _isUploading = true);
@@ -164,7 +101,8 @@ class _LabsScreenState extends State<LabsScreen> {
       final image = await picker.pickImage(source: source);
       if (image == null) return;
 
-      // Create lab result with mock data (MVP - actual BloodworkAI integration in Phase 7)
+      // Create lab result with mock biomarker data
+      // In Phase 7: Real PDF upload + BloodworkAI API will extract actual biomarkers
       final mockData = BloodworkService.getMockResponse();
       
       final labResult = LabResult(
