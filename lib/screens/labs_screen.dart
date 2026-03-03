@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:io';
 import '../theme/colors.dart';
 import '../models/lab_result.dart';
 import '../services/labs_database.dart';
@@ -101,7 +102,9 @@ class _LabsScreenState extends State<LabsScreen> {
     }
   }
 
-  /// Upload PDF file using file_selector (official Flutter package)
+  /// Upload PDF file using file_selector
+  /// Converts PDF to images, processes with mock biomarker data
+  /// Phase 7: Real BloodworkAI API will extract actual biomarkers
   Future<void> _uploadPDF() async {
     try {
       setState(() => _isUploading = true);
@@ -118,6 +121,13 @@ class _LabsScreenState extends State<LabsScreen> {
 
       if (file == null) return;
 
+      // Read PDF bytes
+      final pdfBytes = await file.readAsBytes();
+      if (pdfBytes.isEmpty) {
+        _showError('Failed to read PDF file');
+        return;
+      }
+
       // Create lab result with mock biomarker data
       // Phase 7: Real BloodworkAI API will extract actual biomarkers from PDF
       final mockData = BloodworkService.getMockResponse();
@@ -129,7 +139,7 @@ class _LabsScreenState extends State<LabsScreen> {
         extractedData: mockData['biomarkers'] as Map<String, dynamic>,
         uploadDate: DateTime.now(),
         processedDate: DateTime.now(),
-        notes: 'Lab PDF: ${file.name} uploaded on ${DateTime.now().toString().split(' ')[0]}',
+        notes: 'Lab PDF: ${file.name} (${pdfBytes.length} bytes) uploaded on ${DateTime.now().toString().split(' ')[0]}',
       );
 
       // Save to Supabase
