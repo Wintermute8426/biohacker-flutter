@@ -1343,7 +1343,91 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 16),
+
+                                // Dose & Side Effects Summary
+                                FutureBuilder<Map<String, dynamic>>(
+                                  future: _loadCycleSummary(cycle.id),
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    
+                                    final data = snapshot.data!;
+                                    final totalDoses = data['totalDoses'] as int? ?? 0;
+                                    final lastDose = data['lastDose'] as String?;
+                                    final recentSideEffects = data['recentSideEffects'] as List<String>? ?? [];
+                                    
+                                    if (totalDoses == 0 && recentSideEffects.isEmpty) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        if (totalDoses > 0) ...[
+                                          Text(
+                                            'TRACKING',
+                                            style: TextStyle(
+                                              color: AppColors.primary,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                '$totalDoses doses logged',
+                                                style: TextStyle(
+                                                  color: AppColors.accent,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              if (lastDose != null)
+                                                Text(
+                                                  'Last: $lastDose',
+                                                  style: TextStyle(
+                                                    color: AppColors.textMid,
+                                                    fontSize: 11,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ],
+                                        if (recentSideEffects.isNotEmpty) ...[
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'SIDE EFFECTS (${recentSideEffects.length})',
+                                            style: TextStyle(
+                                              color: AppColors.error,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          ...recentSideEffects.map((effect) => Padding(
+                                            padding: const EdgeInsets.only(bottom: 4),
+                                            child: Text(
+                                              '• $effect',
+                                              style: TextStyle(
+                                                color: AppColors.textMid,
+                                                fontSize: 11,
+                                              ),
+                                            ),
+                                          )),
+                                        ],
+                                        const SizedBox(height: 12),
+                                      ],
+                                    );
+                                  },
+                                ),
+
+                                const SizedBox(height: 8),
 
                                 // Action Buttons Row 1
                                 Row(
@@ -1492,6 +1576,41 @@ class _CyclesScreenState extends State<CyclesScreen> {
         ],
       ),
     );
+  }
+
+  Future<Map<String, dynamic>> _loadCycleSummary(String cycleId) async {
+    try {
+      // Fetch dose logs
+      final doseLogs = await doseDb.getCycleDoseLogs(cycleId);
+      final totalDoses = doseLogs.length;
+      
+      String? lastDose;
+      if (doseLogs.isNotEmpty) {
+        final last = doseLogs.first;
+        final date = last.loggedAt.toString().split(' ')[0];
+        lastDose = date;
+      }
+      
+      // Fetch side effects
+      final sideEffects = await sideEffectDb.getCycleSideEffects(cycleId);
+      final recentSideEffects = sideEffects
+          .take(3)
+          .map((e) => '${e.symptom} (${e.severity}/10)')
+          .toList();
+      
+      return {
+        'totalDoses': totalDoses,
+        'lastDose': lastDose,
+        'recentSideEffects': recentSideEffects,
+      };
+    } catch (e) {
+      print('Error loading cycle summary: $e');
+      return {
+        'totalDoses': 0,
+        'lastDose': null,
+        'recentSideEffects': [],
+      };
+    }
   }
 
   @override
