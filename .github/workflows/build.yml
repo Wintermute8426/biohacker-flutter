@@ -23,13 +23,14 @@ jobs:
       - name: Verify Flutter installation
         run: flutter --version && flutter doctor -v
       
-      - name: Clean pub cache (fix file_picker v1 embedding issue)
+      - name: Clean pub cache and lock file
         run: |
           rm -rf ~/.pub-cache/hosted/pub.dev/file_picker*
+          rm -f pubspec.lock
           flutter pub cache repair
       
       - name: Get dependencies
-        run: flutter pub get
+        run: flutter pub get --no-precompile
       
       - name: Analyze code
         run: flutter analyze --no-fatal-infos || true
