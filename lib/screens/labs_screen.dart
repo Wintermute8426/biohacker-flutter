@@ -257,26 +257,40 @@ class _LabsScreenState extends State<LabsScreen> {
           const SizedBox(height: 12),
           ...result.extractedData.entries
               .where((e) => e.value != null && e.key != 'extracted_at')
-              .map((e) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      e.key.replaceAll('_', ' ').toUpperCase(),
-                      style: TextStyle(color: AppColors.textMid, fontSize: 11),
-                    ),
-                    Text(
-                      e.value.toString(),
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+              .map((e) {
+                String displayValue = '';
+                if (e.value is Map) {
+                  final map = e.value as Map;
+                  displayValue = map.entries
+                      .map((entry) => '${entry.key}: ${entry.value}')
+                      .join(', ');
+                } else {
+                  displayValue = e.value.toString();
+                }
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        e.key.replaceAll('_', ' ').toUpperCase(),
+                        style: TextStyle(color: AppColors.textMid, fontSize: 11),
                       ),
-                    ),
-                  ],
-                ),
-              ))
+                      Flexible(
+                        child: Text(
+                          displayValue,
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.end,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              })
               .toList(),
 
           // Notes
@@ -479,7 +493,7 @@ class _LabsScreenState extends State<LabsScreen> {
   /// Build results list
   Widget _buildResultsList() {
     return ListView.builder(
-      padding: const EdgeInsets.all(16).copyWith(bottom: 80),
+      padding: const EdgeInsets.all(16).copyWith(bottom: 120),
       itemCount: _labResults.length,
       itemBuilder: (context, index) {
         final result = _labResults[index];
