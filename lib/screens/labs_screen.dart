@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/colors.dart';
 import '../models/lab_result.dart';
@@ -40,34 +40,64 @@ class _LabsScreenState extends State<LabsScreen> {
     }
   }
 
-  /// Handle PDF upload
+  /// Handle file upload (photo or gallery)
   Future<void> _handleUpload() async {
     try {
-      // Pick PDF file
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-        withData: true,
+      final picker = ImagePicker();
+      
+      // Show choice: Camera or Gallery
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: AppColors.surface,
+        builder: (context) => Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take Photo'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _uploadFromSource(picker, ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _uploadFromSource(picker, ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        ),
       );
+    } catch (e) {
+      _showError('Upload failed: $e');
+    }
+  }
 
-      if (result == null || result.files.isEmpty) return;
-
-      final file = result.files.first;
-      if (file.bytes == null) {
-        _showError('Failed to read file');
-        return;
-      }
-
+  /// Upload from camera or gallery
+  Future<void> _uploadFromSource(ImagePicker picker, ImageSource source) async {
+    try {
       setState(() => _isUploading = true);
 
-      // Save file temporarily (in real app, upload to storage)
-      final tempPath = 'labs/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+      final image = await picker.pickImage(source: source);
+      if (image == null) return;
 
-      // Upload to BloodworkAI and extract
-      final labResult = await BloodworkService.uploadLabPdf(
-        filePath: tempPath,
+      // Create lab result with mock data (MVP - actual BloodworkAI integration in Phase 7)
+      final mockData = BloodworkService.getMockResponse();
+      
+      final labResult = LabResult(
+        id: 'lab_${DateTime.now().millisecondsSinceEpoch}',
         userId: _userId,
-        notes: 'Uploaded on ${DateTime.now()}',
+        pdfPath: image.path,
+        extractedData: mockData['biomarkers'] as Map<String, dynamic>,
+        uploadDate: DateTime.now(),
+        processedDate: DateTime.now(),
+        notes: 'Lab report - ${DateTime.now()}',
       );
 
       // Save to Supabase
