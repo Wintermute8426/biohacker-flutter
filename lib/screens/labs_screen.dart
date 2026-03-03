@@ -40,12 +40,13 @@ class _LabsScreenState extends State<LabsScreen> {
     }
   }
 
-  /// Handle file upload (photo or gallery)
+  /// Handle file upload (photo or gallery for MVP)
   Future<void> _handleUpload() async {
     try {
       final picker = ImagePicker();
       
-      // Show choice: Camera or Gallery
+      // Show choice: Camera or Gallery (for MVP, using image_picker)
+      // In Phase 7, we'll integrate real PDF upload + BloodworkAI API
       showModalBottomSheet(
         context: context,
         backgroundColor: AppColors.surface,
@@ -54,9 +55,19 @@ class _LabsScreenState extends State<LabsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Text(
+                'UPLOAD LAB REPORT',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 12),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
                 title: const Text('Take Photo'),
+                subtitle: const Text('Photograph your lab report'),
                 onTap: () async {
                   Navigator.pop(context);
                   await _uploadFromSource(picker, ImageSource.camera);
@@ -65,11 +76,13 @@ class _LabsScreenState extends State<LabsScreen> {
               ListTile(
                 leading: const Icon(Icons.photo_library),
                 title: const Text('Choose from Gallery'),
+                subtitle: const Text('Select lab report image'),
                 onTap: () async {
                   Navigator.pop(context);
                   await _uploadFromSource(picker, ImageSource.gallery);
                 },
               ),
+              const SizedBox(height: 8),
             ],
           ),
         ),
@@ -97,7 +110,7 @@ class _LabsScreenState extends State<LabsScreen> {
         extractedData: mockData['biomarkers'] as Map<String, dynamic>,
         uploadDate: DateTime.now(),
         processedDate: DateTime.now(),
-        notes: 'Lab report - ${DateTime.now()}',
+        notes: 'Lab report uploaded on ${DateTime.now().toString().split(' ')[0]}',
       );
 
       // Save to Supabase
@@ -417,7 +430,7 @@ class _LabsScreenState extends State<LabsScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Upload your lab PDF to extract biomarkers',
+                  'Upload your lab report to extract biomarkers',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.textDim,
                   ),
@@ -425,6 +438,7 @@ class _LabsScreenState extends State<LabsScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 80), // Bottom padding for nav bar
         ],
       ),
     );
@@ -433,7 +447,7 @@ class _LabsScreenState extends State<LabsScreen> {
   /// Build results list
   Widget _buildResultsList() {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16).copyWith(bottom: 80),
       itemCount: _labResults.length,
       itemBuilder: (context, index) {
         final result = _labResults[index];
