@@ -23,14 +23,25 @@ jobs:
       - name: Verify Flutter installation
         run: flutter --version && flutter doctor -v
       
+      - name: Clean pub cache (fix file_picker v1 embedding issue)
+        run: |
+          rm -rf ~/.pub-cache/hosted/pub.dev/file_picker*
+          flutter pub cache repair
+      
       - name: Get dependencies
         run: flutter pub get
       
       - name: Analyze code
         run: flutter analyze --no-fatal-infos || true
       
+      - name: Clean Android build
+        run: |
+          cd android
+          ./gradlew clean
+          cd ..
+      
       - name: Build APK (split-per-abi for testing on your phone)
-        run: flutter build apk --split-per-abi --release
+        run: flutter build apk --split-per-abi --release --no-shrink
       
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
