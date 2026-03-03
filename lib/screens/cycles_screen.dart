@@ -5,6 +5,7 @@ import '../data/dosing_calculator.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
 import '../services/side_effects_database.dart';
+import '../services/protocol_templates_database.dart';
 import '../widgets/advanced_dosing_widget.dart';
 
 class CyclesScreen extends StatefulWidget {
@@ -27,6 +28,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   final db = CyclesDatabase();
   final doseDb = DoseLogsDatabase();
   final sideEffectDb = SideEffectsDatabase();
+  final protocolDb = ProtocolTemplatesDatabase();
   
   List<Cycle> savedCycles = [];
   List<String> filteredPeptides = PEPTIDE_LIST;
@@ -1544,6 +1546,30 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                     Expanded(
                                       child: OutlinedButton(
                                         onPressed: () =>
+                                            _showSaveAsProtocolDialog(cycle),
+                                        style: OutlinedButton.styleFrom(
+                                          side: BorderSide(
+                                            color: AppColors.primary,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(3),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'SAVE',
+                                          style: TextStyle(
+                                            color: AppColors.primary,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed: () =>
                                             _showDeleteConfirmation(cycle),
                                         style: OutlinedButton.styleFrom(
                                           side: BorderSide(
@@ -1572,6 +1598,92 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           );
                         },
                       ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSaveAsProtocolDialog(Cycle cycle) {
+    final nameController = TextEditingController();
+    final descController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('SAVE AS PROTOCOL', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Protocol Name',
+                style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: nameController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'e.g., "${cycle.peptideName} Recovery"',
+                  hintStyle: TextStyle(color: AppColors.textDim),
+                  border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Description (optional)',
+                style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: descController,
+                style: const TextStyle(color: Colors.white),
+                maxLines: 2,
+                decoration: InputDecoration(
+                  hintText: 'Notes about this protocol...',
+                  hintStyle: TextStyle(color: AppColors.textDim),
+                  border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('CANCEL', style: TextStyle(color: AppColors.textDim)),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (nameController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a protocol name')),
+                );
+                return;
+              }
+
+              await protocolDb.saveProtocol(
+                name: nameController.text,
+                description: descController.text.isEmpty ? null : descController.text,
+                peptideName: cycle.peptideName,
+                dose: cycle.dose,
+                route: cycle.route,
+                frequency: cycle.frequency,
+                durationWeeks: cycle.durationWeeks,
+              );
+
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('✓ Protocol saved: ${nameController.text}'),
+                  backgroundColor: AppColors.primary,
+                ),
+              );
+            },
+            child: Text('SAVE', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

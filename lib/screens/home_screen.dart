@@ -3,6 +3,7 @@ import '../theme/colors.dart';
 import 'dashboard_screen.dart';
 import 'cycles_screen.dart';
 import 'research_screen.dart';
+import 'protocols_screen.dart';
 import 'labs_screen.dart';
 import 'settings_screen.dart';
 
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const DashboardScreen(),
     const CyclesScreen(),
     const ResearchScreen(),
+    const ProtocolsScreen(),
     const LabsScreen(),
     const SettingsScreen(),
   ];
@@ -53,6 +55,10 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
             label: 'Research',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bookmark),
+            label: 'Protocols',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.science),
