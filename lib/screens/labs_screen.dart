@@ -129,10 +129,13 @@ class _LabsScreenState extends State<LabsScreen> {
   /// Converts PDF to images, processes with mock biomarker data
   /// Phase 7: Real BloodworkAI API will extract actual biomarkers
   Future<void> _uploadPDF() async {
+    print('DEBUG: _uploadPDF() STARTED');
     try {
+      print('DEBUG: Setting _isUploading = true');
       setState(() => _isUploading = true);
 
       // Pick PDF file
+      print('DEBUG: Opening file picker for PDF');
       const XTypeGroup pdfTypeGroup = XTypeGroup(
         label: 'PDF Files',
         extensions: <String>['pdf'],
@@ -142,7 +145,11 @@ class _LabsScreenState extends State<LabsScreen> {
         acceptedTypeGroups: <XTypeGroup>[pdfTypeGroup],
       );
 
-      if (file == null) return;
+      print('DEBUG: File picker returned: ${file?.name ?? "null"}');
+      if (file == null) {
+        print('DEBUG: File was null, returning');
+        return;
+      }
 
       // Read PDF bytes
       final pdfBytes = await file.readAsBytes();
@@ -198,11 +205,18 @@ class _LabsScreenState extends State<LabsScreen> {
   /// Photograph lab report or select image - displays mock biomarker data
   /// Phase 7: Real BloodworkAI API for actual biomarker extraction
   Future<void> _uploadFromSource(ImagePicker picker, ImageSource source) async {
+    print('DEBUG: _uploadFromSource() STARTED for source: $source');
     try {
+      print('DEBUG: Setting _isUploading = true');
       setState(() => _isUploading = true);
 
+      print('DEBUG: Opening image picker for source: $source');
       final image = await picker.pickImage(source: source);
-      if (image == null) return;
+      print('DEBUG: Image picker returned: ${image?.path ?? "null"}');
+      if (image == null) {
+        print('DEBUG: Image was null, returning');
+        return;
+      }
 
       // Create lab result with mock biomarker data
       final mockData = BloodworkService.getMockResponse();
