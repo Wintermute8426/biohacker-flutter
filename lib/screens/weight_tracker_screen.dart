@@ -11,28 +11,6 @@ class WeightTrackerWidget extends StatefulWidget {
 
 class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
   final db = WeightLogsDatabase();
-  List<WeightLog> weightLogs = [];
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadWeights();
-  }
-
-  void _loadWeights() async {
-    setState(() => isLoading = true);
-    try {
-      final logs = await db.getWeightLogs(limit: 10);
-      setState(() {
-        weightLogs = logs;
-        isLoading = false;
-      });
-    } catch (e) {
-      print('Error loading weights: $e');
-      setState(() => isLoading = false);
-    }
-  }
 
   void _showLogWeightModal() {
     final weightController = TextEditingController();
@@ -174,7 +152,7 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
                   final weight = double.tryParse(weightController.text);
                   if (weight == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Please enter a valid weight')),
+                      const SnackBar(content: Text('Please enter a valid weight')),
                     );
                     return;
                   }
@@ -187,7 +165,6 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
                     loggedAt: selectedDate,
                   );
 
-                  _loadWeights();
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -195,6 +172,7 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
                       backgroundColor: AppColors.primary,
                     ),
                   );
+                  setState(() {}); // Refresh widget
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -260,122 +238,231 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
           ),
           const SizedBox(height: 12),
 
-          if (isLoading)
-            Center(
-              child: SizedBox(
-                height: 30,
-                width: 30,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                ),
-              ),
-            )
-          else if (weightLogs.isEmpty)
-            Text(
-              'No weights logged yet. Tap LOG to start tracking.',
-              style: TextStyle(
-                color: AppColors.textDim,
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-              ),
-            )
-          else
-            Column(
-              children: [
-                // Latest weight
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                    borderRadius: BorderRadius.circular(3),
+          FutureBuilder<List<WeightLog>>(
+            future: db.getWeightLogs(limit: 10),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: SizedBox(
+                    height: 30,
+                    width: 30,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                    ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Latest',
-                            style: TextStyle(
-                              color: AppColors.textDim,
-                              fontSize: 11,
-                            ),
-                          ),
-                          Text(
-                            '${weightLogs.first.weightLbs} lbs',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            weightLogs.first.loggedAt.toString().split(' ')[0],
-                            style: TextStyle(
-                              color: AppColors.textDim,
-                              fontSize: 11,
-                            ),
-                          ),
-                          if (weightLogs.first.bodyFatPercent != null)
-                            Text(
-                              '${weightLogs.first.bodyFatPercent}% BF',
-                              style: TextStyle(
-                                color: AppColors.accent,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
+                );
+              }
 
-                // Recent entries list
-                Text(
-                  'Recent (${weightLogs.length})',
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Text(
+                  'No weights logged yet. Tap LOG to start tracking.',
                   style: TextStyle(
                     color: AppColors.textDim,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
                   ),
-                ),
-                const SizedBox(height: 8),
-                ...weightLogs.skip(1).take(5).map((log) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
+                );
+              }
+
+              final logs = snapshot.data!;
+              final latest = logs.first;
+
+              return Column(
+                children: [
+                  // Latest weight
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          log.loggedAt.toString().split(' ')[0],
-                          style: TextStyle(
-                            color: AppColors.textMid,
-                            fontSize: 11,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Latest',
+                              style: TextStyle(
+                                color: AppColors.textDim,
+                                fontSize: 11,
+                              ),
+                            ),
+                            Text(
+                              '${latest.weightLbs} lbs',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '${log.weightLbs} lbs${log.bodyFatPercent != null ? ' / ${log.bodyFatPercent}%' : ''}',
-                          style: TextStyle(
-                            color: AppColors.textLight,
-                            fontSize: 11,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              latest.loggedAt.toString().split(' ')[0],
+                              style: TextStyle(
+                                color: AppColors.textDim,
+                                fontSize: 11,
+                              ),
+                            ),
+                            if (latest.bodyFatPercent != null)
+                              Text(
+                                '${latest.bodyFatPercent}% BF',
+                                style: TextStyle(
+                                  color: AppColors.accent,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                          ],
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Simple trend chart (if multiple entries)
+                  if (logs.length > 1) ...[
+                    Text(
+                      'TREND',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildSimpleChart(logs),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Recent entries
+                  Text(
+                    'HISTORY (${logs.length})',
+                    style: TextStyle(
+                      color: AppColors.textDim,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...logs.map((log) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            log.loggedAt.toString().split(' ')[0],
+                            style: TextStyle(
+                              color: AppColors.textMid,
+                              fontSize: 11,
+                            ),
+                          ),
+                          Text(
+                            '${log.weightLbs} lbs${log.bodyFatPercent != null ? ' / ${log.bodyFatPercent}%' : ''}',
+                            style: TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSimpleChart(List<WeightLog> logs) {
+    // Reverse to show oldest on left
+    final sortedLogs = logs.reversed.toList();
+    
+    if (sortedLogs.length < 2) {
+      return const SizedBox.shrink();
+    }
+
+    // Find min/max weight for scaling
+    final weights = sortedLogs.map((l) => l.weightLbs).toList();
+    final minWeight = weights.reduce((a, b) => a < b ? a : b);
+    final maxWeight = weights.reduce((a, b) => a > b ? a : b);
+    final range = maxWeight - minWeight;
+    final padding = range * 0.1; // 10% padding
+
+    const chartHeight = 80.0;
+    const barWidth = 3.0;
+    const spacing = 2.0;
+
+    return Container(
+      height: chartHeight + 30,
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.5),
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        children: [
+          SizedBox(
+            height: chartHeight,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(
+                sortedLogs.length,
+                (index) {
+                  final log = sortedLogs[index];
+                  final normalizedWeight =
+                      (log.weightLbs - (minWeight - padding)) / (range + padding * 2);
+                  final height = (chartHeight * normalizedWeight).clamp(2.0, chartHeight);
+
+                  return Tooltip(
+                    message: '${log.weightLbs}lbs\n${log.loggedAt.toString().split(' ')[0]}',
+                    child: Container(
+                      width: barWidth,
+                      height: height,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
                   );
-                }),
-              ],
+                },
+              ),
             ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${minWeight.toStringAsFixed(1)}',
+                style: TextStyle(
+                  color: AppColors.textDim,
+                  fontSize: 9,
+                ),
+              ),
+              Text(
+                '${maxWeight.toStringAsFixed(1)}',
+                style: TextStyle(
+                  color: AppColors.textDim,
+                  fontSize: 9,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
