@@ -18,12 +18,24 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
   List<ProtocolTemplate> communityProtocols = [];
   bool isLoading = true;
 
-  // Biohacker official protocols
+  // Biohacker official protocols with detailed descriptions
+  final Map<String, String> protocolDetails = {
+    'bh-bpc157': 'BPC-157 (Body Protection Compound-157) is a pentadecapeptide that accelerates healing of damaged tissues, improves gut health, and promotes recovery from injuries. Ideal for joint pain, tendon damage, and muscle strains. Works best when combined with proper rest and mobility work.',
+    'bh-tb500': 'Thymosin Beta-4 (TB-500) is a naturally occurring peptide that promotes tissue repair and regeneration. Excellent for muscle recovery, wound healing, and joint support. Can be stacked with BPC-157 for synergistic effects.',
+    'bh-ghkcu': 'GHK-Cu (Copper Tripeptide) stimulates collagen synthesis and skin regeneration. Ideal for hair growth, skin elasticity, and anti-aging. Can be used topically or systemically for enhanced results.',
+    'bh-epitalon': 'Epitalon is a pineal peptide that activates telomerase and extends telomere length. Promotes cellular rejuvenation, improves sleep quality, and supports immune function. The ultimate longevity protocol.',
+    'bh-thymosin': 'Thymosin Alpha-1 enhances immune function and supports vaccine response. Essential for preventative health and immune optimization. Particularly useful during cold/flu season.',
+    'bh-full-recovery': 'Complete injury recovery protocol combining BPC-157 + TB-500 for maximum healing. Targets joint repair, muscle recovery, and tissue regeneration. 12-week protocol for serious injuries.',
+    'bh-hair-growth': 'Hair growth protocol using GHK-Cu + Semax. Stimulates follicle activation while improving scalp health and circulation. Best results over 12-16 weeks.',
+    'bh-longevity': 'Ultimate longevity stack: Epitalon for telomere extension + NAD+ for cellular energy + immune support. Comprehensive anti-aging protocol.',
+    'bh-immune-boost': 'Preventative immune protocol: Thymosin Alpha-1 + seasonal immune support. Strengthens immune defenses before illness onset.',
+  };
+
   final List<ProtocolTemplate> biohackerProtocols = [
     ProtocolTemplate(
       id: 'bh-bpc157',
-      name: 'BPC-157 Recovery Stack',
-      description: 'Tissue repair and recovery protocol for injury healing',
+      name: 'BPC-157 Recovery',
+      description: 'Tissue repair and injury healing',
       peptideName: 'BPC-157',
       dose: 250,
       route: 'SC (subcutaneous)',
@@ -34,8 +46,8 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
     ),
     ProtocolTemplate(
       id: 'bh-tb500',
-      name: 'TB-500 Healing Protocol',
-      description: 'Thymosin Beta-4 for accelerated tissue repair',
+      name: 'TB-500 Healing',
+      description: 'Accelerated tissue and muscle recovery',
       peptideName: 'TB-500',
       dose: 5,
       route: 'SC (subcutaneous)',
@@ -45,38 +57,86 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       isPublic: true,
     ),
     ProtocolTemplate(
-      id: 'bh-cjc1295',
-      name: 'CJC-1295 Growth Stack',
-      description: 'Growth hormone stimulation for muscle and strength',
-      peptideName: 'CJC-1295 (no DAC)',
-      dose: 100,
+      id: 'bh-ghkcu',
+      name: 'GHK-Cu Hair & Skin',
+      description: 'Collagen synthesis for hair and skin regeneration',
+      peptideName: 'GHK-Cu',
+      dose: 5,
       route: 'SC (subcutaneous)',
+      frequency: '1x daily',
+      durationWeeks: 12,
+      usageCount: 0,
+      isPublic: true,
+    ),
+    ProtocolTemplate(
+      id: 'bh-epitalon',
+      name: 'Epitalon Longevity',
+      description: 'Telomere extension and cellular rejuvenation',
+      peptideName: 'Epitalon',
+      dose: 1,
+      route: 'SC (subcutaneous)',
+      frequency: '1x daily',
+      durationWeeks: 10,
+      usageCount: 0,
+      isPublic: true,
+    ),
+    ProtocolTemplate(
+      id: 'bh-thymosin',
+      name: 'Thymosin Alpha-1 Immune',
+      description: 'Preventative immune optimization',
+      peptideName: 'Thymosin Alpha-1',
+      dose: 1.6,
+      route: 'SC (subcutaneous)',
+      frequency: '3x weekly',
+      durationWeeks: 8,
+      usageCount: 0,
+      isPublic: true,
+    ),
+    ProtocolTemplate(
+      id: 'bh-full-recovery',
+      name: 'STACK: Complete Injury Recovery',
+      description: 'BPC-157 + TB-500 for maximum healing potential',
+      peptideName: 'BPC-157 + TB-500',
+      dose: 250,
+      route: 'SC (subcutaneous)',
+      frequency: '1x daily + 2x weekly',
+      durationWeeks: 12,
+      usageCount: 0,
+      isPublic: true,
+    ),
+    ProtocolTemplate(
+      id: 'bh-hair-growth',
+      name: 'STACK: Hair Growth Protocol',
+      description: 'GHK-Cu + Semax for follicle activation',
+      peptideName: 'GHK-Cu + Semax',
+      dose: 5,
+      route: 'SC + Intranasal',
       frequency: '1x daily',
       durationWeeks: 16,
       usageCount: 0,
       isPublic: true,
     ),
     ProtocolTemplate(
-      id: 'bh-semax',
-      name: 'Semax Cognitive Stack',
-      description: 'Cognitive enhancement and neuroprotection',
-      peptideName: 'Semax',
-      dose: 5,
-      route: 'Intranasal',
-      frequency: '2x daily',
-      durationWeeks: 8,
+      id: 'bh-longevity',
+      name: 'STACK: Ultimate Longevity',
+      description: 'Epitalon for telomeres + NAD+ for energy',
+      peptideName: 'Epitalon',
+      dose: 1,
+      route: 'SC (subcutaneous)',
+      frequency: '1x daily',
+      durationWeeks: 12,
       usageCount: 0,
       isPublic: true,
     ),
     ProtocolTemplate(
-      id: 'bh-melanotan',
-      name: 'Melanotan II Aesthetic',
-      description: 'UV-free tanning and aesthetic enhancement',
-      peptideName: 'Melanotan II',
-      dose: 1,
+      id: 'bh-immune-boost',
+      name: 'Preventative Immune Protocol',
+      description: 'Strengthen defenses before illness onset',
+      peptideName: 'Thymosin Alpha-1',
+      dose: 1.6,
       route: 'SC (subcutaneous)',
       frequency: '3x weekly',
-      durationWeeks: 10,
+      durationWeeks: 8,
       usageCount: 0,
       isPublic: true,
     ),
@@ -371,93 +431,259 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
     );
   }
 
-  Widget _buildProtocolCard(ProtocolTemplate protocol) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      protocol.name,
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${protocol.peptideName} • ${protocol.dose}mg • ${protocol.frequency}',
-                      style: TextStyle(
-                        color: AppColors.textMid,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (protocol.usageCount > 0)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
+  void _showProtocolDetail(ProtocolTemplate protocol) {
+    final detail = protocolDetails[protocol.id] ?? protocol.description ?? 'No details available.';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      builder: (context) => SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
                   child: Text(
-                    'Used ${protocol.usageCount}x',
+                    protocol.name.toUpperCase(),
                     style: TextStyle(
-                      color: AppColors.accent,
-                      fontSize: 10,
+                      color: AppColors.primary,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
                     ),
                   ),
                 ),
-            ],
-          ),
-          if (protocol.description != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              protocol.description!,
-              style: TextStyle(
-                color: AppColors.textDim,
-                fontSize: 11,
-                fontStyle: FontStyle.italic,
-              ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  color: AppColors.textMid,
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
             ),
-          ],
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            height: 36,
-            child: ElevatedButton(
-              onPressed: () => _showStartFromProtocolModal(protocol),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+            const SizedBox(height: 16),
+
+            // Protocol details
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.08),
+                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                'START CYCLE',
+                detail,
                 style: TextStyle(
-                  color: AppColors.background,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
+                  color: AppColors.textLight,
+                  fontSize: 12,
+                  height: 1.6,
                 ),
               ),
+            ),
+            const SizedBox(height: 20),
+
+            // Specs
+            Text(
+              'PROTOCOL SPECS',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.border),
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: Column(
+                children: [
+                  _buildSpecRow('Peptide(s)', protocol.peptideName),
+                  _buildSpecRow('Dose', '${protocol.dose}mg'),
+                  _buildSpecRow('Route', protocol.route),
+                  _buildSpecRow('Frequency', protocol.frequency),
+                  _buildSpecRow('Duration', '${protocol.durationWeeks} weeks'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Start button
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _showStartFromProtocolModal(protocol);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                ),
+                child: const Text('START CYCLE', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpecRow(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: AppColors.border.withOpacity(0.5)),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.textMid,
+              fontSize: 11,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProtocolCard(ProtocolTemplate protocol) {
+    return GestureDetector(
+      onTap: () => _showProtocolDetail(protocol),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        protocol.name,
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${protocol.peptideName} • ${protocol.dose}mg • ${protocol.frequency}',
+                        style: TextStyle(
+                          color: AppColors.textMid,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (protocol.usageCount > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: Text(
+                      'Used ${protocol.usageCount}x',
+                      style: TextStyle(
+                        color: AppColors.accent,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            if (protocol.description != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                protocol.description!,
+                style: TextStyle(
+                  color: AppColors.textDim,
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _showProtocolDetail(protocol),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+                    ),
+                    child: Text(
+                      'DETAILS',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _showStartFromProtocolModal(protocol),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+                    ),
+                    child: Text(
+                      'START',
+                      style: TextStyle(
+                        color: AppColors.background,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
