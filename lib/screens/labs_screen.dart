@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 import '../theme/colors.dart';
@@ -65,12 +64,12 @@ class _LabsScreenState extends State<LabsScreen> {
     }
   }
 
-  /// Handle file upload (PDF, camera, or gallery)
+  /// Handle file upload (camera or gallery only)
   Future<void> _handleUpload() async {
     try {
       final picker = ImagePicker();
       
-      // Show choice: PDF, Camera, or Gallery
+      // Show choice: Camera or Gallery (no PDF)
       showModalBottomSheet(
         context: context,
         backgroundColor: AppColors.surface,
@@ -88,15 +87,6 @@ class _LabsScreenState extends State<LabsScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              ListTile(
-                leading: const Icon(Icons.description),
-                title: const Text('PDF File'),
-                subtitle: const Text('Select lab PDF from device'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await _uploadPDF();
-                },
-              ),
               ListTile(
                 leading: const Icon(Icons.camera_alt),
                 title: const Text('Take Photo'),
@@ -122,82 +112,6 @@ class _LabsScreenState extends State<LabsScreen> {
       );
     } catch (e) {
       _showError('Upload failed: $e');
-    }
-  }
-
-  /// Upload PDF file using file_selector
-  /// Converts PDF to images, processes with mock biomarker data
-  /// Phase 7: Real BloodworkAI API will extract actual biomarkers
-  Future<void> _uploadPDF() async {
-    print('DEBUG: _uploadPDF() STARTED');
-    try {
-      print('DEBUG: Setting _isUploading = true');
-      setState(() => _isUploading = true);
-
-      // Pick PDF file
-      print('DEBUG: Opening file picker for PDF');
-      const XTypeGroup pdfTypeGroup = XTypeGroup(
-        label: 'PDF Files',
-        extensions: <String>['pdf'],
-      );
-
-      final XFile? file = await openFile(
-        acceptedTypeGroups: <XTypeGroup>[pdfTypeGroup],
-      );
-
-      print('DEBUG: File picker returned: ${file?.name ?? "null"}');
-      if (file == null) {
-        print('DEBUG: File was null, returning');
-        return;
-      }
-
-      // Read PDF bytes
-      final pdfBytes = await file.readAsBytes();
-      if (pdfBytes.isEmpty) {
-        _showError('Failed to read PDF file');
-        return;
-      }
-
-      // Create lab result with mock biomarker data
-      // Phase 7: Real BloodworkAI API will extract actual biomarkers from PDF
-      final mockData = BloodworkService.getMockResponse();
-      
-      final labResult = LabResult(
-        id: 'lab_${DateTime.now().millisecondsSinceEpoch}',
-        userId: _userId,
-        pdfPath: file.path,
-        extractedData: mockData['biomarkers'] as Map<String, dynamic>,
-        uploadDate: DateTime.now(),
-        processedDate: DateTime.now(),
-        notes: 'Lab PDF: ${file.name} (${pdfBytes.length} bytes) uploaded on ${DateTime.now().toString().split(' ')[0]}',
-      );
-
-      // Save to Supabase
-      print('DEBUG: Saving lab result to Supabase: ${labResult.id}');
-      await _labsDb.saveLabResult(labResult);
-      print('DEBUG: Lab result saved successfully');
-
-      // Add to local list instead of reloading from DB
-      if (mounted) {
-        print('DEBUG: Adding result to local list. Total results: ${_labResults.length + 1}');
-        setState(() {
-          _labResults.insert(0, labResult);
-          _isUploading = false;
-          print('DEBUG: setState complete. Total results now: ${_labResults.length}');
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lab PDF uploaded and processed'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      print('DEBUG: PDF upload error: $e');
-      _showError('PDF upload failed: $e');
-      if (mounted) {
-        setState(() => _isUploading = false);
-      }
     }
   }
 
