@@ -168,6 +168,7 @@ class _LabsScreenState extends State<LabsScreen> {
         setState(() {
           _labResults.insert(0, labResult);
           _isUploading = false;
+          _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -180,8 +181,10 @@ class _LabsScreenState extends State<LabsScreen> {
       print('DEBUG: PDF upload error: $e');
       _showError('PDF upload failed: $e');
       if (mounted) {
-        setState(() => _isUploading = false);
-        setState(() => _isLoading = false); // Also clear loading state
+        setState(() {
+          _isUploading = false;
+          _isLoading = false;
+        });
       }
     }
   }
@@ -219,6 +222,7 @@ class _LabsScreenState extends State<LabsScreen> {
         setState(() {
           _labResults.insert(0, labResult);
           _isUploading = false;
+          _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -231,7 +235,10 @@ class _LabsScreenState extends State<LabsScreen> {
       print('DEBUG: Upload error: $e');
       _showError('Upload failed: $e');
       if (mounted) {
-        setState(() => _isUploading = false);
+        setState(() {
+          _isUploading = false;
+          _isLoading = false;
+        });
       }
     }
   }
