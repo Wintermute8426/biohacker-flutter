@@ -106,11 +106,32 @@ class ProtocolTemplatesDatabase {
           .from(tableName)
           .select()
           .eq('user_id', user.id)
+          .eq('is_public', false)
           .order('usage_count', ascending: false);
 
       return (response as List).map((e) => ProtocolTemplate.fromJson(e)).toList();
     } catch (e) {
       print('Error fetching protocols: $e');
+      return [];
+    }
+  }
+
+  // Get community (public) protocols from other users
+  Future<List<ProtocolTemplate>> getCommunityProtocols() async {
+    try {
+      final user = supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      final response = await supabase
+          .from(tableName)
+          .select()
+          .eq('is_public', true)
+          .neq('user_id', user.id)
+          .order('usage_count', ascending: false);
+
+      return (response as List).map((e) => ProtocolTemplate.fromJson(e)).toList();
+    } catch (e) {
+      print('Error fetching community protocols: $e');
       return [];
     }
   }
