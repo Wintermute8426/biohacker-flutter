@@ -27,22 +27,33 @@ class _LabsScreenState extends State<LabsScreen> {
     super.initState();
     _userId = Supabase.instance.client.auth.currentUser?.id ?? '';
     print('DEBUG: Labs screen initialized. User ID: $_userId');
+    print('DEBUG: Auth user: ${Supabase.instance.client.auth.currentUser}');
     _loadLabResults();
   }
 
   /// Load all lab results for user
   Future<void> _loadLabResults() async {
-    setState(() => _isLoading = true);
+    print('DEBUG: _loadLabResults() START');
+    setState(() {
+      _isLoading = true;
+      print('DEBUG: _isLoading = true');
+    });
     try {
       print('DEBUG: Loading lab results for user: $_userId');
       final results = await _labsDb.getUserLabResults(_userId);
       print('DEBUG: Loaded ${results.length} lab results');
-      setState(() => _labResults = results);
-    } catch (e) {
+      setState(() {
+        _labResults = results;
+        _isLoading = false;
+        print('DEBUG: _isLoading = false, results set to ${results.length}');
+      });
+    } catch (e, stackTrace) {
       print('DEBUG: Error loading lab results: $e');
-      _showError('Failed to load lab results: $e');
-    } finally {
-      setState(() => _isLoading = false);
+      print('DEBUG: StackTrace: $stackTrace');
+      if (mounted) {
+        _showError('Failed to load lab results: $e');
+        setState(() => _isLoading = false);
+      }
     }
   }
 

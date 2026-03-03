@@ -22,18 +22,27 @@ class LabsDatabase {
   /// Get all lab results for user
   Future<List<LabResult>> getUserLabResults(String userId) async {
     try {
+      print('DEBUG (LabsDatabase): getUserLabResults START for userId: $userId');
       final response = await supabase
           .from('labs_results')
           .select()
           .eq('user_id', userId)
           .order('upload_date', ascending: false);
 
-      if (response.isEmpty) return [];
+      print('DEBUG (LabsDatabase): Query succeeded. Response: $response');
+      if (response.isEmpty) {
+        print('DEBUG (LabsDatabase): Response is empty, returning []');
+        return [];
+      }
       
-      return (response as List)
+      final results = (response as List)
           .map((json) => LabResult.fromJson(json))
           .toList();
-    } catch (e) {
+      print('DEBUG (LabsDatabase): Mapped ${results.length} results');
+      return results;
+    } catch (e, stackTrace) {
+      print('DEBUG (LabsDatabase): Error: $e');
+      print('DEBUG (LabsDatabase): StackTrace: $stackTrace');
       throw Exception('Failed to fetch lab results: $e');
     }
   }
