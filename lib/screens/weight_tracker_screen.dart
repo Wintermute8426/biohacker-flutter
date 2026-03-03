@@ -11,6 +11,19 @@ class WeightTrackerWidget extends StatefulWidget {
 
 class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
   final db = WeightLogsDatabase();
+  late Future<List<WeightLog>> _weightLogsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshWeights();
+  }
+
+  void _refreshWeights() {
+    setState(() {
+      _weightLogsFuture = db.getWeightLogs(limit: 10);
+    });
+  }
 
   void _showLogWeightModal() {
     final weightController = TextEditingController();
@@ -172,7 +185,7 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
                       backgroundColor: AppColors.primary,
                     ),
                   );
-                  setState(() {}); // Refresh widget
+                  _refreshWeights(); // Reload data from database
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -239,7 +252,7 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
           const SizedBox(height: 12),
 
           FutureBuilder<List<WeightLog>>(
-            future: db.getWeightLogs(limit: 10),
+            future: _weightLogsFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
