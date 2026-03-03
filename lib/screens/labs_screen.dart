@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/colors.dart';
+import '../models/lab_result.dart';
+import '../services/labs_database.dart';
+import '../services/bloodwork_service.dart';
 
 class LabsScreen extends StatefulWidget {
   const LabsScreen({Key? key}) : super(key: key);
@@ -9,56 +14,284 @@ class LabsScreen extends StatefulWidget {
 }
 
 class _LabsScreenState extends State<LabsScreen> {
-  List<String> uploadedFiles = [];
+  final LabsDatabase _labsDb = LabsDatabase();
+  late String _userId;
+  List<LabResult> _labResults = [];
+  bool _isLoading = false;
+  bool _isUploading = false;
 
-  void _showUploadDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(
-          'UPLOAD LAB RESULTS',
-          style: TextStyle(color: AppColors.primary, letterSpacing: 1),
+  @override
+  void initState() {
+    super.initState();
+    _userId = Supabase.instance.client.auth.currentUser?.id ?? '';
+    _loadLabResults();
+  }
+
+  /// Load all lab results for user
+  Future<void> _loadLabResults() async {
+    setState(() => _isLoading = true);
+    try {
+      final results = await _labsDb.getUserLabResults(_userId);
+      setState(() => _labResults = results);
+    } catch (e) {
+      _showError('Failed to load lab results: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  /// Handle PDF upload
+  Future<void> _handleUpload() async {
+    try {
+      // Pick PDF file
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+      if (file.bytes == null) {
+        _showError('Failed to read file');
+        return;
+      }
+
+      setState(() => _isUploading = true);
+
+      // Save file temporarily (in real app, upload to storage)
+      final tempPath = 'labs/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+
+      // Upload to BloodworkAI and extract
+      final labResult = await BloodworkService.uploadLabPdf(
+        filePath: tempPath,
+        userId: _userId,
+        notes: 'Uploaded on ${DateTime.now()}',
+      );
+
+      // Save to Supabase
+      await _labsDb.saveLabResult(labResult);
+
+      // Reload results
+      await _loadLabResults();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Lab results uploaded and processed'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      _showError('Upload failed: $e');
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
+  }
+
+  /// Show error message
+  void _showError(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.error,
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.description, color: AppColors.primary, size: 48),
-            const SizedBox(height: 16),
+      );
+    }
+  }
+
+  /// Show lab result details
+  void _showResultDetails(LabResult result) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (context) => _buildResultDetailsSheet(result),
+    );
+  }
+
+  /// Build result details sheet
+  Widget _buildResultDetailsSheet(LabResult result) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'LAB RESULTS',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: AppColors.primary,
+                  letterSpacing: 1,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Date
+          Text(
+            'Uploaded: ${result.uploadDate.toString().split(' ')[0]}',
+            style: TextStyle(color: AppColors.textDim, fontSize: 12),
+          ),
+          const SizedBox(height: 20),
+
+          // Key Biomarkers
+          if (result.testosterone != null) ...[
+            _buildBiomarkerRow('TESTOSTERONE', '${result.testosterone} ng/dL', result.testosteroneStatus),
+          ],
+          if (result.cortisol != null) ...[
+            _buildBiomarkerRow('CORTISOL', '${result.cortisol} µg/dL', result.cortisolStatus),
+          ],
+          if (result.glucose != null) ...[
+            _buildBiomarkerRow('GLUCOSE', '${result.glucose} mg/dL', 'NORMAL'),
+          ],
+
+          // All extracted data
+          const SizedBox(height: 20),
+          Text(
+            'All Biomarkers',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...result.extractedData.entries
+              .where((e) => e.value != null && e.key != 'extracted_at')
+              .map((e) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      e.key.replaceAll('_', ' ').toUpperCase(),
+                      style: TextStyle(color: AppColors.textMid, fontSize: 11),
+                    ),
+                    Text(
+                      e.value.toString(),
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ))
+              .toList(),
+
+          // Notes
+          if (result.notes != null && result.notes!.isNotEmpty) ...[
+            const SizedBox(height: 20),
             Text(
-              'Select PDF from your device',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textMid),
+              'Notes',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              'BloodworkAI will extract results automatically',
-              style: TextStyle(color: AppColors.textDim, fontSize: 11),
+              result.notes!,
+              style: TextStyle(color: AppColors.textLight, fontSize: 11),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('CLOSE', style: TextStyle(color: AppColors.textDim)),
+
+          // Delete button
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () async {
+                await _labsDb.deleteLabResult(result.id);
+                if (mounted) {
+                  Navigator.pop(context);
+                  _loadLabResults();
+                }
+              },
+              icon: const Icon(Icons.delete),
+              label: const Text('DELETE RESULT'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+              ),
+            ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              // TODO: Implement file picker
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('File picker coming soon'),
-                  backgroundColor: Colors.orange,
+        ],
+      ),
+    );
+  }
+
+  /// Build biomarker row
+  Widget _buildBiomarkerRow(String label, String value, String? status) {
+    Color statusColor = Colors.grey;
+    if (status == 'OPTIMAL') statusColor = Colors.green;
+    else if (status == 'HIGH' || status == 'LOW') statusColor = Colors.orange;
+    else if (status == 'CRITICAL') statusColor = Colors.red;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        border: Border.all(color: statusColor.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: AppColors.textMid,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
                 ),
-              );
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.2),
+              border: Border.all(color: statusColor.withOpacity(0.5)),
+              borderRadius: BorderRadius.circular(3),
             ),
             child: Text(
-              'SELECT PDF',
-              style: TextStyle(color: AppColors.background),
+              status ?? 'N/A',
+              style: TextStyle(
+                color: statusColor,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -72,6 +305,7 @@ class _LabsScreenState extends State<LabsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -86,9 +320,18 @@ class _LabsScreenState extends State<LabsScreen> {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: _showUploadDialog,
-                  icon: const Icon(Icons.cloud_upload),
-                  label: const Text('UPLOAD'),
+                  onPressed: _isUploading ? null : _handleUpload,
+                  icon: _isUploading
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(AppColors.background),
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Icon(Icons.cloud_upload),
+                  label: Text(_isUploading ? 'UPLOADING...' : 'UPLOAD'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                   ),
@@ -96,89 +339,124 @@ class _LabsScreenState extends State<LabsScreen> {
               ],
             ),
           ),
+
+          // Content
           Expanded(
-            child: uploadedFiles.isEmpty
-                ? SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 40),
-                        Container(
-                          padding: const EdgeInsets.all(32),
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            border: Border.all(color: AppColors.border),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.favorite_border,
-                                color: AppColors.primary,
-                                size: 48,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No lab results',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: AppColors.textMid,
-                                    ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Upload or log your lab results here',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: AppColors.textDim,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+            child: _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(AppColors.primary),
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: uploadedFiles.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          border: Border.all(color: AppColors.border),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.description, color: AppColors.primary),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                uploadedFiles[index],
-                                style: TextStyle(color: AppColors.textLight),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: AppColors.error),
-                              onPressed: () {
-                                setState(() => uploadedFiles.removeAt(index));
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                : _labResults.isEmpty
+                    ? _buildEmptyState()
+                    : _buildResultsList(),
           ),
         ],
       ),
+    );
+  }
+
+  /// Build empty state
+  Widget _buildEmptyState() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          const SizedBox(height: 40),
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.favorite_border,
+                  color: AppColors.primary,
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No lab results yet',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.textMid,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Upload your lab PDF to extract biomarkers',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textDim,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build results list
+  Widget _buildResultsList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _labResults.length,
+      itemBuilder: (context, index) {
+        final result = _labResults[index];
+        return GestureDetector(
+          onTap: () => _showResultDetails(result),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Lab Results',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      result.uploadDate.toString().split(' ')[0],
+                      style: TextStyle(color: AppColors.textDim, fontSize: 11),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (result.testosterone != null)
+                  Text(
+                    'Test: ${result.testosterone} ng/dL',
+                    style: TextStyle(color: AppColors.textLight, fontSize: 12),
+                  ),
+                if (result.cortisol != null)
+                  Text(
+                    'Cortisol: ${result.cortisol} µg/dL',
+                    style: TextStyle(color: AppColors.textLight, fontSize: 12),
+                  ),
+                const SizedBox(height: 8),
+                Text(
+                  'Tap to view full results',
+                  style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
