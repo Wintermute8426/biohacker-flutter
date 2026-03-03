@@ -172,20 +172,40 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
 
                   final bodyFat = double.tryParse(bodyFatController.text);
 
-                  await db.saveWeightLog(
-                    weightLbs: weight,
-                    bodyFatPercent: bodyFat,
-                    loggedAt: selectedDate,
-                  );
+                  try {
+                    final result = await db.saveWeightLog(
+                      weightLbs: weight,
+                      bodyFatPercent: bodyFat,
+                      loggedAt: selectedDate,
+                    );
 
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('✓ Weight logged: ${weight}lbs${bodyFat != null ? ' / ${bodyFat}% BF' : ''}'),
-                      backgroundColor: AppColors.primary,
-                    ),
-                  );
-                  _refreshWeights(); // Reload data from database
+                    if (result != null) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('✓ Weight logged: ${weight}lbs${bodyFat != null ? ' / ${bodyFat}% BF' : ''}'),
+                          backgroundColor: AppColors.primary,
+                        ),
+                      );
+                      _refreshWeights(); // Reload data from database
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('❌ Failed to save weight'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    print('Error in save button: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('❌ Error: $e'),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 5),
+                      ),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,

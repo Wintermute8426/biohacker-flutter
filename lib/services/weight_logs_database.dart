@@ -44,15 +44,21 @@ class WeightLogsDatabase {
   }) async {
     try {
       final user = supabase.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      print('DEBUG: Saving weight log - User: ${user.id}, Weight: $weightLbs');
 
       final data = {
         'user_id': user.id,
         'weight_lbs': weightLbs,
         'body_fat_percent': bodyFatPercent,
-        'logged_at': loggedAt.toIso8601String(),
+        'logged_at': loggedAt.toIso8601String().split('T')[0], // Date only
         'notes': notes,
       };
+
+      print('DEBUG: Data being inserted: $data');
 
       final response = await supabase
           .from(tableName)
@@ -60,10 +66,11 @@ class WeightLogsDatabase {
           .select()
           .single();
 
+      print('DEBUG: Weight log saved successfully: $response');
       return WeightLog.fromJson(response);
     } catch (e) {
-      print('Error saving weight log: $e');
-      return null;
+      print('ERROR saving weight log: $e');
+      rethrow; // Re-throw so caller can see the error
     }
   }
 
