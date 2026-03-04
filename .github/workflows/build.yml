@@ -31,7 +31,7 @@ jobs:
           flutter clean
       
       - name: Get dependencies
-        run: flutter pub get --no-precompile
+        run: flutter pub get
       
       - name: Analyze code
         run: flutter analyze --no-fatal-infos || true

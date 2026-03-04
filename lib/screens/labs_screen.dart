@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
@@ -10,6 +9,7 @@ import '../theme/colors.dart';
 import '../models/lab_result.dart';
 import '../services/labs_database.dart';
 import '../services/bloodwork_service.dart';
+import '../services/android_file_picker.dart';
 
 class LabsScreen extends StatefulWidget {
   const LabsScreen({Key? key}) : super(key: key);
@@ -115,12 +115,9 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                 subtitle: const Text('Upload blood test PDF'),
                 onTap: () async {
                   Navigator.pop(context);
-                  final result = await FilePicker.platform.pickFiles(
-                    type: FileType.custom,
-                    allowedExtensions: ['pdf'],
-                  );
-                  if (result != null && result.files.isNotEmpty) {
-                    await _uploadPDF(File(result.files.first.path!));
+                  final filePath = await AndroidFilePicker.pickPdfFile();
+                  if (filePath != null) {
+                    await _uploadPDF(File(filePath));
                   }
                 },
               ),
