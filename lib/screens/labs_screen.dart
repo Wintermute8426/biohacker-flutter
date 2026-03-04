@@ -376,67 +376,314 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildLabResultCard(LabResult lab) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                DateFormat('M/d/yyyy').format(lab.uploadDate),
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () => _showLabDetail(lab),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  DateFormat('M/d/yyyy').format(lab.uploadDate),
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
+                Row(
+                  children: [
+                    Text(
+                      '${lab.extractedData.length} markers',
+                      style: TextStyle(
+                        color: AppColors.accent,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(Icons.chevron_right, color: AppColors.primary, size: 18),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: lab.extractedData.entries.take(6).map((entry) {
+                final isOut = _isOutOfRange(entry.key, entry.value);
+                final displayValue = entry.value is Map 
+                  ? (entry.value['value']?.toString() ?? 'N/A')
+                  : entry.value.toString();
+                
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isOut ? AppColors.error.withOpacity(0.1) : AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                  child: Text(
+                    '${entry.key}: $displayValue${isOut ? ' [HIGH]' : ''}',
+                    style: TextStyle(
+                      color: isOut ? AppColors.error : AppColors.accent,
+                      fontSize: 10,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            if (lab.extractedData.length > 6) ...[
+              const SizedBox(height: 8),
               Text(
-                '${lab.extractedData.length} markers',
+                '+ ${lab.extractedData.length - 6} more biomarkers',
                 style: TextStyle(
-                  color: AppColors.accent,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
+                  color: AppColors.textMid,
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: lab.extractedData.entries.take(6).map((entry) {
-              final isOut = _isOutOfRange(entry.key, entry.value);
-              final displayValue = entry.value is Map 
-                ? (entry.value['value']?.toString() ?? 'N/A')
-                : entry.value.toString();
-              
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isOut ? AppColors.error.withOpacity(0.1) : AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: Text(
-                  '${entry.key}: $displayValue${isOut ? ' [HIGH]' : ''}',
-                  style: TextStyle(
-                    color: isOut ? AppColors.error : AppColors.accent,
-                    fontSize: 10,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  void _showLabDetail(LabResult lab) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.background,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        builder: (context, scrollController) => Container(
+          color: AppColors.background,
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(16),
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'LAB REPORT',
+                        style: TextStyle(
+                          color: AppColors.textMid,
+                          fontSize: 11,
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        DateFormat('MMMM d, yyyy').format(lab.uploadDate),
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    color: AppColors.primary,
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Lab metadata
+              if (lab.notes != null && lab.notes!.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'SOURCE',
+                        style: TextStyle(
+                          color: AppColors.textMid,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        lab.notes!,
+                        style: TextStyle(color: AppColors.accent, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // All biomarkers
+              Text(
+                'ALL BIOMARKERS (${lab.extractedData.length})',
+                style: TextStyle(
+                  color: AppColors.textMid,
+                  fontSize: 11,
+                  letterSpacing: 1,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              ...lab.extractedData.entries.map((entry) {
+                final isOut = _isOutOfRange(entry.key, entry.value);
+                final displayValue = entry.value is Map 
+                  ? (entry.value['value']?.toString() ?? 'N/A')
+                  : entry.value.toString();
+                final status = entry.value is Map
+                  ? (entry.value['status']?.toString() ?? 'NORMAL')
+                  : 'NORMAL';
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    border: Border.all(
+                      color: isOut ? AppColors.error.withOpacity(0.3) : AppColors.primary.withOpacity(0.3),
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _beautifyBiomarkerName(entry.key),
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isOut 
+                                ? AppColors.error.withOpacity(0.2)
+                                : AppColors.accent.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: Text(
+                              isOut ? 'OUT OF RANGE' : status,
+                              style: TextStyle(
+                                color: isOut ? AppColors.error : AppColors.accent,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        displayValue,
+                        style: TextStyle(
+                          color: AppColors.accent,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _getUnitForBiomarker(entry.key),
+                        style: TextStyle(
+                          color: AppColors.textMid,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _beautifyBiomarkerName(String key) {
+    final names = {
+      'testosterone': 'Testosterone',
+      'free_testosterone': 'Free Testosterone',
+      'estradiol': 'Estradiol',
+      'igf1': 'IGF-1',
+      'hgh': 'HGH',
+      'crp': 'CRP (High Sensitivity)',
+      'hdl': 'HDL Cholesterol',
+      'ldl': 'LDL Cholesterol',
+      'total_cholesterol': 'Total Cholesterol',
+      'triglycerides': 'Triglycerides',
+      'glucose': 'Glucose',
+      'insulin': 'Insulin',
+      'cortisol': 'Cortisol',
+      'alt': 'ALT',
+      'ast': 'AST',
+      'tsh': 'TSH',
+      't3': 'T3',
+      't4': 'T4',
+      'prolactin': 'Prolactin',
+      'psa': 'PSA',
+    };
+    return names[key.toLowerCase()] ?? key;
+  }
+
+  String _getUnitForBiomarker(String key) {
+    final units = {
+      'testosterone': 'ng/dL',
+      'free_testosterone': 'pg/mL',
+      'estradiol': 'pg/mL',
+      'igf1': 'ng/mL',
+      'hgh': 'ng/mL',
+      'crp': 'mg/L',
+      'hdl': 'mg/dL',
+      'ldl': 'mg/dL',
+      'total_cholesterol': 'mg/dL',
+      'triglycerides': 'mg/dL',
+      'glucose': 'mg/dL',
+      'insulin': 'mIU/L',
+      'cortisol': 'µg/dL',
+      'alt': 'U/L',
+      'ast': 'U/L',
+      'tsh': 'mIU/L',
+      't3': 'pg/mL',
+      't4': 'ng/dL',
+      'prolactin': 'ng/mL',
+      'psa': 'ng/mL',
+    };
+    return units[key.toLowerCase()] ?? '';
   }
 
   int _getTotalMarkerCount() {
