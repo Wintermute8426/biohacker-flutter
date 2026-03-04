@@ -123,20 +123,20 @@ VALUES
 INSERT INTO labs_results (id, user_id, cycle_id, pdf_file_path, extracted_data, upload_date, processed_date, notes)
 VALUES
   ('lab-2025-01-'||gen_random_uuid()::text, (SELECT id FROM auth.users LIMIT 1), (SELECT id FROM temp_cycles WHERE name = 'BPC-157 + TB-500'), '/labs/jan-2025.pdf',
-   '{"testosterone": {"value": 650, "status": "OPTIMAL", "percentile": 75}, "cortisol": {"value": 12, "status": "NORMAL"}, "glucose": {"value": 95, "status": "NORMAL"}, "cholesterol": {"hdl": 50, "ldl": 110, "total": 185, "triglycerides": 90}}'::jsonb,
-   '2025-02-03'::timestamp with time zone, '2025-02-03'::timestamp with time zone, 'Post-injury, testosterone stable'),
+   '{"testosterone": 650, "free_testosterone": 18.5, "estradiol": 32, "cortisol": 12, "glucose": 95, "insulin": 8.2, "igf1": 180, "hgh": 2.1, "crp": 1.8, "hdl": 50, "ldl": 110, "total_cholesterol": 185, "triglycerides": 90, "alt": 28, "ast": 32, "tsh": 1.8, "t3": 3.2, "t4": 8.5, "prolactin": 8.2, "psa": 0.9}'::jsonb,
+   '2025-02-03'::timestamp with time zone, '2025-02-03'::timestamp with time zone, 'Post-injury baseline'),
    
   ('lab-2025-02-'||gen_random_uuid()::text, (SELECT id FROM auth.users LIMIT 1), (SELECT id FROM temp_cycles WHERE name = 'GHK-Cu + Semax'), '/labs/mar-2025.pdf',
-   '{"testosterone": {"value": 670, "status": "OPTIMAL", "percentile": 78}, "cortisol": {"value": 10, "status": "NORMAL"}, "glucose": {"value": 92, "status": "NORMAL"}, "cholesterol": {"hdl": 55, "ldl": 105, "total": 180, "triglycerides": 85}}'::jsonb,
-   '2025-03-25'::timestamp with time zone, '2025-03-25'::timestamp with time zone, 'Improved lipids, better cortisol control'),
+   '{"testosterone": 670, "free_testosterone": 19.2, "estradiol": 30, "cortisol": 10, "glucose": 92, "insulin": 7.8, "igf1": 195, "hgh": 2.8, "crp": 1.4, "hdl": 55, "ldl": 105, "total_cholesterol": 180, "triglycerides": 85, "alt": 26, "ast": 30, "tsh": 1.7, "t3": 3.4, "t4": 8.8, "prolactin": 7.9, "psa": 0.9}'::jsonb,
+   '2025-03-25'::timestamp with time zone, '2025-03-25'::timestamp with time zone, 'GHK-Cu cycle start'),
    
   ('lab-2025-03-'||gen_random_uuid()::text, (SELECT id FROM auth.users LIMIT 1), (SELECT id FROM temp_cycles WHERE name = 'Epitalon + Thymosin Alpha-1'), '/labs/may-2025.pdf',
-   '{"testosterone": {"value": 680, "status": "OPTIMAL", "percentile": 80}, "cortisol": {"value": 9, "status": "NORMAL"}, "glucose": {"value": 90, "status": "NORMAL"}, "cholesterol": {"hdl": 60, "ldl": 100, "total": 175, "triglycerides": 78}}'::jsonb,
-   '2025-05-15'::timestamp with time zone, '2025-05-15'::timestamp with time zone, 'Excellent metrics post-longevity cycle'),
+   '{"testosterone": 680, "free_testosterone": 19.8, "estradiol": 28, "cortisol": 9, "glucose": 90, "insulin": 7.2, "igf1": 210, "hgh": 3.2, "crp": 1.1, "hdl": 60, "ldl": 100, "total_cholesterol": 175, "triglycerides": 78, "alt": 25, "ast": 28, "tsh": 1.6, "t3": 3.6, "t4": 9.0, "prolactin": 7.5, "psa": 0.8}'::jsonb,
+   '2025-05-15'::timestamp with time zone, '2025-05-15'::timestamp with time zone, 'Longevity stack'),
    
   ('lab-2025-04-'||gen_random_uuid()::text, (SELECT id FROM auth.users LIMIT 1), (SELECT id FROM temp_cycles WHERE name = 'CJC-1295 + peptide blend'), '/labs/sep-2025.pdf',
-   '{"testosterone": {"value": 700, "status": "OPTIMAL", "percentile": 85}, "cortisol": {"value": 8, "status": "NORMAL"}, "glucose": {"value": 88, "status": "NORMAL"}, "cholesterol": {"hdl": 65, "ldl": 95, "total": 170, "triglycerides": 70}}'::jsonb,
-   '2025-09-10'::timestamp with time zone, '2025-09-10'::timestamp with time zone, 'Peak performance metrics');
+   '{"testosterone": 700, "free_testosterone": 20.5, "estradiol": 26, "cortisol": 8, "glucose": 88, "insulin": 6.9, "igf1": 230, "hgh": 3.8, "crp": 0.9, "hdl": 65, "ldl": 95, "total_cholesterol": 170, "triglycerides": 70, "alt": 24, "ast": 26, "tsh": 1.5, "t3": 3.8, "t4": 9.2, "prolactin": 7.2, "psa": 0.8}'::jsonb,
+   '2025-09-10'::timestamp with time zone, '2025-09-10'::timestamp with time zone, 'Performance blend');
 
 -- ============================================================
 -- STEP 6: Add Cycle Reviews (Effectiveness Ratings)

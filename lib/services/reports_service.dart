@@ -789,15 +789,25 @@ class ReportsService {
   String _getBiomarkerUnit(String key) {
     final units = {
       'testosterone': 'ng/dL',
+      'free_testosterone': 'pg/mL',
+      'estradiol': 'pg/mL',
       'igf1': 'ng/mL',
       'hgh': 'ng/mL',
       'crp': 'mg/L',
       'hdl': 'mg/dL',
       'ldl': 'mg/dL',
+      'total_cholesterol': 'mg/dL',
       'triglycerides': 'mg/dL',
       'glucose': 'mg/dL',
+      'insulin': 'mIU/L',
       'cortisol': 'µg/dL',
-      'estradiol': 'pg/mL',
+      'alt': 'U/L',
+      'ast': 'U/L',
+      'tsh': 'mIU/L',
+      't3': 'pg/mL',
+      't4': 'ng/dL',
+      'prolactin': 'ng/mL',
+      'psa': 'ng/mL',
     };
     return units[key.toLowerCase()] ?? '';
   }
@@ -805,16 +815,28 @@ class ReportsService {
   String _determineBiomarkerStatus(String key, double? value) {
     if (value == null) return 'NORMAL';
     
-    // Simple reference ranges (these should ideally come from a database)
+    // Reference ranges optimized for peptide protocol users
     final ranges = {
       'testosterone': (300.0, 900.0),
-      'igf1': (100.0, 250.0),
-      'hgh': (0.0, 5.0),
+      'free_testosterone': (8.7, 25.0),
+      'estradiol': (20.0, 40.0),
+      'igf1': (100.0, 300.0),
+      'hgh': (0.1, 5.0),
       'crp': (0.0, 3.0),
       'hdl': (40.0, 200.0),
-      'ldl': (0.0, 100.0),
+      'ldl': (0.0, 130.0),
+      'total_cholesterol': (0.0, 200.0),
+      'triglycerides': (0.0, 150.0),
       'glucose': (70.0, 100.0),
-      'cortisol': (10.0, 20.0),
+      'insulin': (2.0, 12.0),
+      'cortisol': (5.0, 20.0),
+      'alt': (7.0, 56.0),
+      'ast': (10.0, 40.0),
+      'tsh': (0.4, 4.0),
+      't3': (2.3, 4.2),
+      't4': (4.5, 12.0),
+      'prolactin': (4.0, 15.0),
+      'psa': (0.0, 4.0),
     };
     
     final range = ranges[key.toLowerCase()];
