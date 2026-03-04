@@ -14,8 +14,9 @@ class ReportsScreen extends StatefulWidget {
   State<ReportsScreen> createState() => _ReportsScreenState();
 }
 
-class _ReportsScreenState extends State<ReportsScreen> {
+class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateMixin {
   final ReportsService _reportsService = ReportsService();
+  late TabController _tabController;
   bool _isLoading = true;
   bool _isGeneratingAI = false;
 
@@ -33,7 +34,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 7, vsync: this);
     _loadAllData();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAllData() async {
@@ -195,6 +203,22 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
             color: AppColors.primary,
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          indicatorColor: AppColors.primary,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textMid,
+          tabs: const [
+            Tab(text: '1'),
+            Tab(text: '2'),
+            Tab(text: '3'),
+            Tab(text: '4'),
+            Tab(text: '5'),
+            Tab(text: '6'),
+            Tab(text: '7'),
+          ],
+        ),
       ),
       body: _isLoading
           ? Center(
