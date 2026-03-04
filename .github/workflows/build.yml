@@ -23,15 +23,26 @@ jobs:
       - name: Verify Flutter installation
         run: flutter --version && flutter doctor -v
       
-      - name: Clean everything
+      - name: Nuke cache completely
         run: |
           rm -rf ~/.pub-cache
+          rm -rf ~/.dart-tool
           rm -f pubspec.lock
+          rm -rf build/
           rm -rf .dart_tool
-          flutter clean
       
-      - name: Get dependencies
+      - name: Verify pubspec.yaml has NO file_picker
+        run: |
+          grep -i "file_picker" pubspec.yaml && echo "ERROR: file_picker still in pubspec.yaml" && exit 1 || echo "OK: file_picker not in pubspec.yaml"
+      
+      - name: Get fresh dependencies
         run: flutter pub get
+      
+      - name: Remove file_picker and win32 from cache post-fetch
+        run: |
+          rm -rf ~/.pub-cache/hosted/pub.dev/file_picker* || true
+          rm -rf ~/.pub-cache/hosted/pub.dev/win32* || true
+          rm -rf .dart_tool/package_config.json || true
       
       - name: Analyze code
         run: flutter analyze --no-fatal-infos || true
