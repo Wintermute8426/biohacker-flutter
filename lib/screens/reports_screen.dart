@@ -427,7 +427,6 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                 }).toList(),
                 lineTouchData: LineTouchData(
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (spot) => AppColors.surface,
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((spot) {
                         final timeline = _doseTimeline[spot.barIndex];
@@ -776,7 +775,6 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
           ],
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
-              getTooltipColor: (spot) => AppColors.surface,
               getTooltipItems: (touchedSpots) {
                 return touchedSpots.map((spot) {
                   if (spot.barIndex == 1) return null; // Skip trend line
@@ -931,7 +929,6 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
           maxY: 10,
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (group) => AppColors.surface,
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 final cycle = _effectiveness[groupIndex];
                 return BarTooltipItem(

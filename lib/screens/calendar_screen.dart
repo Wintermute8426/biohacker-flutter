@@ -429,7 +429,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     // Get weight history for sparkline (last 7 days)
     final recentWeights = <double>[];
     for (int i = 6; i >= 0; i--) {
-      final checkDate = event.weight!.loggedAt.subtract(Duration(days: i));
+      final checkDate = event.date.subtract(Duration(days: i));
       final pastEvent = _events[DateTime(checkDate.year, checkDate.month, checkDate.day)];
       if (pastEvent?.weight != null) {
         recentWeights.add(pastEvent!.weight!.weightLbs);
