@@ -286,24 +286,18 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      _buildSectionHeader('💡 AI INSIGHTS', 'Claude Analysis'),
-                      const SizedBox(height: 12),
-                      _buildAIInsights(),
-                      const SizedBox(height: 32),
+                      _buildAIInsightsV2(),
                     ],
                   ),
                 ),
-                // Tab 5: Cycle Timeline (Dose Timeline)
+                // Tab 5: Cycle Timeline (Gantt chart)
                 RefreshIndicator(
                   onRefresh: _loadAllData,
                   color: AppColors.primary,
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      _buildSectionHeader('📊 DOSE TIMELINE', 'Last 90 Days'),
-                      const SizedBox(height: 12),
-                      _buildDoseTimeline(),
-                      const SizedBox(height: 32),
+                      _buildCycleTimelineV2(),
                     ],
                   ),
                 ),
@@ -2107,6 +2101,265 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
       'cortisol': 'µg/dL',
     };
     return units[key] ?? '';
+  }
+
+  // Tab 4: AI Insights V2 - Brain icon + Generate button
+  Widget _buildAIInsightsV2() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 40),
+          // Brain icon
+          Text(
+            '🧠',
+            style: TextStyle(fontSize: 64, color: AppColors.primary),
+          ),
+          const SizedBox(height: 24),
+          // Title
+          Text(
+            'AI-Powered Insights',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Subtitle
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Claude will analyze your cycles and lab data to identify patterns, correlations, and provide personalized recommendations.',
+              style: TextStyle(
+                color: AppColors.textMid,
+                fontSize: 13,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 32),
+          // Generate button
+          GestureDetector(
+            onTap: _isGeneratingAI ? null : _generateClaudeInsights,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _isGeneratingAI ? AppColors.textMid : AppColors.primary,
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_isGeneratingAI) ...[
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    _isGeneratingAI ? 'GENERATING...' : '✨ GENERATE INSIGHTS',
+                    style: TextStyle(
+                      color: _isGeneratingAI ? AppColors.textMid : AppColors.primary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+  // Tab 5: Cycle Timeline V2 - Gantt chart showing all cycles
+  Widget _buildCycleTimelineV2() {
+    if (_cycleComparisons.isEmpty) {
+      return _buildEmptyState('No cycle data available');
+    }
+
+    // Sort cycles by start date (oldest first)
+    final sortedCycles = List<CycleComparison>.from(_cycleComparisons)
+      ..sort((a, b) => a.startDate.compareTo(b.startDate));
+
+    // Find date range
+    final allDates = <DateTime>[];
+    for (var cycle in sortedCycles) {
+      allDates.add(cycle.startDate);
+      allDates.add(cycle.endDate);
+    }
+    final minDate = allDates.reduce((a, b) => a.isBefore(b) ? a : b);
+    final maxDate = allDates.reduce((a, b) => a.isAfter(b) ? a : b);
+    final totalDays = maxDate.difference(minDate).inDays;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        _buildSectionHeader('📊 CYCLE TIMELINE', 'Visual timeline of all cycles'),
+        const SizedBox(height: 20),
+
+        // Status legend
+        Text(
+          'STATUS LEGEND',
+          style: TextStyle(
+            color: AppColors.textMid,
+            fontSize: 11,
+            letterSpacing: 1,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _buildStatusBadge('Active', AppColors.primary),
+            const SizedBox(width: 16),
+            _buildStatusBadge('Paused', Colors.orange),
+            const SizedBox(width: 16),
+            _buildStatusBadge('Completed', AppColors.accent),
+          ],
+        ),
+        const SizedBox(height: 24),
+
+        // Timeline
+        ...sortedCycles.map((cycle) {
+          final startOffset = cycle.startDate.difference(minDate).inDays;
+          final duration = cycle.endDate.difference(cycle.startDate).inDays;
+          final percentStart = (startOffset / totalDays * 100).clamp(0, 100);
+          final percentWidth = (duration / totalDays * 100).clamp(0, 100);
+
+          // Determine status
+          final now = DateTime.now();
+          String status = 'Completed';
+          Color statusColor = AppColors.accent;
+          if (now.isBefore(cycle.endDate) && now.isAfter(cycle.startDate)) {
+            status = 'Active';
+            statusColor = AppColors.primary;
+          }
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Label
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      cycle.cycleName,
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${DateFormat('MMM d').format(cycle.startDate)} - ${DateFormat('MMM d').format(cycle.endDate)}',
+                      style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Bar
+                Stack(
+                  children: [
+                    // Background timeline
+                    Container(
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    // Positioned cycle bar
+                    Positioned(
+                      left: percentStart.isNaN ? 0 : percentStart.toDouble(),
+                      child: Container(
+                        width: percentWidth.isNaN ? 0 : percentWidth,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: statusColor,
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [
+                            BoxShadow(
+                              color: statusColor.withOpacity(0.5),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${duration} days • $status',
+                  style: TextStyle(
+                    color: AppColors.textMid,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+
+        // Date labels at bottom
+        const SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              DateFormat('MMM yyyy').format(minDate),
+              style: TextStyle(color: AppColors.textMid, fontSize: 10),
+            ),
+            Text(
+              DateFormat('MMM yyyy').format(maxDate),
+              style: TextStyle(color: AppColors.textMid, fontSize: 10),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusBadge(String label, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: TextStyle(
+            color: AppColors.textMid,
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
   }
 
   // Tab 6: Body Composition - Dual-axis weight + body fat chart
