@@ -234,49 +234,97 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                 ],
               ),
             )
-          : RefreshIndicator(
-              onRefresh: _loadAllData,
-              color: AppColors.primary,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  // A. Dose Timeline
-                  _buildSectionHeader('📊 DOSE TIMELINE', 'Last 90 Days'),
-                  const SizedBox(height: 12),
-                  _buildDoseTimeline(),
-                  const SizedBox(height: 32),
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                // Tab 1: Full Reports
+                RefreshIndicator(
+                  onRefresh: _loadAllData,
+                  color: AppColors.primary,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      // A. Dose Timeline
+                      _buildSectionHeader('📊 DOSE TIMELINE', 'Last 90 Days'),
+                      const SizedBox(height: 12),
+                      _buildDoseTimeline(),
+                      const SizedBox(height: 32),
 
-                  // B. Side Effects Heatmap
-                  _buildSectionHeader('🔥 SIDE EFFECTS HEATMAP', 'Monthly View'),
-                  const SizedBox(height: 12),
-                  _buildSideEffectsHeatmap(),
-                  const SizedBox(height: 32),
+                      // B. Side Effects Heatmap
+                      _buildSectionHeader('🔥 SIDE EFFECTS HEATMAP', 'Monthly View'),
+                      const SizedBox(height: 12),
+                      _buildSideEffectsHeatmap(),
+                      const SizedBox(height: 32),
 
-                  // C. Weight Trends
-                  _buildSectionHeader('⚖️ WEIGHT TRENDS', 'Last 6 Months'),
-                  const SizedBox(height: 12),
-                  _buildWeightTrends(),
-                  const SizedBox(height: 32),
+                      // C. Weight Trends
+                      _buildSectionHeader('⚖️ WEIGHT TRENDS', 'Last 6 Months'),
+                      const SizedBox(height: 12),
+                      _buildWeightTrends(),
+                      const SizedBox(height: 32),
 
-                  // D. Cycle-Lab Correlation
-                  _buildSectionHeader('🧪 CYCLE-LAB CORRELATION', '90-Day Context'),
-                  const SizedBox(height: 12),
-                  _buildLabCorrelations(),
-                  const SizedBox(height: 32),
+                      // D. Cycle-Lab Correlation
+                      _buildSectionHeader('🧪 CYCLE-LAB CORRELATION', '90-Day Context'),
+                      const SizedBox(height: 12),
+                      _buildLabCorrelations(),
+                      const SizedBox(height: 32),
 
-                  // E. Effectiveness Ratings
-                  _buildSectionHeader('⭐ EFFECTIVENESS RATINGS', 'By Cycle'),
-                  const SizedBox(height: 12),
-                  _buildEffectivenessRatings(),
-                  const SizedBox(height: 32),
+                      // E. Effectiveness Ratings
+                      _buildSectionHeader('⭐ EFFECTIVENESS RATINGS', 'By Cycle'),
+                      const SizedBox(height: 12),
+                      _buildEffectivenessRatings(),
+                      const SizedBox(height: 32),
 
-                  // F. AI Insights
-                  _buildSectionHeader('💡 AI INSIGHTS', 'Claude Analysis'),
-                  const SizedBox(height: 12),
-                  _buildAIInsights(),
-                  const SizedBox(height: 32),
-                ],
-              ),
+                      // F. AI Insights
+                      _buildSectionHeader('💡 AI INSIGHTS', 'Claude Analysis'),
+                      const SizedBox(height: 12),
+                      _buildAIInsights(),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+                // Tab 2: Placeholder
+                Center(
+                  child: Text(
+                    'TAB 2 - Coming Soon',
+                    style: TextStyle(color: AppColors.textMid, fontSize: 16, letterSpacing: 1),
+                  ),
+                ),
+                // Tab 3: Placeholder
+                Center(
+                  child: Text(
+                    'TAB 3 - Coming Soon',
+                    style: TextStyle(color: AppColors.textMid, fontSize: 16, letterSpacing: 1),
+                  ),
+                ),
+                // Tab 4: Placeholder
+                Center(
+                  child: Text(
+                    'TAB 4 - Coming Soon',
+                    style: TextStyle(color: AppColors.textMid, fontSize: 16, letterSpacing: 1),
+                  ),
+                ),
+                // Tab 5: Placeholder
+                Center(
+                  child: Text(
+                    'TAB 5 - Coming Soon',
+                    style: TextStyle(color: AppColors.textMid, fontSize: 16, letterSpacing: 1),
+                  ),
+                ),
+                // Tab 6: Placeholder
+                Center(
+                  child: Text(
+                    'TAB 6 - Coming Soon',
+                    style: TextStyle(color: AppColors.textMid, fontSize: 16, letterSpacing: 1),
+                  ),
+                ),
+                // Tab 7: Placeholder
+                Center(
+                  child: Text(
+                    'TAB 7 - Coming Soon',
+                    style: TextStyle(color: AppColors.textMid, fontSize: 16, letterSpacing: 1),
+                  ),
+                ),
+              ],
             ),
     );
   }
