@@ -294,11 +294,15 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                     ],
                   ),
                 ),
-                // Tab 7: Placeholder
-                Center(
-                  child: Text(
-                    'TAB 7 - Coming Soon',
-                    style: TextStyle(color: AppColors.textMid, fontSize: 16, letterSpacing: 1),
+                // Tab 7: Effectiveness Summary
+                RefreshIndicator(
+                  onRefresh: _loadAllData,
+                  color: AppColors.primary,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      _buildEffectivenessSummary(),
+                    ],
                   ),
                 ),
               ],
@@ -2421,6 +2425,357 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
         ),
       ],
     );
+  }
+
+  // Tab 7: Effectiveness Summary - Overall protocol performance
+  Widget _buildEffectivenessSummary() {
+    if (_effectiveness.isEmpty && _cycleComparisons.isEmpty) {
+      return _buildEmptyState('No effectiveness data available');
+    }
+
+    // Calculate overall metrics
+    double avgRating = 0;
+    int totalCycles = _cycleComparisons.length;
+    int highPerformance = 0; // Cycles with rating >= 8
+    
+    if (_cycleComparisons.isNotEmpty) {
+      avgRating = _cycleComparisons.fold(0, (sum, c) => sum + c.rating) / _cycleComparisons.length;
+      highPerformance = _cycleComparisons.where((c) => c.rating >= 8).length;
+    }
+
+    // Sort cycles by rating (highest first)
+    final sortedCycles = List<CycleComparison>.from(_cycleComparisons)
+      ..sort((a, b) => b.rating.compareTo(a.rating));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        _buildSectionHeader('⭐ EFFECTIVENESS SUMMARY', 'Protocol performance analysis'),
+        const SizedBox(height: 20),
+
+        // Overall metrics cards
+        Row(
+          children: [
+            Expanded(
+              child: _buildMetricCard(
+                'AVG RATING',
+                '${avgRating.toStringAsFixed(1)}/10',
+                AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildMetricCard(
+                'HIGH PERF',
+                '$highPerformance / $totalCycles',
+                AppColors.accent,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildMetricCard(
+          'TOTAL CYCLES',
+          totalCycles.toString(),
+          AppColors.secondary,
+        ),
+        const SizedBox(height: 24),
+
+        // Detailed breakdown
+        Text(
+          'CYCLE RATINGS BREAKDOWN',
+          style: TextStyle(
+            color: AppColors.textMid,
+            fontSize: 11,
+            letterSpacing: 1,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        
+        // Rating distribution
+        ..._buildRatingDistribution(),
+
+        const SizedBox(height: 24),
+
+        // Top performers
+        if (sortedCycles.isNotEmpty) ...[
+          Text(
+            'TOP PERFORMERS',
+            style: TextStyle(
+              color: AppColors.textMid,
+              fontSize: 11,
+              letterSpacing: 1,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...sortedCycles.take(5).map((cycle) {
+            final ratingColor = cycle.rating >= 8
+                ? AppColors.accent
+                : cycle.rating >= 6
+                    ? Colors.orange
+                    : AppColors.error;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border.all(color: ratingColor.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        cycle.cycleName,
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: ratingColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          '${cycle.rating}/10',
+                          style: TextStyle(
+                            color: ratingColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${DateFormat('MMM d').format(cycle.startDate)} - ${DateFormat('MMM d').format(cycle.endDate)}',
+                        style: TextStyle(color: AppColors.textMid, fontSize: 11),
+                      ),
+                      Text(
+                        '${cycle.dosesLogged} doses',
+                        style: TextStyle(color: AppColors.accent, fontSize: 11),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+
+        const SizedBox(height: 24),
+
+        // Recommendations
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '💡 RECOMMENDATIONS',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ..._buildRecommendations(sortedCycles, avgRating),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricCard(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: color.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.textMid,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildRatingDistribution() {
+    // Count cycles by rating range
+    final excellent = _cycleComparisons.where((c) => c.rating >= 9).length;
+    final great = _cycleComparisons.where((c) => c.rating >= 7 && c.rating < 9).length;
+    final good = _cycleComparisons.where((c) => c.rating >= 5 && c.rating < 7).length;
+    final fair = _cycleComparisons.where((c) => c.rating < 5).length;
+
+    return [
+      _buildRatingBar('Excellent (9-10)', excellent, AppColors.accent),
+      _buildRatingBar('Great (7-8)', great, Colors.orange),
+      _buildRatingBar('Good (5-6)', good, AppColors.primary),
+      _buildRatingBar('Fair (<5)', fair, AppColors.error),
+    ];
+  }
+
+  Widget _buildRatingBar(String label, int count, Color color) {
+    final total = _cycleComparisons.length;
+    final percentage = total > 0 ? (count / total * 100) : 0;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: TextStyle(color: AppColors.textMid, fontSize: 11),
+              ),
+              Text(
+                '$count (${percentage.toStringAsFixed(0)}%)',
+                style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Container(
+            height: 6,
+            decoration: BoxDecoration(
+              color: AppColors.border,
+              borderRadius: BorderRadius.circular(3),
+            ),
+            child: FractionallySizedBox(
+              widthFactor: percentage / 100,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildRecommendations(List<CycleComparison> sorted, double avgRating) {
+    final recommendations = <Widget>[];
+
+    if (sorted.isEmpty) {
+      recommendations.add(
+        Text(
+          'Start tracking cycle effectiveness ratings to see personalized recommendations.',
+          style: TextStyle(color: AppColors.textMid, fontSize: 11, height: 1.6),
+        ),
+      );
+      return recommendations;
+    }
+
+    // Recommendation 1: Best protocol
+    if (sorted.isNotEmpty && sorted.first.rating >= 7) {
+      recommendations.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            '✅ Repeat ${sorted.first.cycleName}: Highest rated protocol (${sorted.first.rating}/10)',
+            style: TextStyle(color: AppColors.accent, fontSize: 11, height: 1.6),
+          ),
+        ),
+      );
+    }
+
+    // Recommendation 2: Consistency
+    if (avgRating >= 7) {
+      recommendations.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            '💪 Excellent consistency: Maintain current dosing strategy',
+            style: TextStyle(color: AppColors.accent, fontSize: 11, height: 1.6),
+          ),
+        ),
+      );
+    } else if (avgRating >= 5) {
+      recommendations.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            '📋 Good progress: Focus on top performers and adjust other protocols',
+            style: TextStyle(color: Colors.orange, fontSize: 11, height: 1.6),
+          ),
+        ),
+      );
+    }
+
+    // Recommendation 3: Low performers
+    final lowPerformers = sorted.where((c) => c.rating < 5).toList();
+    if (lowPerformers.isNotEmpty) {
+      recommendations.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            '⚠️ Consider discontinuing or adjusting: ${lowPerformers.take(2).map((c) => c.cycleName).join(", ")}',
+            style: TextStyle(color: AppColors.error, fontSize: 11, height: 1.6),
+          ),
+        ),
+      );
+    }
+
+    // Recommendation 4: Next steps
+    recommendations.add(
+      Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Text(
+          '🚀 Schedule labs in 3 months to measure cumulative impact of best protocols',
+          style: TextStyle(color: AppColors.primary, fontSize: 11, height: 1.6),
+        ),
+      ),
+    );
+
+    return recommendations;
   }
 
   // Tab 6: Body Composition - Dual-axis weight + body fat chart
