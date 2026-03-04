@@ -29,6 +29,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
   List<CycleEffectiveness> _effectiveness = [];
   List<AIInsight> _aiInsights = [];
   List<CycleComparison> _cycleComparisons = [];
+  List<LabResultWithContext> _labsWithContext = [];
 
   DateTime _heatmapMonth = DateTime.now();
 
@@ -65,6 +66,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
         _reportsService.getCycleEffectiveness(),
         _reportsService.generateAIInsights(),
         _reportsService.getCycleComparisons(),
+        _reportsService.getLabsWithCycleContext(),
       ]);
 
       if (mounted) {
@@ -77,6 +79,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
           _effectiveness = results[5] as List<CycleEffectiveness>;
           _aiInsights = results[6] as List<AIInsight>;
           _cycleComparisons = results[7] as List<CycleComparison>;
+          _labsWithContext = results[8] as List<LabResultWithContext>;
           _isLoading = false;
         });
       }
@@ -240,17 +243,14 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
           : TabBarView(
               controller: _tabController,
               children: [
-                // Tab 1: Cycle-Lab Correlation
+                // Tab 1: Cycle-Lab Correlation (New Layout)
                 RefreshIndicator(
                   onRefresh: _loadAllData,
                   color: AppColors.primary,
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      _buildSectionHeader('🧪 CYCLE-LAB CORRELATION', '90-Day Context'),
-                      const SizedBox(height: 12),
-                      _buildLabCorrelations(),
-                      const SizedBox(height: 32),
+                      _buildCycleLabCorrelationV2(),
                     ],
                   ),
                 ),
@@ -345,6 +345,220 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
               ],
             ),
     );
+  }
+
+  // Tab 1: Cycle-Lab Correlation (V2 - New Layout)
+  Widget _buildCycleLabCorrelationV2() {
+    if (_labsWithContext.isEmpty) {
+      return _buildEmptyState('No lab results available');
+    }
+
+    return Column(
+      children: _labsWithContext.map((labContext) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Lab date
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    DateFormat('M/dd/yyyy').format(labContext.labDate),
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${labContext.labSource ?? 'Unknown Lab'} + ${labContext.markerCount} markers',
+                    style: TextStyle(color: AppColors.textMid, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+
+            // Active cycles during prior 3 months
+            if (labContext.activeCycles.isNotEmpty) ...[
+              Text(
+                'ACTIVE CYCLES (3 MONTHS PRIOR)',
+                style: TextStyle(
+                  color: AppColors.textMid,
+                  fontSize: 11,
+                  letterSpacing: 1,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Column(
+                  children: labContext.activeCycles.map((cycle) {
+                    return Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                cycle.peptideName,
+                                style: TextStyle(color: AppColors.primary, fontSize: 12),
+                              ),
+                              Text(
+                                '${DateFormat('MMM d').format(cycle.startDate)} - ${DateFormat('MMM d').format(cycle.endDate)}',
+                                style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                              ),
+                            ],
+                          ),
+                          Text(
+                            '${cycle.dose.toStringAsFixed(0)}mg',
+                            style: TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+            if (labContext.activeCycles.isEmpty) ...[
+              Text(
+                'ACTIVE CYCLES (3 MONTHS PRIOR)',
+                style: TextStyle(
+                  color: AppColors.textMid,
+                  fontSize: 11,
+                  letterSpacing: 1,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'No active cycles during this period',
+                  style: TextStyle(color: AppColors.textMid, fontSize: 12),
+                ),
+              ),
+            ],
+
+            // Key changes section
+            if (labContext.biomarkerChanges.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text(
+                'KEY CHANGES VS PREVIOUS LAB',
+                style: TextStyle(
+                  color: AppColors.textMid,
+                  fontSize: 11,
+                  letterSpacing: 1,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...labContext.biomarkerChanges
+                  .where((b) => b.previousValue != null)
+                  .take(6) // Show top 6 changes
+                  .map((biomarker) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    border: Border.all(
+                      color: _getStatusColor(biomarker.status).withOpacity(0.3),
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            biomarker.name,
+                            style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                '${biomarker.currentValue?.toStringAsFixed(1) ?? 'N/A'} ${biomarker.unit ?? ''}',
+                                style: TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(width: 8),
+                              if (biomarker.changePercent != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: biomarker.changePercent! >= 0
+                                        ? AppColors.accent.withOpacity(0.2)
+                                        : AppColors.error.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                  child: Text(
+                                    '${biomarker.changePercent! >= 0 ? '+' : ''}${biomarker.changePercent?.toStringAsFixed(1)}%',
+                                    style: TextStyle(
+                                      color: biomarker.changePercent! >= 0 ? AppColors.accent : AppColors.error,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Previous: ${biomarker.previousValue?.toStringAsFixed(1) ?? 'N/A'}',
+                        style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
+            const SizedBox(height: 16),
+            Container(
+              height: 1,
+              color: AppColors.border,
+              margin: const EdgeInsets.symmetric(vertical: 16),
+            ),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'HIGH':
+        return AppColors.error;
+      case 'LOW':
+        return AppColors.secondary;
+      default:
+        return AppColors.accent;
+    }
   }
 
   Widget _buildSectionHeader(String title, String subtitle) {

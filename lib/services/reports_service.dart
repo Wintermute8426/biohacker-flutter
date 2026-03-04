@@ -141,6 +141,42 @@ class CycleComparison {
   });
 }
 
+class BiomarkerComparison {
+  final String name;
+  final double? currentValue;
+  final double? previousValue;
+  final String? unit;
+  final String status; // "HIGH", "NORMAL", "LOW"
+  final double? changePercent;
+
+  BiomarkerComparison({
+    required this.name,
+    required this.currentValue,
+    required this.previousValue,
+    required this.unit,
+    required this.status,
+    this.changePercent,
+  });
+}
+
+class LabResultWithContext {
+  final String labId;
+  final DateTime labDate;
+  final String? labSource; // "Quest Diagnostics", "LabCorp", etc.
+  final int markerCount;
+  final List<CycleWindow> activeCycles; // Cycles active in 3 months prior
+  final List<BiomarkerComparison> biomarkerChanges;
+
+  LabResultWithContext({
+    required this.labId,
+    required this.labDate,
+    required this.labSource,
+    required this.markerCount,
+    required this.activeCycles,
+    required this.biomarkerChanges,
+  });
+}
+
 class ReportsService {
   final SupabaseClient supabase = Supabase.instance.client;
 
@@ -624,7 +660,142 @@ class ReportsService {
     return (data as num?)?.toDouble();
   }
 
-  // G. Cycle Comparison - Get side-by-side comparison of cycles
+  // G. Labs with Cycle Context - For Tab 1: Cycle-Lab Correlation (new format)
+  Future<List<LabResultWithContext>> getLabsWithCycleContext() async {
+    try {
+      final user = supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Get all lab results sorted by date (newest first)
+      final labsResponse = await supabase
+          .from('labs_results')
+          .select()
+          .eq('user_id', user.id)
+          .order('upload_date', ascending: false);
+
+      final labs = labsResponse as List;
+      final List<LabResultWithContext> results = [];
+
+      for (int i = 0; i < labs.length; i++) {
+        final lab = labs[i];
+        final labDate = DateTime.parse(lab['upload_date']);
+        final windowStart = labDate.subtract(const Duration(days: 90));
+
+        // Get cycles active during 3 months prior
+        final cyclesResponse = await supabase
+            .from('cycles')
+            .select()
+            .eq('user_id', user.id)
+            .gte('end_date', windowStart.toIso8601String())
+            .lte('start_date', labDate.toIso8601String());
+
+        final activeCycles = (cyclesResponse as List).map((c) => CycleWindow(
+          cycleId: c['id'],
+          peptideName: c['peptide_name'],
+          startDate: DateTime.parse(c['start_date']),
+          endDate: DateTime.parse(c['end_date']),
+          dose: (c['dose'] as num).toDouble(),
+        )).toList();
+
+        // Extract current biomarkers
+        final currentBiomarkers = lab['extracted_data'] as Map? ?? {};
+
+        // Get previous lab for comparison
+        Map? previousBiomarkers;
+        if (i + 1 < labs.length) {
+          previousBiomarkers = (labs[i + 1]['extracted_data'] as Map?) ?? {};
+        }
+
+        // Build biomarker comparisons
+        final biomarkerChanges = <BiomarkerComparison>[];
+        
+        currentBiomarkers.forEach((key, value) {
+          final currentVal = _extractValue(value);
+          final previousVal = _extractValue(previousBiomarkers?[key]);
+          
+          double? changePercent;
+          if (currentVal != null && previousVal != null && previousVal != 0) {
+            changePercent = ((currentVal - previousVal) / previousVal * 100);
+          }
+
+          biomarkerChanges.add(BiomarkerComparison(
+            name: _beautifyBiomarkerName(key),
+            currentValue: currentVal,
+            previousValue: previousVal,
+            unit: _getBiomarkerUnit(key),
+            status: _determineBiomarkerStatus(key, currentVal),
+            changePercent: changePercent,
+          ));
+        });
+
+        results.add(LabResultWithContext(
+          labId: lab['id'],
+          labDate: labDate,
+          labSource: lab['lab_source'] as String?, // May be null, we'll handle in UI
+          markerCount: currentBiomarkers.length,
+          activeCycles: activeCycles,
+          biomarkerChanges: biomarkerChanges,
+        ));
+      }
+
+      return results;
+    } catch (e) {
+      print('Error fetching labs with cycle context: $e');
+      return [];
+    }
+  }
+
+  // Helper: Extract numeric value from biomarker data
+  String _beautifyBiomarkerName(String key) {
+    // Convert snake_case or camelCase to Title Case
+    return key
+        .replaceAllMapped(RegExp(r'([a-z])([A-Z])'), (m) => '${m.group(1)} ${m.group(2)}')
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
+  }
+
+  String _getBiomarkerUnit(String key) {
+    final units = {
+      'testosterone': 'ng/dL',
+      'igf1': 'ng/mL',
+      'hgh': 'ng/mL',
+      'crp': 'mg/L',
+      'hdl': 'mg/dL',
+      'ldl': 'mg/dL',
+      'triglycerides': 'mg/dL',
+      'glucose': 'mg/dL',
+      'cortisol': 'µg/dL',
+      'estradiol': 'pg/mL',
+    };
+    return units[key.toLowerCase()] ?? '';
+  }
+
+  String _determineBiomarkerStatus(String key, double? value) {
+    if (value == null) return 'NORMAL';
+    
+    // Simple reference ranges (these should ideally come from a database)
+    final ranges = {
+      'testosterone': (300.0, 900.0),
+      'igf1': (100.0, 250.0),
+      'hgh': (0.0, 5.0),
+      'crp': (0.0, 3.0),
+      'hdl': (40.0, 200.0),
+      'ldl': (0.0, 100.0),
+      'glucose': (70.0, 100.0),
+      'cortisol': (10.0, 20.0),
+    };
+    
+    final range = ranges[key.toLowerCase()];
+    if (range == null) return 'NORMAL';
+    
+    if (value < range.$1) return 'LOW';
+    if (value > range.$2) return 'HIGH';
+    return 'NORMAL';
+  }
+
+  // H. Cycle Comparison - Get side-by-side comparison of cycles
   Future<List<CycleComparison>> getCycleComparisons() async {
     try {
       final user = supabase.auth.currentUser;
