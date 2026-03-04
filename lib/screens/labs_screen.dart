@@ -128,9 +128,10 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
       final mockResult = LabResult(
         id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
         userId: _userId,
+        pdfPath: image.name,
         uploadDate: DateTime.now(),
-        labSource: 'Manual Upload',
-        biomarkers: {
+        notes: 'Manual Upload',
+        extractedData: {
           'testosterone': 680,
           'igf1': 210,
           'cortisol': 9,
@@ -228,9 +229,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
           ),
         ),
         const SizedBox(height: 16),
-        ..._labResults.asMap().entries.map((entry) {
-          return _buildLabResultCard(entry.value);
-        }).toList(),
+        ..._labResults.map((lab) => _buildLabResultCard(lab)).toList(),
       ],
     );
   }
@@ -239,7 +238,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
     final outOfRange = _labResults.where((lab) {
       // Count biomarkers that are out of range (simplified)
       int count = 0;
-      lab.biomarkers.forEach((key, value) {
+      lab.extractedData.forEach((key, value) {
         if (_isOutOfRange(key, value)) {
           count++;
         }
@@ -400,7 +399,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                 ),
               ),
               Text(
-                '${lab.biomarkers.length} markers',
+                '${lab.extractedData.length} markers',
                 style: TextStyle(
                   color: AppColors.accent,
                   fontSize: 11,
@@ -413,8 +412,12 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: lab.biomarkers.entries.take(6).map((entry) {
+            children: lab.extractedData.entries.take(6).map((entry) {
               final isOut = _isOutOfRange(entry.key, entry.value);
+              final displayValue = entry.value is Map 
+                ? (entry.value['value']?.toString() ?? 'N/A')
+                : entry.value.toString();
+              
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
@@ -422,7 +425,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: Text(
-                  '${entry.key}: ${entry.value}${isOut ? ' [HIGH]' : ''}',
+                  '${entry.key}: $displayValue${isOut ? ' [HIGH]' : ''}',
                   style: TextStyle(
                     color: isOut ? AppColors.error : AppColors.accent,
                     fontSize: 10,
@@ -437,12 +440,21 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
   }
 
   int _getTotalMarkerCount() {
-    return _labResults.fold(0, (sum, lab) => sum + lab.biomarkers.length);
+    return _labResults.fold<int>(0, (sum, lab) => sum + lab.extractedData.length);
   }
 
   bool _isOutOfRange(String biomarker, dynamic value) {
-    // Simple check - in production, use reference ranges from database
-    final numValue = (value as num).toDouble();
+    // Extract numeric value (handle both direct values and nested objects)
+    double? numValue;
+    if (value is num) {
+      numValue = value.toDouble();
+    } else if (value is Map) {
+      final val = value['value'];
+      if (val is num) numValue = val.toDouble();
+    }
+    
+    if (numValue == null) return false;
+    
     final ranges = {
       'testosterone': (300.0, 900.0),
       'igf1': (100.0, 300.0),
