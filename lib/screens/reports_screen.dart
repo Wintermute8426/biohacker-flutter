@@ -2288,9 +2288,9 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                     ),
                     // Positioned cycle bar
                     Positioned(
-                      left: percentStart.isNaN ? 0 : percentStart.toDouble(),
+                      left: percentStart.isNaN ? 0 : percentStart as double,
                       child: Container(
-                        width: percentWidth.isNaN ? 0 : percentWidth,
+                        width: percentWidth.isNaN ? 0 : percentWidth as double,
                         height: 8,
                         decoration: BoxDecoration(
                           color: statusColor,
