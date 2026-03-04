@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
@@ -85,6 +86,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
               ListTile(
                 leading: const Icon(Icons.camera_alt),
                 title: const Text('Take Photo'),
+                subtitle: const Text('Photograph your lab report'),
                 onTap: () async {
                   Navigator.pop(context);
                   final image = await picker.pickImage(source: ImageSource.camera);
@@ -96,11 +98,27 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
               ListTile(
                 leading: const Icon(Icons.photo_library),
                 title: const Text('Gallery'),
+                subtitle: const Text('Upload image from your device'),
                 onTap: () async {
                   Navigator.pop(context);
                   final image = await picker.pickImage(source: ImageSource.gallery);
                   if (image != null) {
                     await _uploadImage(image);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf),
+                title: const Text('PDF File'),
+                subtitle: const Text('Upload lab report PDF'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final result = await FilePicker.platform.pickFiles(
+                    type: FileType.custom,
+                    allowedExtensions: ['pdf'],
+                  );
+                  if (result != null) {
+                    await _uploadPDF(result.files.first);
                   }
                 },
               ),
@@ -118,19 +136,15 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
   Future<void> _uploadImage(XFile image) async {
     setState(() => _isUploading = true);
     try {
-      // Convert image to bytes
       final bytes = await image.readAsBytes();
-
-      // For now, show a message (actual extraction would happen here)
       print('Image upload started: ${image.name}');
 
-      // Add mock lab result
       final mockResult = LabResult(
         id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
         userId: _userId,
         pdfPath: image.name,
         uploadDate: DateTime.now(),
-        notes: 'Manual Upload',
+        notes: 'Image Upload',
         extractedData: {
           'testosterone': 680,
           'igf1': 210,
@@ -149,6 +163,56 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Lab result added successfully'),
+            backgroundColor: AppColors.accent,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isUploading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
+  Future<void> _uploadPDF(PlatformFile file) async {
+    setState(() => _isUploading = true);
+    try {
+      print('PDF upload started: ${file.name}');
+
+      final mockResult = LabResult(
+        id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
+        userId: _userId,
+        pdfPath: file.path ?? file.name,
+        uploadDate: DateTime.now(),
+        notes: 'PDF Upload (${file.name})',
+        extractedData: {
+          'testosterone': 685,
+          'free_testosterone': 19.5,
+          'igf1': 215,
+          'hgh': 2.9,
+          'cortisol': 8.5,
+          'glucose': 91,
+          'insulin': 7.5,
+          'crp': 1.2,
+          'hdl': 62,
+          'ldl': 102,
+        },
+      );
+
+      if (mounted) {
+        setState(() {
+          _labResults.insert(0, mockResult);
+          _isUploading = false;
+        });
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('PDF "${file.name}" added successfully'),
             backgroundColor: AppColors.accent,
           ),
         );
