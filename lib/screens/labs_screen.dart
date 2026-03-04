@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../theme/colors.dart';
 import '../models/lab_result.dart';
 import '../services/labs_database.dart';
@@ -106,6 +109,21 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                   }
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf),
+                title: const Text('PDF Lab Report'),
+                subtitle: const Text('Upload blood test PDF'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final result = await FilePicker.platform.pickFiles(
+                    type: FileType.custom,
+                    allowedExtensions: ['pdf'],
+                  );
+                  if (result != null && result.files.isNotEmpty) {
+                    await _uploadPDF(File(result.files.first.path!));
+                  }
+                },
+              ),
             ],
           ),
         ),
@@ -152,6 +170,77 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
         );
       }
     } catch (e) {
+      if (mounted) {
+        setState(() => _isUploading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
+  Future<void> _uploadPDF(File pdfFile) async {
+    setState(() => _isUploading = true);
+    try {
+      print('PDF upload started: ${pdfFile.path}');
+
+      // Read PDF file
+      final bytes = await pdfFile.readAsBytes();
+      final fileName = pdfFile.path.split('/').last;
+
+      // Send to backend for extraction
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://100.71.64.116:9000/api/extract-lab-pdf'),
+      );
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: fileName,
+        ),
+      );
+
+      final response = await request.send();
+      final responseData = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(responseData);
+        final extractedBiomarkers = Map<String, dynamic>.from(result['biomarkers'] ?? {});
+
+        print('Extracted ${extractedBiomarkers.length} biomarkers from PDF');
+
+        // Save to database
+        final labResult = LabResult(
+          id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
+          userId: _userId,
+          pdfPath: pdfFile.path,
+          uploadDate: DateTime.now(),
+          notes: 'PDF Upload ($fileName)',
+          extractedData: extractedBiomarkers,
+        );
+
+        if (mounted) {
+          setState(() {
+            _labResults.insert(0, labResult);
+            _isUploading = false;
+          });
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Extracted ${extractedBiomarkers.length} biomarkers'),
+              backgroundColor: AppColors.accent,
+            ),
+          );
+        }
+      } else {
+        throw Exception('Backend error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error uploading PDF: $e');
       if (mounted) {
         setState(() => _isUploading = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -538,17 +627,50 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                 const SizedBox(height: 16),
               ],
 
-              // All biomarkers
-              Text(
-                'ALL BIOMARKERS (${lab.extractedData.length})',
-                style: TextStyle(
-                  color: AppColors.textMid,
-                  fontSize: 11,
-                  letterSpacing: 1,
-                  fontWeight: FontWeight.bold,
+              // All biomarkers header
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'ALL BIOMARKERS',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: Text(
+                            '${lab.extractedData.length} markers',
+                            style: TextStyle(
+                              color: AppColors.accent,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
 
               ...lab.extractedData.entries.map((entry) {
                 final isOut = _isOutOfRange(entry.key, entry.value);
