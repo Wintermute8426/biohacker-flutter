@@ -14,15 +14,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   final CalendarService _calendarService = CalendarService();
   
   DateTime _selectedMonth = DateTime.now();
-  DateTime _selectedWeekStart = DateTime.now().subtract(
-    Duration(days: DateTime.now().weekday % 7),
-  );
-  
   Map<DateTime, CalendarEvent> _events = {};
   bool _isLoading = true;
-  
-  // View toggle
-  bool _isMonthView = true;
   
   // Filters
   bool _showCycles = true;
@@ -69,45 +62,25 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  void _previousPeriod() {
+  void _previousMonth() {
     setState(() {
-      if (_isMonthView) {
-        _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
-      } else {
-        _selectedWeekStart = _selectedWeekStart.subtract(const Duration(days: 7));
-      }
+      _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
     });
     _loadMonthEvents();
   }
 
-  void _nextPeriod() {
+  void _nextMonth() {
     setState(() {
-      if (_isMonthView) {
-        _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
-      } else {
-        _selectedWeekStart = _selectedWeekStart.add(const Duration(days: 7));
-      }
+      _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
     });
     _loadMonthEvents();
   }
 
   void _goToToday() {
     setState(() {
-      if (_isMonthView) {
-        _selectedMonth = DateTime.now();
-      } else {
-        _selectedWeekStart = DateTime.now().subtract(
-          Duration(days: DateTime.now().weekday % 7),
-        );
-      }
+      _selectedMonth = DateTime.now();
     });
     _loadMonthEvents();
-  }
-
-  void _toggleView() {
-    setState(() {
-      _isMonthView = !_isMonthView;
-    });
   }
 
   @override
@@ -115,7 +88,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
         title: Text(
           'CALENDAR',
           style: TextStyle(
@@ -125,12 +97,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: Icon(_isMonthView ? Icons.view_week : Icons.calendar_month),
-            onPressed: _toggleView,
-            color: AppColors.primary,
-            tooltip: _isMonthView ? 'Week View' : 'Month View',
-          ),
           IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: _showFilterDialog,
@@ -153,9 +119,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _buildHeader(),
+                  _buildMonthHeader(),
                   const SizedBox(height: 16),
-                  _isMonthView ? _buildMonthView() : _buildWeekView(),
+                  _buildCalendarGrid(),
                   const SizedBox(height: 16),
                   _buildLegend(),
                 ],
@@ -164,49 +130,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    String headerText;
-    if (_isMonthView) {
-      headerText = DateFormat('MMMM yyyy').format(_selectedMonth);
-    } else {
-      final weekEnd = _selectedWeekStart.add(const Duration(days: 6));
-      headerText = '${DateFormat('MMM d').format(_selectedWeekStart)} - ${DateFormat('MMM d').format(weekEnd)}';
-    }
-
+  Widget _buildMonthHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             icon: const Icon(Icons.chevron_left),
-            onPressed: _previousPeriod,
+            onPressed: _previousMonth,
             color: AppColors.primary,
           ),
           Text(
-            headerText,
+            DateFormat('MMMM yyyy').format(_selectedMonth),
             style: TextStyle(
               color: AppColors.textLight,
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              letterSpacing: 1,
             ),
           ),
           IconButton(
             icon: const Icon(Icons.chevron_right),
-            onPressed: _nextPeriod,
+            onPressed: _nextMonth,
             color: AppColors.primary,
           ),
         ],
@@ -214,7 +164,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  Widget _buildMonthView() {
+  Widget _buildCalendarGrid() {
     final firstDay = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
     final lastDay = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0);
     final daysInMonth = lastDay.day;
@@ -223,15 +173,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
       ),
       child: Column(
         children: [
@@ -265,118 +208,57 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 children: List.generate(7, (weekday) {
                   final dayNumber = week * 7 + weekday - startWeekday + 1;
                   if (dayNumber < 1 || dayNumber > daysInMonth) {
-                    return const SizedBox(width: 50, height: 90);
+                    return const SizedBox(width: 50, height: 70);
                   }
 
                   final date = DateTime(_selectedMonth.year, _selectedMonth.month, dayNumber);
-                  return _buildDayCell(date, false);
+                  final event = _events[date];
+                  final isToday = _isToday(date);
+
+                  return GestureDetector(
+                    onTap: () => _showDayDetails(date, event),
+                    child: Container(
+                      width: 50,
+                      height: 70,
+                      margin: const EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        color: isToday ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+                        border: Border.all(
+                          color: isToday ? AppColors.primary : AppColors.border,
+                          width: isToday ? 2 : 1,
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          // Day number
+                          Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Text(
+                              '$dayNumber',
+                              style: TextStyle(
+                                color: isToday ? AppColors.primary : AppColors.textLight,
+                                fontSize: 12,
+                                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                          // Event indicators
+                          if (event != null && event.hasEvents)
+                            Expanded(
+                              child: _buildEventIndicators(event),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
                 }),
               ),
             );
           }),
           const SizedBox(height: 8),
         ],
-      ),
-    );
-  }
-
-  Widget _buildWeekView() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Weekday headers
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-                  .map((d) => SizedBox(
-                        width: 40,
-                        child: Text(
-                          d,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: AppColors.textMid,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ),
-          // Week days
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(7, (index) {
-                final date = _selectedWeekStart.add(Duration(days: index));
-                return _buildDayCell(date, true);
-              }),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDayCell(DateTime date, bool isWeekView) {
-    final event = _events[date];
-    final isToday = _isToday(date);
-
-    return GestureDetector(
-      onTap: () => _showDayDetails(date, event),
-      child: Container(
-        width: isWeekView ? 50 : 50,
-        height: isWeekView ? 120 : 90,
-        margin: const EdgeInsets.all(1),
-        decoration: BoxDecoration(
-          color: isToday ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
-          border: Border.all(
-            color: isToday ? AppColors.primary : AppColors.border,
-            width: isToday ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            // Day number
-            Padding(
-              padding: const EdgeInsets.all(4),
-              child: Text(
-                '${date.day}',
-                style: TextStyle(
-                  color: isToday ? AppColors.primary : AppColors.textLight,
-                  fontSize: 12,
-                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
-            // Event indicators
-            if (event != null && event.hasEvents)
-              Expanded(
-                child: _buildEventIndicators(event),
-              ),
-            // Weight sparkline (mini trend)
-            if (_showWeight && event != null && event.weight != null)
-              _buildWeightSparkline(event),
-          ],
-        ),
       ),
     );
   }
@@ -388,83 +270,44 @@ class _CalendarScreenState extends State<CalendarScreen> {
         // Cycle indicator (horizontal bar)
         if (_showCycles && event.cycles.isNotEmpty)
           Container(
-            height: 4,
+            height: 3,
             width: 40,
-            margin: const EdgeInsets.symmetric(vertical: 2),
             decoration: BoxDecoration(
               color: _getCycleColor(event.cycles.first.peptideName),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
+        const SizedBox(height: 2),
         // Protocol badge
         if (_showProtocols && event.protocols.isNotEmpty)
           Container(
-            width: 8,
-            height: 8,
-            margin: const EdgeInsets.symmetric(vertical: 2),
+            width: 6,
+            height: 6,
             decoration: BoxDecoration(
               color: AppColors.accent,
               shape: BoxShape.circle,
             ),
           ),
+        const SizedBox(height: 2),
         // Lab marker (red dot)
         if (_showLabs && event.labs.isNotEmpty)
           Container(
-            width: 8,
-            height: 8,
-            margin: const EdgeInsets.symmetric(vertical: 2),
+            width: 6,
+            height: 6,
             decoration: BoxDecoration(
               color: AppColors.error,
               shape: BoxShape.circle,
             ),
           ),
+        const SizedBox(height: 2),
+        // Weight indicator
+        if (_showWeight && event.weight != null)
+          Icon(
+            Icons.scale,
+            size: 8,
+            color: AppColors.textMid,
+          ),
       ],
-    );
-  }
-
-  // Weight sparkline (mini trend visualization)
-  Widget _buildWeightSparkline(CalendarEvent event) {
-    if (event.weight == null) return const SizedBox.shrink();
-
-    // Get weight history for sparkline (last 7 days)
-    final recentWeights = <double>[];
-    for (int i = 6; i >= 0; i--) {
-      final checkDate = event.weight!.loggedAt.subtract(Duration(days: i));
-      final pastEvent = _events[DateTime(checkDate.year, checkDate.month, checkDate.day)];
-      if (pastEvent?.weight != null) {
-        recentWeights.add(pastEvent!.weight!.weightLbs);
-      }
-    }
-
-    if (recentWeights.length < 2) {
-      // Not enough data for sparkline, show dot
-      return Container(
-        margin: const EdgeInsets.only(top: 2),
-        child: Icon(
-          Icons.scale,
-          size: 8,
-          color: AppColors.textMid,
-        ),
-      );
-    }
-
-    // Calculate min/max for scaling
-    final minWeight = recentWeights.reduce((a, b) => a < b ? a : b);
-    final maxWeight = recentWeights.reduce((a, b) => a > b ? a : b);
-    final range = maxWeight - minWeight;
-
-    return Container(
-      height: 12,
-      width: 40,
-      margin: const EdgeInsets.only(top: 2, bottom: 2),
-      child: CustomPaint(
-        painter: SparklinePainter(
-          weights: recentWeights,
-          minWeight: minWeight,
-          maxWeight: maxWeight,
-          color: AppColors.accent,
-        ),
-      ),
     );
   }
 
@@ -493,7 +336,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             'Active cycle',
             Container(
               width: 30,
-              height: 4,
+              height: 3,
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(2),
@@ -525,19 +368,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ),
           _buildLegendItem(
-            'Sparkline',
-            'Weight trend (7 days)',
-            Container(
-              width: 30,
-              height: 12,
-              child: CustomPaint(
-                painter: SparklinePainter(
-                  weights: [175, 176, 175.5, 176.5, 177, 176, 175.5],
-                  minWeight: 175,
-                  maxWeight: 177,
-                  color: AppColors.accent,
-                ),
-              ),
+            'Scale Icon',
+            'Weight logged',
+            Icon(
+              Icons.scale,
+              size: 12,
+              color: AppColors.textMid,
             ),
           ),
         ],
@@ -752,10 +588,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               children: [
                 Text(
                   dose.peptideName,
-                  style: TextStyle(
-                    color: AppColors.textLight,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   '${dose.amount}mg ${dose.route ?? ""}',
@@ -784,7 +617,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       ),
       child: Row(
         children: [
-          Icon(Icons.scale, color: AppColors.accent, size: 20),
+          Icon(Icons.scale, color: Colors.blue, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -937,50 +770,4 @@ class _CalendarScreenState extends State<CalendarScreen> {
     ];
     return colors[peptideName.hashCode % colors.length];
   }
-}
-
-// Custom painter for weight sparklines
-class SparklinePainter extends CustomPainter {
-  final List<double> weights;
-  final double minWeight;
-  final double maxWeight;
-  final Color color;
-
-  SparklinePainter({
-    required this.weights,
-    required this.minWeight,
-    required this.maxWeight,
-    required this.color,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (weights.length < 2) return;
-
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final path = Path();
-    final range = maxWeight - minWeight;
-
-    for (int i = 0; i < weights.length; i++) {
-      final x = (i / (weights.length - 1)) * size.width;
-      final normalizedY = range > 0 ? (weights[i] - minWeight) / range : 0.5;
-      final y = size.height - (normalizedY * size.height);
-
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'dart:math' as math;
 import '../theme/colors.dart';
 import '../services/reports_service.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({Key? key}) : super(key: key);
@@ -17,7 +14,6 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> {
   final ReportsService _reportsService = ReportsService();
   bool _isLoading = true;
-  bool _isGeneratingAI = false;
 
   // Data for each section
   List<DoseTimelineData> _doseTimeline = [];
@@ -78,93 +74,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
     }
   }
 
-  Future<void> _generateClaudeInsights() async {
-    setState(() => _isGeneratingAI = true);
-
-    try {
-      // Gather data for Claude analysis
-      final analysisData = {
-        'weight_trends': _weightTrends.map((w) => {
-          'date': w.date.toIso8601String(),
-          'weight': w.weight,
-        }).toList(),
-        'effectiveness_ratings': _effectiveness.map((e) => {
-          'cycle': e.cycleName,
-          'rating': e.rating,
-          'notes': e.notes,
-        }).toList(),
-        'side_effects': _sideEffectsHeatmap.map((s) => {
-          'date': s.date.toIso8601String(),
-          'severity': s.maxSeverity,
-          'symptoms': s.symptoms,
-        }).toList(),
-        'lab_correlations': _labCorrelations.take(2).map((l) => {
-          'date': l.labDate.toIso8601String(),
-          'biomarkers': l.biomarkers,
-          'cycles': l.cycles.map((c) => c.peptideName).toList(),
-        }).toList(),
-      };
-
-      final prompt = '''Analyze this peptide protocol data and provide 3-5 key insights:
-
-Weight Trends: ${_weightTrends.length} data points over ${(_weightTrends.isNotEmpty ? _weightTrends.last.date.difference(_weightTrends.first.date).inDays : 0)} days
-Latest Lab Results: ${_labCorrelations.isNotEmpty ? _labCorrelations.first.biomarkers.toString() : 'None'}
-Best Performing Cycles: ${_effectiveness.where((e) => e.rating >= 8).map((e) => e.cycleName).join(', ')}
-Side Effects: ${_sideEffectsHeatmap.length} logged events
-
-Provide insights on:
-1. Weight consistency and trends
-2. Hormonal optimization patterns
-3. Side effect patterns and severity
-4. Actionable recommendations for next cycles
-
-Format as JSON array of objects with "title" (emoji + text), "message" (insight), "icon" (single emoji) fields.''';
-
-      // Call Claude API (using Anthropic's Claude)
-      final response = await http.post(
-        Uri.parse('https://api.anthropic.com/v1/messages'),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': 'sk-ant-api03-YOUR_API_KEY_HERE', // TODO: Move to env
-          'anthropic-version': '2023-06-01',
-        },
-        body: jsonEncode({
-          'model': 'claude-3-5-sonnet-20241022',
-          'max_tokens': 1024,
-          'messages': [
-            {
-              'role': 'user',
-              'content': prompt,
-            }
-          ],
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final content = data['content'][0]['text'];
-        
-        // Parse JSON from Claude's response
-        final insights = jsonDecode(content) as List;
-        
-        setState(() {
-          _aiInsights = insights.map((i) => AIInsight(
-            title: i['title'],
-            message: i['message'],
-            icon: i['icon'],
-          )).toList();
-          _isGeneratingAI = false;
-        });
-      } else {
-        throw Exception('API Error: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error generating Claude insights: $e');
-      setState(() => _isGeneratingAI = false);
-      _showError('Failed to generate AI insights. Using fallback.');
-    }
-  }
-
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -179,7 +88,6 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
         title: Text(
           'REPORTS',
           style: TextStyle(
@@ -204,8 +112,8 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                   CircularProgressIndicator(color: AppColors.primary),
                   const SizedBox(height: 16),
                   Text(
-                    'ANALYZING DATA...',
-                    style: TextStyle(color: AppColors.textMid, letterSpacing: 2),
+                    'Analyzing...',
+                    style: TextStyle(color: AppColors.textMid),
                   ),
                 ],
               ),
@@ -247,7 +155,7 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                   const SizedBox(height: 32),
 
                   // F. AI Insights
-                  _buildSectionHeader('💡 AI INSIGHTS', 'Claude Analysis'),
+                  _buildSectionHeader('💡 AI INSIGHTS', 'Data-Driven'),
                   const SizedBox(height: 12),
                   _buildAIInsights(),
                   const SizedBox(height: 32),
@@ -292,133 +200,91 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
       ),
-      child: Column(
-        children: [
-          // Legend
-          Wrap(
-            spacing: 12,
-            children: _doseTimeline.asMap().entries.map((entry) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: _getChartColor(entry.key),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    entry.value.peptideName,
-                    style: TextStyle(color: AppColors.textMid, fontSize: 10),
-                  ),
-                ],
-              );
-            }).toList(),
+      child: LineChart(
+        LineChartData(
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (value) => FlLine(
+              color: AppColors.border,
+              strokeWidth: 1,
+            ),
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: AppColors.border,
-                    strokeWidth: 1,
-                  ),
-                ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        if (value.toInt() % 15 != 0) return const SizedBox.shrink();
-                        final date = DateTime.now().subtract(Duration(days: 90 - value.toInt()));
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            DateFormat('M/d').format(date),
-                            style: TextStyle(color: AppColors.textDim, fontSize: 10),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 40,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          '${value.toInt()}mg',
-                          style: TextStyle(color: AppColors.textDim, fontSize: 10),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                lineBarsData: _doseTimeline.asMap().entries.map((entry) {
-                  final color = _getChartColor(entry.key);
-                  return LineChartBarData(
-                    spots: entry.value.points.map((point) {
-                      final daysDiff = DateTime.now().difference(point.date).inDays;
-                      return FlSpot(90 - daysDiff.toDouble(), point.amount);
-                    }).toList(),
-                    isCurved: true,
-                    color: color,
-                    barWidth: 3,
-                    dotData: FlDotData(
-                      show: true,
-                      getDotPainter: (spot, percent, barData, index) {
-                        return FlDotCirclePainter(
-                          radius: 4,
-                          color: color,
-                          strokeWidth: 2,
-                          strokeColor: AppColors.background,
-                        );
-                      },
-                    ),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: color.withOpacity(0.1),
+          titlesData: FlTitlesData(
+            show: true,
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  if (value.toInt() % 15 != 0) return const SizedBox.shrink();
+                  final date = DateTime.now().subtract(Duration(days: 90 - value.toInt()));
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      DateFormat('M/d').format(date),
+                      style: TextStyle(color: AppColors.textDim, fontSize: 10),
                     ),
                   );
-                }).toList(),
-                lineTouchData: LineTouchData(
-                  touchTooltipData: LineTouchTooltipData(
-                    getTooltipColor: (spot) => AppColors.surface,
-                    getTooltipItems: (touchedSpots) {
-                      return touchedSpots.map((spot) {
-                        final timeline = _doseTimeline[spot.barIndex];
-                        return LineTooltipItem(
-                          '${timeline.peptideName}\n${spot.y.toStringAsFixed(1)}mg',
-                          TextStyle(color: _getChartColor(spot.barIndex), fontSize: 12),
-                        );
-                      }).toList();
-                    },
-                  ),
-                ),
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 40,
+                getTitlesWidget: (value, meta) {
+                  return Text(
+                    '${value.toInt()}mg',
+                    style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                  );
+                },
               ),
             ),
           ),
-        ],
+          borderData: FlBorderData(show: false),
+          lineBarsData: _doseTimeline.map((timeline) {
+            final color = _getChartColor(timeline.colorIndex);
+            return LineChartBarData(
+              spots: timeline.points.map((point) {
+                final daysDiff = DateTime.now().difference(point.date).inDays;
+                return FlSpot(90 - daysDiff.toDouble(), point.amount);
+              }).toList(),
+              isCurved: true,
+              color: color,
+              barWidth: 3,
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) {
+                  return FlDotCirclePainter(
+                    radius: 4,
+                    color: color,
+                    strokeWidth: 2,
+                    strokeColor: AppColors.background,
+                  );
+                },
+              ),
+              belowBarData: BarAreaData(show: false),
+            );
+          }).toList(),
+          lineTouchData: LineTouchData(
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipItems: (touchedSpots) {
+                return touchedSpots.map((spot) {
+                  final timeline = _doseTimeline[spot.barIndex];
+                  return LineTooltipItem(
+                    '${timeline.peptideName}\n${spot.y.toStringAsFixed(1)}mg',
+                    const TextStyle(color: Colors.white, fontSize: 12),
+                  );
+                }).toList();
+              },
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -429,15 +295,8 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.error.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
       ),
       child: Column(
         children: [
@@ -527,19 +386,8 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                     height: 40,
                     decoration: BoxDecoration(
                       color: _getSeverityColor(data.maxSeverity),
-                      border: Border.all(
-                        color: data.maxSeverity > 0 
-                            ? AppColors.error.withOpacity(0.5)
-                            : AppColors.border,
-                      ),
+                      border: Border.all(color: AppColors.border),
                       borderRadius: BorderRadius.circular(4),
-                      boxShadow: data.maxSeverity > 5 ? [
-                        BoxShadow(
-                          color: AppColors.error.withOpacity(0.3),
-                          blurRadius: 4,
-                          spreadRadius: 1,
-                        ),
-                      ] : null,
                     ),
                     child: Center(
                       child: Text(
@@ -565,11 +413,11 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildLegendItem('Low (1-3)', _getSeverityColor(2)),
+        _buildLegendItem('Low', _getSeverityColor(2)),
         const SizedBox(width: 8),
-        _buildLegendItem('Med (4-6)', _getSeverityColor(5)),
+        _buildLegendItem('Med', _getSeverityColor(5)),
         const SizedBox(width: 8),
-        _buildLegendItem('High (7-10)', _getSeverityColor(8)),
+        _buildLegendItem('High', _getSeverityColor(8)),
       ],
     );
   }
@@ -639,35 +487,25 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
 
   Color _getSeverityColor(int severity) {
     if (severity == 0) return AppColors.surface;
-    if (severity <= 3) return AppColors.accent.withOpacity(0.3);
-    if (severity <= 6) return Colors.orange.withOpacity(0.5);
-    if (severity <= 8) return AppColors.error.withOpacity(0.6);
-    return AppColors.error.withOpacity(0.8);
+    if (severity <= 3) return Colors.green.withOpacity(0.5);
+    if (severity <= 6) return Colors.yellow.withOpacity(0.5);
+    if (severity <= 8) return Colors.orange.withOpacity(0.6);
+    return Colors.red.withOpacity(0.7);
   }
 
-  // C. Weight Trends Chart (ENHANCED with dual axis + trend line)
+  // C. Weight Trends Chart
   Widget _buildWeightTrends() {
     if (_weightTrends.isEmpty) {
       return _buildEmptyState('No weight data available');
     }
 
-    // Calculate trend line (linear regression)
-    final trendData = _calculateTrendLine(_weightTrends);
-
     return Container(
-      height: 350,
+      height: 300,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.accent.withOpacity(0.3)),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accent.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
       ),
       child: LineChart(
         LineChartData(
@@ -716,50 +554,28 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
           ),
           borderData: FlBorderData(show: false),
           lineBarsData: [
-            // Weight line
             LineChartBarData(
               spots: _weightTrends.asMap().entries.map((entry) {
                 return FlSpot(entry.key.toDouble(), entry.value.weight);
               }).toList(),
               isCurved: true,
-              color: AppColors.accent,
+              color: Colors.blue,
               barWidth: 3,
-              dotData: FlDotData(
-                show: true,
-                getDotPainter: (spot, percent, barData, index) {
-                  return FlDotCirclePainter(
-                    radius: 4,
-                    color: AppColors.accent,
-                    strokeWidth: 2,
-                    strokeColor: AppColors.background,
-                  );
-                },
-              ),
+              dotData: FlDotData(show: true),
               belowBarData: BarAreaData(
                 show: true,
-                color: AppColors.accent.withOpacity(0.1),
+                color: Colors.blue.withOpacity(0.1),
               ),
-            ),
-            // Trend line
-            LineChartBarData(
-              spots: trendData,
-              isCurved: false,
-              color: AppColors.primary.withOpacity(0.6),
-              barWidth: 2,
-              dotData: FlDotData(show: false),
-              dashArray: [5, 5],
             ),
           ],
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
-              getTooltipColor: (spot) => AppColors.surface,
               getTooltipItems: (touchedSpots) {
                 return touchedSpots.map((spot) {
-                  if (spot.barIndex == 1) return null; // Skip trend line
                   final point = _weightTrends[spot.x.toInt()];
                   return LineTooltipItem(
                     '${point.weight.toStringAsFixed(1)} lbs\n${DateFormat('MMM d').format(point.date)}',
-                    TextStyle(color: AppColors.accent, fontSize: 12),
+                    const TextStyle(color: Colors.white, fontSize: 12),
                   );
                 }).toList();
               },
@@ -768,28 +584,6 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
         ),
       ),
     );
-  }
-
-  List<FlSpot> _calculateTrendLine(List<WeightPoint> weights) {
-    if (weights.length < 2) return [];
-
-    // Linear regression: y = mx + b
-    double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-    int n = weights.length;
-
-    for (int i = 0; i < n; i++) {
-      double x = i.toDouble();
-      double y = weights[i].weight;
-      sumX += x;
-      sumY += y;
-      sumXY += x * y;
-      sumX2 += x * x;
-    }
-
-    double m = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-    double b = (sumY - m * sumX) / n;
-
-    return List.generate(n, (i) => FlSpot(i.toDouble(), m * i + b));
   }
 
   // D. Cycle-Lab Correlations
@@ -805,31 +599,18 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
+            border: Border.all(color: AppColors.border),
             borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.secondary.withOpacity(0.1),
-                blurRadius: 10,
-                spreadRadius: 2,
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.science, color: AppColors.secondary, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Lab Report - ${DateFormat('MMM d, yyyy').format(correlation.labDate)}',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+              Text(
+                'Lab Report - ${DateFormat('MMM d, yyyy').format(correlation.labDate)}',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 12),
               // Biomarkers
@@ -891,15 +672,8 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.accent.withOpacity(0.3)),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accent.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
       ),
       child: BarChart(
         BarChartData(
@@ -907,12 +681,11 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
           maxY: 10,
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (group) => AppColors.surface,
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 final cycle = _effectiveness[groupIndex];
                 return BarTooltipItem(
                   '${cycle.cycleName}\nRating: ${cycle.rating}/10',
-                  TextStyle(color: AppColors.accent),
+                  const TextStyle(color: Colors.white),
                 );
               },
             ),
@@ -974,11 +747,6 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                     topLeft: Radius.circular(4),
                     topRight: Radius.circular(4),
                   ),
-                  backDrawRodData: BackgroundBarChartRodData(
-                    show: true,
-                    toY: 10,
-                    color: AppColors.border.withOpacity(0.2),
-                  ),
                 ),
               ],
             );
@@ -989,94 +757,59 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
   }
 
   Color _getRatingColor(int rating) {
-    if (rating <= 3) return AppColors.error;
+    if (rating <= 3) return Colors.red;
     if (rating <= 6) return Colors.orange;
     if (rating <= 8) return Colors.yellow;
-    return AppColors.accent;
+    return Colors.green;
   }
 
-  // F. AI Insights (with Claude integration)
+  // F. AI Insights
   Widget _buildAIInsights() {
+    if (_aiInsights.isEmpty) {
+      return _buildEmptyState('No insights yet - keep logging data!');
+    }
+
     return Column(
-      children: [
-        if (_aiInsights.isEmpty)
-          _buildEmptyState('No insights yet - keep logging data!'),
-        ..._aiInsights.map((insight) {
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.1),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  insight.icon,
-                  style: const TextStyle(fontSize: 24),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        insight.title,
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        insight.message,
-                        style: TextStyle(color: AppColors.textMid),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-        const SizedBox(height: 16),
-        // AI Refresh Button
-        ElevatedButton.icon(
-          onPressed: _isGeneratingAI ? null : _generateClaudeInsights,
-          icon: _isGeneratingAI
-              ? SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColors.primary,
-                  ),
-                )
-              : Icon(Icons.auto_awesome, color: AppColors.primary),
-          label: Text(
-            _isGeneratingAI ? 'GENERATING...' : 'REFRESH AI INSIGHTS',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1,
-            ),
+      children: _aiInsights.map((insight) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(8),
           ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.surface,
-            side: BorderSide(color: AppColors.primary.withOpacity(0.5)),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                insight.icon,
+                style: const TextStyle(fontSize: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      insight.title,
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      insight.message,
+                      style: TextStyle(color: AppColors.textMid),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+        );
+      }).toList(),
     );
   }
 
@@ -1100,12 +833,12 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
 
   Color _getChartColor(int index) {
     final colors = [
-      AppColors.primary,      // Cyan
-      AppColors.accent,       // Green
-      Colors.orange,
-      AppColors.secondary,    // Magenta
-      Colors.purple,
+      AppColors.primary,
+      AppColors.accent,
+      AppColors.secondary,
       Colors.blue,
+      Colors.purple,
+      Colors.orange,
     ];
     return colors[index % colors.length];
   }
