@@ -115,69 +115,27 @@ ${_labsWithContext.isNotEmpty ? _labsWithContext.first.biomarkerChanges.take(10)
 Side Effects Logged: ${_sideEffectsHeatmap.length} events
 ''';
 
-      final prompt = '''You are a peptide protocol analyst. Analyze the following user data and provide 4-5 specific, actionable insights.
+      print('DEBUG: Sending insights request to dashboard backend');
 
-$dataForAnalysis
-
-Provide insights on:
-1. Protocol effectiveness based on ratings and biomarker changes
-2. Weight and body composition trends
-3. Side effect patterns and mitigation strategies
-4. Lab biomarker improvements or concerns
-5. Recommendations for next protocol optimization
-
-Format your response as a JSON array with exactly this structure (no extra text):
-[
-  {
-    "title": "📊 Insight Title",
-    "message": "Detailed message with specific numbers and recommendations",
-    "icon": "emoji"
-  }
-]
-
-Be specific and data-driven. Use actual values from the data provided.''';
-
-      print('DEBUG: Sending prompt to Claude: ${prompt.length} chars');
-
-      // Call Claude API via HTTP
+      // Call Wintermute Dashboard backend (production proxy)
       final response = await http.post(
-        Uri.parse('https://api.anthropic.com/v1/messages'),
+        Uri.parse('http://100.71.64.116:9000/api/insights'),
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': const String.fromEnvironment('CLAUDE_API_KEY', defaultValue: ''),
-          'anthropic-version': '2023-06-01',
         },
         body: jsonEncode({
-          'model': 'claude-opus-4-5',
-          'max_tokens': 1024,
-          'messages': [
-            {
-              'role': 'user',
-              'content': prompt,
-            }
-          ],
+          'analysisData': dataForAnalysis,
         }),
       );
 
-      print('DEBUG: Claude API response status: ${response.statusCode}');
+      print('DEBUG: Backend response status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final content = data['content'][0]['text'] as String;
+        final insightsData = data['insights'] as List;
         
-        print('DEBUG: Claude response: $content');
+        print('DEBUG: Received ${insightsData.length} insights from backend');
 
-        // Parse JSON from Claude's response
-        // Handle case where response might have markdown code blocks
-        String jsonString = content;
-        if (content.contains('```json')) {
-          jsonString = content.split('```json')[1].split('```')[0];
-        } else if (content.contains('```')) {
-          jsonString = content.split('```')[1].split('```')[0];
-        }
-        
-        final insightsData = jsonDecode(jsonString.trim()) as List;
-        
         if (mounted) {
           setState(() {
             _aiInsights = insightsData.map((i) => AIInsight(
@@ -189,15 +147,16 @@ Be specific and data-driven. Use actual values from the data provided.''';
           });
         }
       } else {
-        final errorBody = response.body;
-        print('DEBUG: Claude API error: $errorBody');
-        throw Exception('Claude API Error ${response.statusCode}: $errorBody');
+        final errorBody = jsonDecode(response.body);
+        final errorMsg = errorBody['message'] ?? 'Unknown error';
+        print('DEBUG: Backend error: $errorMsg');
+        throw Exception('Backend error: $errorMsg');
       }
     } catch (e) {
-      print('Error generating Claude insights: $e');
+      print('Error generating insights: $e');
       if (mounted) {
         setState(() => _isGeneratingAI = false);
-        _showError('Claude API error: $e. Make sure CLAUDE_API_KEY env var is set.');
+        _showError('Failed to generate insights: $e');
       }
     }
   }
