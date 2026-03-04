@@ -674,12 +674,15 @@ class ReportsService {
           .order('upload_date', ascending: false);
 
       final labs = labsResponse as List;
+      print('DEBUG: Found ${labs.length} lab results');
       final List<LabResultWithContext> results = [];
 
       for (int i = 0; i < labs.length; i++) {
         final lab = labs[i];
-        final labDate = DateTime.parse(lab['upload_date']);
+        final labDate = DateTime.parse(lab['upload_date'] as String);
         final windowStart = labDate.subtract(const Duration(days: 90));
+
+        print('DEBUG: Processing lab from $labDate');
 
         // Get cycles active during 3 months prior
         final cyclesResponse = await supabase
@@ -690,20 +693,46 @@ class ReportsService {
             .lte('start_date', labDate.toIso8601String());
 
         final activeCycles = (cyclesResponse as List).map((c) => CycleWindow(
-          cycleId: c['id'],
-          peptideName: c['peptide_name'],
-          startDate: DateTime.parse(c['start_date']),
-          endDate: DateTime.parse(c['end_date']),
+          cycleId: c['id'] as String,
+          peptideName: c['peptide_name'] as String,
+          startDate: DateTime.parse(c['start_date'] as String),
+          endDate: DateTime.parse(c['end_date'] as String),
           dose: (c['dose'] as num).toDouble(),
         )).toList();
 
-        // Extract current biomarkers
-        final currentBiomarkers = lab['extracted_data'] as Map? ?? {};
+        print('DEBUG: Found ${activeCycles.length} active cycles');
+
+        // Extract current biomarkers - handle nested structure
+        final extractedData = lab['extracted_data'];
+        final currentBiomarkers = <String, dynamic>{};
+        
+        if (extractedData is Map) {
+          extractedData.forEach((key, value) {
+            // If value is a Map with 'value' key, use that; otherwise use the value directly
+            if (value is Map && value.containsKey('value')) {
+              currentBiomarkers[key] = value['value'];
+            } else {
+              currentBiomarkers[key] = value;
+            }
+          });
+        }
+
+        print('DEBUG: Extracted ${currentBiomarkers.length} biomarkers');
 
         // Get previous lab for comparison
-        Map? previousBiomarkers;
+        Map<String, dynamic>? previousBiomarkers;
         if (i + 1 < labs.length) {
-          previousBiomarkers = (labs[i + 1]['extracted_data'] as Map?) ?? {};
+          final prevExtracted = labs[i + 1]['extracted_data'];
+          previousBiomarkers = {};
+          if (prevExtracted is Map) {
+            prevExtracted.forEach((key, value) {
+              if (value is Map && value.containsKey('value')) {
+                previousBiomarkers![key] = value['value'];
+              } else {
+                previousBiomarkers![key] = value;
+              }
+            });
+          }
         }
 
         // Build biomarker comparisons
@@ -711,7 +740,7 @@ class ReportsService {
         
         currentBiomarkers.forEach((key, value) {
           final currentVal = _extractValue(value);
-          final previousVal = _extractValue(previousBiomarkers?[key]);
+          final previousVal = previousBiomarkers != null ? _extractValue(previousBiomarkers[key]) : null;
           
           double? changePercent;
           if (currentVal != null && previousVal != null && previousVal != 0) {
@@ -729,15 +758,16 @@ class ReportsService {
         });
 
         results.add(LabResultWithContext(
-          labId: lab['id'],
+          labId: lab['id'] as String,
           labDate: labDate,
-          labSource: lab['lab_source'] as String?, // May be null, we'll handle in UI
+          labSource: (lab['notes'] as String?) ?? 'Lab Test', // Use notes as source fallback
           markerCount: currentBiomarkers.length,
           activeCycles: activeCycles,
           biomarkerChanges: biomarkerChanges,
         ));
       }
 
+      print('DEBUG: Returning ${results.length} lab results with context');
       return results;
     } catch (e) {
       print('Error fetching labs with cycle context: $e');
