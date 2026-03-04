@@ -25,8 +25,9 @@ jobs:
       
       - name: Clean pub cache and lock file
         run: |
-          rm -rf ~/.pub-cache/hosted/pub.dev/file_picker*
+          rm -rf ~/.pub-cache
           rm -f pubspec.lock
+          rm -rf .dart_tool
           flutter pub cache repair
       
       - name: Get dependencies
