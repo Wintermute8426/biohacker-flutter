@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
@@ -107,21 +106,6 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                   }
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.picture_as_pdf),
-                title: const Text('PDF File'),
-                subtitle: const Text('Upload lab report PDF'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final result = await FilePicker.platform.pickFiles(
-                    type: FileType.custom,
-                    allowedExtensions: ['pdf'],
-                  );
-                  if (result != null) {
-                    await _uploadPDF(result.files.first);
-                  }
-                },
-              ),
             ],
           ),
         ),
@@ -163,56 +147,6 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Lab result added successfully'),
-            backgroundColor: AppColors.accent,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isUploading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-        );
-      }
-    }
-  }
-
-  Future<void> _uploadPDF(PlatformFile file) async {
-    setState(() => _isUploading = true);
-    try {
-      print('PDF upload started: ${file.name}');
-
-      final mockResult = LabResult(
-        id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
-        userId: _userId,
-        pdfPath: file.path ?? file.name,
-        uploadDate: DateTime.now(),
-        notes: 'PDF Upload (${file.name})',
-        extractedData: {
-          'testosterone': 685,
-          'free_testosterone': 19.5,
-          'igf1': 215,
-          'hgh': 2.9,
-          'cortisol': 8.5,
-          'glucose': 91,
-          'insulin': 7.5,
-          'crp': 1.2,
-          'hdl': 62,
-          'ldl': 102,
-        },
-      );
-
-      if (mounted) {
-        setState(() {
-          _labResults.insert(0, mockResult);
-          _isUploading = false;
-        });
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('PDF "${file.name}" added successfully'),
             backgroundColor: AppColors.accent,
           ),
         );
@@ -386,7 +320,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              'Photograph your lab report or upload from gallery. Results will be extracted automatically.',
+              'Take a photo or upload an image of your lab report. Results will be extracted automatically.',
               style: TextStyle(
                 color: AppColors.textMid,
                 fontSize: 12,
