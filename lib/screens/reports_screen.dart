@@ -99,78 +99,105 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
     setState(() => _isGeneratingAI = true);
 
     try {
-      // Simulate API delay
-      await Future.delayed(const Duration(seconds: 2));
+      // Build comprehensive data summary for Claude
+      final dataForAnalysis = '''
+PEPTIDE PROTOCOL DATA FOR ANALYSIS:
 
-      // Generate mock insights based on actual data
-      final insights = <AIInsight>[];
+Weight Tracking:
+${_weightTrends.isNotEmpty ? _weightTrends.map((w) => '- ${DateFormat('MMM d').format(w.date)}: ${w.weight.toStringAsFixed(1)} lbs').join('\n') : 'No weight data'}
 
-      // Insight 1: Best cycle
-      if (_effectiveness.isNotEmpty) {
-        final bestCycle = _effectiveness.reduce((a, b) => a.rating > b.rating ? a : b);
-        insights.add(AIInsight(
-          title: '⭐ Best Performing Cycle',
-          message: '${bestCycle.cycleName} showed highest effectiveness rating (${bestCycle.rating}/10). Consider repeating this protocol.',
-          icon: '🎯',
-        ));
-      }
+Cycles Completed:
+${_cycleComparisons.isNotEmpty ? _cycleComparisons.map((c) => '- ${c.cycleName}: ${c.dosesLogged} doses over ${c.endDate.difference(c.startDate).inDays} days (Rating: ${c.rating}/10)').join('\n') : 'No cycle data'}
 
-      // Insight 2: Weight trend
-      if (_weightTrends.length >= 2) {
-        final firstWeight = _weightTrends.first.weight;
-        final lastWeight = _weightTrends.last.weight;
-        final change = lastWeight - firstWeight;
-        insights.add(AIInsight(
-          title: change.abs() > 5 ? '📊 Significant Weight Change' : '⚖️ Weight Stable',
-          message: change > 0
-              ? 'Weight increased ${change.toStringAsFixed(1)}lbs over tracking period. Correlate with cycle dosing.'
-              : 'Weight decreased ${change.abs().toStringAsFixed(1)}lbs. Metabolic optimization evident.',
-          icon: change > 0 ? '📈' : '📉',
-        ));
-      }
+Latest Lab Results:
+${_labsWithContext.isNotEmpty ? _labsWithContext.first.biomarkerChanges.take(10).map((b) => '- ${b.name}: ${b.currentValue?.toStringAsFixed(1) ?? 'N/A'} ${b.unit ?? ''} (vs previous: ${b.previousValue?.toStringAsFixed(1) ?? 'N/A'}, change: ${b.changePercent?.toStringAsFixed(1) ?? 'N/A'}%)').join('\n') : 'No lab data'}
 
-      // Insight 3: Side effects
-      if (_sideEffectsHeatmap.isNotEmpty) {
-        final avgSeverity = _sideEffectsHeatmap.map((s) => s.maxSeverity).reduce((a, b) => a + b) / _sideEffectsHeatmap.length;
-        insights.add(AIInsight(
-          title: avgSeverity > 5 ? '⚠️ High Side Effect Load' : '✅ Tolerable Side Effects',
-          message: avgSeverity > 5
-              ? 'Consider dose reduction or cycle spacing. Monitor kidney/liver markers.'
-              : 'Side effect profile is manageable. Proceed with current protocol.',
-          icon: '🔍',
-        ));
-      }
+Side Effects Logged: ${_sideEffectsHeatmap.length} events
+''';
 
-      // Insight 4: Protocol consistency
-      if (_cycleComparisons.isNotEmpty) {
-        final avgAdherence = _cycleComparisons.fold<double>(0, (sum, c) => sum + (c.dosesLogged / ((c.endDate.difference(c.startDate).inDays / 7) * 3)).clamp(0, 1)) / _cycleComparisons.length;
-        insights.add(AIInsight(
-          title: avgAdherence > 0.8 ? '✨ Excellent Protocol Adherence' : '📋 Improve Consistency',
-          message: avgAdherence > 0.8
-              ? 'Your adherence is excellent. Maintain current dosing schedule.'
-              : 'Improve protocol consistency for better results. Set reminders.',
-          icon: '💪',
-        ));
-      }
+      final prompt = '''You are a peptide protocol analyst. Analyze the following user data and provide 4-5 specific, actionable insights.
 
-      // Insight 5: Recommendation
-      insights.add(AIInsight(
-        title: '💡 Next Steps',
-        message: 'Schedule next lab work in 3 months to measure protocol impact. Consider biomarker-specific optimization.',
-        icon: '🚀',
-      ));
+$dataForAnalysis
 
-      if (mounted) {
-        setState(() {
-          _aiInsights = insights;
-          _isGeneratingAI = false;
-        });
+Provide insights on:
+1. Protocol effectiveness based on ratings and biomarker changes
+2. Weight and body composition trends
+3. Side effect patterns and mitigation strategies
+4. Lab biomarker improvements or concerns
+5. Recommendations for next protocol optimization
+
+Format your response as a JSON array with exactly this structure (no extra text):
+[
+  {
+    "title": "📊 Insight Title",
+    "message": "Detailed message with specific numbers and recommendations",
+    "icon": "emoji"
+  }
+]
+
+Be specific and data-driven. Use actual values from the data provided.''';
+
+      print('DEBUG: Sending prompt to Claude: ${prompt.length} chars');
+
+      // Call Claude API via HTTP
+      final response = await http.post(
+        Uri.parse('https://api.anthropic.com/v1/messages'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': const String.fromEnvironment('CLAUDE_API_KEY', defaultValue: ''),
+          'anthropic-version': '2023-06-01',
+        },
+        body: jsonEncode({
+          'model': 'claude-opus-4-5',
+          'max_tokens': 1024,
+          'messages': [
+            {
+              'role': 'user',
+              'content': prompt,
+            }
+          ],
+        }),
+      );
+
+      print('DEBUG: Claude API response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final content = data['content'][0]['text'] as String;
+        
+        print('DEBUG: Claude response: $content');
+
+        // Parse JSON from Claude's response
+        // Handle case where response might have markdown code blocks
+        String jsonString = content;
+        if (content.contains('```json')) {
+          jsonString = content.split('```json')[1].split('```')[0];
+        } else if (content.contains('```')) {
+          jsonString = content.split('```')[1].split('```')[0];
+        }
+        
+        final insightsData = jsonDecode(jsonString.trim()) as List;
+        
+        if (mounted) {
+          setState(() {
+            _aiInsights = insightsData.map((i) => AIInsight(
+              title: i['title'] as String,
+              message: i['message'] as String,
+              icon: i['icon'] as String,
+            )).toList();
+            _isGeneratingAI = false;
+          });
+        }
+      } else {
+        final errorBody = response.body;
+        print('DEBUG: Claude API error: $errorBody');
+        throw Exception('Claude API Error ${response.statusCode}: $errorBody');
       }
     } catch (e) {
-      print('Error generating insights: $e');
+      print('Error generating Claude insights: $e');
       if (mounted) {
         setState(() => _isGeneratingAI = false);
-        _showError('Failed to generate insights');
+        _showError('Claude API error: $e. Make sure CLAUDE_API_KEY env var is set.');
       }
     }
   }
