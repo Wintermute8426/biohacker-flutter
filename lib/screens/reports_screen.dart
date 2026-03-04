@@ -254,21 +254,14 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                     ],
                   ),
                 ),
-                // Tab 2: Effectiveness & Side Effects
+                // Tab 2: Cycle Comparison (Peptide Summary Table)
                 RefreshIndicator(
                   onRefresh: _loadAllData,
                   color: AppColors.primary,
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      _buildSectionHeader('⭐ EFFECTIVENESS RATINGS', 'By Cycle'),
-                      const SizedBox(height: 12),
-                      _buildEffectivenessRatings(),
-                      const SizedBox(height: 32),
-                      _buildSectionHeader('🔥 SIDE EFFECTS HEATMAP', 'Monthly View'),
-                      const SizedBox(height: 12),
-                      _buildSideEffectsHeatmap(),
-                      const SizedBox(height: 32),
+                      _buildCycleComparisonV2(),
                     ],
                   ),
                 ),
@@ -328,18 +321,11 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                     ],
                   ),
                 ),
-                // Tab 7: Cycle Comparison
-                RefreshIndicator(
-                  onRefresh: _loadAllData,
-                  color: AppColors.primary,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _buildSectionHeader('📊 CYCLE COMPARISON', 'Side-by-Side Analysis'),
-                      const SizedBox(height: 12),
-                      _buildCycleComparison(),
-                      const SizedBox(height: 32),
-                    ],
+                // Tab 7: Placeholder
+                Center(
+                  child: Text(
+                    'TAB 7 - Coming Soon',
+                    style: TextStyle(color: AppColors.textMid, fontSize: 16, letterSpacing: 1),
                   ),
                 ),
               ],
@@ -1514,6 +1500,282 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
           ),
         ),
       ],
+    );
+  }
+
+  // Tab 2: Cycle Comparison V2 - Peptide summary table with stats
+  Widget _buildCycleComparisonV2() {
+    if (_cycleComparisons.isEmpty) {
+      return _buildEmptyState('No cycle data available');
+    }
+
+    // Group cycles by peptide to get aggregate stats
+    final peptideStats = <String, List<CycleComparison>>{};
+    for (var cycle in _cycleComparisons) {
+      if (!peptideStats.containsKey(cycle.cycleName)) {
+        peptideStats[cycle.cycleName] = [];
+      }
+      peptideStats[cycle.cycleName]!.add(cycle);
+    }
+
+    // Calculate peptide-level metrics
+    final peptideMetrics = peptideStats.entries.map((entry) {
+      final peptideName = entry.key;
+      final cycles = entry.value;
+      final totalCycles = cycles.length;
+      final completedCycles = cycles.where((c) => c.rating > 0).length;
+      final adherencePercent = totalCycles > 0 ? (completedCycles / totalCycles * 100) : 0;
+      final avgDuration = totalCycles > 0
+          ? cycles.map((c) => c.endDate.difference(c.startDate).inDays).reduce((a, b) => a + b) / totalCycles
+          : 0;
+      final totalDoses = cycles.fold<int>(0, (sum, c) => sum + c.dosesLogged);
+      final avgRating = totalCycles > 0
+          ? cycles.map((c) => c.rating).reduce((a, b) => a + b) / totalCycles
+          : 0;
+
+      return {
+        'peptide': peptideName,
+        'totalCycles': totalCycles,
+        'completedCycles': completedCycles,
+        'adherence': adherencePercent,
+        'avgDuration': avgDuration,
+        'totalDoses': totalDoses,
+        'avgRating': avgRating,
+      };
+    }).toList();
+
+    // Sort by adherence descending
+    peptideMetrics.sort((a, b) => (b['adherence'] as double).compareTo(a['adherence'] as double));
+
+    // Get top stats
+    final bestAdherence = peptideMetrics.isNotEmpty ? peptideMetrics.first : null;
+    final mostUsed = peptideMetrics.isNotEmpty
+        ? peptideMetrics.reduce((a, b) => (a['totalCycles'] as int) > (b['totalCycles'] as int) ? a : b)
+        : null;
+    final longestProtocol = peptideMetrics.isNotEmpty
+        ? peptideMetrics.reduce((a, b) => (a['avgDuration'] as double) > (b['avgDuration'] as double) ? a : b)
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        _buildSectionHeader('📊 CYCLE COMPARISON', 'Peptide performance summary'),
+        const SizedBox(height: 20),
+
+        // Top 3 stat cards
+        if (bestAdherence != null) ...[
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCardLarge(
+                  '✅ BEST ADHERENCE',
+                  bestAdherence['peptide'] as String,
+                  '${(bestAdherence['adherence'] as double).toStringAsFixed(0)}%',
+                  AppColors.accent,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCardLarge(
+                  '🔥 MOST USED',
+                  mostUsed!['peptide'] as String,
+                  '${mostUsed['totalCycles']} cycles',
+                  AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildStatCardLarge(
+            '⏱️ LONGEST PROTOCOL',
+            longestProtocol!['peptide'] as String,
+            '${(longestProtocol['avgDuration'] as double).toStringAsFixed(0)} days avg',
+            AppColors.secondary,
+          ),
+          const SizedBox(height: 24),
+        ],
+
+        // Table header
+        Text(
+          'PEPTIDE COMPARISON',
+          style: TextStyle(
+            color: AppColors.textMid,
+            fontSize: 11,
+            letterSpacing: 1,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Table
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Column(
+            children: [
+              // Header row
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: AppColors.border)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Text('PEPTIDE', style: _tableHeaderStyle()),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text('CYCLES', style: _tableHeaderStyle(), textAlign: TextAlign.center),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text('✓', style: _tableHeaderStyle(), textAlign: TextAlign.center),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text('ADHR', style: _tableHeaderStyle(), textAlign: TextAlign.right),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text('DAYS', style: _tableHeaderStyle(), textAlign: TextAlign.right),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text('DOSES', style: _tableHeaderStyle(), textAlign: TextAlign.right),
+                    ),
+                  ],
+                ),
+              ),
+              // Data rows
+              ...peptideMetrics.asMap().entries.map((entry) {
+                final metric = entry.value;
+                final isHighlight = entry.key < 3; // Highlight first 3
+                return Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isHighlight ? AppColors.surface.withOpacity(0.7) : AppColors.surface,
+                    border: Border(bottom: BorderSide(color: AppColors.border.withOpacity(0.3))),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          metric['peptide'] as String,
+                          style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          '${metric['totalCycles']}',
+                          style: TextStyle(color: AppColors.textLight, fontSize: 10),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text(
+                          '${metric['completedCycles']}',
+                          style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          '${(metric['adherence'] as double).toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            color: (metric['adherence'] as double) >= 80 ? AppColors.accent : AppColors.textMid,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          '${(metric['avgDuration'] as double).toStringAsFixed(0)}',
+                          style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          '${metric['totalDoses']}',
+                          style: TextStyle(color: AppColors.accent, fontSize: 10),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  TextStyle _tableHeaderStyle() {
+    return TextStyle(
+      color: AppColors.textMid,
+      fontSize: 10,
+      fontWeight: FontWeight.bold,
+      letterSpacing: 0.5,
+    );
+  }
+
+  Widget _buildStatCardLarge(String label, String title, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: color.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.textMid,
+              fontSize: 9,
+              letterSpacing: 0.5,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            title,
+            style: TextStyle(
+              color: color,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              color: AppColors.accent,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
