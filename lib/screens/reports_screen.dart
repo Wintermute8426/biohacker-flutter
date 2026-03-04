@@ -360,10 +360,15 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
         _buildSectionHeader('🧪 CYCLE-LAB CORRELATION', 'Visualize peptide impact on biomarkers'),
         const SizedBox(height: 24),
         // Lab results
-        ..._labsWithContext.map((labContext) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        ..._labsWithContext.map((labContext) => _buildLabResultCard(labContext)).toList(),
+      ],
+    );
+  }
+
+  Widget _buildLabResultCard(LabResultWithContext labContext) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
             // Lab date
             Container(
               margin: const EdgeInsets.symmetric(vertical: 16),
@@ -498,15 +503,13 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                 ),
               ],
             ],
-            const SizedBox(height: 16),
-            Container(
-              height: 1,
-              color: AppColors.border,
-              margin: const EdgeInsets.symmetric(vertical: 16),
-            ),
-          ],
-        );
-      }).toList(),
+        const SizedBox(height: 16),
+        Container(
+          height: 1,
+          color: AppColors.border,
+          margin: const EdgeInsets.symmetric(vertical: 16),
+        ),
+      ],
     );
   }
 
