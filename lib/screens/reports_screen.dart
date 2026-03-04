@@ -354,7 +354,13 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
     }
 
     return Column(
-      children: _labsWithContext.map((labContext) {
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        _buildSectionHeader('🧪 CYCLE-LAB CORRELATION', 'Visualize peptide impact on biomarkers'),
+        const SizedBox(height: 24),
+        // Lab results
+        ..._labsWithContext.map((labContext) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -475,68 +481,22 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                 ),
               ),
               const SizedBox(height: 12),
+              // Show first 3 biomarkers
               ...labContext.biomarkerChanges
                   .where((b) => b.previousValue != null)
-                  .take(6) // Show top 6 changes
-                  .map((biomarker) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    border: Border.all(
-                      color: _getStatusColor(biomarker.status).withOpacity(0.3),
-                    ),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            biomarker.name,
-                            style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                '${biomarker.currentValue?.toStringAsFixed(1) ?? 'N/A'} ${biomarker.unit ?? ''}',
-                                style: TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(width: 8),
-                              if (biomarker.changePercent != null)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: biomarker.changePercent! >= 0
-                                        ? AppColors.accent.withOpacity(0.2)
-                                        : AppColors.error.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                  child: Text(
-                                    '${biomarker.changePercent! >= 0 ? '+' : ''}${biomarker.changePercent?.toStringAsFixed(1)}%',
-                                    style: TextStyle(
-                                      color: biomarker.changePercent! >= 0 ? AppColors.accent : AppColors.error,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Previous: ${biomarker.previousValue?.toStringAsFixed(1) ?? 'N/A'}',
-                        style: TextStyle(color: AppColors.textMid, fontSize: 10),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                  .take(3)
+                  .map((biomarker) => _buildBiomarkerCard(biomarker))
+                  .toList(),
+              // Show "More" section if there are more than 3
+              if (labContext.biomarkerChanges.where((b) => b.previousValue != null).length > 3) ...[
+                const SizedBox(height: 12),
+                _buildExpandableBiomarkerSection(
+                  labContext.biomarkerChanges
+                      .where((b) => b.previousValue != null)
+                      .skip(3)
+                      .toList(),
+                ),
+              ],
             ],
             const SizedBox(height: 16),
             Container(
@@ -559,6 +519,179 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
       default:
         return AppColors.accent;
     }
+  }
+
+  Widget _buildBiomarkerCard(BiomarkerComparison biomarker) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(
+          color: _getStatusColor(biomarker.status).withOpacity(0.3),
+        ),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                biomarker.name,
+                style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+              Row(
+                children: [
+                  Text(
+                    '${biomarker.currentValue?.toStringAsFixed(1) ?? 'N/A'} ${biomarker.unit ?? ''}',
+                    style: TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 8),
+                  if (biomarker.changePercent != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: biomarker.changePercent! >= 0
+                            ? AppColors.accent.withOpacity(0.2)
+                            : AppColors.error.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Text(
+                        '${biomarker.changePercent! >= 0 ? '+' : ''}${biomarker.changePercent?.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          color: biomarker.changePercent! >= 0 ? AppColors.accent : AppColors.error,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Previous: ${biomarker.previousValue?.toStringAsFixed(1) ?? 'N/A'}',
+            style: TextStyle(color: AppColors.textMid, fontSize: 10),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpandableBiomarkerSection(List<BiomarkerComparison> biomarkers) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            dividerColor: Colors.transparent,
+          ),
+          child: ExpansionTile(
+            title: Text(
+              'MORE BIOMARKERS (+${biomarkers.length})',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+            childrenPadding: EdgeInsets.zero,
+            tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            backgroundColor: AppColors.surface.withOpacity(0.5),
+            collapsedBackgroundColor: AppColors.surface.withOpacity(0.5),
+            iconColor: AppColors.primary,
+            collapsedIconColor: AppColors.primary,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Column(
+                  children: biomarkers
+                      .map((biomarker) => Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    biomarker.name,
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Previous: ${biomarker.previousValue?.toStringAsFixed(1) ?? 'N/A'}',
+                                    style: TextStyle(color: AppColors.textMid, fontSize: 9),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${biomarker.currentValue?.toStringAsFixed(1) ?? 'N/A'} ${biomarker.unit ?? ''}',
+                                  style: TextStyle(
+                                    color: AppColors.accent,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (biomarker.changePercent != null)
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 2),
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: biomarker.changePercent! >= 0
+                                          ? AppColors.accent.withOpacity(0.2)
+                                          : AppColors.error.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                    child: Text(
+                                      '${biomarker.changePercent! >= 0 ? '+' : ''}${biomarker.changePercent?.toStringAsFixed(1)}%',
+                                      style: TextStyle(
+                                        color: biomarker.changePercent! >= 0 ? AppColors.accent : AppColors.error,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (biomarker != biomarkers.last)
+                        Divider(
+                          color: AppColors.border,
+                          height: 1,
+                          indent: 12,
+                          endIndent: 12,
+                        ),
+                    ],
+                  ))
+                  .toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildSectionHeader(String title, String subtitle) {
