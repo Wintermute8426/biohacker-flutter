@@ -28,6 +28,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
   List<CycleLabCorrelation> _labCorrelations = [];
   List<CycleEffectiveness> _effectiveness = [];
   List<AIInsight> _aiInsights = [];
+  List<CycleComparison> _cycleComparisons = [];
 
   DateTime _heatmapMonth = DateTime.now();
 
@@ -63,6 +64,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
         _reportsService.getCycleLabCorrelation(),
         _reportsService.getCycleEffectiveness(),
         _reportsService.generateAIInsights(),
+        _reportsService.getCycleComparisons(),
       ]);
 
       if (mounted) {
@@ -74,6 +76,7 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
           _labCorrelations = results[4] as List<CycleLabCorrelation>;
           _effectiveness = results[5] as List<CycleEffectiveness>;
           _aiInsights = results[6] as List<AIInsight>;
+          _cycleComparisons = results[7] as List<CycleComparison>;
           _isLoading = false;
         });
       }
@@ -312,17 +315,31 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                   ),
                 ),
                 // Tab 6: Body Composition
-                Center(
-                  child: Text(
-                    'BODY COMPOSITION - Coming Soon',
-                    style: TextStyle(color: AppColors.textMid, fontSize: 16, letterSpacing: 1),
+                RefreshIndicator(
+                  onRefresh: _loadAllData,
+                  color: AppColors.primary,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      _buildSectionHeader('💪 BODY COMPOSITION', 'Weight + Body Fat %'),
+                      const SizedBox(height: 12),
+                      _buildBodyComposition(),
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
                 // Tab 7: Cycle Comparison
-                Center(
-                  child: Text(
-                    'CYCLE COMPARISON - Coming Soon',
-                    style: TextStyle(color: AppColors.textMid, fontSize: 16, letterSpacing: 1),
+                RefreshIndicator(
+                  onRefresh: _loadAllData,
+                  color: AppColors.primary,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      _buildSectionHeader('📊 CYCLE COMPARISON', 'Side-by-Side Analysis'),
+                      const SizedBox(height: 12),
+                      _buildCycleComparison(),
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
               ],
@@ -1147,6 +1164,256 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
           ),
         ),
       ],
+    );
+  }
+
+  // Tab 6: Body Composition - Dual-axis weight + body fat chart
+  Widget _buildBodyComposition() {
+    if (_weightTrends.isEmpty) {
+      return _buildEmptyState('No weight data available');
+    }
+
+    final hasBodyFat = _weightTrends.any((w) => w.bodyFatPercent != null);
+    
+    return Container(
+      height: 300,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.1),
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Legend
+          Wrap(
+            spacing: 20,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Weight (lbs)',
+                    style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                  ),
+                ],
+              ),
+              if (hasBodyFat)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Body Fat %',
+                      style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: AppColors.border,
+                    strokeWidth: 1,
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  show: true,
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        if (value.toInt() % 30 != 0) return const SizedBox.shrink();
+                        final index = value.toInt();
+                        if (index >= 0 && index < _weightTrends.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              DateFormat('M/d').format(_weightTrends[index].date),
+                              style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          '${value.toInt()}',
+                          style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  // Weight line
+                  LineChartBarData(
+                    spots: _weightTrends.asMap().entries.map((entry) {
+                      return FlSpot(entry.key.toDouble(), entry.value.weight);
+                    }).toList(),
+                    isCurved: true,
+                    color: AppColors.primary,
+                    barWidth: 3,
+                    dotData: FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: AppColors.primary.withOpacity(0.1),
+                    ),
+                  ),
+                  // Body fat line (if available)
+                  if (hasBodyFat)
+                    LineChartBarData(
+                      spots: _weightTrends
+                          .asMap()
+                          .entries
+                          .where((entry) => entry.value.bodyFatPercent != null)
+                          .map((entry) {
+                        return FlSpot(entry.key.toDouble(), entry.value.bodyFatPercent! * 10);
+                      }).toList(),
+                      isCurved: true,
+                      color: AppColors.accent,
+                      barWidth: 3,
+                      dotData: FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: AppColors.accent.withOpacity(0.1),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Tab 7: Cycle Comparison - Side-by-side summary cards
+  Widget _buildCycleComparison() {
+    if (_cycleComparisons.isEmpty) {
+      return _buildEmptyState('No cycle data available');
+    }
+
+    return Column(
+      children: _cycleComparisons.map((cycle) {
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.1),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Cycle name + dates
+              Text(
+                cycle.cycleName,
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${DateFormat('MMM d').format(cycle.startDate)} - ${DateFormat('MMM d').format(cycle.endDate)}',
+                style: TextStyle(color: AppColors.textMid, fontSize: 12),
+              ),
+              const SizedBox(height: 16),
+              // Stats grid
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                children: [
+                  _buildStatCard('⭐ RATING', '${cycle.rating}/10', 
+                    cycle.rating >= 7 ? AppColors.accent : cycle.rating >= 5 ? Colors.orange : AppColors.error),
+                  _buildStatCard('💉 DOSES', '${cycle.dosesLogged}', AppColors.primary),
+                  _buildStatCard('⚖️ AVG WEIGHT', '${cycle.avgWeight.toStringAsFixed(1)} lbs', AppColors.secondary),
+                  _buildStatCard('⚠️ SIDE FX', '${cycle.sideEffects}', AppColors.error),
+                ],
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // Helper: Stat card for cycle comparison
+  Widget _buildStatCard(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        border: Border.all(color: color.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            style: TextStyle(color: AppColors.textMid, fontSize: 10, letterSpacing: 0.5),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 

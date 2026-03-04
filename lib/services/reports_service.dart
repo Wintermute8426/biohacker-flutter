@@ -42,12 +42,14 @@ class SideEffectHeatmapData {
 class WeightPoint {
   final DateTime date;
   final double weight;
+  final double? bodyFatPercent;
   final String? cycleId;
   final String? cycleName;
 
   WeightPoint({
     required this.date,
     required this.weight,
+    this.bodyFatPercent,
     this.cycleId,
     this.cycleName,
   });
@@ -114,6 +116,28 @@ class AIInsight {
     required this.title,
     required this.message,
     required this.icon,
+  });
+}
+
+class CycleComparison {
+  final String cycleId;
+  final String cycleName;
+  final DateTime startDate;
+  final DateTime endDate;
+  final int rating;
+  final int dosesLogged;
+  final double avgWeight;
+  final int sideEffects;
+
+  CycleComparison({
+    required this.cycleId,
+    required this.cycleName,
+    required this.startDate,
+    required this.endDate,
+    required this.rating,
+    required this.dosesLogged,
+    required this.avgWeight,
+    required this.sideEffects,
   });
 }
 
@@ -266,6 +290,7 @@ class ReportsService {
         return WeightPoint(
           date: logDate,
           weight: (log['weight_lbs'] as num).toDouble(),
+          bodyFatPercent: log['body_fat_percent'] != null ? (log['body_fat_percent'] as num).toDouble() : null,
           cycleId: cycleId,
           cycleName: cycleName,
         );
@@ -597,5 +622,81 @@ class ReportsService {
       return (data['value'] as num?)?.toDouble();
     }
     return (data as num?)?.toDouble();
+  }
+
+  // G. Cycle Comparison - Get side-by-side comparison of cycles
+  Future<List<CycleComparison>> getCycleComparisons() async {
+    try {
+      final user = supabase.auth.currentUser;
+      if (user == null) throw Exception('User not authenticated');
+
+      // Get all cycles with their reviews
+      final cyclesResponse = await supabase
+          .from('cycles')
+          .select('*, cycle_reviews(*)')
+          .eq('user_id', user.id)
+          .order('start_date', ascending: false);
+
+      final cycles = cyclesResponse as List;
+      final List<CycleComparison> comparisons = [];
+
+      for (var cycle in cycles) {
+        final cycleId = cycle['id'] as String;
+        final startDate = DateTime.parse(cycle['start_date']);
+        final endDate = DateTime.parse(cycle['end_date']);
+
+        // Get doses logged during this cycle
+        final dosesResponse = await supabase
+            .from('dose_logs')
+            .select()
+            .eq('cycle_id', cycleId)
+            .eq('user_id', user.id);
+        final doseCount = (dosesResponse as List).length;
+
+        // Get side effects during cycle
+        final effectsResponse = await supabase
+            .from('side_effects_log')
+            .select()
+            .eq('user_id', user.id)
+            .gte('logged_at', startDate.toIso8601String())
+            .lte('logged_at', endDate.toIso8601String());
+        final effectCount = (effectsResponse as List).length;
+
+        // Get weight during cycle
+        final weightsResponse = await supabase
+            .from('weight_logs')
+            .select()
+            .eq('user_id', user.id)
+            .gte('logged_at', startDate.toIso8601String())
+            .lte('logged_at', endDate.toIso8601String());
+        final weights = (weightsResponse as List);
+        final avgWeight = weights.isNotEmpty
+            ? weights
+                .map((w) => (w['weight_lbs'] as num).toDouble())
+                .reduce((a, b) => a + b) /
+                weights.length
+            : 0.0;
+
+        // Get review rating
+        final reviews = cycle['cycle_reviews'] as List;
+        final rating = reviews.isNotEmpty ? reviews[0]['effectiveness_rating'] as int : 0;
+
+        comparisons.add(CycleComparison(
+          cycleId: cycleId,
+          cycleName: cycle['peptide_name'] as String,
+          startDate: startDate,
+          endDate: endDate,
+          rating: rating,
+          dosesLogged: doseCount,
+          avgWeight: avgWeight,
+          sideEffects: effectCount,
+        ));
+      }
+
+      return comparisons;
+    } catch (e) {
+      print('Error fetching cycle comparisons: $e');
+      return [];
+    }
   }
 }
