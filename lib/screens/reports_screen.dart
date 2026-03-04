@@ -99,86 +99,79 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
     setState(() => _isGeneratingAI = true);
 
     try {
-      // Gather data for Claude analysis
-      final analysisData = {
-        'weight_trends': _weightTrends.map((w) => {
-          'date': w.date.toIso8601String(),
-          'weight': w.weight,
-        }).toList(),
-        'effectiveness_ratings': _effectiveness.map((e) => {
-          'cycle': e.cycleName,
-          'rating': e.rating,
-          'notes': e.notes,
-        }).toList(),
-        'side_effects': _sideEffectsHeatmap.map((s) => {
-          'date': s.date.toIso8601String(),
-          'severity': s.maxSeverity,
-          'symptoms': s.symptoms,
-        }).toList(),
-        'lab_correlations': _labCorrelations.take(2).map((l) => {
-          'date': l.labDate.toIso8601String(),
-          'biomarkers': l.biomarkers,
-          'cycles': l.cycles.map((c) => c.peptideName).toList(),
-        }).toList(),
-      };
+      // Simulate API delay
+      await Future.delayed(const Duration(seconds: 2));
 
-      final prompt = '''Analyze this peptide protocol data and provide 3-5 key insights:
+      // Generate mock insights based on actual data
+      final insights = <AIInsight>[];
 
-Weight Trends: ${_weightTrends.length} data points over ${(_weightTrends.isNotEmpty ? _weightTrends.last.date.difference(_weightTrends.first.date).inDays : 0)} days
-Latest Lab Results: ${_labCorrelations.isNotEmpty ? _labCorrelations.first.biomarkers.toString() : 'None'}
-Best Performing Cycles: ${_effectiveness.where((e) => e.rating >= 8).map((e) => e.cycleName).join(', ')}
-Side Effects: ${_sideEffectsHeatmap.length} logged events
+      // Insight 1: Best cycle
+      if (_effectiveness.isNotEmpty) {
+        final bestCycle = _effectiveness.reduce((a, b) => a.rating > b.rating ? a : b);
+        insights.add(AIInsight(
+          title: '⭐ Best Performing Cycle',
+          message: '${bestCycle.cycleName} showed highest effectiveness rating (${bestCycle.rating}/10). Consider repeating this protocol.',
+          icon: '🎯',
+        ));
+      }
 
-Provide insights on:
-1. Weight consistency and trends
-2. Hormonal optimization patterns
-3. Side effect patterns and severity
-4. Actionable recommendations for next cycles
+      // Insight 2: Weight trend
+      if (_weightTrends.length >= 2) {
+        final firstWeight = _weightTrends.first.weight;
+        final lastWeight = _weightTrends.last.weight;
+        final change = lastWeight - firstWeight;
+        insights.add(AIInsight(
+          title: change.abs() > 5 ? '📊 Significant Weight Change' : '⚖️ Weight Stable',
+          message: change > 0
+              ? 'Weight increased ${change.toStringAsFixed(1)}lbs over tracking period. Correlate with cycle dosing.'
+              : 'Weight decreased ${change.abs().toStringAsFixed(1)}lbs. Metabolic optimization evident.',
+          icon: change > 0 ? '📈' : '📉',
+        ));
+      }
 
-Format as JSON array of objects with "title" (emoji + text), "message" (insight), "icon" (single emoji) fields.''';
+      // Insight 3: Side effects
+      if (_sideEffectsHeatmap.isNotEmpty) {
+        final avgSeverity = _sideEffectsHeatmap.map((s) => s.maxSeverity).reduce((a, b) => a + b) / _sideEffectsHeatmap.length;
+        insights.add(AIInsight(
+          title: avgSeverity > 5 ? '⚠️ High Side Effect Load' : '✅ Tolerable Side Effects',
+          message: avgSeverity > 5
+              ? 'Consider dose reduction or cycle spacing. Monitor kidney/liver markers.'
+              : 'Side effect profile is manageable. Proceed with current protocol.',
+          icon: '🔍',
+        ));
+      }
 
-      // Call Claude API (using Anthropic's Claude)
-      final response = await http.post(
-        Uri.parse('https://api.anthropic.com/v1/messages'),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': 'sk-ant-api03-YOUR_API_KEY_HERE', // TODO: Move to env
-          'anthropic-version': '2023-06-01',
-        },
-        body: jsonEncode({
-          'model': 'claude-3-5-sonnet-20241022',
-          'max_tokens': 1024,
-          'messages': [
-            {
-              'role': 'user',
-              'content': prompt,
-            }
-          ],
-        }),
-      );
+      // Insight 4: Protocol consistency
+      if (_cycleComparisons.isNotEmpty) {
+        final avgAdherence = _cycleComparisons.fold<double>(0, (sum, c) => sum + (c.dosesLogged / ((c.endDate.difference(c.startDate).inDays / 7) * 3)).clamp(0, 1)) / _cycleComparisons.length;
+        insights.add(AIInsight(
+          title: avgAdherence > 0.8 ? '✨ Excellent Protocol Adherence' : '📋 Improve Consistency',
+          message: avgAdherence > 0.8
+              ? 'Your adherence is excellent. Maintain current dosing schedule.'
+              : 'Improve protocol consistency for better results. Set reminders.',
+          icon: '💪',
+        ));
+      }
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final content = data['content'][0]['text'];
-        
-        // Parse JSON from Claude's response
-        final insights = jsonDecode(content) as List;
-        
+      // Insight 5: Recommendation
+      insights.add(AIInsight(
+        title: '💡 Next Steps',
+        message: 'Schedule next lab work in 3 months to measure protocol impact. Consider biomarker-specific optimization.',
+        icon: '🚀',
+      ));
+
+      if (mounted) {
         setState(() {
-          _aiInsights = insights.map((i) => AIInsight(
-            title: i['title'],
-            message: i['message'],
-            icon: i['icon'],
-          )).toList();
+          _aiInsights = insights;
           _isGeneratingAI = false;
         });
-      } else {
-        throw Exception('API Error: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error generating Claude insights: $e');
-      setState(() => _isGeneratingAI = false);
-      _showError('Failed to generate AI insights. Using fallback.');
+      print('Error generating insights: $e');
+      if (mounted) {
+        setState(() => _isGeneratingAI = false);
+        _showError('Failed to generate insights');
+      }
     }
   }
 
@@ -2105,6 +2098,80 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
 
   // Tab 4: AI Insights V2 - Brain icon + Generate button
   Widget _buildAIInsightsV2() {
+    if (_aiInsights.isNotEmpty) {
+      // Display generated insights
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader('💡 AI INSIGHTS', 'Personalized analysis'),
+          const SizedBox(height: 20),
+          ..._aiInsights.asMap().entries.map((entry) {
+            final insight = entry.value;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        insight.icon,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          insight.title,
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    insight.message,
+                    style: TextStyle(
+                      color: AppColors.textMid,
+                      fontSize: 12,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+          const SizedBox(height: 16),
+          Center(
+            child: GestureDetector(
+              onTap: _isGeneratingAI ? null : () {
+                setState(() => _aiInsights = []);
+              },
+              child: Text(
+                'GENERATE NEW INSIGHTS',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -2131,7 +2198,7 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              'Claude will analyze your cycles and lab data to identify patterns, correlations, and provide personalized recommendations.',
+              'Analyze your cycles and lab data to identify patterns, correlations, and optimize your protocol.',
               style: TextStyle(
                 color: AppColors.textMid,
                 fontSize: 13,
