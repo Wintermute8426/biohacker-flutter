@@ -23,12 +23,12 @@ jobs:
       - name: Verify Flutter installation
         run: flutter --version && flutter doctor -v
       
-      - name: Clean pub cache and lock file
+      - name: Clean everything
         run: |
           rm -rf ~/.pub-cache
           rm -f pubspec.lock
           rm -rf .dart_tool
-          flutter pub cache repair
+          flutter clean
       
       - name: Get dependencies
         run: flutter pub get --no-precompile
