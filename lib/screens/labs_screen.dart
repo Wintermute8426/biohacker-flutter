@@ -677,6 +677,8 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                 final status = entry.value is Map
                   ? (entry.value['status']?.toString() ?? 'NORMAL')
                   : 'NORMAL';
+                final category = _getBiomarkerCategory(entry.key);
+                final hint = _getBiomarkerHint(entry.key);
 
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -691,52 +693,102 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Top row: Name + Status
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            _beautifyBiomarkerName(entry.key),
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _beautifyBiomarkerName(entry.key),
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                if (hint.isNotEmpty)
+                                  Text(
+                                    hint,
+                                    style: TextStyle(
+                                      color: AppColors.textMid,
+                                      fontSize: 10,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               color: isOut 
                                 ? AppColors.error.withOpacity(0.2)
                                 : AppColors.accent.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(2),
+                              borderRadius: BorderRadius.circular(3),
                             ),
                             child: Text(
-                              isOut ? 'OUT OF RANGE' : status,
+                              isOut ? 'OUT OF\nRANGE' : status,
                               style: TextStyle(
                                 color: isOut ? AppColors.error : AppColors.accent,
-                                fontSize: 10,
+                                fontSize: 9,
                                 fontWeight: FontWeight.bold,
                               ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        displayValue,
-                        style: TextStyle(
-                          color: AppColors.accent,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _getUnitForBiomarker(entry.key),
-                        style: TextStyle(
-                          color: AppColors.textMid,
-                          fontSize: 10,
-                        ),
+                      // Value + Unit + Category
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            displayValue,
+                            style: TextStyle(
+                              color: AppColors.accent,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _getUnitForBiomarker(entry.key),
+                                  style: TextStyle(
+                                    color: AppColors.textMid,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                                const SizedBox(height: 1),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                  child: Text(
+                                    category,
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -773,8 +825,78 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
       't4': 'T4',
       'prolactin': 'Prolactin',
       'psa': 'PSA',
+      'basophils': 'Basophils',
+      'eosinophils': 'Eosinophils',
+      'ferritin': 'Ferritin',
+      'hematocrit': 'Hematocrit',
+      'hemoglobin': 'Hemoglobin',
+      'hemoglobin_a1c': 'Hemoglobin A1C',
     };
     return names[key.toLowerCase()] ?? key;
+  }
+
+  String _getBiomarkerCategory(String key) {
+    final categories = {
+      'testosterone': 'Hormones',
+      'free_testosterone': 'Hormones',
+      'estradiol': 'Hormones',
+      'cortisol': 'Hormones',
+      'prolactin': 'Hormones',
+      'tsh': 'Thyroid',
+      't3': 'Thyroid',
+      't4': 'Thyroid',
+      'igf1': 'Growth Factors',
+      'hgh': 'Growth Factors',
+      'crp': 'Inflammation',
+      'hdl': 'Lipids',
+      'ldl': 'Lipids',
+      'total_cholesterol': 'Lipids',
+      'triglycerides': 'Lipids',
+      'glucose': 'Metabolic',
+      'insulin': 'Metabolic',
+      'hemoglobin_a1c': 'Metabolic',
+      'alt': 'Liver',
+      'ast': 'Liver',
+      'psa': 'Prostate',
+      'basophils': 'Blood Count',
+      'eosinophils': 'Blood Count',
+      'ferritin': 'Blood Count',
+      'hematocrit': 'Blood Count',
+      'hemoglobin': 'Blood Count',
+    };
+    return categories[key.toLowerCase()] ?? 'Other';
+  }
+
+  String _getBiomarkerHint(String key) {
+    final hints = {
+      'testosterone': 'Primary male sex hormone',
+      'free_testosterone': 'Bioavailable testosterone',
+      'estradiol': 'Primary female sex hormone',
+      'cortisol': 'Stress hormone',
+      'prolactin': 'Milk production hormone',
+      'tsh': 'Thyroid stimulating hormone',
+      't3': 'Active thyroid hormone',
+      't4': 'Thyroid storage hormone',
+      'igf1': 'Growth & recovery factor',
+      'hgh': 'Human growth hormone',
+      'crp': 'Inflammation marker',
+      'hdl': 'Good cholesterol',
+      'ldl': 'LDL cholesterol',
+      'total_cholesterol': 'Total blood cholesterol',
+      'triglycerides': 'Blood fat storage',
+      'glucose': 'Blood sugar level',
+      'insulin': 'Blood sugar regulator',
+      'hemoglobin_a1c': '3-month glucose average',
+      'alt': 'Liver enzyme',
+      'ast': 'Liver enzyme',
+      'psa': 'Prostate marker',
+      'basophils': 'White blood cell type',
+      'eosinophils': 'White blood cell type',
+      'ferritin': 'Iron storage protein',
+      'hematocrit': 'Red blood cell % in blood',
+      'hemoglobin': 'Oxygen-carrying protein',
+    };
+    return hints[key.toLowerCase()] ?? '';
   }
 
   String _getUnitForBiomarker(String key) {
