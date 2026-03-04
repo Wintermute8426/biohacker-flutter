@@ -32,6 +32,9 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
   List<LabResultWithContext> _labsWithContext = [];
 
   DateTime _heatmapMonth = DateTime.now();
+  
+  // Tab 3: Selected biomarkers for Lab Trends chart
+  Set<String> _selectedMarkers = {'testosterone', 'igf1'};
 
   @override
   void initState() {
@@ -265,17 +268,14 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
                     ],
                   ),
                 ),
-                // Tab 3: Lab Trends (Weight)
+                // Tab 3: Lab Trends (Biomarker chart with selectors)
                 RefreshIndicator(
                   onRefresh: _loadAllData,
                   color: AppColors.primary,
                   child: ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      _buildSectionHeader('⚖️ WEIGHT TRENDS', 'Last 6 Months'),
-                      const SizedBox(height: 12),
-                      _buildWeightTrends(),
-                      const SizedBox(height: 32),
+                      _buildLabTrendsV2(),
                     ],
                   ),
                 ),
@@ -1777,6 +1777,336 @@ Format as JSON array of objects with "title" (emoji + text), "message" (insight)
         ],
       ),
     );
+  }
+
+  // Tab 3: Lab Trends V2 - Biomarker line chart with selectors
+  Widget _buildLabTrendsV2() {
+    if (_labsWithContext.isEmpty) {
+      return _buildEmptyState('No lab data available');
+    }
+
+    // Get all unique biomarkers across all labs
+    final allMarkers = <String>{};
+    for (var lab in _labsWithContext) {
+      for (var biomarker in lab.biomarkerChanges) {
+        allMarkers.add(biomarker.name.toLowerCase().replaceAll(' ', '_'));
+      }
+    }
+
+    // Build data points for selected markers
+    final chartData = <String, List<FlSpot>>{};
+    final latestValues = <String, double>{};
+    final baselineValues = <String, double>{};
+
+    for (var marker in _selectedMarkers) {
+      chartData[marker] = [];
+    }
+
+    // Sort labs by date (oldest first for chart)
+    final sortedLabs = List<LabResultWithContext>.from(_labsWithContext)
+      ..sort((a, b) => a.labDate.compareTo(b.labDate));
+
+    for (int i = 0; i < sortedLabs.length; i++) {
+      final lab = sortedLabs[i];
+      for (var biomarker in lab.biomarkerChanges) {
+        final markerKey = biomarker.name.toLowerCase().replaceAll(' ', '_');
+        if (_selectedMarkers.contains(markerKey) && biomarker.currentValue != null) {
+          chartData[markerKey]?.add(FlSpot(i.toDouble(), biomarker.currentValue!));
+          
+          // Track latest and baseline values
+          latestValues[markerKey] = biomarker.currentValue!;
+          if (!baselineValues.containsKey(markerKey)) {
+            baselineValues[markerKey] = biomarker.currentValue!;
+          }
+        }
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        _buildSectionHeader('📈 LAB TRENDS', 'Biomarker changes over time'),
+        const SizedBox(height: 20),
+
+        // Marker selectors
+        Text(
+          'SELECT MARKERS TO DISPLAY',
+          style: TextStyle(
+            color: AppColors.textMid,
+            fontSize: 11,
+            letterSpacing: 1,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _buildMarkerChip('testosterone', 'Testosterone'),
+            _buildMarkerChip('igf1', 'IGF-1'),
+            _buildMarkerChip('crp', 'CRP'),
+            _buildMarkerChip('hdl', 'HDL'),
+            _buildMarkerChip('glucose', 'Glucose'),
+            _buildMarkerChip('cortisol', 'Cortisol'),
+            _buildMarkerChip('free_testosterone', 'Free T'),
+            _buildMarkerChip('estradiol', 'Estradiol'),
+          ],
+        ),
+        const SizedBox(height: 24),
+
+        // Chart
+        if (_selectedMarkers.isNotEmpty && chartData.values.any((v) => v.isNotEmpty)) ...[
+          Text(
+            'MARKER TRENDS OVER TIME',
+            style: TextStyle(
+              color: AppColors.textMid,
+              fontSize: 11,
+              letterSpacing: 1,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            height: 250,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: AppColors.border,
+                    strokeWidth: 1,
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  show: true,
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        final index = value.toInt();
+                        if (index >= 0 && index < sortedLabs.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              DateFormat('MMM').format(sortedLabs[index].labDate),
+                              style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          value.toInt().toString(),
+                          style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                lineBarsData: chartData.entries.where((e) => e.value.isNotEmpty).map((entry) {
+                  final colorIndex = _selectedMarkers.toList().indexOf(entry.key);
+                  final color = _getChartColor(colorIndex);
+                  return LineChartBarData(
+                    spots: entry.value,
+                    isCurved: true,
+                    color: color,
+                    barWidth: 3,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (spot, percent, barData, index) {
+                        return FlDotCirclePainter(
+                          radius: 5,
+                          color: color,
+                          strokeWidth: 2,
+                          strokeColor: AppColors.background,
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(show: false),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Legend
+          Wrap(
+            spacing: 16,
+            children: _selectedMarkers.map((marker) {
+              final colorIndex = _selectedMarkers.toList().indexOf(marker);
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 12,
+                    height: 3,
+                    color: _getChartColor(colorIndex),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _beautifyMarkerName(marker),
+                    style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+
+          // Summary stat cards
+          ...latestValues.entries.map((entry) {
+            final marker = entry.key;
+            final current = entry.value;
+            final baseline = baselineValues[marker];
+            final changePercent = baseline != null && baseline != 0
+                ? ((current - baseline) / baseline * 100)
+                : null;
+            
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _beautifyMarkerName(marker),
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${current.toStringAsFixed(1)} ${_getUnitForMarker(marker)}',
+                        style: TextStyle(
+                          color: AppColors.accent,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (changePercent != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: changePercent >= 0
+                            ? AppColors.accent.withOpacity(0.2)
+                            : AppColors.error.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '${changePercent >= 0 ? '+' : ''}${changePercent.toStringAsFixed(1)}% vs baseline',
+                        style: TextStyle(
+                          color: changePercent >= 0 ? AppColors.accent : AppColors.error,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }).toList(),
+        ] else ...[
+          _buildEmptyState('Select markers to view trends'),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildMarkerChip(String key, String label) {
+    final isSelected = _selectedMarkers.contains(key);
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (isSelected) {
+            _selectedMarkers.remove(key);
+          } else {
+            _selectedMarkers.add(key);
+          }
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary.withOpacity(0.2) : AppColors.surface,
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? AppColors.primary : AppColors.textMid,
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _beautifyMarkerName(String key) {
+    final names = {
+      'testosterone': 'Testosterone',
+      'free_testosterone': 'Free T',
+      'estradiol': 'Estradiol',
+      'igf1': 'IGF-1',
+      'hgh': 'HGH',
+      'crp': 'CRP',
+      'hdl': 'HDL',
+      'ldl': 'LDL',
+      'glucose': 'Glucose',
+      'cortisol': 'Cortisol',
+    };
+    return names[key] ?? key;
+  }
+
+  String _getUnitForMarker(String key) {
+    final units = {
+      'testosterone': 'ng/dL',
+      'free_testosterone': 'pg/mL',
+      'estradiol': 'pg/mL',
+      'igf1': 'ng/mL',
+      'hgh': 'ng/mL',
+      'crp': 'mg/L',
+      'hdl': 'mg/dL',
+      'ldl': 'mg/dL',
+      'glucose': 'mg/dL',
+      'cortisol': 'µg/dL',
+    };
+    return units[key] ?? '';
   }
 
   // Tab 6: Body Composition - Dual-axis weight + body fat chart
