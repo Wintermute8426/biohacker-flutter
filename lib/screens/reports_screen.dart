@@ -2099,10 +2099,18 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
   // Tab 4: AI Insights V2 - Brain icon + Generate button
   Widget _buildAIInsightsV2() {
     if (_aiInsights.isNotEmpty) {
-      // Display generated insights
+      // Display generated insights with brain icon
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Brain icon at top
+          Center(
+            child: Text(
+              '🧠',
+              style: TextStyle(fontSize: 48, color: AppColors.primary),
+            ),
+          ),
+          const SizedBox(height: 16),
           _buildSectionHeader('💡 AI INSIGHTS', 'Personalized analysis'),
           const SizedBox(height: 20),
           ..._aiInsights.asMap().entries.map((entry) {
