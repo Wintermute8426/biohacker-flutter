@@ -1071,7 +1071,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             createdAt: now,
                           );
                           
-                          print('[DEBUG] tempCycle created: ${tempCycle.peptideName}');
+                          print('[DEBUG] Dialog trigger - tempCycle: ${tempCycle.peptideName}');
                           
                           // Show dialog while modal context is still valid
                           showDialog(
