@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../data/peptides.dart';
@@ -32,7 +33,14 @@ class _CyclesScreenState extends State<CyclesScreen> {
   final doseDb = DoseLogsDatabase();
   final sideEffectDb = SideEffectsDatabase();
   final protocolDb = ProtocolTemplatesDatabase();
-  final doseScheduleService = DoseScheduleService();
+  late final DoseScheduleService doseScheduleService;
+
+  @override
+  void initState() {
+    super.initState();
+    doseScheduleService = DoseScheduleService(Supabase.instance.client);
+    _loadCycles();
+  }
   
   List<Cycle> savedCycles = [];
   List<String> filteredPeptides = PEPTIDE_LIST;
@@ -42,12 +50,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
   String _selectedRoute = 'SC (subcutaneous)';
   bool _showAdvanced = false;
   bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCycles();
-  }
 
   void _loadCycles() async {
     setState(() => _isLoading = true);
@@ -1058,7 +1060,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         _selectedFrequency = '1x weekly';
                         _selectedRoute = 'SC (subcutaneous)';
                         _selectedDosingSchedule = null;
-                        await _loadCycles();
+                        _loadCycles();
                         
                         // Navigate back to close the dialog
                         Navigator.pop(context);
@@ -1660,7 +1662,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
         context: context,
         backgroundColor: AppColors.surface,
         isScrollControlled: true,
-        builder: (context) => DoseScheduleForm(peptideName: peptide),
+        builder: (context) => DoseScheduleForm(
+          cycleId: cycle.id,
+          peptideName: peptide,
+          defaultDoseAmount: cycle.dose,
+        ),
       );
       
       if (result != null) {
