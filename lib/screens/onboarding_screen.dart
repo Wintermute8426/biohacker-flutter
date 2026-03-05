@@ -84,8 +84,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     try {
       final service = ref.read(userProfileServiceProvider);
       
-      // Update user profile
-      final profile = await service.updateUserProfile(
+      // First, check if profile exists - if not, create it
+      var profile = await service.getUserProfile(userId);
+      
+      if (profile == null) {
+        print('[Onboarding] Profile not found, creating...');
+        profile = await service.createUserProfile(userId);
+        if (profile == null) {
+          throw Exception('Failed to create user profile');
+        }
+      }
+
+      // Now update it with onboarding data
+      final updated = await service.updateUserProfile(
         userId,
         experienceLevel: _experienceLevel,
         healthGoals: _selectedGoals,
@@ -95,7 +106,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         onboardingCompleted: true,
       );
 
-      if (profile == null) {
+      if (updated == null) {
         throw Exception('Failed to save profile');
       }
 

@@ -154,17 +154,30 @@ class UserProfileService {
         }
       }
 
+      print('[UserProfile] Updating profile for user: $userId');
+      print('[UserProfile] Updates: $updates');
+
       final response = await _supabase
           .from('user_profiles')
           .update(updates)
           .eq('id', userId)
-          .select()
-          .single();
+          .select();
 
-      return UserProfile.fromJson(response);
+      print('[UserProfile] Update response: $response');
+
+      if (response.isEmpty) {
+        print('[UserProfile] ERROR: Empty response from update. User ID may not exist.');
+        // Try to create if doesn't exist
+        return await createUserProfile(userId);
+      }
+
+      final profile = UserProfile.fromJson(response.first);
+      print('[UserProfile] Successfully updated profile');
+      return profile;
     } catch (e) {
-      print('Error updating user profile: $e');
-      return null;
+      print('[UserProfile] ERROR updating user profile: $e');
+      print('[UserProfile] Stack trace: ${StackTrace.current}');
+      rethrow; // Let caller handle the error
     }
   }
 
