@@ -1692,8 +1692,14 @@ class _CyclesScreenState extends State<CyclesScreen> {
     
     // Batch create dose schedules
     try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+      
       for (final schedule in schedules) {
         await doseScheduleService.createDoseSchedule(
+          userId: userId,
           cycleId: cycle.id,
           peptideName: schedule['peptideName'] ?? '',
           doseAmount: schedule['doseAmount'] ?? 0.0,
