@@ -171,6 +171,7 @@ class UserProfileService {
   // Initialize notification preferences
   Future<void> initializeNotificationPreferences(String userId) async {
     try {
+      // Try to insert, ignore if already exists
       await _supabase
           .from('notification_preferences')
           .insert({
@@ -183,10 +184,12 @@ class UserProfileService {
             'quiet_hours_enabled': false,
             'quiet_hours_start': '22:00',
             'quiet_hours_end': '08:00',
-          })
-          .onConflict('user_id');
+          });
     } catch (e) {
-      print('Error initializing notification preferences: $e');
+      // Ignore duplicate key errors (already exists)
+      if (!e.toString().contains('duplicate key')) {
+        print('Error initializing notification preferences: $e');
+      }
     }
   }
 }

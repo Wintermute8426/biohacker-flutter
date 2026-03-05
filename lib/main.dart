@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/auth_provider.dart';
@@ -16,22 +15,24 @@ void main() async {
   );
 
   runApp(
-    ProviderScope(
-      child: MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ],
-        child: const MyApp(),
-      ),
+    const ProviderScope(
+      child: MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+// Riverpod provider for AuthProvider
+final authProviderProvider = ChangeNotifierProvider<AuthProvider>((ref) {
+  return AuthProvider();
+});
+
+class MyApp extends ConsumerWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authProvider = ref.watch(authProviderProvider);
+    
     return MaterialApp(
       title: 'Biohacker',
       debugShowCheckedModeBanner: false,
@@ -45,26 +46,18 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: Consumer<AuthProvider>(
-        builder: (context, authProvider, _) {
-          if (authProvider.isLoading) {
-            return Scaffold(
+      home: authProvider.isLoading
+          ? Scaffold(
               backgroundColor: AppColors.background,
               body: Center(
                 child: CircularProgressIndicator(
                   color: AppColors.primary,
                 ),
               ),
-            );
-          }
-
-          if (authProvider.user != null) {
-            return const HomeScreen();
-          }
-
-          return const LoginScreen();
-        },
-      ),
+            )
+          : authProvider.user != null
+              ? const HomeScreen()
+              : const LoginScreen(),
     );
   }
 }
