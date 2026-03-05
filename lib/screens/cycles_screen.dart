@@ -1070,7 +1070,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         
                         // Show dose configuration prompt with captured cycle data
                         if (mounted) {
-                          await Future.delayed(const Duration(milliseconds: 300));
+                          print('[DEBUG] Showing configure doses dialog...');
+                          await Future.delayed(const Duration(milliseconds: 500));
                           if (mounted) {
                             final now = DateTime.now();
                             final tempCycle = Cycle(
@@ -1087,9 +1088,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
                               createdAt: now,
                             );
                             
+                            print('[DEBUG] tempCycle created: ${tempCycle.peptideName}');
+                            
                             showDialog(
                               context: context,
-                              builder: (context) => AlertDialog(
+                              barrierDismissible: true,
+                              builder: (dialogContext) => AlertDialog(
                                 backgroundColor: AppColors.surface,
                                 title: Text('Configure Doses?', style: TextStyle(color: AppColors.primary)),
                                 content: Text(
@@ -1098,12 +1102,16 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.pop(context),
+                                    onPressed: () {
+                                      print('[DEBUG] SKIP clicked');
+                                      Navigator.pop(dialogContext);
+                                    },
                                     child: Text('SKIP', style: TextStyle(color: AppColors.textDim)),
                                   ),
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.pop(context);
+                                      print('[DEBUG] CONFIGURE clicked');
+                                      Navigator.pop(dialogContext);
                                       _showConfigureDosesFlow(tempCycle);
                                     },
                                     child: Text('CONFIGURE', style: TextStyle(color: AppColors.primary)),
@@ -1111,6 +1119,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                 ],
                               ),
                             );
+                            print('[DEBUG] Dialog shown');
                           }
                         }
                       },
