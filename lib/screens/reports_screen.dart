@@ -329,6 +329,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
               ],
             ),
           ),
+        ),
       ),
     );
   }
