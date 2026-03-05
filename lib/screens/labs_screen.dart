@@ -276,17 +276,29 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Stack(
         children: [
-          // Tab 1: All Results
-          _buildAllResultsTab(),
-          // Tab 2: Out of Range
-          _buildOutOfRangeTab(),
-          // Tab 3: Recent
-          _buildRecentTab(),
-          // Tab 4: Upload
-          _buildUploadTab(),
+          TabBarView(
+            controller: _tabController,
+            children: [
+              // Tab 1: All Results
+              _buildAllResultsTab(),
+              // Tab 2: Out of Range
+              _buildOutOfRangeTab(),
+              // Tab 3: Recent
+              _buildRecentTab(),
+              // Tab 4: Upload
+              _buildUploadTab(),
+            ],
+          ),
+          // Scanlines overlay
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -947,4 +959,21 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
     if (range == null) return false;
     return numValue < range.$1 || numValue > range.$2;
   }
+}
+
+// Scanlines painter for CRT effect
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.textDim.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double i = 0; i < size.height; i += 3) {
+      canvas.drawLine(Offset(0, i), Offset(size.width, i), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

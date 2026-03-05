@@ -78,7 +78,7 @@ class WintermmuteStyles {
     letterSpacing: 1.0,
   );
 
-  // Stat Value (Primary): Cyan with glow
+  // Stat Value (Primary): Cyan with subtle glow
   static const TextStyle statValueStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
@@ -87,14 +87,14 @@ class WintermmuteStyles {
     letterSpacing: 1.0,
     shadows: [
       Shadow(
-        color: Color(0x6600FFFF), // Cyan glow
-        blurRadius: 6,
+        color: Color(0x3300FFFF), // Cyan glow, reduced to 20% opacity
+        blurRadius: 4,
         offset: Offset(0, 0),
       ),
     ],
   );
 
-  // Stat Value (Accent): Green with glow
+  // Stat Value (Accent): Green with subtle glow
   static const TextStyle statValueAccentStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
@@ -103,8 +103,8 @@ class WintermmuteStyles {
     letterSpacing: 1.0,
     shadows: [
       Shadow(
-        color: Color(0x6639FF14), // Green glow
-        blurRadius: 6,
+        color: Color(0x3339FF14), // Green glow, reduced to 20% opacity
+        blurRadius: 4,
         offset: Offset(0, 0),
       ),
     ],
