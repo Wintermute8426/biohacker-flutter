@@ -1033,11 +1033,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           return;
                         }
 
+                        final peptideName = _peptideController.text;
                         final dose = double.tryParse(_doseController.text) ?? 0;
                         final weeks = int.tryParse(_weeksController.text) ?? 8;
 
                         await db.saveCycle(
-                          peptideName: _peptideController.text,
+                          peptideName: peptideName,
                           dose: dose,
                           route: _selectedRoute,
                           frequency: _selectedFrequency,
@@ -1045,10 +1046,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           startDate: DateTime.now(),
                           advancedSchedule: _selectedDosingSchedule?.toJson(),
                         );
-
-                        final peptideName = _peptideController.text;
-                        final dose = double.tryParse(_doseController.text) ?? 0;
-                        final weeks = int.tryParse(_weeksController.text) ?? 8;
                         
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -1075,15 +1072,19 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         if (mounted) {
                           await Future.delayed(const Duration(milliseconds: 300));
                           if (mounted) {
+                            final now = DateTime.now();
                             final tempCycle = Cycle(
-                              id: DateTime.now().millisecondsSinceEpoch.toString(),
+                              id: now.millisecondsSinceEpoch.toString(),
+                              userId: Supabase.instance.client.auth.currentUser?.id ?? '',
                               peptideName: peptideName,
                               dose: dose,
                               route: _selectedRoute,
                               frequency: _selectedFrequency,
                               durationWeeks: weeks,
-                              startDate: DateTime.now(),
-                              status: 'active',
+                              startDate: now,
+                              endDate: now.add(Duration(days: weeks * 7)),
+                              isActive: true,
+                              createdAt: now,
                             );
                             
                             showDialog(
