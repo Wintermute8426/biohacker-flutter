@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'dart:math' as math;
 import '../theme/colors.dart';
 import '../services/reports_service.dart';
+import '../theme/wintermute_styles.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -178,11 +179,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
         backgroundColor: AppColors.background,
         title: Text(
           'REPORTS',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
-          ),
+          style: WintermmuteStyles.titleStyle,
         ),
         actions: [
           IconButton(
@@ -197,6 +194,10 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           indicatorColor: AppColors.primary,
           labelColor: AppColors.primary,
           unselectedLabelColor: AppColors.textMid,
+          labelStyle: WintermmuteStyles.tabLabelStyle,
+          unselectedLabelStyle: WintermmuteStyles.tabLabelStyle.copyWith(
+            color: AppColors.textMid,
+          ),
           tabs: const [
             Tab(text: '1'),
             Tab(text: '2'),
@@ -222,9 +223,12 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                 ],
               ),
             )
-          : TabBarView(
-              controller: _tabController,
-              children: [
+          : AnimatedOpacity(
+              opacity: _isLoading ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
                 // Tab 1: Cycle-Lab Correlation (New Layout)
                 RefreshIndicator(
                   onRefresh: _loadAllData,
@@ -307,6 +311,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                 ),
               ],
             ),
+          ),
     );
   }
 
@@ -491,12 +496,9 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(
-          color: _getStatusColor(biomarker.status).withOpacity(0.3),
-        ),
-        borderRadius: BorderRadius.circular(4),
+      decoration: WintermmuteStyles.customCardDecoration(
+        borderColor: _getStatusColor(biomarker.status),
+        borderRadius: 4,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1704,9 +1706,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
   }
 
   TextStyle _tableHeaderStyle() {
-    return TextStyle(
-      color: AppColors.textMid,
-      fontSize: 10,
+    return WintermmuteStyles.tinyStyle.copyWith(
       fontWeight: FontWeight.bold,
       letterSpacing: 0.5,
     );
@@ -1715,29 +1715,25 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
   Widget _buildStatCardLarge(String label, String title, String value, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: color.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(4),
+      decoration: WintermmuteStyles.customCardDecoration(
+        borderColor: color,
+        borderRadius: 4,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: TextStyle(
-              color: AppColors.textMid,
-              fontSize: 9,
-              letterSpacing: 0.5,
+            style: WintermmuteStyles.tinyStyle.copyWith(
               fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             title,
-            style: TextStyle(
+            style: WintermmuteStyles.bodyStyle.copyWith(
               color: color,
-              fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
             overflow: TextOverflow.ellipsis,
@@ -1745,9 +1741,8 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           const SizedBox(height: 4),
           Text(
             value,
-            style: TextStyle(
+            style: WintermmuteStyles.smallStyle.copyWith(
               color: AppColors.accent,
-              fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -2611,10 +2606,9 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
   Widget _buildMetricCard(String label, String value, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: color.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(4),
+      decoration: WintermmuteStyles.customCardDecoration(
+        borderColor: color,
+        borderRadius: 4,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 import '../models/lab_result.dart';
 import '../services/labs_database.dart';
 import '../services/bloodwork_service.dart';
@@ -255,11 +256,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
         backgroundColor: AppColors.background,
         title: Text(
           'LABS',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
-          ),
+          style: WintermmuteStyles.titleStyle,
         ),
         bottom: TabBar(
           controller: _tabController,
@@ -267,6 +264,10 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
           indicatorColor: AppColors.primary,
           labelColor: AppColors.primary,
           unselectedLabelColor: AppColors.textMid,
+          labelStyle: WintermmuteStyles.tabLabelStyle,
+          unselectedLabelStyle: WintermmuteStyles.tabLabelStyle.copyWith(
+            color: AppColors.textMid,
+          ),
           tabs: const [
             Tab(text: 'ALL RESULTS'),
             Tab(text: 'OUT OF RANGE'),
@@ -465,11 +466,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-          borderRadius: BorderRadius.circular(4),
-        ),
+        decoration: WintermmuteStyles.cardDecoration,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

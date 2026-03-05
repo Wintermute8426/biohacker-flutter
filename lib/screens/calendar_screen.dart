@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 import '../services/calendar_service.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -118,11 +119,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         backgroundColor: AppColors.background,
         title: Text(
           'CALENDAR',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
-          ),
+          style: WintermmuteStyles.titleStyle,
         ),
         actions: [
           IconButton(
