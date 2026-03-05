@@ -11,13 +11,6 @@ class WintermmuteStyles {
     color: AppColors.primary, // Cyan
     fontFamily: 'JetBrains Mono',
     letterSpacing: 2.0,
-    shadows: [
-      Shadow(
-        color: Color(0x6600FFFF), // Cyan glow, 40% opacity
-        blurRadius: 8,
-        offset: Offset(0, 0),
-      ),
-    ],
   );
 
   // Section Headers: 18px, bold, cyan, letter-spacing 1px
@@ -27,13 +20,6 @@ class WintermmuteStyles {
     color: AppColors.primary, // Cyan
     fontFamily: 'JetBrains Mono',
     letterSpacing: 1.0,
-    shadows: [
-      Shadow(
-        color: Color(0x6600FFFF), // Cyan glow, 40% opacity
-        blurRadius: 8,
-        offset: Offset(0, 0),
-      ),
-    ],
   );
 
   // Subheaders: 14px, regular, cyan, letter-spacing 0.5px
@@ -78,98 +64,48 @@ class WintermmuteStyles {
     letterSpacing: 1.0,
   );
 
-  // Stat Value (Primary): Cyan with subtle glow
+  // Stat Value (Primary): Cyan, clean
   static const TextStyle statValueStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
     color: AppColors.primary,
     fontFamily: 'JetBrains Mono',
     letterSpacing: 1.0,
-    shadows: [
-      Shadow(
-        color: Color(0x3300FFFF), // Cyan glow, reduced to 20% opacity
-        blurRadius: 4,
-        offset: Offset(0, 0),
-      ),
-    ],
   );
 
-  // Stat Value (Accent): Green with subtle glow
+  // Stat Value (Accent): Green, clean
   static const TextStyle statValueAccentStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
     color: AppColors.accent,
     fontFamily: 'JetBrains Mono',
     letterSpacing: 1.0,
-    shadows: [
-      Shadow(
-        color: Color(0x3339FF14), // Green glow, reduced to 20% opacity
-        blurRadius: 4,
-        offset: Offset(0, 0),
-      ),
-    ],
   );
 
-  // ==================== BOX SHADOWS (GLOW EFFECTS) ====================
+  // ==================== BOX SHADOWS (MINIMAL) ====================
 
-  // Cyan glow: Strong (for primary elements)
-  static const List<BoxShadow> cyanGlowStrong = [
-    BoxShadow(
-      color: Color(0x6600FFFF), // Cyan, 40% opacity
-      blurRadius: 12,
-      spreadRadius: 2,
-    ),
-  ];
-
-  // Cyan glow: Subtle (for secondary elements)
-  static const List<BoxShadow> cyanGlowSubtle = [
-    BoxShadow(
-      color: Color(0x3300FFFF), // Cyan, 20% opacity
-      blurRadius: 8,
-      spreadRadius: 1,
-    ),
-  ];
-
-  // Green glow: Subtle
-  static const List<BoxShadow> greenGlowSubtle = [
-    BoxShadow(
-      color: Color(0x3339FF14), // Green, 20% opacity
-      blurRadius: 8,
-      spreadRadius: 1,
-    ),
-  ];
-
-  // Magenta glow: Subtle
-  static const List<BoxShadow> magentaGlowSubtle = [
-    BoxShadow(
-      color: Color(0x33FF00FF), // Magenta, 20% opacity
-      blurRadius: 8,
-      spreadRadius: 1,
-    ),
-  ];
+  // None needed - dashboard aesthetic uses clean borders, no glow
 
   // ==================== BOX DECORATIONS ====================
 
-  // Standard card: Dark background, cyan border, glow
+  // Standard card: Dark background, cyan border, clean (no glow)
   static BoxDecoration cardDecoration = BoxDecoration(
     color: AppColors.surface, // Dark surface
     border: Border.all(
-      color: AppColors.primary.withOpacity(0.4), // Cyan border, 40% opacity
+      color: AppColors.primary.withOpacity(0.3), // Cyan border, subtle
       width: 1,
     ),
-    borderRadius: BorderRadius.circular(6),
-    boxShadow: cyanGlowSubtle,
+    borderRadius: BorderRadius.circular(4),
   );
 
-  // Accent card: Dark background, green border, glow
+  // Accent card: Dark background, green border, clean
   static BoxDecoration cardDecorationAccent = BoxDecoration(
     color: AppColors.surface,
     border: Border.all(
-      color: AppColors.accent.withOpacity(0.4), // Green border
+      color: AppColors.accent.withOpacity(0.3), // Green border
       width: 1,
     ),
-    borderRadius: BorderRadius.circular(6),
-    boxShadow: greenGlowSubtle,
+    borderRadius: BorderRadius.circular(4),
   );
 
   // Chart tooltip: Dark bg, cyan border
@@ -180,7 +116,6 @@ class WintermmuteStyles {
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
-    boxShadow: cyanGlowSubtle,
   );
 
   // ==================== HELPER METHODS ====================
@@ -193,7 +128,7 @@ class WintermmuteStyles {
     return Color(0x66FFFFFF);
   }
 
-  // Create a custom card decoration with specified glow color
+  // Create a custom card decoration with specified border color (clean, no glow)
   static BoxDecoration customCardDecoration({
     required Color borderColor,
     Color backgroundColor = AppColors.surface,
@@ -203,17 +138,10 @@ class WintermmuteStyles {
     return BoxDecoration(
       color: backgroundColor,
       border: Border.all(
-        color: borderColor.withOpacity(0.4),
+        color: borderColor.withOpacity(0.3),
         width: borderWidth,
       ),
       borderRadius: BorderRadius.circular(borderRadius),
-      boxShadow: [
-        BoxShadow(
-          color: borderColor.withOpacity(0.3),
-          blurRadius: 8,
-          spreadRadius: 1,
-        ),
-      ],
     );
   }
 }
