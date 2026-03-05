@@ -108,36 +108,15 @@ class _RainPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (raindrops.isEmpty) _initRaindrops();
 
-    // Clear previous frame with slight fade
-    final clearPaint = Paint()
-      ..color = Colors.black.withOpacity(0.02)
-      ..blendMode = BlendMode.srcOver;
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      clearPaint,
-    );
-
-    // Draw each raindrop
+    // Draw each raindrop (no clearing, just paint subtle lines)
     for (final drop in raindrops) {
       final x = drop.x * size.width;
       var y = (drop.y + animationValue * drop.speed) % 1.2 * size.height - drop.length;
 
-      // Create gradient for raindrop
-      final gradient = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          const Color(0xFFB4DCFF).withOpacity(0),
-          Color(0xFFB4DCFF).withOpacity(drop.opacity * 0.7),
-          const Color(0xFFB4DCFF).withOpacity(0),
-        ],
-      );
-
+      // Simple raindrop paint (very subtle)
       final paint = Paint()
-        ..shader = gradient.createShader(
-          Rect.fromLTWH(x - 2, y, 4, drop.length),
-        )
-        ..strokeWidth = drop.width
+        ..color = const Color(0xFFB4DCFF).withOpacity(drop.opacity * 0.5)
+        ..strokeWidth = drop.width * 0.6
         ..strokeCap = StrokeCap.round;
 
       // Draw raindrop line with slight wind effect
