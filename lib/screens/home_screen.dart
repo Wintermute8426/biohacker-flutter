@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
+import '../services/user_profile_service.dart';
+import 'onboarding_screen.dart';
 import 'dashboard_screen.dart';
 import 'cycles_screen.dart';
 import 'research_screen.dart';
@@ -10,14 +13,14 @@ import 'reports_screen.dart';
 import 'calendar_screen.dart';
 import 'settings_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
@@ -39,60 +42,88 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          _screens[_selectedIndex],
-          Positioned.fill(
-            child: IgnorePointer(
-              child: CustomPaint(
-                painter: _ScanlinesPainter(),
+    // Check if onboarding is completed
+    final onboardingCompleted = ref.watch(onboardingCompletedProvider);
+
+    return onboardingCompleted.when(
+      data: (completed) {
+        if (!completed) {
+          // Show onboarding if not completed
+          return const OnboardingScreen();
+        }
+        
+        // Show main app
+        return Scaffold(
+          body: Stack(
+            children: [
+              _screens[_selectedIndex],
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: _ScanlinesPainter(),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            backgroundColor: AppColors.surface,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: AppColors.textMid,
+            type: BottomNavigationBarType.fixed,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Dashboard',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.schedule),
+                label: 'Cycles',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.book),
+                label: 'Research',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.bookmark),
+                label: 'Protocols',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.science),
+                label: 'Labs',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.analytics),
+                label: 'Reports',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.calendar_month),
+                label: 'Calendar',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings),
+                label: 'Settings',
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textMid,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Dashboard',
+      error: (err, stack) => Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: Text(
+            'Error loading profile',
+            style: WintermmuteStyles.bodyStyle,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
-            label: 'Cycles',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Research',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Protocols',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.science),
-            label: 'Labs',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.analytics),
-            label: 'Reports',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+        ),
       ),
     );
   }
