@@ -86,33 +86,70 @@ class WintermmuteStyles {
 
   // None needed - dashboard aesthetic uses clean borders, no glow
 
-  // ==================== BOX DECORATIONS ====================
+  // ==================== BOX DECORATIONS (MULTI-COLOR) ====================
 
-  // Standard card: Dark background, cyan border, clean (no glow)
+  // Color palette matching dashboard
+  static const Color colorCyan = Color(0xFF00FFFF);
+  static const Color colorGreen = Color(0xFF39FF14);
+  static const Color colorOrange = Color(0xFFFF6600);
+  static const Color colorMagenta = Color(0xFFFF00FF);
+  static const Color colorBTC = Color(0xFFF7931A);
+
+  // Standard card: Dark background, cyan border
   static BoxDecoration cardDecoration = BoxDecoration(
-    color: AppColors.surface, // Dark surface
+    color: AppColors.surface,
     border: Border.all(
-      color: AppColors.primary.withOpacity(0.3), // Cyan border, subtle
+      color: colorCyan.withOpacity(0.25),
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
   );
 
-  // Accent card: Dark background, green border, clean
+  // Accent card: Green border
   static BoxDecoration cardDecorationAccent = BoxDecoration(
     color: AppColors.surface,
     border: Border.all(
-      color: AppColors.accent.withOpacity(0.3), // Green border
+      color: colorGreen.withOpacity(0.25),
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
   );
 
-  // Chart tooltip: Dark bg, cyan border
+  // Orange card: For secondary sections
+  static BoxDecoration cardDecorationOrange = BoxDecoration(
+    color: AppColors.surface,
+    border: Border.all(
+      color: colorOrange.withOpacity(0.25),
+      width: 1,
+    ),
+    borderRadius: BorderRadius.circular(4),
+  );
+
+  // Magenta card: For tertiary sections
+  static BoxDecoration cardDecorationMagenta = BoxDecoration(
+    color: AppColors.surface,
+    border: Border.all(
+      color: colorMagenta.withOpacity(0.25),
+      width: 1,
+    ),
+    borderRadius: BorderRadius.circular(4),
+  );
+
+  // BTC/Bitcoin card: For financial data
+  static BoxDecoration cardDecorationBTC = BoxDecoration(
+    color: AppColors.surface,
+    border: Border.all(
+      color: colorBTC.withOpacity(0.25),
+      width: 1,
+    ),
+    borderRadius: BorderRadius.circular(4),
+  );
+
+  // Chart tooltip: Cyan
   static BoxDecoration chartTooltipDecoration = BoxDecoration(
     color: AppColors.surface,
     border: Border.all(
-      color: AppColors.primary,
+      color: colorCyan.withOpacity(0.4),
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
