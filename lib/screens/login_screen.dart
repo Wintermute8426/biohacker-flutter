@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../main.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../theme/wintermute_background.dart';
 import 'signup_screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _showPassword = false;
@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-      await context.read<AuthProvider>().signIn(
+      await ref.read(authProviderProvider).signIn(
         _emailController.text,
         _passwordController.text,
       );

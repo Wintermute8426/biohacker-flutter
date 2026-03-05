@@ -1,5 +1,6 @@
+import '../main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
@@ -9,7 +10,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().user;
+    final user = ref.watch(authProviderProvider).user;
 
     return SafeArea(
       child: Stack(
@@ -180,7 +181,7 @@ class SettingsScreen extends StatelessWidget {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                  context.read<AuthProvider>().signOut();
+                  ref.read(authProviderProvider).signOut();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.error,

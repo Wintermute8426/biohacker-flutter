@@ -1,5 +1,6 @@
+import '../main.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
@@ -7,14 +8,14 @@ import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
 import 'weight_tracker_screen.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  ConsumerState _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState {
   final cycleDb = CyclesDatabase();
   final doseDb = DoseLogsDatabase();
 
@@ -47,7 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().user;
+    final user = ref.watch(authProviderProvider).user;
 
     return SafeArea(
       child: Stack(
