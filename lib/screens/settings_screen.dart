@@ -5,11 +5,11 @@ import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProviderProvider).user;
 
     return SafeArea(

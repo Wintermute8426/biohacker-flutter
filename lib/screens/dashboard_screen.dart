@@ -12,10 +12,10 @@ class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState _DashboardScreenState();
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState {
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   final cycleDb = CyclesDatabase();
   final doseDb = DoseLogsDatabase();
 
