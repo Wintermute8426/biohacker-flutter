@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 import '../data/peptide_library.dart';
 
 class ResearchScreen extends StatefulWidget {
@@ -716,9 +717,11 @@ class _ResearchScreenState extends State<ResearchScreen> {
     final categories = getAllCategories().toList()..sort();
 
     return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           // Header + Tabs
           Padding(
             padding: const EdgeInsets.all(16),
@@ -727,11 +730,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
               children: [
                 Text(
                   'RESEARCH',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
+                  style: WintermmuteStyles.titleStyle,
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -889,6 +888,15 @@ class _ResearchScreenState extends State<ResearchScreen> {
           ] else if (_tabIndex == 2) ...[
             Expanded(child: _buildPepScoreMethodology()),
           ],
+            ],
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -958,4 +966,20 @@ class _ResearchScreenState extends State<ResearchScreen> {
     _searchController.dispose();
     super.dispose();
   }
+}
+
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

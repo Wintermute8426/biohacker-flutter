@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -11,19 +12,17 @@ class SettingsScreen extends StatelessWidget {
     final user = context.watch<AuthProvider>().user;
 
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
             // Header
             Text(
               'SETTINGS',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-              ),
+              style: WintermmuteStyles.titleStyle,
             ),
             const SizedBox(height: 32),
 
@@ -38,11 +37,7 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: WintermmuteStyles.cardDecoration,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -79,11 +74,7 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: WintermmuteStyles.cardDecoration,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -138,11 +129,7 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: WintermmuteStyles.cardDecoration,
               child: Column(
                 children: [
                   _SettingRow('Dose Reminders', true),
@@ -166,11 +153,7 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.border),
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: WintermmuteStyles.cardDecoration,
               child: Column(
                 children: [
                   Text(
@@ -215,8 +198,33 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
+
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _SettingRow extends StatelessWidget {

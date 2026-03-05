@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -47,9 +48,11 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.1),
@@ -57,11 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // Logo
               Text(
                 '🧊 BIOHACKER',
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
+                style: WintermmuteStyles.titleStyle.copyWith(fontSize: 32),
               ),
               const SizedBox(height: 40),
 
@@ -191,7 +190,32 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: _ScanlinesPainter(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

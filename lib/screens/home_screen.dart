@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 import 'dashboard_screen.dart';
 import 'cycles_screen.dart';
 import 'research_screen.dart';
@@ -39,7 +40,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: Stack(
+        children: [
+          _screens[_selectedIndex],
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -84,4 +96,20 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
+
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

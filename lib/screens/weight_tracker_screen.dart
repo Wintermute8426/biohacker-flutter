@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 import '../services/weight_logs_database.dart';
 
 class WeightTrackerWidget extends StatefulWidget {
@@ -230,10 +231,7 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(4),
-      ),
+      decoration: WintermmuteStyles.cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -242,12 +240,7 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
             children: [
               Text(
                 'WEIGHT TRACKER',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
-                ),
+                style: WintermmuteStyles.headerStyle.copyWith(fontSize: 14),
               ),
               ElevatedButton(
                 onPressed: _showLogWeightModal,
@@ -306,11 +299,7 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
                   // Latest weight
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+                    decoration: WintermmuteStyles.cardDecoration,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

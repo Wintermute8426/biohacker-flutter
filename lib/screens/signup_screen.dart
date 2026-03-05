@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -80,10 +81,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
               // First Name Field
               TextField(
                 controller: _firstNameController,
@@ -212,7 +215,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ],
           ),
         ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: _ScanlinesPainter(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

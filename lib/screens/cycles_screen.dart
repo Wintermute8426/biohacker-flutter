@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 import '../data/peptides.dart';
 import '../data/dosing_calculator.dart';
 import '../services/cycles_database.dart';
@@ -1083,9 +1084,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -1093,11 +1096,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
               children: [
                 Text(
                   'CYCLES',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
+                  style: WintermmuteStyles.titleStyle,
                 ),
                 ElevatedButton.icon(
                   onPressed: _showNewCycleDialog,
@@ -1129,11 +1128,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             const SizedBox(height: 40),
                             Container(
                               padding: const EdgeInsets.all(32),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                border: Border.all(color: AppColors.border),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
+                              decoration: WintermmuteStyles.cardDecoration,
                               child: Column(
                                 children: [
                                   Icon(
@@ -1599,6 +1594,15 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         },
                       ),
           ),
+            ],
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1736,4 +1740,20 @@ class _CyclesScreenState extends State<CyclesScreen> {
     _sideEffectNotesController.dispose();
     super.dispose();
   }
+}
+
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

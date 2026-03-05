@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
 import 'weight_tracker_screen.dart';
@@ -49,39 +50,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final user = context.watch<AuthProvider>().user;
 
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
             Text(
               'DASHBOARD',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-              ),
+              style: WintermmuteStyles.titleStyle,
             ),
             const SizedBox(height: 8),
             Text(
               'Welcome back, ${user?.email?.split('@')[0] ?? 'User'}',
-              style: TextStyle(
-                color: AppColors.textMid,
-                fontSize: 14,
-              ),
+              style: WintermmuteStyles.bodyStyle,
             ),
             const SizedBox(height: 24),
 
             // ACTIVE CYCLES
             Text(
               'ACTIVE CYCLES',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
+              style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
             ),
             const SizedBox(height: 12),
             FutureBuilder<List<Cycle>>(
@@ -98,14 +89,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                    decoration: WintermmuteStyles.cardDecoration,
                     child: Text(
                       'No active cycles. Go to Cycles tab to create one.',
-                      style: TextStyle(color: AppColors.textMid),
+                      style: WintermmuteStyles.bodyStyle,
                     ),
                   );
                 }
@@ -118,11 +105,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                      decoration: WintermmuteStyles.cardDecoration,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -175,12 +158,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // RECENT DOSES
             Text(
               'RECENT INJECTIONS',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
+              style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
             ),
             const SizedBox(height: 12),
             FutureBuilder<List<DoseLog>>(
@@ -197,14 +175,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                    decoration: WintermmuteStyles.cardDecoration,
                     child: Text(
                       'No logged doses yet.',
-                      style: TextStyle(color: AppColors.textMid),
+                      style: WintermmuteStyles.bodyStyle,
                     ),
                   );
                 }
@@ -218,11 +192,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                      decoration: WintermmuteStyles.cardDecoration,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -267,6 +237,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
+
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

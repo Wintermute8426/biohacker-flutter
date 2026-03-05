@@ -140,24 +140,35 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
-          : RefreshIndicator(
-              onRefresh: _loadMonthEvents,
-              color: AppColors.primary,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _buildHeader(),
-                  const SizedBox(height: 16),
-                  _isMonthView ? _buildMonthView() : _buildWeekView(),
-                  const SizedBox(height: 16),
-                  _buildLegend(),
-                ],
+      body: Stack(
+        children: [
+          _isLoading
+              ? Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                )
+              : RefreshIndicator(
+                  onRefresh: _loadMonthEvents,
+                  color: AppColors.primary,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 16),
+                      _isMonthView ? _buildMonthView() : _buildWeekView(),
+                      const SizedBox(height: 16),
+                      _buildLegend(),
+                    ],
+                  ),
+                ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
               ),
             ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -980,4 +991,20 @@ class SparklinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 import '../services/protocol_templates_database.dart';
 import '../services/cycles_database.dart';
 import '../data/peptides.dart';
@@ -289,11 +290,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                borderRadius: BorderRadius.circular(3),
-              ),
+              decoration: WintermmuteStyles.cardDecoration,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -402,11 +399,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             // Stack description
             Container(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
-                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                borderRadius: BorderRadius.circular(4),
-              ),
+              decoration: WintermmuteStyles.cardDecoration,
               child: Text(
                 stack['description'] as String,
                 style: TextStyle(
@@ -434,10 +427,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               return Container(
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.border),
-                  borderRadius: BorderRadius.circular(3),
-                ),
+                decoration: WintermmuteStyles.cardDecoration,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -505,10 +495,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.border),
-          borderRadius: BorderRadius.circular(4),
-        ),
+        decoration: WintermmuteStyles.cardDecoration,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -590,10 +577,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.border),
-          borderRadius: BorderRadius.circular(4),
-        ),
+        decoration: WintermmuteStyles.cardDecoration,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -702,9 +686,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -712,12 +698,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               children: [
                 Text(
                   'PROTOCOLS',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
+                  style: WintermmuteStyles.titleStyle,
                 ),
                 ElevatedButton(
                   onPressed: _showCreateProtocolModal,
@@ -747,12 +728,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   // Biohacker Protocols (Stacks)
                   Text(
                     'BIOHACKER PROTOCOL STACKS',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
+                    style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
                   ),
                   const SizedBox(height: 12),
                   ...getBiohackerProtocols().map((stack) => _buildStackCard(stack)),
@@ -762,12 +738,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   if (myProtocols.isNotEmpty) ...[
                     Text(
                       'MY PROTOCOLS',
-                      style: TextStyle(
-                        color: AppColors.accent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
-                      ),
+                      style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12, color: AppColors.accent),
                     ),
                     const SizedBox(height: 12),
                     ...myProtocols.map((protocol) => _buildProtocolCard(protocol)),
@@ -778,12 +749,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   if (communityProtocols.isNotEmpty) ...[
                     Text(
                       'COMMUNITY PROTOCOLS',
-                      style: TextStyle(
-                        color: const Color(0xFF00FFFF),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
-                      ),
+                      style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
                     ),
                     const SizedBox(height: 12),
                     ...communityProtocols.map((protocol) => _buildProtocolCard(protocol)),
@@ -793,6 +759,31 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
           ],
         ),
       ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
+
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
