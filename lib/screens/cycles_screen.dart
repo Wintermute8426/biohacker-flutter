@@ -1046,37 +1046,53 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           advancedSchedule: _selectedDosingSchedule?.toJson(),
                         );
 
+                        final peptideName = _peptideController.text;
+                        final dose = double.tryParse(_doseController.text) ?? 0;
+                        final weeks = int.tryParse(_weeksController.text) ?? 8;
+                        
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('✓ ${_peptideController.text} cycle created'),
+                            content: Text('✓ $peptideName cycle created'),
                             backgroundColor: AppColors.primary,
                           ),
                         );
                         
-                        // Clear form and reload cycles to get the newly created cycle
+                        // Clear form
                         _peptideController.clear();
                         _doseController.clear();
                         _weeksController.text = '8';
                         _selectedFrequency = '1x weekly';
                         _selectedRoute = 'SC (subcutaneous)';
                         _selectedDosingSchedule = null;
+                        
+                        // Reload cycles
                         _loadCycles();
                         
                         // Navigate back to close the dialog
                         Navigator.pop(context);
                         
-                        // Show dose configuration prompt
-                        if (mounted && savedCycles.isNotEmpty) {
-                          final newCycle = savedCycles.last;
-                          await Future.delayed(const Duration(milliseconds: 500));
+                        // Show dose configuration prompt with captured cycle data
+                        if (mounted) {
+                          await Future.delayed(const Duration(milliseconds: 300));
                           if (mounted) {
+                            final tempCycle = Cycle(
+                              id: DateTime.now().millisecondsSinceEpoch.toString(),
+                              peptideName: peptideName,
+                              dose: dose,
+                              route: _selectedRoute,
+                              frequency: _selectedFrequency,
+                              durationWeeks: weeks,
+                              startDate: DateTime.now(),
+                              status: 'active',
+                            );
+                            
                             showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
                                 backgroundColor: AppColors.surface,
                                 title: Text('Configure Doses?', style: TextStyle(color: AppColors.primary)),
                                 content: Text(
-                                  'Would you like to configure dose schedules for ${newCycle.peptideName}?',
+                                  'Would you like to configure dose schedules for $peptideName?',
                                   style: TextStyle(color: AppColors.textMid),
                                 ),
                                 actions: [
@@ -1087,7 +1103,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                   TextButton(
                                     onPressed: () {
                                       Navigator.pop(context);
-                                      _showConfigureDosesFlow(newCycle);
+                                      _showConfigureDosesFlow(tempCycle);
                                     },
                                     child: Text('CONFIGURE', style: TextStyle(color: AppColors.primary)),
                                   ),
