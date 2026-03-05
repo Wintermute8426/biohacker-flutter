@@ -7,6 +7,8 @@ import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
 import '../services/side_effects_database.dart';
 import '../services/protocol_templates_database.dart';
+import '../services/dose_schedule_service.dart';
+import '../screens/dose_schedule_form.dart';
 import '../widgets/advanced_dosing_widget.dart';
 
 class CyclesScreen extends StatefulWidget {
@@ -30,6 +32,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   final doseDb = DoseLogsDatabase();
   final sideEffectDb = SideEffectsDatabase();
   final protocolDb = ProtocolTemplatesDatabase();
+  final doseScheduleService = DoseScheduleService();
   
   List<Cycle> savedCycles = [];
   List<String> filteredPeptides = PEPTIDE_LIST;
@@ -1047,14 +1050,50 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             backgroundColor: AppColors.primary,
                           ),
                         );
+                        
+                        // Clear form and reload cycles to get the newly created cycle
                         _peptideController.clear();
                         _doseController.clear();
                         _weeksController.text = '8';
                         _selectedFrequency = '1x weekly';
                         _selectedRoute = 'SC (subcutaneous)';
                         _selectedDosingSchedule = null;
-                        _loadCycles();
+                        await _loadCycles();
+                        
+                        // Navigate back to close the dialog
                         Navigator.pop(context);
+                        
+                        // Show dose configuration prompt
+                        if (mounted && savedCycles.isNotEmpty) {
+                          final newCycle = savedCycles.last;
+                          await Future.delayed(const Duration(milliseconds: 500));
+                          if (mounted) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                backgroundColor: AppColors.surface,
+                                title: Text('Configure Doses?', style: TextStyle(color: AppColors.primary)),
+                                content: Text(
+                                  'Would you like to configure dose schedules for ${newCycle.peptideName}?',
+                                  style: TextStyle(color: AppColors.textMid),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text('SKIP', style: TextStyle(color: AppColors.textDim)),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      _showConfigureDosesFlow(newCycle);
+                                    },
+                                    child: Text('CONFIGURE', style: TextStyle(color: AppColors.primary)),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -1606,6 +1645,81 @@ class _CyclesScreenState extends State<CyclesScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _showConfigureDosesFlow(Cycle cycle) async {
+    if (!mounted) return;
+    
+    final schedules = <Map<String, dynamic>>[];
+    final peptides = cycle.peptideName.split(',').map((p) => p.trim()).toList();
+    
+    for (final peptide in peptides) {
+      if (!mounted) return;
+      
+      final result = await showModalBottomSheet<Map<String, dynamic>>(
+        context: context,
+        backgroundColor: AppColors.surface,
+        isScrollControlled: true,
+        builder: (context) => DoseScheduleForm(peptideName: peptide),
+      );
+      
+      if (result != null) {
+        schedules.add(result);
+      } else {
+        // User cancelled, skip this peptide
+        continue;
+      }
+    }
+    
+    if (schedules.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('No dose schedules configured'),
+            backgroundColor: AppColors.textDim,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
+    
+    // Batch create dose schedules
+    try {
+      for (final schedule in schedules) {
+        await doseScheduleService.createDoseSchedule(
+          cycleId: cycle.id,
+          peptideName: schedule['peptideName'] ?? '',
+          doseAmount: schedule['doseAmount'] ?? 0.0,
+          route: schedule['route'] ?? 'SC',
+          scheduledTime: schedule['scheduledTime'] ?? '08:00',
+          daysOfWeek: List<int>.from(schedule['daysOfWeek'] ?? []),
+          startDate: schedule['startDate'] ?? DateTime.now(),
+          endDate: schedule['endDate'],
+          notes: schedule['notes'],
+        );
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('✓ Dose schedules created'),
+            backgroundColor: AppColors.primary,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error creating schedules: $e'),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   void _showSaveAsProtocolDialog(Cycle cycle) {
