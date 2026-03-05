@@ -217,3 +217,68 @@ class WintermmuteStyles {
     );
   }
 }
+
+// ==================== CUSTOM PAINTERS ====================
+
+/// Scanlines overlay - horizontal CRT-style scanlines
+class ScanlinesPainter extends CustomPainter {
+  final double opacity;
+  final double lineSpacing;
+
+  ScanlinesPainter({
+    this.opacity = 0.07,
+    this.lineSpacing = 3.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Color(0xFF606060).withOpacity(opacity)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    for (double y = 0; y < size.height; y += lineSpacing) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Scanlines overlay widget
+class ScanlinesOverlay extends StatelessWidget {
+  final Widget child;
+  final double opacity;
+  final double lineSpacing;
+
+  const ScanlinesOverlay({
+    Key? key,
+    required this.child,
+    this.opacity = 0.07,
+    this.lineSpacing = 3.0,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        child,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: ScanlinesPainter(
+                opacity: opacity,
+                lineSpacing: lineSpacing,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

@@ -18,6 +18,8 @@ class ReportsScreen extends StatefulWidget {
 class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateMixin {
   final ReportsService _reportsService = ReportsService();
   late TabController _tabController;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
   bool _isLoading = true;
   bool _isGeneratingAI = false;
 
@@ -41,12 +43,24 @@ class _ReportsScreenState extends State<ReportsScreen> with TickerProviderStateM
   void initState() {
     super.initState();
     _tabController = TabController(length: 7, vsync: this);
+    
+    // Initialize pulse animation controller
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _pulseAnimation = Tween<double>(begin: 0.3, end: 0.6).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+    
     _loadAllData();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -209,24 +223,25 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           ],
         ),
       ),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: AppColors.primary),
-                  const SizedBox(height: 16),
-                  Text(
-                    'ANALYZING DATA...',
-                    style: TextStyle(color: AppColors.textMid, letterSpacing: 2),
-                  ),
-                ],
-              ),
-            )
-          : AnimatedOpacity(
-              opacity: _isLoading ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 300),
-              child: TabBarView(
+      body: ScanlinesOverlay(
+        child: _isLoading
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: AppColors.primary),
+                    const SizedBox(height: 16),
+                    Text(
+                      'ANALYZING DATA...',
+                      style: TextStyle(color: AppColors.textMid, letterSpacing: 2),
+                    ),
+                  ],
+                ),
+              )
+            : AnimatedOpacity(
+                opacity: _isLoading ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 300),
+                child: TabBarView(
                 controller: _tabController,
                 children: [
                 // Tab 1: Cycle-Lab Correlation (New Layout)
@@ -312,6 +327,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
               ],
             ),
           ),
+      ),
     );
   }
 
@@ -741,7 +757,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color: AppColors.border,
+                    color: const Color(0xFF606060).withOpacity(0.2),
                     strokeWidth: 1,
                   ),
                 ),
@@ -759,7 +775,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
                             DateFormat('M/d').format(date),
-                            style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                            style: const TextStyle(
+                              color: Color(0xFF606060),
+                              fontSize: 10,
+                              fontFamily: 'JetBrains Mono',
+                            ),
                           ),
                         );
                       },
@@ -772,7 +792,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                       getTitlesWidget: (value, meta) {
                         return Text(
                           '${value.toInt()}mg',
-                          style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                          style: const TextStyle(
+                            color: Color(0xFF606060),
+                            fontSize: 10,
+                            fontFamily: 'JetBrains Mono',
+                          ),
                         );
                       },
                     ),
@@ -802,18 +826,25 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                     ),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: color.withOpacity(0.1),
+                      color: color.withOpacity(0.12),
                     ),
                   );
                 }).toList(),
                 lineTouchData: LineTouchData(
                   touchTooltipData: LineTouchTooltipData(
+                    tooltipBgColor: AppColors.surface,
+                    tooltipBorder: BorderSide(color: AppColors.primary, width: 1),
+                    tooltipRoundedRadius: 4,
                     getTooltipItems: (touchedSpots) {
                       return touchedSpots.map((spot) {
                         final timeline = _doseTimeline[spot.barIndex];
                         return LineTooltipItem(
                           '${timeline.peptideName}\n${spot.y.toStringAsFixed(1)}mg',
-                          TextStyle(color: _getChartColor(spot.barIndex), fontSize: 12),
+                          const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 12,
+                            fontFamily: 'JetBrains Mono',
+                          ),
                         );
                       }).toList();
                     },
@@ -1079,7 +1110,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             show: true,
             drawVerticalLine: false,
             getDrawingHorizontalLine: (value) => FlLine(
-              color: AppColors.border,
+              color: const Color(0xFF606060).withOpacity(0.2),
               strokeWidth: 1,
             ),
           ),
@@ -1099,7 +1130,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
                       DateFormat('M/d').format(_weightTrends[index].date),
-                      style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                      style: const TextStyle(
+                        color: Color(0xFF606060),
+                        fontSize: 10,
+                        fontFamily: 'JetBrains Mono',
+                      ),
                     ),
                   );
                 },
@@ -1112,7 +1147,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                 getTitlesWidget: (value, meta) {
                   return Text(
                     '${value.toInt()}lbs',
-                    style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                    style: const TextStyle(
+                      color: Color(0xFF606060),
+                      fontSize: 10,
+                      fontFamily: 'JetBrains Mono',
+                    ),
                   );
                 },
               ),
@@ -1141,7 +1180,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
               ),
               belowBarData: BarAreaData(
                 show: true,
-                color: AppColors.accent.withOpacity(0.1),
+                color: AppColors.accent.withOpacity(0.12),
               ),
             ),
             // Trend line
@@ -1156,13 +1195,20 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           ],
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
+              tooltipBgColor: AppColors.surface,
+              tooltipBorder: BorderSide(color: AppColors.primary, width: 1),
+              tooltipRoundedRadius: 4,
               getTooltipItems: (touchedSpots) {
                 return touchedSpots.map((spot) {
                   if (spot.barIndex == 1) return null; // Skip trend line
                   final point = _weightTrends[spot.x.toInt()];
                   return LineTooltipItem(
                     '${point.weight.toStringAsFixed(1)} lbs\n${DateFormat('MMM d').format(point.date)}',
-                    TextStyle(color: AppColors.accent, fontSize: 12),
+                    const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontFamily: 'JetBrains Mono',
+                    ),
                   );
                 }).toList();
               },
@@ -1310,11 +1356,18 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           maxY: 10,
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
+              tooltipBgColor: AppColors.surface,
+              tooltipBorder: BorderSide(color: AppColors.primary, width: 1),
+              tooltipRoundedRadius: 4,
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 final cycle = _effectiveness[groupIndex];
                 return BarTooltipItem(
                   '${cycle.cycleName}\nRating: ${cycle.rating}/10',
-                  TextStyle(color: AppColors.accent),
+                  const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontFamily: 'JetBrains Mono',
+                  ),
                 );
               },
             ),
@@ -1334,7 +1387,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                     child: Text(
                       _effectiveness[index].cycleName.substring(0, 
                         _effectiveness[index].cycleName.length > 8 ? 8 : _effectiveness[index].cycleName.length),
-                      style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                      style: const TextStyle(
+                        color: Color(0xFF606060),
+                        fontSize: 10,
+                        fontFamily: 'JetBrains Mono',
+                      ),
                     ),
                   );
                 },
@@ -1347,7 +1404,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                 getTitlesWidget: (value, meta) {
                   return Text(
                     value.toInt().toString(),
-                    style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                    style: const TextStyle(
+                      color: Color(0xFF606060),
+                      fontSize: 10,
+                      fontFamily: 'JetBrains Mono',
+                    ),
                   );
                 },
               ),
@@ -1358,7 +1419,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             show: true,
             drawVerticalLine: false,
             getDrawingHorizontalLine: (value) => FlLine(
-              color: AppColors.border,
+              color: const Color(0xFF606060).withOpacity(0.2),
               strokeWidth: 1,
             ),
           ),
@@ -1379,7 +1440,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                   backDrawRodData: BackgroundBarChartRodData(
                     show: true,
                     toY: 10,
-                    color: AppColors.border.withOpacity(0.2),
+                    color: const Color(0xFF606060).withOpacity(0.2),
                   ),
                 ),
               ],
@@ -1739,13 +1800,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
-          Text(
-            value,
-            style: WintermmuteStyles.smallStyle.copyWith(
-              color: AppColors.accent,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          _buildPulsingStatValue(value, AppColors.accent),
         ],
       ),
     );
@@ -1854,7 +1909,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color: AppColors.border,
+                    color: const Color(0xFF606060).withOpacity(0.2),
                     strokeWidth: 1,
                   ),
                 ),
@@ -1872,7 +1927,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
                               DateFormat('MMM').format(sortedLabs[index].labDate),
-                              style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                              style: const TextStyle(
+                                color: Color(0xFF606060),
+                                fontSize: 10,
+                                fontFamily: 'JetBrains Mono',
+                              ),
                             ),
                           );
                         }
@@ -1887,7 +1946,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                       getTitlesWidget: (value, meta) {
                         return Text(
                           value.toInt().toString(),
-                          style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                          style: const TextStyle(
+                            color: Color(0xFF606060),
+                            fontSize: 10,
+                            fontFamily: 'JetBrains Mono',
+                          ),
                         );
                       },
                     ),
@@ -1913,9 +1976,32 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                         );
                       },
                     ),
-                    belowBarData: BarAreaData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: color.withOpacity(0.12),
+                    ),
                   );
                 }).toList(),
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    tooltipBgColor: AppColors.surface,
+                    tooltipBorder: BorderSide(color: AppColors.primary, width: 1),
+                    tooltipRoundedRadius: 4,
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((spot) {
+                        final markerKey = _selectedMarkers.toList()[spot.barIndex];
+                        return LineTooltipItem(
+                          '${_beautifyMarkerName(markerKey)}\n${spot.y.toStringAsFixed(1)}',
+                          const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 12,
+                            fontFamily: 'JetBrains Mono',
+                          ),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
               ),
             ),
           ),
@@ -2623,14 +2709,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          _buildPulsingStatValue(value, color),
         ],
       ),
     );
@@ -2848,7 +2927,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                   show: true,
                   drawVerticalLine: false,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color: AppColors.border,
+                    color: const Color(0xFF606060).withOpacity(0.2),
                     strokeWidth: 1,
                   ),
                 ),
@@ -2867,7 +2946,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
                               DateFormat('M/d').format(_weightTrends[index].date),
-                              style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                              style: const TextStyle(
+                                color: Color(0xFF606060),
+                                fontSize: 10,
+                                fontFamily: 'JetBrains Mono',
+                              ),
                             ),
                           );
                         }
@@ -2882,7 +2965,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                       getTitlesWidget: (value, meta) {
                         return Text(
                           '${value.toInt()}',
-                          style: TextStyle(color: AppColors.textDim, fontSize: 10),
+                          style: const TextStyle(
+                            color: Color(0xFF606060),
+                            fontSize: 10,
+                            fontFamily: 'JetBrains Mono',
+                          ),
                         );
                       },
                     ),
@@ -2901,7 +2988,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                     dotData: FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withOpacity(0.12),
                     ),
                   ),
                   // Body fat line (if available)
@@ -2920,10 +3007,45 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                       dotData: FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: AppColors.accent.withOpacity(0.1),
+                        color: AppColors.accent.withOpacity(0.12),
                       ),
                     ),
                 ],
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    tooltipBgColor: AppColors.surface,
+                    tooltipBorder: BorderSide(color: AppColors.primary, width: 1),
+                    tooltipRoundedRadius: 4,
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((spot) {
+                        final index = spot.x.toInt();
+                        if (index >= 0 && index < _weightTrends.length) {
+                          final point = _weightTrends[index];
+                          if (spot.barIndex == 0) {
+                            return LineTooltipItem(
+                              '${point.weight.toStringAsFixed(1)} lbs',
+                              const TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 12,
+                                fontFamily: 'JetBrains Mono',
+                              ),
+                            );
+                          } else if (point.bodyFatPercent != null) {
+                            return LineTooltipItem(
+                              '${point.bodyFatPercent!.toStringAsFixed(1)}% BF',
+                              const TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 12,
+                                fontFamily: 'JetBrains Mono',
+                              ),
+                            );
+                          }
+                        }
+                        return null;
+                      }).toList();
+                    },
+                  ),
+                ),
               ),
             ),
           ),
@@ -3050,5 +3172,36 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
       Colors.blue,
     ];
     return colors[index % colors.length];
+  }
+
+  // Pulse animation wrapper for stat values
+  Widget _buildPulsingStatValue(String value, Color color) {
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        return Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(_pulseAnimation.value),
+                blurRadius: 8,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      child: Text(
+        value,
+        style: TextStyle(
+          color: color,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'JetBrains Mono',
+          letterSpacing: 1.0,
+        ),
+      ),
+    );
   }
 }
