@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
+import '../theme/wintermute_background.dart';
 import '../services/calendar_service.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -113,8 +114,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return WintermmuteBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: AppColors.background,
         title: Text(
@@ -169,7 +171,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildHeader() {

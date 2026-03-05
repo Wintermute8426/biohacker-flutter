@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
+import '../theme/wintermute_background.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -69,9 +70,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
+    return WintermmuteBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
         title: const Text('CREATE ACCOUNT'),
         backgroundColor: AppColors.background,
         elevation: 0,
@@ -225,7 +227,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
 
