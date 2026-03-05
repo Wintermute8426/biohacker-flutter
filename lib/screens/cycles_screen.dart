@@ -1054,6 +1054,60 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           ),
                         );
                         
+                        // Show dose configuration prompt BEFORE closing the modal
+                        if (mounted) {
+                          final now = DateTime.now();
+                          final tempCycle = Cycle(
+                            id: now.millisecondsSinceEpoch.toString(),
+                            userId: Supabase.instance.client.auth.currentUser?.id ?? '',
+                            peptideName: peptideName,
+                            dose: dose,
+                            route: _selectedRoute,
+                            frequency: _selectedFrequency,
+                            durationWeeks: weeks,
+                            startDate: now,
+                            endDate: now.add(Duration(days: weeks * 7)),
+                            isActive: true,
+                            createdAt: now,
+                          );
+                          
+                          print('[DEBUG] tempCycle created: ${tempCycle.peptideName}');
+                          
+                          // Show dialog while modal context is still valid
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (dialogContext) => AlertDialog(
+                              backgroundColor: AppColors.surface,
+                              title: Text('Configure Doses?', style: TextStyle(color: AppColors.primary)),
+                              content: Text(
+                                'Would you like to configure dose schedules for $peptideName?',
+                                style: TextStyle(color: AppColors.textMid),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    print('[DEBUG] SKIP clicked');
+                                    Navigator.pop(dialogContext);
+                                    Navigator.pop(context); // Close the CREATE CYCLE modal
+                                  },
+                                  child: Text('SKIP', style: TextStyle(color: AppColors.textDim)),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    print('[DEBUG] CONFIGURE clicked');
+                                    Navigator.pop(dialogContext);
+                                    Navigator.pop(context); // Close the CREATE CYCLE modal
+                                    _showConfigureDosesFlow(tempCycle);
+                                  },
+                                  child: Text('CONFIGURE', style: TextStyle(color: AppColors.primary)),
+                                ),
+                              ],
+                            ),
+                          );
+                          print('[DEBUG] Dialog shown');
+                        }
+                        
                         // Clear form
                         _peptideController.clear();
                         _doseController.clear();
@@ -1064,64 +1118,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         
                         // Reload cycles
                         _loadCycles();
-                        
-                        // Navigate back to close the dialog
-                        Navigator.pop(context);
-                        
-                        // Show dose configuration prompt with captured cycle data
-                        if (mounted) {
-                          print('[DEBUG] Showing configure doses dialog...');
-                          await Future.delayed(const Duration(milliseconds: 500));
-                          if (mounted) {
-                            final now = DateTime.now();
-                            final tempCycle = Cycle(
-                              id: now.millisecondsSinceEpoch.toString(),
-                              userId: Supabase.instance.client.auth.currentUser?.id ?? '',
-                              peptideName: peptideName,
-                              dose: dose,
-                              route: _selectedRoute,
-                              frequency: _selectedFrequency,
-                              durationWeeks: weeks,
-                              startDate: now,
-                              endDate: now.add(Duration(days: weeks * 7)),
-                              isActive: true,
-                              createdAt: now,
-                            );
-                            
-                            print('[DEBUG] tempCycle created: ${tempCycle.peptideName}');
-                            
-                            showDialog(
-                              context: context,
-                              barrierDismissible: true,
-                              builder: (dialogContext) => AlertDialog(
-                                backgroundColor: AppColors.surface,
-                                title: Text('Configure Doses?', style: TextStyle(color: AppColors.primary)),
-                                content: Text(
-                                  'Would you like to configure dose schedules for $peptideName?',
-                                  style: TextStyle(color: AppColors.textMid),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      print('[DEBUG] SKIP clicked');
-                                      Navigator.pop(dialogContext);
-                                    },
-                                    child: Text('SKIP', style: TextStyle(color: AppColors.textDim)),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      print('[DEBUG] CONFIGURE clicked');
-                                      Navigator.pop(dialogContext);
-                                      _showConfigureDosesFlow(tempCycle);
-                                    },
-                                    child: Text('CONFIGURE', style: TextStyle(color: AppColors.primary)),
-                                  ),
-                                ],
-                              ),
-                            );
-                            print('[DEBUG] Dialog shown');
-                          }
-                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
