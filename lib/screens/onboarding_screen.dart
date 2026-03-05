@@ -85,7 +85,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       final service = ref.read(userProfileServiceProvider);
       
       // Update user profile
-      await service.updateUserProfile(
+      final profile = await service.updateUserProfile(
         userId,
         experienceLevel: _experienceLevel,
         healthGoals: _selectedGoals,
@@ -95,25 +95,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         onboardingCompleted: true,
       );
 
+      if (profile == null) {
+        throw Exception('Failed to save profile');
+      }
+
       // Initialize notification preferences
       await service.initializeNotificationPreferences(userId);
 
-      // Refresh user profile in provider
+      // Refresh both providers
       ref.refresh(userProfileProvider);
+      ref.refresh(onboardingCompletedProvider);
+
+      // Small delay to ensure providers update
+      await Future.delayed(const Duration(milliseconds: 500));
 
       // Navigate back to home
       if (mounted) {
-        Navigator.of(context).pop();
+        Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
       print('Error completing onboarding: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error saving profile. Please try again.')),
+          SnackBar(content: Text('Error saving profile: $e')),
         );
-      }
-    } finally {
-      if (mounted) {
         setState(() => _isLoading = false);
       }
     }
@@ -168,61 +173,67 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
           // Navigation buttons
           Positioned(
-            bottom: 20,
-            left: 16,
-            right: 16,
-            child: Row(
-              children: [
-                // Back button
-                if (_currentPage > 0)
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _previousPage,
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                      child: Text(
-                        'BACK',
-                        style: WintermmuteStyles.bodyStyle.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              color: AppColors.background,
+              padding: const EdgeInsets.all(16).copyWith(
+                bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Row(
+                children: [
+                  // Back button
+                  if (_currentPage > 0)
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _previousPage,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: Text(
+                          'BACK',
+                          style: WintermmuteStyles.bodyStyle.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                if (_currentPage > 0) const SizedBox(width: 12),
-                // Next/Complete button
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _isLoading
-                        ? null
-                        : (_currentPage == 6 ? _completeOnboarding : _nextPage),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: _isLoading
-                        ? SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.background,
+                  if (_currentPage > 0) const SizedBox(width: 12),
+                  // Next/Complete button
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isLoading
+                          ? null
+                          : (_currentPage == 6 ? _completeOnboarding : _nextPage),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: _isLoading
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.background,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              _currentPage == 6 ? 'COMPLETE' : 'NEXT',
+                              style: WintermmuteStyles.bodyStyle.copyWith(
+                                color: AppColors.background,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          )
-                        : Text(
-                            _currentPage == 6 ? 'COMPLETE' : 'NEXT',
-                            style: WintermmuteStyles.bodyStyle.copyWith(
-                              color: AppColors.background,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -232,82 +243,86 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildWelcomePage() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20).copyWith(bottom: 100),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 60),
-          Text(
-            '🧊 BIOHACKER',
-            style: WintermmuteStyles.titleStyle.copyWith(fontSize: 36),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          Text(
-            'Set up your biohacker profile',
-            style: WintermmuteStyles.headerStyle,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Let\'s get to know your peptide protocol, goals, and preferences.\n\nThis takes 3 minutes.',
-            style: WintermmuteStyles.bodyStyle.copyWith(
-              color: AppColors.textLight,
-              height: 1.6,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'What we\'ll cover:',
-                  style: WintermmuteStyles.headerStyle.copyWith(fontSize: 14),
+      padding: const EdgeInsets.all(20).copyWith(bottom: 120, top: 80),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                '🧊 BIOHACKER',
+                style: WintermmuteStyles.titleStyle.copyWith(fontSize: 36),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Set up your biohacker profile',
+                style: WintermmuteStyles.headerStyle,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Let\'s get to know your peptide protocol, goals, and preferences.\n\nThis takes 3 minutes.',
+                style: WintermmuteStyles.bodyStyle.copyWith(
+                  color: AppColors.textLight,
+                  height: 1.6,
                 ),
-                const SizedBox(height: 12),
-                ...[
-                  'Your experience level with peptides',
-                  'Health and performance goals',
-                  'Baseline metrics (weight, labs)',
-                  'Timezone and notification preferences',
-                ].map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Text(
-                        '✓ ',
-                        style: WintermmuteStyles.bodyStyle.copyWith(
-                          color: AppColors.accent,
-                        ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'What we\'ll cover:',
+                      style: WintermmuteStyles.headerStyle.copyWith(fontSize: 14),
+                    ),
+                    const SizedBox(height: 12),
+                    ...[
+                      'Your experience level with peptides',
+                      'Health and performance goals',
+                      'Baseline metrics (weight, labs)',
+                      'Timezone and notification preferences',
+                    ].map((item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Text(
+                            '✓ ',
+                            style: WintermmuteStyles.bodyStyle.copyWith(
+                              color: AppColors.accent,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              item,
+                              style: WintermmuteStyles.bodyStyle,
+                            ),
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        child: Text(
-                          item,
-                          style: WintermmuteStyles.bodyStyle,
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
-              ],
-            ),
+                    )),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildExperiencePage() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20).copyWith(bottom: 100, top: 100),
+      padding: const EdgeInsets.all(20).copyWith(bottom: 120, top: 80),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -315,7 +330,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             'Your experience with peptides?',
             style: WintermmuteStyles.headerStyle,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           ...[
             ('beginner', 'Beginner', 'New to peptides, learning fundamentals'),
             ('intermediate', 'Intermediate', 'Have run several cycles, understand dosing'),
@@ -366,7 +381,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildGoalsPage() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20).copyWith(bottom: 100, top: 100),
+      padding: const EdgeInsets.all(20).copyWith(bottom: 120, top: 80),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -445,7 +460,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildMetricsPage() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20).copyWith(bottom: 100, top: 100),
+      padding: const EdgeInsets.all(20).copyWith(bottom: 120, top: 80),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -467,12 +482,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             onChanged: (val) => setState(() => _weight = double.tryParse(val)),
             decoration: InputDecoration(
               labelText: 'Weight (lbs)',
-              labelStyle: const TextStyle(color: AppColors.textMid),
+              labelStyle: const TextStyle(color: AppColors.textMid, fontSize: 13),
               hintText: '185',
-              hintStyle: const TextStyle(color: AppColors.textDim),
+              hintStyle: const TextStyle(color: AppColors.textDim, fontSize: 13),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4),
-                borderSide: const BorderSide(color: AppColors.border),
+                borderSide: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide(color: AppColors.primary.withOpacity(0.3)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4),
@@ -480,8 +499,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
               filled: true,
               fillColor: AppColors.surface,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             ),
-            style: const TextStyle(color: AppColors.textLight),
+            style: const TextStyle(color: AppColors.textLight, fontSize: 14),
           ),
           const SizedBox(height: 16),
           // Body Fat
@@ -490,12 +510,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             onChanged: (val) => setState(() => _bodyFat = double.tryParse(val)),
             decoration: InputDecoration(
               labelText: 'Body Fat % (optional)',
-              labelStyle: const TextStyle(color: AppColors.textMid),
+              labelStyle: const TextStyle(color: AppColors.textMid, fontSize: 13),
               hintText: '12.5',
-              hintStyle: const TextStyle(color: AppColors.textDim),
+              hintStyle: const TextStyle(color: AppColors.textDim, fontSize: 13),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4),
-                borderSide: const BorderSide(color: AppColors.border),
+                borderSide: BorderSide(color: AppColors.primary.withOpacity(0.3)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide(color: AppColors.primary.withOpacity(0.3)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4),
@@ -503,8 +527,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
               filled: true,
               fillColor: AppColors.surface,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             ),
-            style: const TextStyle(color: AppColors.textLight),
+            style: const TextStyle(color: AppColors.textLight, fontSize: 14),
           ),
           const SizedBox(height: 24),
           Container(
@@ -528,7 +553,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildTimezonePage() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20).copyWith(bottom: 100, top: 100),
+      padding: const EdgeInsets.all(20).copyWith(bottom: 120, top: 80),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -574,7 +599,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildNotificationsPage() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20).copyWith(bottom: 100, top: 100),
+      padding: const EdgeInsets.all(20).copyWith(bottom: 120, top: 80),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -636,7 +661,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildConfirmationPage() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20).copyWith(bottom: 100, top: 100),
+      padding: const EdgeInsets.all(20).copyWith(bottom: 120, top: 80),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
