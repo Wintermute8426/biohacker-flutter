@@ -29,11 +29,9 @@ class _LogDoseModalState extends State<LogDoseModal> {
   late TextEditingController _doseController;
   late TextEditingController _notesController;
   String _selectedRoute = '';
-  String _selectedSite = '';
   DateTime _selectedDateTime = DateTime.now();
   bool _isLoading = false;
 
-  final _injectionSites = ['Left arm', 'Right arm', 'Left thigh', 'Right thigh', 'Abdomen', 'Other'];
   final _routes = ['IM', 'SC', 'IV', 'PO', 'Intranasal'];
 
   @override
@@ -42,7 +40,6 @@ class _LogDoseModalState extends State<LogDoseModal> {
     _doseController = TextEditingController(text: widget.defaultDoseAmount.toString());
     _notesController = TextEditingController();
     _selectedRoute = widget.defaultRoute;
-    _selectedSite = _injectionSites.first;
   }
 
   @override
@@ -88,7 +85,7 @@ class _LogDoseModalState extends State<LogDoseModal> {
         peptideName: widget.peptideName,
         doseAmount: double.parse(_doseController.text),
         route: _selectedRoute,
-        injectionSite: _selectedSite,
+        injectionSite: null,
         loggedAt: _selectedDateTime,
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
       );
@@ -196,23 +193,7 @@ class _LogDoseModalState extends State<LogDoseModal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
-            Text(
-              'LOG DOSE',
-              style: WintermmuteStyles.headerStyle.copyWith(
-                fontSize: 16,
-                letterSpacing: 1,
-              ),
-            ),
             const SizedBox(height: 4),
-            Text(
-              widget.peptideName,
-              style: WintermmuteStyles.bodyStyle.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
 
             // Dose Amount
             Text(
@@ -260,31 +241,6 @@ class _LogDoseModalState extends State<LogDoseModal> {
               onChanged: (value) {
                 if (value != null) {
                   setState(() => _selectedRoute = value);
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Injection Site
-            Text(
-              'Injection Site',
-              style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
-            ),
-            const SizedBox(height: 8),
-            DropdownButton<String>(
-              value: _selectedSite,
-              isExpanded: true,
-              dropdownColor: AppColors.surface,
-              style: const TextStyle(color: Colors.white),
-              items: _injectionSites.map((site) {
-                return DropdownMenuItem(
-                  value: site,
-                  child: Text(site),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedSite = value);
                 }
               },
             ),
