@@ -1675,11 +1675,17 @@ class _CyclesScreenState extends State<CyclesScreen> {
     final peptides = cycle.peptideName.split(',').map((p) => p.trim()).toList();
     
     print('[DEBUG FLOW] Starting dose configuration for peptides: $peptides');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('[1/4] Starting dose config for ${peptides.length} peptide(s)'), duration: Duration(seconds: 2)),
+    );
     
     for (final peptide in peptides) {
       if (!mounted) return;
       
       print('[DEBUG FLOW] Showing form for peptide: $peptide');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('[2/4] Form for: $peptide'), duration: Duration(seconds: 2)),
+      );
       
       final result = await showModalBottomSheet<Map<String, dynamic>>(
         context: context,
@@ -1694,9 +1700,15 @@ class _CyclesScreenState extends State<CyclesScreen> {
       
       if (result != null) {
         print('[DEBUG FLOW] Form returned: $result');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('[3/4] Got data for $peptide'), duration: Duration(seconds: 2)),
+        );
         schedules.add(result);
       } else {
         print('[DEBUG FLOW] Form cancelled for: $peptide');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('[!] Form cancelled - no data'), backgroundColor: AppColors.error, duration: Duration(seconds: 3)),
+        );
         continue;
       }
     }
@@ -1721,6 +1733,10 @@ class _CyclesScreenState extends State<CyclesScreen> {
     try {
       final userId = Supabase.instance.client.auth.currentUser?.id;
       print('[DEBUG FLOW] User ID: $userId');
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('[4/4] Saving ${schedules.length} schedules to DB...'), duration: Duration(seconds: 2)),
+      );
       
       if (userId == null) {
         throw Exception('User not authenticated');
