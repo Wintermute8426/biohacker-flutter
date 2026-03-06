@@ -1674,8 +1674,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
     final schedules = <Map<String, dynamic>>[];
     final peptides = cycle.peptideName.split(',').map((p) => p.trim()).toList();
     
+    print('[DEBUG FLOW] Starting dose configuration for peptides: $peptides');
+    
     for (final peptide in peptides) {
       if (!mounted) return;
+      
+      print('[DEBUG FLOW] Showing form for peptide: $peptide');
       
       final result = await showModalBottomSheet<Map<String, dynamic>>(
         context: context,
@@ -1689,14 +1693,18 @@ class _CyclesScreenState extends State<CyclesScreen> {
       );
       
       if (result != null) {
+        print('[DEBUG FLOW] Form returned: $result');
         schedules.add(result);
       } else {
-        // User cancelled, skip this peptide
+        print('[DEBUG FLOW] Form cancelled for: $peptide');
         continue;
       }
     }
     
+    print('[DEBUG FLOW] Total schedules collected: ${schedules.length}');
+    
     if (schedules.isEmpty) {
+      print('[DEBUG FLOW] No schedules collected, showing message');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1712,12 +1720,18 @@ class _CyclesScreenState extends State<CyclesScreen> {
     // Batch create dose schedules
     try {
       final userId = Supabase.instance.client.auth.currentUser?.id;
+      print('[DEBUG FLOW] User ID: $userId');
+      
       if (userId == null) {
         throw Exception('User not authenticated');
       }
       
-      for (final schedule in schedules) {
-        await doseScheduleService.createDoseSchedule(
+      for (int i = 0; i < schedules.length; i++) {
+        final schedule = schedules[i];
+        print('[DEBUG FLOW] Creating schedule $i: ${schedule['peptideName']}');
+        print('[DEBUG FLOW] Schedule data: $schedule');
+        
+        final result = await doseScheduleService.createDoseSchedule(
           userId: userId,
           cycleId: cycle.id,
           peptideName: schedule['peptideName'] ?? '',
@@ -1729,24 +1743,31 @@ class _CyclesScreenState extends State<CyclesScreen> {
           endDate: schedule['endDate'],
           notes: schedule['notes'],
         );
+        
+        print('[DEBUG FLOW] Creation result: $result');
       }
+      
+      print('[DEBUG FLOW] All schedules created successfully');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('✓ Dose schedules created'),
             backgroundColor: AppColors.primary,
-            duration: const Duration(seconds: 2),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
     } catch (e) {
+      print('[DEBUG FLOW] Error creating schedules: $e');
+      print('[DEBUG FLOW] Stack trace: ${StackTrace.current}');
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error creating schedules: $e'),
+            content: Text('Error: $e'),
             backgroundColor: AppColors.error,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 5),
           ),
         );
       }

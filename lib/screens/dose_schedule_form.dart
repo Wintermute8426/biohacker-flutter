@@ -112,7 +112,7 @@ class _DoseScheduleFormState extends ConsumerState<DoseScheduleForm> {
       return;
     }
 
-    Navigator.pop(context, {
+    final data = {
       'peptideName': widget.peptideName,
       'doseAmount': double.parse(_doseController.text),
       'route': _route,
@@ -121,7 +121,10 @@ class _DoseScheduleFormState extends ConsumerState<DoseScheduleForm> {
       'startDate': _startDate,
       'endDate': _endDate,
       'notes': _notes,
-    });
+    };
+    
+    print('[DEBUG FORM] Saving schedule data: $data');
+    Navigator.pop(context, data);
   }
 
   @override

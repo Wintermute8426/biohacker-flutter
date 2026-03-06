@@ -124,27 +124,38 @@ class DoseScheduleService {
     String? notes,
   }) async {
     try {
+      print('[DEBUG SERVICE] Creating schedule for $peptideName');
+      print('[DEBUG SERVICE] User: $userId, Cycle: $cycleId');
+      print('[DEBUG SERVICE] Dose: ${doseAmount}mg, Route: $route, Time: $scheduledTime');
+      print('[DEBUG SERVICE] Days: $daysOfWeek, Start: ${startDate.toString()}');
+      
+      final data = {
+        'user_id': userId,
+        'cycle_id': cycleId,
+        'peptide_name': peptideName,
+        'dose_amount': doseAmount,
+        'route': route,
+        'scheduled_time': scheduledTime,
+        'days_of_week': daysOfWeek,
+        'start_date': startDate.toIso8601String().split('T')[0],
+        'end_date': endDate?.toIso8601String().split('T')[0],
+        'is_active': true,
+        'notes': notes,
+      };
+      
+      print('[DEBUG SERVICE] Insert data: $data');
+      
       final response = await _supabase
           .from('dose_schedules')
-          .insert({
-            'user_id': userId,
-            'cycle_id': cycleId,
-            'peptide_name': peptideName,
-            'dose_amount': doseAmount,
-            'route': route,
-            'scheduled_time': scheduledTime,
-            'days_of_week': daysOfWeek,
-            'start_date': startDate.toIso8601String().split('T')[0],
-            'end_date': endDate?.toIso8601String().split('T')[0],
-            'is_active': true,
-            'notes': notes,
-          })
+          .insert(data)
           .select()
           .single();
 
+      print('[DEBUG SERVICE] Insert successful, response: $response');
       return DoseSchedule.fromJson(response);
     } catch (e) {
-      print('Error creating dose schedule: $e');
+      print('[ERROR SERVICE] Error creating dose schedule: $e');
+      print('[ERROR SERVICE] Stack trace: ${StackTrace.current}');
       return null;
     }
   }
