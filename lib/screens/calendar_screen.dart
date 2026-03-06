@@ -470,6 +470,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         builder: (context) => AddSymptomsModal(
           doseLogId: dose.doseLogId,
           peptideName: dose.peptideName,
+          scheduledAt: dose.date,
           onCompleted: () {
             ref.refresh(upcomingDosesProvider);
           },
@@ -489,6 +490,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         builder: (context) => MarkMissedModal(
           doseLogId: dose.doseLogId,
           peptideName: dose.peptideName,
+          scheduledAt: dose.date,
           onCompleted: () {
             ref.refresh(upcomingDosesProvider);
           },
