@@ -360,9 +360,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _showLogDoseModal(dose);
+                    onPressed: () async {
+                      Navigator.pop(context); // Close detail modal
+                      await _showLogDoseModal(dose); // Show log modal
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -384,12 +384,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  void _showLogDoseModal(DoseInstance dose) {
-    showModalBottomSheet(
+  Future<void> _showLogDoseModal(DoseInstance dose) async {
+    print('[DEBUG] Opening LogDoseModal for ${dose.peptideName}');
+    
+    final result = await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => LogDoseModal(
+      builder: (bottomSheetContext) => LogDoseModal(
         cycleId: dose.cycleId,
         scheduleId: dose.scheduleId,
         peptideName: dose.peptideName,
@@ -397,6 +399,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         defaultRoute: dose.route,
       ),
     );
+    
+    print('[DEBUG] LogDoseModal result: $result');
   }
 
   Widget _buildDetailItem(String label, String value) {
