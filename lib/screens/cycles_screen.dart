@@ -11,6 +11,7 @@ import '../services/protocol_templates_database.dart';
 import '../services/dose_schedule_service.dart';
 import '../screens/dose_schedule_form.dart';
 import '../widgets/advanced_dosing_widget.dart';
+import '../widgets/wintermute_dialog.dart';
 
 class CyclesScreen extends StatefulWidget {
   const CyclesScreen({Key? key}) : super(key: key);
@@ -1077,30 +1078,26 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           showDialog(
                             context: context,
                             barrierDismissible: false,
-                            builder: (dialogContext) => AlertDialog(
-                              backgroundColor: AppColors.surface,
-                              title: Text('Configure Doses?', style: TextStyle(color: AppColors.primary)),
-                              content: Text(
-                                'Would you like to configure dose schedules for $peptideName?',
-                                style: TextStyle(color: AppColors.textMid),
-                              ),
+                            builder: (dialogContext) => WintermmuteDialog(
+                              title: 'CONFIGURE DOSES?',
+                              content: 'Would you like to configure dose schedules for $peptideName?',
                               actions: [
-                                TextButton(
+                                WintermmuteDialogAction(
+                                  label: 'SKIP',
+                                  isPrimary: false,
                                   onPressed: () {
                                     print('[DEBUG] SKIP clicked');
-                                    Navigator.pop(dialogContext);
                                     Navigator.pop(context); // Close the CREATE CYCLE modal
                                   },
-                                  child: Text('SKIP', style: TextStyle(color: AppColors.textDim)),
                                 ),
-                                TextButton(
+                                WintermmuteDialogAction(
+                                  label: 'CONFIGURE',
+                                  isPrimary: true,
                                   onPressed: () {
                                     print('[DEBUG] CONFIGURE clicked');
-                                    Navigator.pop(dialogContext);
                                     Navigator.pop(context); // Close the CREATE CYCLE modal
                                     _showConfigureDosesFlow(tempCycle);
                                   },
-                                  child: Text('CONFIGURE', style: TextStyle(color: AppColors.primary)),
                                 ),
                               ],
                             ),
