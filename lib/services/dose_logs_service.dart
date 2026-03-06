@@ -79,24 +79,22 @@ class DoseLogsService {
     try {
       print('[DEBUG] Logging dose: $peptideName, ${doseAmount}mg');
 
+      // Start with minimal required fields
       final data = {
         'user_id': userId,
         'cycle_id': cycleId,
-        'schedule_id': scheduleId,
-        'peptide_name': peptideName,
         'dose_amount': doseAmount,
-        'route': route,
         'logged_at': loggedAt.toIso8601String(),
       };
       
-      // Only include optional fields if they have values
-      if (injectionSite != null && injectionSite.isNotEmpty) {
-        data['injection_site'] = injectionSite;
-      }
-      if (notes != null && notes.isNotEmpty) {
-        data['notes'] = notes;
-      }
+      // Add optional fields only if they exist
+      if (route.isNotEmpty) data['route'] = route;
+      if (scheduleId != null && scheduleId.isNotEmpty) data['schedule_id'] = scheduleId;
+      if (peptideName.isNotEmpty) data['peptide_name'] = peptideName;
+      if (injectionSite != null && injectionSite.isNotEmpty) data['injection_site'] = injectionSite;
+      if (notes != null && notes.isNotEmpty) data['notes'] = notes;
       
+      print('[DEBUG SERVICE] Inserting to dose_logs with data: $data');
       final response = await _supabase.from('dose_logs').insert(data).select().single();
 
       print('[DEBUG] Dose logged successfully');
