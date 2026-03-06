@@ -79,19 +79,15 @@ class DoseLogsService {
     try {
       print('[DEBUG] Logging dose: $peptideName, ${doseAmount}mg');
 
-      // Start with minimal required fields
+      // Match the actual dose_logs schema
       final data = {
-        'user_id': userId,
         'cycle_id': cycleId,
+        'dosis_id': scheduleId ?? '', // Use schedule_id as dosis_id
         'dose_amount': doseAmount,
         'logged_at': loggedAt.toIso8601String(),
       };
       
-      // Add optional fields only if they exist
-      if (route.isNotEmpty) data['route'] = route;
-      if (scheduleId != null && scheduleId.isNotEmpty) data['schedule_id'] = scheduleId;
-      if (peptideName.isNotEmpty) data['peptide_name'] = peptideName;
-      if (injectionSite != null && injectionSite.isNotEmpty) data['injection_site'] = injectionSite;
+      // Add optional fields
       if (notes != null && notes.isNotEmpty) data['notes'] = notes;
       
       print('[DEBUG SERVICE] Inserting to dose_logs with data: $data');
