@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/dose_logs_service.dart';
@@ -71,9 +72,15 @@ class _LogDoseModalState extends State<LogDoseModal> {
     setState(() => _isLoading = true);
 
     try {
-      final userId = 'test_user'; // Will get from Supabase auth in real implementation
-      final service = DoseLogsService(null);
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
 
+      final service = DoseLogsService(Supabase.instance.client);
+
+      print('[DEBUG] Logging dose for cycle: ${widget.cycleId}');
+      
       await service.logDose(
         userId: userId,
         cycleId: widget.cycleId,
@@ -86,6 +93,8 @@ class _LogDoseModalState extends State<LogDoseModal> {
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
       );
 
+      print('[DEBUG] Dose logged successfully');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -97,6 +106,7 @@ class _LogDoseModalState extends State<LogDoseModal> {
         Navigator.pop(context, true);
       }
     } catch (e) {
+      print('[ERROR] Failed to log dose: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

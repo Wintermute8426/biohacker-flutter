@@ -390,7 +390,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => LogDoseModal(
-        cycleId: 'test_cycle', // TODO: Get actual cycle ID
+        cycleId: dose.cycleId,
         scheduleId: dose.scheduleId,
         peptideName: dose.peptideName,
         defaultDoseAmount: dose.doseAmount,

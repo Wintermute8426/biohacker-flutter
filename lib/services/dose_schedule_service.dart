@@ -73,6 +73,7 @@ class DoseInstance {
   final double doseAmount;
   final String route;
   final String scheduleId;
+  final String cycleId;
   final bool? isLogged;
 
   DoseInstance({
@@ -82,6 +83,7 @@ class DoseInstance {
     required this.doseAmount,
     required this.route,
     required this.scheduleId,
+    required this.cycleId,
     this.isLogged,
   });
 }
@@ -197,6 +199,7 @@ class DoseScheduleService {
               doseAmount: schedule.doseAmount,
               route: schedule.route,
               scheduleId: schedule.id,
+              cycleId: schedule.cycleId,
               isLogged: null, // TODO: Check dose_logs table
             ));
           }
