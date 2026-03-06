@@ -82,13 +82,17 @@ class DoseLogsService {
       // Match the actual dose_logs schema
       final data = {
         'cycle_id': cycleId,
-        'dosis_id': scheduleId ?? '', // Use schedule_id as dosis_id
         'dose_amount': doseAmount,
         'logged_at': loggedAt.toIso8601String(),
       };
       
-      // Add optional fields
-      if (notes != null && notes.isNotEmpty) data['notes'] = notes;
+      // Add optional fields only if they have values
+      if (scheduleId != null && scheduleId.isNotEmpty) {
+        data['dosis_id'] = scheduleId;
+      }
+      if (notes != null && notes.isNotEmpty) {
+        data['notes'] = notes;
+      }
       
       print('[DEBUG SERVICE] Inserting to dose_logs with data: $data');
       final response = await _supabase.from('dose_logs').insert(data).select().single();
