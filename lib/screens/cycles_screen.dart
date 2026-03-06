@@ -955,8 +955,13 @@ class _CyclesScreenState extends State<CyclesScreen> {
                     height: 44,
                     child: ElevatedButton(
                       onPressed: () async {
+                        print('[DEBUG CREATE CYCLE] Button pressed');
+                        print('[DEBUG CREATE CYCLE] Peptide: "${_peptideController.text}"');
+                        print('[DEBUG CREATE CYCLE] Dose: "${_doseController.text}"');
+                        
                         if (_peptideController.text.isEmpty ||
                             _doseController.text.isEmpty) {
+                          print('[DEBUG CREATE CYCLE] Validation failed - showing snackbar');
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Please fill in peptide and dose'),
@@ -966,39 +971,61 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           return;
                         }
 
+                        print('[DEBUG CREATE CYCLE] Validation passed');
                         final peptideName = _peptideController.text;
                         final dose = double.tryParse(_doseController.text) ?? 0;
                         final weeks = int.tryParse(_weeksController.text) ?? 8;
+                        print('[DEBUG CREATE CYCLE] Parsed values - peptide: $peptideName, dose: $dose, weeks: $weeks');
 
                         // Save cycle and capture the actual returned cycle with real UUID
-                        final createdCycle = await db.saveCycle(
-                          peptideName: peptideName,
-                          dose: dose,
-                          route: _selectedRoute,
-                          frequency: _selectedFrequency,
-                          durationWeeks: weeks,
-                          startDate: DateTime.now(),
-                          advancedSchedule: _selectedDosingSchedule?.toJson(),
-                        );
-                        
-                        if (createdCycle == null) {
+                        print('[DEBUG CREATE CYCLE] Calling db.saveCycle()...');
+                        Cycle? createdCycle;
+                        try {
+                          createdCycle = await db.saveCycle(
+                            peptideName: peptideName,
+                            dose: dose,
+                            route: _selectedRoute,
+                            frequency: _selectedFrequency,
+                            durationWeeks: weeks,
+                            startDate: DateTime.now(),
+                            advancedSchedule: _selectedDosingSchedule?.toJson(),
+                          );
+                          
+                          print('[DEBUG CREATE CYCLE] saveCycle returned: ${createdCycle?.id}');
+                          
+                          if (createdCycle == null) {
+                            print('[DEBUG CREATE CYCLE] createdCycle is null');
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Error creating cycle'),
+                                  backgroundColor: Color(0xFFFF0040),
+                                ),
+                              );
+                            }
+                            return;
+                          }
+                          print('[DEBUG CREATE CYCLE] createdCycle is valid - peptideName: ${createdCycle.peptideName}, id: ${createdCycle.id}');
+                          
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('✓ $peptideName cycle created'),
+                              backgroundColor: AppColors.primary,
+                            ),
+                          );
+                        } catch (e, stackTrace) {
+                          print('[DEBUG CREATE CYCLE] Exception in saveCycle: $e');
+                          print('[DEBUG CREATE CYCLE] Stack trace: $stackTrace');
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Error creating cycle'),
+                              SnackBar(
+                                content: Text('Exception: $e'),
                                 backgroundColor: Color(0xFFFF0040),
                               ),
                             );
                           }
                           return;
                         }
-                        
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('✓ $peptideName cycle created'),
-                            backgroundColor: AppColors.primary,
-                          ),
-                        );
                         
                         // Show dose configuration prompt BEFORE closing the modal
                         if (mounted) {
