@@ -44,7 +44,9 @@ class DoseLog {
       injectionSite: json['injection_site'],
       loggedAt: DateTime.parse(json['logged_at']),
       notes: json['notes'],
-      createdAt: DateTime.parse(json['created_at']),
+      status: json['status'] ?? 'SCHEDULED',
+      symptoms: json['symptoms'] as Map<String, dynamic>?,
+      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
     );
   }
 
@@ -59,6 +61,8 @@ class DoseLog {
       'injection_site': injectionSite,
       'logged_at': loggedAt.toIso8601String(),
       'notes': notes,
+      'status': status,
+      'symptoms': symptoms,
     };
   }
 }
@@ -68,50 +72,61 @@ class DoseLogsService {
 
   DoseLogsService(this._supabase);
 
-  // Create dose log
-  Future<DoseLog?> logDose({
+  // Auto-generate SCHEDULED dose logs from a dose schedule
+  Future<List<DoseLog>> generateDosesFromSchedule({
     required String userId,
     required String cycleId,
-    String? scheduleId,
+    required String scheduleId,
     required String peptideName,
     required double doseAmount,
     required String route,
-    String? injectionSite,
-    required DateTime loggedAt,
-    String? notes,
+    required String scheduledTime,
+    required List<int> daysOfWeek,
+    required DateTime startDate,
+    DateTime? endDate,
   }) async {
     try {
-      print('[DEBUG] Logging dose: $peptideName, ${doseAmount}mg');
-
-      // Use ONLY the columns we're 100% sure exist
-      final data = {
-        'cycle_id': cycleId,
-        'dose_amount': doseAmount,
-        'logged_at': loggedAt.toIso8601String(),
-      };
+      print('[DEBUG SERVICE] Generating doses from schedule for $peptideName');
       
-      print('[DEBUG SERVICE] Inserting to dose_logs with minimal data: $data');
+      final generatedDoses = <DoseLog>[];
+      final end = endDate ?? startDate.add(const Duration(days: 365));
       
-      final response = await _supabase.from('dose_logs').insert(data).select().single();
-      print('[DEBUG SERVICE] Insert successful: $response');
-      print('[DEBUG] Dose logged successfully');
-      return DoseLog.fromJson(response as Map<String, dynamic>);
+      // Generate dose_logs for each scheduled day
+      for (DateTime date = startDate; date.isBefore(end); date = date.add(const Duration(days: 1))) {
+        final dayOfWeek = date.weekday % 7; // 0 = Sunday
+        
+        if (daysOfWeek.contains(dayOfWeek)) {
+          // Parse time (HH:MM format)
+          final timeParts = scheduledTime.split(':');
+          final hour = int.parse(timeParts[0]);
+          final minute = int.parse(timeParts[1]);
+          
+          final loggedAt = DateTime(date.year, date.month, date.day, hour, minute);
+          
+          // Create dose_logs entry with SCHEDULED status
+          final data = {
+            'user_id': userId,
+            'cycle_id': cycleId,
+            'dose_amount': doseAmount,
+            'logged_at': loggedAt.toIso8601String(),
+            'status': 'SCHEDULED',
+          };
+          
+          if (scheduleId.isNotEmpty) data['dosis_id'] = scheduleId;
+          if (peptideName.isNotEmpty) data['peptide_name'] = peptideName;
+          
+          final response = await _supabase.from('dose_logs').insert(data).select().single();
+          generatedDoses.add(DoseLog.fromJson(response as Map<String, dynamic>));
+          
+          print('[DEBUG SERVICE] Generated dose for ${date.toIso8601String()}');
+        }
+      }
+      
+      print('[DEBUG SERVICE] Generated ${generatedDoses.length} dose logs');
+      return generatedDoses;
     } catch (e) {
-      print('[ERROR] Failed to log dose: $e');
-      print('[DEBUG] Returning fallback DoseLog');
-      // Return a fallback DoseLog if insert fails
-      return DoseLog(
-        id: 'temp_id',
-        userId: userId,
-        cycleId: cycleId,
-        scheduleId: scheduleId,
-        peptideName: peptideName,
-        doseAmount: doseAmount,
-        route: route,
-        loggedAt: loggedAt,
-        notes: notes,
-        createdAt: DateTime.now(),
-      );
+      print('[ERROR SERVICE] Failed to generate doses: $e');
+      return [];
     }
   }
 
@@ -157,6 +172,48 @@ class DoseLogsService {
     }
   }
 
+  // Mark dose as MISSED
+  Future<bool> markAsMissed(String doseLogId) async {
+    try {
+      await _supabase
+          .from('dose_logs')
+          .update({'status': 'MISSED'})
+          .eq('id', doseLogId);
+      return true;
+    } catch (e) {
+      print('[ERROR] Failed to mark dose as missed: $e');
+      return false;
+    }
+  }
+
+  // Mark dose as COMPLETED
+  Future<bool> markAsCompleted(String doseLogId) async {
+    try {
+      await _supabase
+          .from('dose_logs')
+          .update({'status': 'COMPLETED'})
+          .eq('id', doseLogId);
+      return true;
+    } catch (e) {
+      print('[ERROR] Failed to mark dose as completed: $e');
+      return false;
+    }
+  }
+
+  // Add symptoms to dose
+  Future<bool> addSymptoms(String doseLogId, Map<String, dynamic> symptoms) async {
+    try {
+      await _supabase
+          .from('dose_logs')
+          .update({'symptoms': symptoms})
+          .eq('id', doseLogId);
+      return true;
+    } catch (e) {
+      print('[ERROR] Failed to add symptoms: $e');
+      return false;
+    }
+  }
+
   // Delete dose log
   Future<bool> deleteDoseLog(String logId) async {
     try {
@@ -174,9 +231,13 @@ final doseLogsServiceProvider = Provider((ref) {
   return DoseLogsService(Supabase.instance.client);
 });
 
+final currentUserIdProvider = Provider<String?>((ref) {
+  return Supabase.instance.client.auth.currentUser?.id;
+});
+
 final cycleDoseLogsProvider =
     FutureProvider.family<List<DoseLog>, String>((ref, cycleId) async {
-  final userId = Supabase.instance.client.auth.currentUser?.id;
+  final userId = ref.watch(currentUserIdProvider);
   if (userId == null) return [];
 
   final service = ref.watch(doseLogsServiceProvider);
