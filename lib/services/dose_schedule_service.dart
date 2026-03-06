@@ -153,9 +153,11 @@ class DoseScheduleService {
 
       print('[DEBUG SERVICE] Insert successful, response: $response');
       return DoseSchedule.fromJson(response);
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('[ERROR SERVICE] Error creating dose schedule: $e');
-      print('[ERROR SERVICE] Stack trace: ${StackTrace.current}');
+      print('[ERROR SERVICE] Exception type: ${e.runtimeType}');
+      print('[ERROR SERVICE] Full error: ${e.toString()}');
+      print('[ERROR SERVICE] Stack trace: $stackTrace');
       return null;
     }
   }

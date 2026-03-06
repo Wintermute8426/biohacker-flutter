@@ -1744,26 +1744,32 @@ class _CyclesScreenState extends State<CyclesScreen> {
       
       for (int i = 0; i < schedules.length; i++) {
         final schedule = schedules[i];
-        print('[DEBUG FLOW] Creating schedule $i: ${schedule['peptideName']}');
+        final peptideName = schedule['peptideName'] ?? 'Unknown';
+        print('[DEBUG FLOW] Creating schedule $i: $peptideName');
         print('[DEBUG FLOW] Schedule data: $schedule');
         
-        final result = await doseScheduleService.createDoseSchedule(
-          userId: userId,
-          cycleId: cycle.id,
-          peptideName: schedule['peptideName'] ?? '',
-          doseAmount: schedule['doseAmount'] ?? 0.0,
-          route: schedule['route'] ?? 'SC',
-          scheduledTime: schedule['scheduledTime'] ?? '08:00',
-          daysOfWeek: List<int>.from(schedule['daysOfWeek'] ?? []),
-          startDate: schedule['startDate'] ?? DateTime.now(),
-          endDate: schedule['endDate'],
-          notes: schedule['notes'],
-        );
-        
-        print('[DEBUG FLOW] Creation result: $result');
-        
-        if (result == null) {
-          throw Exception('Failed to create schedule for ${schedule['peptideName']}');
+        try {
+          final result = await doseScheduleService.createDoseSchedule(
+            userId: userId,
+            cycleId: cycle.id,
+            peptideName: peptideName,
+            doseAmount: schedule['doseAmount'] ?? 0.0,
+            route: schedule['route'] ?? 'SC',
+            scheduledTime: schedule['scheduledTime'] ?? '08:00',
+            daysOfWeek: List<int>.from(schedule['daysOfWeek'] ?? []),
+            startDate: schedule['startDate'] ?? DateTime.now(),
+            endDate: schedule['endDate'],
+            notes: schedule['notes'],
+          );
+          
+          print('[DEBUG FLOW] Creation result: $result');
+          
+          if (result == null) {
+            throw Exception('Supabase insert returned null - check console for details');
+          }
+        } catch (e) {
+          print('[DEBUG FLOW] Inner catch - exception for $peptideName: $e');
+          rethrow;
         }
       }
       
@@ -1778,16 +1784,20 @@ class _CyclesScreenState extends State<CyclesScreen> {
           ),
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('[DEBUG FLOW] Error creating schedules: $e');
-      print('[DEBUG FLOW] Stack trace: ${StackTrace.current}');
+      print('[DEBUG FLOW] Exception type: ${e.runtimeType}');
+      print('[DEBUG FLOW] Stack trace: $stackTrace');
+      
+      final errorMsg = e.toString();
+      print('[DEBUG FLOW] Full error: $errorMsg');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('ERROR: $errorMsg'),
             backgroundColor: AppColors.error,
-            duration: const Duration(seconds: 5),
+            duration: const Duration(seconds: 7),
           ),
         );
       }
