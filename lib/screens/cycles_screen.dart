@@ -1761,6 +1761,10 @@ class _CyclesScreenState extends State<CyclesScreen> {
         );
         
         print('[DEBUG FLOW] Creation result: $result');
+        
+        if (result == null) {
+          throw Exception('Failed to create schedule for ${schedule['peptideName']}');
+        }
       }
       
       print('[DEBUG FLOW] All schedules created successfully');
