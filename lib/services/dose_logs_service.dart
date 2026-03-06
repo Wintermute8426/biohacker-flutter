@@ -79,17 +79,25 @@ class DoseLogsService {
     try {
       print('[DEBUG] Logging dose: $peptideName, ${doseAmount}mg');
 
-      final response = await _supabase.from('dose_logs').insert({
+      final data = {
         'user_id': userId,
         'cycle_id': cycleId,
         'schedule_id': scheduleId,
         'peptide_name': peptideName,
         'dose_amount': doseAmount,
         'route': route,
-        'injection_site': injectionSite,
         'logged_at': loggedAt.toIso8601String(),
-        'notes': notes,
-      }).select().single();
+      };
+      
+      // Only include optional fields if they have values
+      if (injectionSite != null && injectionSite.isNotEmpty) {
+        data['injection_site'] = injectionSite;
+      }
+      if (notes != null && notes.isNotEmpty) {
+        data['notes'] = notes;
+      }
+      
+      final response = await _supabase.from('dose_logs').insert(data).select().single();
 
       print('[DEBUG] Dose logged successfully');
       return DoseLog.fromJson(response as Map<String, dynamic>);
