@@ -10,6 +10,7 @@ import '../services/side_effects_database.dart';
 import '../services/protocol_templates_database.dart';
 import '../services/dose_schedule_service.dart';
 import '../screens/dose_schedule_form.dart';
+import '../screens/insights_screen.dart';
 import '../widgets/advanced_dosing_widget.dart';
 import '../widgets/wintermute_dialog.dart';
 
@@ -1564,6 +1565,35 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                           ),
                                           child: Text(
                                             'EDIT',
+                                            style: TextStyle(
+                                              color: AppColors.primary,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          onPressed: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  InsightsScreen(cycleId: cycle.id),
+                                            ),
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            side: BorderSide(
+                                              color: AppColors.primary,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(3),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'INSIGHTS',
                                             style: TextStyle(
                                               color: AppColors.primary,
                                               fontSize: 10,
