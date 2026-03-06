@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
-import '../data/peptides.dart';
+import '../data/peptides.dart' show PEPTIDE_LIST;
 
 class PeptideSelector extends StatefulWidget {
   final Function(String) onSelected;
@@ -40,7 +40,7 @@ class _PeptideSelectorState extends State<PeptideSelector> {
 
   void _updateFilteredList() {
     final query = _searchController.text.toLowerCase();
-    final allPeptides = peptides.map((p) => p['name'] as String).toList();
+    final allPeptides = PEPTIDE_LIST;
     
     if (query.isEmpty) {
       _filteredPeptides = allPeptides;
