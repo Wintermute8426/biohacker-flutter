@@ -154,11 +154,13 @@ class DoseScheduleService {
       print('[DEBUG SERVICE] Insert successful, response: $response');
       return DoseSchedule.fromJson(response);
     } catch (e, stackTrace) {
-      print('[ERROR SERVICE] Error creating dose schedule: $e');
+      final errorMsg = 'Supabase Error: ${e.toString()}';
+      print('[ERROR SERVICE] Error creating dose schedule: $errorMsg');
       print('[ERROR SERVICE] Exception type: ${e.runtimeType}');
-      print('[ERROR SERVICE] Full error: ${e.toString()}');
       print('[ERROR SERVICE] Stack trace: $stackTrace');
-      return null;
+      
+      // Throw the error so caller can see it
+      throw Exception(errorMsg);
     }
   }
 
