@@ -387,16 +387,16 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   Future<void> _showLogDoseModal(DoseInstance dose) async {
     print('[DEBUG] Opening LogDoseModal for ${dose.peptideName}');
     
-    final result = await showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (bottomSheetContext) => LogDoseModal(
-        cycleId: dose.cycleId,
-        scheduleId: dose.scheduleId,
-        peptideName: dose.peptideName,
-        defaultDoseAmount: dose.doseAmount,
-        defaultRoute: dose.route,
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LogDoseModal(
+          cycleId: dose.cycleId,
+          scheduleId: dose.scheduleId,
+          peptideName: dose.peptideName,
+          defaultDoseAmount: dose.doseAmount,
+          defaultRoute: dose.route,
+        ),
       ),
     );
     
