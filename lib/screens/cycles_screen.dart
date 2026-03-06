@@ -13,6 +13,7 @@ import '../screens/dose_schedule_form.dart';
 import '../screens/insights_screen.dart';
 import '../widgets/advanced_dosing_widget.dart';
 import '../widgets/wintermute_dialog.dart';
+import '../widgets/peptide_selector.dart';
 
 class CyclesScreen extends StatefulWidget {
   const CyclesScreen({Key? key}) : super(key: key);
@@ -45,7 +46,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
   }
   
   List<Cycle> savedCycles = [];
-  List<String> filteredPeptides = PEPTIDE_LIST;
+
   DosingSchedule? _selectedDosingSchedule;
   
   String _selectedFrequency = '1x weekly';
@@ -59,19 +60,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
     setState(() {
       savedCycles = cycles;
       _isLoading = false;
-    });
-  }
-
-  void _filterPeptides(String query) {
-    setState(() {
-      filteredPeptides = searchPeptides(query);
-    });
-  }
-
-  void _selectPeptide(String peptide) {
-    setState(() {
-      _peptideController.text = peptide;
-      filteredPeptides = [];
     });
   }
 
@@ -763,70 +751,13 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  Text(
-                    'Peptide',
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
+                  PeptideSelector(
+                    initialValue: _peptideController.text.isNotEmpty ? _peptideController.text : null,
+                    label: 'PEPTIDE',
+                    onSelected: (peptide) {
+                      _peptideController.text = peptide;
+                    },
                   ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _peptideController,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                    onChanged: _filterPeptides,
-                    decoration: InputDecoration(
-                      hintText: 'Search peptides...',
-                      hintStyle: TextStyle(color: AppColors.textDim, fontSize: 12),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
-                  ),
-                  if (filteredPeptides.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      constraints: const BoxConstraints(maxHeight: 200),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: filteredPeptides.map((p) {
-                          return GestureDetector(
-                            onTap: () => _selectPeptide(p),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: AppColors.border,
-                                    width: 0.5,
-                                  ),
-                                ),
-                              ),
-                              child: Text(
-                                p,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: 20),
 
                   Row(
