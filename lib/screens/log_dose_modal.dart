@@ -175,19 +175,26 @@ class _LogDoseModalState extends State<LogDoseModal> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.fromLTRB(16, 20, 16, MediaQuery.of(context).viewInsets.bottom + 20),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          border: Border(
-            top: BorderSide(color: AppColors.border),
-          ),
+    print('[DEBUG MODAL] Building LogDoseModal for ${widget.peptideName}');
+    
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: Text(
+          'LOG ${widget.peptideName.toUpperCase()}',
+          style: WintermmuteStyles.headerStyle.copyWith(fontSize: 16),
         ),
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
             // Header
             Text(
