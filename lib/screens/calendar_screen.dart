@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/dose_schedule_service.dart';
+import '../services/dose_logs_service.dart';
+import '../screens/log_dose_modal.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -358,13 +361,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // TODO: Log dose
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Dose logged (coming in Phase 10C)'),
-                        ),
-                      );
+                      _showLogDoseModal(dose);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -382,6 +380,21 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showLogDoseModal(DoseInstance dose) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => LogDoseModal(
+        cycleId: 'test_cycle', // TODO: Get actual cycle ID
+        scheduleId: dose.scheduleId,
+        peptideName: dose.peptideName,
+        defaultDoseAmount: dose.doseAmount,
+        defaultRoute: dose.route,
       ),
     );
   }
