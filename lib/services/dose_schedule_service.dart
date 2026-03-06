@@ -75,6 +75,8 @@ class DoseInstance {
   final String scheduleId;
   final String cycleId;
   final bool? isLogged;
+  final String doseLogId;
+  final String status; // SCHEDULED, COMPLETED, MISSED
 
   DoseInstance({
     required this.date,
@@ -85,6 +87,8 @@ class DoseInstance {
     required this.scheduleId,
     required this.cycleId,
     this.isLogged,
+    required this.doseLogId,
+    required this.status,
   });
 }
 
@@ -176,6 +180,24 @@ class DoseScheduleService {
       final instances = <DoseInstance>[];
       final now = DateTime.now();
 
+      // Fetch all dose_logs for next 30 days
+      final endDate = now.add(Duration(days: daysAhead));
+      final doseLogs = await _supabase
+          .from('dose_logs')
+          .select()
+          .eq('user_id', userId)
+          .gte('logged_at', now.toIso8601String())
+          .lte('logged_at', endDate.toIso8601String());
+
+      // Create a map of dose_logs by schedule_id + logged_at date for quick lookup
+      final doseLogMap = <String, Map<String, dynamic>>{};
+      for (final log in doseLogs as List) {
+        final scheduleId = log['dose_schedule_id'] as String? ?? '';
+        final loggedAt = DateTime.parse(log['logged_at'] as String);
+        final logDateKey = '${scheduleId}_${loggedAt.year}-${loggedAt.month.toString().padLeft(2, '0')}-${loggedAt.day.toString().padLeft(2, '0')}';
+        doseLogMap[logDateKey] = log as Map<String, dynamic>;
+      }
+
       for (final schedule in schedules) {
         // Skip if schedule hasn't started yet
         if (schedule.startDate.isAfter(now)) continue;
@@ -192,6 +214,13 @@ class DoseScheduleService {
           final adjustedDayOfWeek = dayOfWeek == 7 ? 0 : dayOfWeek; // Convert to 0=Sunday
 
           if (schedule.daysOfWeek.contains(adjustedDayOfWeek)) {
+            // Look up dose_log for this schedule + date
+            final logDateKey = '${schedule.id}_${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+            final doseLog = doseLogMap[logDateKey];
+
+            final doseLogId = doseLog?['id'] as String? ?? '';
+            final status = doseLog?['status'] as String? ?? 'SCHEDULED';
+
             instances.add(DoseInstance(
               date: date,
               time: schedule.scheduledTime,
@@ -200,7 +229,9 @@ class DoseScheduleService {
               route: schedule.route,
               scheduleId: schedule.id,
               cycleId: schedule.cycleId,
-              isLogged: null, // TODO: Check dose_logs table
+              isLogged: status != 'SCHEDULED',
+              doseLogId: doseLogId,
+              status: status,
             ));
           }
         }

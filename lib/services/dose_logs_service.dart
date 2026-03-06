@@ -112,7 +112,7 @@ class DoseLogsService {
             'status': 'SCHEDULED',
           };
           
-          if (scheduleId.isNotEmpty) data['dosis_id'] = scheduleId;
+          if (scheduleId.isNotEmpty) data['dose_schedule_id'] = scheduleId;
           if (peptideName.isNotEmpty) data['peptide_name'] = peptideName;
           
           final response = await _supabase.from('dose_logs').insert(data).select().single();

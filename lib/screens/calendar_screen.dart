@@ -6,7 +6,8 @@ import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/dose_schedule_service.dart';
 import '../services/dose_logs_service.dart';
-import '../screens/log_dose_modal.dart';
+import '../screens/mark_missed_modal.dart';
+import '../screens/add_symptoms_modal.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -317,6 +318,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   void _showDoseDetails(DoseInstance dose) {
+    // Determine status badge color
+    Color statusColor = AppColors.textMid;
+    String statusText = 'SCHEDULED';
+    if (dose.status == 'COMPLETED') {
+      statusColor = const Color(0xFF00FF00); // Green
+      statusText = 'COMPLETED';
+    } else if (dose.status == 'MISSED') {
+      statusColor = const Color(0xFFFF0040); // Red
+      statusText = 'MISSED';
+    }
+
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
@@ -326,9 +338,32 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              dose.peptideName,
-              style: WintermmuteStyles.headerStyle,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    dose.peptideName,
+                    style: WintermmuteStyles.headerStyle,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: statusColor),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    statusText,
+                    style: WintermmuteStyles.tinyStyle.copyWith(
+                      color: statusColor,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             Row(
@@ -357,50 +392,111 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      Navigator.pop(context); // Close detail modal
-                      await _showLogDoseModal(dose); // Show log modal
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                    ),
-                    child: Text(
-                      'LOG DOSE',
-                      style: WintermmuteStyles.bodyStyle.copyWith(
-                        color: AppColors.background,
-                        fontWeight: FontWeight.bold,
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Show action buttons based on status
+            if (dose.status == 'SCHEDULED')
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        await _showAddSymptomsModal(dose);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
+                      child: Text(
+                        'ADD SYMPTOMS',
+                        style: WintermmuteStyles.bodyStyle.copyWith(
+                          color: AppColors.background,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        await _showMarkMissedModal(dose);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF0040),
+                      ),
+                      child: Text(
+                        'MARK MISSED',
+                        style: WintermmuteStyles.bodyStyle.copyWith(
+                          color: AppColors.background,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await _showAddSymptomsModal(dose);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
                 ),
-              ],
-            ),
+                child: Text(
+                  'ADD SYMPTOMS',
+                  style: WintermmuteStyles.bodyStyle.copyWith(
+                    color: AppColors.background,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Future<void> _showLogDoseModal(DoseInstance dose) async {
-    print('[DEBUG] Opening LogDoseModal for ${dose.peptideName}');
+  Future<void> _showAddSymptomsModal(DoseInstance dose) async {
+    print('[DEBUG] Opening AddSymptomsModal for ${dose.peptideName}');
     
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LogDoseModal(
-          cycleId: dose.cycleId,
-          scheduleId: dose.scheduleId,
+        builder: (context) => AddSymptomsModal(
+          doseLogId: dose.doseLogId,
           peptideName: dose.peptideName,
-          defaultDoseAmount: dose.doseAmount,
-          defaultRoute: dose.route,
+          onCompleted: () {
+            ref.refresh(upcomingDosesProvider);
+          },
         ),
       ),
     );
     
-    print('[DEBUG] LogDoseModal result: $result');
+    print('[DEBUG] AddSymptomsModal result: $result');
+  }
+
+  Future<void> _showMarkMissedModal(DoseInstance dose) async {
+    print('[DEBUG] Opening MarkMissedModal for ${dose.peptideName}');
+    
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MarkMissedModal(
+          doseLogId: dose.doseLogId,
+          peptideName: dose.peptideName,
+          onCompleted: () {
+            ref.refresh(upcomingDosesProvider);
+          },
+        ),
+      ),
+    );
+    
+    print('[DEBUG] MarkMissedModal result: $result');
   }
 
   Widget _buildDetailItem(String label, String value) {
