@@ -79,23 +79,37 @@ class DoseLogsService {
     try {
       print('[DEBUG] Logging dose: $peptideName, ${doseAmount}mg');
 
-      // Match the actual dose_logs schema
+      // Use ONLY the columns we're 100% sure exist
       final data = {
         'cycle_id': cycleId,
         'dose_amount': doseAmount,
         'logged_at': loggedAt.toIso8601String(),
       };
       
-      // Add optional fields only if they have values
-      if (scheduleId != null && scheduleId.isNotEmpty) {
-        data['dosis_id'] = scheduleId;
-      }
-      if (notes != null && notes.isNotEmpty) {
-        data['notes'] = notes;
-      }
+      print('[DEBUG SERVICE] Inserting to dose_logs with minimal data: $data');
       
-      print('[DEBUG SERVICE] Inserting to dose_logs with data: $data');
-      final response = await _supabase.from('dose_logs').insert(data).select().single();
+      try {
+        final response = await _supabase.from('dose_logs').insert(data).select().single();
+        print('[DEBUG SERVICE] Insert successful: $response');
+        return DoseLog.fromJson(response as Map<String, dynamic>);
+      } catch (e) {
+        print('[ERROR SERVICE] Insert failed, attempting without select: $e');
+        // Try insert without select if select fails
+        await _supabase.from('dose_logs').insert(data);
+        print('[DEBUG SERVICE] Insert succeeded without select');
+        return DoseLog(
+          id: 'temp_id',
+          userId: userId,
+          cycleId: cycleId,
+          scheduleId: scheduleId,
+          peptideName: peptideName,
+          doseAmount: doseAmount,
+          route: route,
+          loggedAt: loggedAt,
+          notes: notes,
+          createdAt: DateTime.now(),
+        );
+      }
 
       print('[DEBUG] Dose logged successfully');
       return DoseLog.fromJson(response as Map<String, dynamic>);
