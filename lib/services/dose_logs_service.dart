@@ -12,6 +12,8 @@ class DoseLog {
   final String? injectionSite;
   final DateTime loggedAt;
   final String? notes;
+  final String status; // SCHEDULED, COMPLETED, MISSED
+  final Map<String, dynamic>? symptoms;
   final DateTime createdAt;
 
   DoseLog({
@@ -25,6 +27,8 @@ class DoseLog {
     this.injectionSite,
     required this.loggedAt,
     this.notes,
+    required this.status,
+    this.symptoms,
     required this.createdAt,
   });
 
