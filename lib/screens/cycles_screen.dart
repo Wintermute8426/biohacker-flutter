@@ -1038,7 +1038,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         final dose = double.tryParse(_doseController.text) ?? 0;
                         final weeks = int.tryParse(_weeksController.text) ?? 8;
 
-                        await db.saveCycle(
+                        // Save cycle and capture the actual returned cycle with real UUID
+                        final createdCycle = await db.saveCycle(
                           peptideName: peptideName,
                           dose: dose,
                           route: _selectedRoute,
@@ -1047,6 +1048,18 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           startDate: DateTime.now(),
                           advancedSchedule: _selectedDosingSchedule?.toJson(),
                         );
+                        
+                        if (createdCycle == null) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Error creating cycle'),
+                                backgroundColor: Color(0xFFFF0040),
+                              ),
+                            );
+                          }
+                          return;
+                        }
                         
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -1057,22 +1070,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         
                         // Show dose configuration prompt BEFORE closing the modal
                         if (mounted) {
-                          final now = DateTime.now();
-                          final tempCycle = Cycle(
-                            id: now.millisecondsSinceEpoch.toString(),
-                            userId: Supabase.instance.client.auth.currentUser?.id ?? '',
-                            peptideName: peptideName,
-                            dose: dose,
-                            route: _selectedRoute,
-                            frequency: _selectedFrequency,
-                            durationWeeks: weeks,
-                            startDate: now,
-                            endDate: now.add(Duration(days: weeks * 7)),
-                            isActive: true,
-                            createdAt: now,
-                          );
-                          
-                          print('[DEBUG] Dialog trigger - tempCycle: ${tempCycle.peptideName}');
+                          print('[DEBUG] Dialog trigger - actualCycle: ${createdCycle.peptideName} with ID: ${createdCycle.id}');
                           
                           // Show dialog while modal context is still valid
                           showDialog(
@@ -1096,7 +1094,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                   onPressed: () {
                                     print('[DEBUG] CONFIGURE clicked');
                                     Navigator.pop(context); // Close the CREATE CYCLE modal
-                                    _showConfigureDosesFlow(tempCycle);
+                                    _showConfigureDosesFlow(createdCycle); // Use actual cycle with real UUID
                                   },
                                 ),
                               ],
