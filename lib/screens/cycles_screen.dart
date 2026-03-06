@@ -1748,29 +1748,20 @@ class _CyclesScreenState extends State<CyclesScreen> {
         print('[DEBUG FLOW] Creating schedule $i: $peptideName');
         print('[DEBUG FLOW] Schedule data: $schedule');
         
-        try {
-          final result = await doseScheduleService.createDoseSchedule(
-            userId: userId,
-            cycleId: cycle.id,
-            peptideName: peptideName,
-            doseAmount: schedule['doseAmount'] ?? 0.0,
-            route: schedule['route'] ?? 'SC',
-            scheduledTime: schedule['scheduledTime'] ?? '08:00',
-            daysOfWeek: List<int>.from(schedule['daysOfWeek'] ?? []),
-            startDate: schedule['startDate'] ?? DateTime.now(),
-            endDate: schedule['endDate'],
-            notes: schedule['notes'],
-          );
-          
-          print('[DEBUG FLOW] Creation result: $result');
-          
-          if (result == null) {
-            throw Exception('Supabase insert returned null - check console for details');
-          }
-        } catch (e) {
-          print('[DEBUG FLOW] Inner catch - exception for $peptideName: $e');
-          rethrow;
-        }
+        final result = await doseScheduleService.createDoseSchedule(
+          userId: userId,
+          cycleId: cycle.id,
+          peptideName: peptideName,
+          doseAmount: schedule['doseAmount'] ?? 0.0,
+          route: schedule['route'] ?? 'SC',
+          scheduledTime: schedule['scheduledTime'] ?? '08:00',
+          daysOfWeek: List<int>.from(schedule['daysOfWeek'] ?? []),
+          startDate: schedule['startDate'] ?? DateTime.now(),
+          endDate: schedule['endDate'],
+          notes: schedule['notes'],
+        );
+        
+        print('[DEBUG FLOW] Creation result: $result');
       }
       
       print('[DEBUG FLOW] All schedules created successfully');
