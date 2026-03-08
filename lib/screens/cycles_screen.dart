@@ -1080,7 +1080,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   style: WintermmuteStyles.titleStyle,
                 ),
                 ElevatedButton.icon(
-                  onPressed: _showNewCycleDialog,
+                  onPressed: _showNewUnifiedCycleSetup,
                   icon: const Icon(Icons.add),
                   label: const Text('NEW'),
                   style: ElevatedButton.styleFrom(
@@ -1640,6 +1640,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
 
     try {
       final peptideName = result['peptideName'] as String;
+      final route = result['route'] as String?;
       final vialSizeMl = result['vialSizeMl'] as double;
       final desiredConcentration = result['desiredConcentration'] as double;
       final bacRequired = result['bacRequired'] as double?;
@@ -1654,7 +1655,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
       final createdCycle = await db.saveCycle(
         peptideName: peptideName,
         dose: schedule.isNotEmpty ? (schedule.first['dose'] as double) : 0,
-        route: 'SC', // Default
+        route: route ?? 'SC',
         frequency: '${daysOfWeek.length}x weekly',
         durationWeeks: 8, // Default, will be overridden by schedule
         startDate: startDate,
@@ -1688,7 +1689,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
         cycleId: createdCycle.id,
         peptideName: peptideName,
         doseAmount: firstDose,
-        route: 'SC',
+        route: route ?? 'SC',
         scheduledTime: scheduledTime,
         daysOfWeek: daysOfWeek,
         startDate: startDate,
@@ -1725,7 +1726,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
             'dose_schedule_id': masterSchedule!.id,
             'peptide_name': peptideName,
             'dose_amount': doseAmount.toDouble(),
-            'route': 'SC',
+            'route': route ?? 'SC',
             'logged_at': doseDateTime.toIso8601String(),
             'status': 'SCHEDULED',
             'notes': 'Phase: $phase',

@@ -35,6 +35,9 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
   double? _rampDownDecrementPerDay;
   int? _rampDownDurationDays;
 
+  // Route
+  String? _selectedRoute = 'SC';
+
   // Schedule
   String? _scheduledTime = '08:00';
   List<int> _daysOfWeek = [1, 3, 5]; // Mon, Wed, Fri
@@ -163,6 +166,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
     // Return all data to caller
     Navigator.pop(context, {
       'peptideName': _selectedPeptide,
+      'route': _selectedRoute,
       'vialSizeMl': _vialSizeMl,
       'desiredConcentration': _desiredConcentration,
       'bacRequired': _bacRequired,
@@ -287,6 +291,30 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
               ),
             ),
           ],
+
+          const SizedBox(height: 24),
+
+          // ===== INJECTION ROUTE =====
+          Text(
+            'ROUTE',
+            style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            initialValue: _selectedRoute,
+            decoration: InputDecoration(
+              labelText: 'INJECTION ROUTE',
+              labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+            dropdownColor: AppColors.surface,
+            style: TextStyle(color: AppColors.primary),
+            items: ['SC', 'IM', 'IV', 'Intranasal'].map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+            onChanged: (value) {
+              setState(() => _selectedRoute = value);
+            },
+          ),
 
           const SizedBox(height: 24),
 
