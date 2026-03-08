@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../data/peptides.dart';
+import '../widgets/peptide_selector.dart';
 
 class CycleSetupForm extends StatefulWidget {
   final String? defaultPeptideName;
@@ -24,6 +25,16 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
   double? _peptideAmount; // mg in vial (from library)
   double? _bacRequired; // calculated BAC in ml
 
+  // Route (full names)
+  String? _selectedRoute = 'Subcutaneous (SC)';
+  
+  final Map<String, String> _routeMap = {
+    'Subcutaneous (SC)': 'SC',
+    'Intramuscular (IM)': 'IM',
+    'Intravenous (IV)': 'IV',
+    'Intranasal': 'Intranasal',
+  };
+
   // Dosing strategy
   double? _rampUpStartDose;
   double? _rampUpIncrementPerDay;
@@ -34,9 +45,6 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
   
   double? _rampDownDecrementPerDay;
   int? _rampDownDurationDays;
-
-  // Route
-  String? _selectedRoute = 'SC';
 
   // Schedule
   String? _scheduledTime = '08:00';
@@ -70,9 +78,6 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       return;
     }
 
-    // Calculate: How much BAC to add to reach desired concentration?
-    // Desired final volume: peptide_amount / desired_concentration (in mg/ml)
-    // BAC needed = final_volume - vial_size
     final desiredFinalVolume = _peptideAmount! / _desiredConcentration!;
     final bacNeeded = desiredFinalVolume - _vialSizeMl!;
 
@@ -95,7 +100,6 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
     final doses = <Map<String, dynamic>>[];
     int dayCounter = 0;
 
-    // Ramp up phase
     if (_rampUpStartDose != null && _rampUpIncrementPerDay != null && _rampUpDurationDays != null) {
       for (int i = 0; i < _rampUpDurationDays!; i++) {
         final dose = _rampUpStartDose! + (_rampUpIncrementPerDay! * i);
@@ -108,7 +112,6 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       }
     }
 
-    // Plateau phase
     if (_plateauDose != null && _plateauDurationDays != null) {
       for (int i = 0; i < _plateauDurationDays!; i++) {
         doses.add({
@@ -120,7 +123,6 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       }
     }
 
-    // Ramp down phase
     if (_rampDownDecrementPerDay != null && _rampDownDurationDays != null) {
       double currentDose = doses.isNotEmpty ? (doses.last['dose'] as double) : _plateauDose ?? _rampUpStartDose ?? 0;
       for (int i = 0; i < _rampDownDurationDays!; i++) {
@@ -135,6 +137,28 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
     }
 
     return doses;
+  }
+
+  String _formatPhaseInfo() {
+    final buf = <String>[];
+    if (_rampUpDurationDays != null && _rampUpDurationDays! > 0) {
+      final startDate = _startDate ?? DateTime.now();
+      final endDate = startDate.add(Duration(days: _rampUpDurationDays! - 1));
+      buf.add('Ramp up: ${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d').format(endDate)}');
+    }
+    if (_plateauDurationDays != null && _plateauDurationDays! > 0) {
+      int offset = (_rampUpDurationDays ?? 0);
+      final startDate = (_startDate ?? DateTime.now()).add(Duration(days: offset));
+      final endDate = startDate.add(Duration(days: _plateauDurationDays! - 1));
+      buf.add('Plateau: ${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMm d').format(endDate)}');
+    }
+    if (_rampDownDurationDays != null && _rampDownDurationDays! > 0) {
+      int offset = (_rampUpDurationDays ?? 0) + (_plateauDurationDays ?? 0);
+      final startDate = (_startDate ?? DateTime.now()).add(Duration(days: offset));
+      final endDate = startDate.add(Duration(days: _rampDownDurationDays! - 1));
+      buf.add('Ramp down: ${DateFormat('MMM d').format(startDate)} - ${DateFormat('MMM d').format(endDate)}');
+    }
+    return buf.join(' | ');
   }
 
   void _submit() {
@@ -163,10 +187,11 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       return;
     }
 
-    // Return all data to caller
+    final routeShort = _routeMap[_selectedRoute] ?? 'SC';
+
     Navigator.pop(context, {
       'peptideName': _selectedPeptide,
-      'route': _selectedRoute,
+      'route': routeShort,
       'vialSizeMl': _vialSizeMl,
       'desiredConcentration': _desiredConcentration,
       'bacRequired': _bacRequired,
@@ -198,32 +223,28 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
           ),
           const SizedBox(height: 24),
 
+          // ===== PEPTIDE SELECTION =====
+          Text(
+            'PEPTIDE',
+            style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1),
+          ),
+          const SizedBox(height: 12),
+          PeptideSelector(
+            initialValue: _selectedPeptide,
+            label: 'Select peptide',
+            onSelected: (peptide) {
+              setState(() {
+                _selectedPeptide = peptide;
+                _peptideAmount = 10; // TODO: Get from peptides.dart library
+              });
+            },
+          ),
+          const SizedBox(height: 24),
+
           // ===== RECONSTITUTION SECTION =====
           Text(
             'RECONSTITUTION',
             style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1),
-          ),
-          const SizedBox(height: 12),
-
-          // Peptide selector
-          DropdownButtonFormField<String>(
-            initialValue: _selectedPeptide,
-            decoration: InputDecoration(
-              labelText: 'PEPTIDE',
-              labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            dropdownColor: AppColors.surface,
-            style: TextStyle(color: AppColors.primary),
-            items: PEPTIDE_LIST.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedPeptide = value;
-                // Look up peptide amount
-                _peptideAmount = 10; // TODO: Get from peptides.dart library
-              });
-            },
           ),
           const SizedBox(height: 12),
 
@@ -294,6 +315,59 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
 
           const SizedBox(height: 24),
 
+          // ===== DATES SECTION =====
+          Text(
+            'CYCLE DATES',
+            style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1),
+          ),
+          const SizedBox(height: 12),
+
+          // Start date
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              'START DATE',
+              style: TextStyle(color: AppColors.textMid, fontSize: 12),
+            ),
+            trailing: Text(
+              _startDate != null ? DateFormat('MMM d, yyyy').format(_startDate!) : 'Select',
+              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+            ),
+            onTap: () async {
+              final date = await showDatePicker(
+                context: context,
+                initialDate: _startDate ?? DateTime.now(),
+                firstDate: DateTime.now(),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+              );
+              if (date != null) setState(() => _startDate = date);
+            },
+          ),
+
+          // End date (optional)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              'END DATE (Optional)',
+              style: TextStyle(color: AppColors.textMid, fontSize: 12),
+            ),
+            trailing: Text(
+              _endDate != null ? DateFormat('MMM d, yyyy').format(_endDate!) : 'Auto',
+              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+            ),
+            onTap: () async {
+              final date = await showDatePicker(
+                context: context,
+                initialDate: _endDate ?? _startDate ?? DateTime.now(),
+                firstDate: DateTime.now(),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+              );
+              if (date != null) setState(() => _endDate = date);
+            },
+          ),
+
+          const SizedBox(height: 24),
+
           // ===== INJECTION ROUTE =====
           Text(
             'ROUTE',
@@ -310,7 +384,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
             ),
             dropdownColor: AppColors.surface,
             style: TextStyle(color: AppColors.primary),
-            items: ['SC', 'IM', 'IV', 'Intranasal'].map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+            items: _routeMap.keys.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
             onChanged: (value) {
               setState(() => _selectedRoute = value);
             },
@@ -344,7 +418,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                     border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   ),
-                  onChanged: (v) => _rampUpStartDose = double.tryParse(v),
+                  onChanged: (v) => setState(() => _rampUpStartDose = double.tryParse(v)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -359,7 +433,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                     border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   ),
-                  onChanged: (v) => _rampUpIncrementPerDay = double.tryParse(v),
+                  onChanged: (v) => setState(() => _rampUpIncrementPerDay = double.tryParse(v)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -374,7 +448,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                     border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   ),
-                  onChanged: (v) => _rampUpDurationDays = int.tryParse(v),
+                  onChanged: (v) => setState(() => _rampUpDurationDays = int.tryParse(v)),
                 ),
               ),
             ],
@@ -400,7 +474,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                     border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   ),
-                  onChanged: (v) => _plateauDose = double.tryParse(v),
+                  onChanged: (v) => setState(() => _plateauDose = double.tryParse(v)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -415,7 +489,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                     border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   ),
-                  onChanged: (v) => _plateauDurationDays = int.tryParse(v),
+                  onChanged: (v) => setState(() => _plateauDurationDays = int.tryParse(v)),
                 ),
               ),
             ],
@@ -441,7 +515,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                     border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   ),
-                  onChanged: (v) => _rampDownDecrementPerDay = double.tryParse(v),
+                  onChanged: (v) => setState(() => _rampDownDecrementPerDay = double.tryParse(v)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -456,11 +530,27 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                     border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   ),
-                  onChanged: (v) => _rampDownDurationDays = int.tryParse(v),
+                  onChanged: (v) => setState(() => _rampDownDurationDays = int.tryParse(v)),
                 ),
               ),
             ],
           ),
+
+          // Phase timeline
+          if (_formatPhaseInfo().isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.accent, width: 0.5),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                _formatPhaseInfo(),
+                style: TextStyle(color: AppColors.accent, fontSize: 11),
+              ),
+            ),
+          ],
 
           const SizedBox(height: 24),
 
@@ -473,6 +563,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
 
           // Time picker
           ListTile(
+            contentPadding: EdgeInsets.zero,
             title: Text(
               'TIME',
               style: TextStyle(color: AppColors.textMid, fontSize: 12),
@@ -532,50 +623,6 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                 ),
               );
             }),
-          ),
-
-          const SizedBox(height: 12),
-
-          // Start date
-          ListTile(
-            title: Text(
-              'START DATE',
-              style: TextStyle(color: AppColors.textMid, fontSize: 12),
-            ),
-            trailing: Text(
-              _startDate != null ? DateFormat('MMM d, yyyy').format(_startDate!) : 'Select',
-              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-            ),
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: _startDate ?? DateTime.now(),
-                firstDate: DateTime.now(),
-                lastDate: DateTime.now().add(const Duration(days: 365)),
-              );
-              if (date != null) setState(() => _startDate = date);
-            },
-          ),
-
-          // End date (optional)
-          ListTile(
-            title: Text(
-              'END DATE (Optional)',
-              style: TextStyle(color: AppColors.textMid, fontSize: 12),
-            ),
-            trailing: Text(
-              _endDate != null ? DateFormat('MMM d, yyyy').format(_endDate!) : 'Auto',
-              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-            ),
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: _endDate ?? _startDate ?? DateTime.now(),
-                firstDate: DateTime.now(),
-                lastDate: DateTime.now().add(const Duration(days: 365)),
-              );
-              if (date != null) setState(() => _endDate = date);
-            },
           ),
 
           const SizedBox(height: 24),
