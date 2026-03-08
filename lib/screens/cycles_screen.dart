@@ -1887,7 +1887,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
             'cycle_id': createdCycle.id,
             'dose_schedule_id': masterSchedule.id,
             'peptide_name': peptideName,
-            'dose_amount': doseAmount,
+            'dose_amount': doseAmount.toDouble(),
             'route': 'SC',
             'logged_at': doseDateTime.toIso8601String(),
             'status': 'SCHEDULED',

@@ -203,7 +203,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
 
           // Peptide selector
           DropdownButtonFormField<String>(
-            value: _selectedPeptide,
+            initialValue: _selectedPeptide,
             decoration: InputDecoration(
               labelText: 'PEPTIDE',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
@@ -211,7 +211,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             dropdownColor: AppColors.surface,
-            style: TextStyle(color: AppColors.text),
+            style: TextStyle(color: AppColors.primary),
             items: PEPTIDE_LIST.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
             onChanged: (value) {
               setState(() {
@@ -227,7 +227,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
           TextField(
             controller: _vialSizeController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: TextStyle(color: AppColors.text),
+            style: TextStyle(color: AppColors.primary),
             decoration: InputDecoration(
               labelText: 'VIAL SIZE (ml)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
@@ -245,7 +245,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
           TextField(
             controller: _desiredConcentrationController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: TextStyle(color: AppColors.text),
+            style: TextStyle(color: AppColors.primary),
             decoration: InputDecoration(
               labelText: 'DESIRED CONCENTRATION (mg/ml)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
@@ -309,7 +309,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                 child: TextField(
                   controller: _rampUpStartController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(color: AppColors.text),
+                  style: TextStyle(color: AppColors.primary),
                   decoration: InputDecoration(
                     labelText: 'START (mg)',
                     labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11),
@@ -324,7 +324,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                 child: TextField(
                   controller: _rampUpIncrementController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(color: AppColors.text),
+                  style: TextStyle(color: AppColors.primary),
                   decoration: InputDecoration(
                     labelText: '+/DAY (mg)',
                     labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11),
@@ -339,7 +339,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                 child: TextField(
                   controller: _rampUpDaysController,
                   keyboardType: TextInputType.number,
-                  style: TextStyle(color: AppColors.text),
+                  style: TextStyle(color: AppColors.primary),
                   decoration: InputDecoration(
                     labelText: 'DAYS',
                     labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11),
@@ -365,7 +365,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                 child: TextField(
                   controller: _plateauDoseController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(color: AppColors.text),
+                  style: TextStyle(color: AppColors.primary),
                   decoration: InputDecoration(
                     labelText: 'DOSE (mg)',
                     labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11),
@@ -380,7 +380,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                 child: TextField(
                   controller: _plateauDaysController,
                   keyboardType: TextInputType.number,
-                  style: TextStyle(color: AppColors.text),
+                  style: TextStyle(color: AppColors.primary),
                   decoration: InputDecoration(
                     labelText: 'DAYS',
                     labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11),
@@ -406,7 +406,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                 child: TextField(
                   controller: _rampDownDecrementController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(color: AppColors.text),
+                  style: TextStyle(color: AppColors.primary),
                   decoration: InputDecoration(
                     labelText: '-/DAY (mg)',
                     labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11),
@@ -421,7 +421,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                 child: TextField(
                   controller: _rampDownDaysController,
                   keyboardType: TextInputType.number,
-                  style: TextStyle(color: AppColors.text),
+                  style: TextStyle(color: AppColors.primary),
                   decoration: InputDecoration(
                     labelText: 'DAYS',
                     labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11),
