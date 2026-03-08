@@ -147,7 +147,7 @@ class _CycleSetupFormV2State extends State<CycleSetupFormV2> {
     );
   }
 
-  int? _getTotalPhaseD ays() {
+  int? _getTotalPhaseDays() {
     int total = 0;
     if (_rampUpDays != null) total += _rampUpDays!;
     if (_plateauDays != null) total += _plateauDays!;
@@ -158,16 +158,16 @@ class _CycleSetupFormV2State extends State<CycleSetupFormV2> {
   String _getPhaseValidationMessage() {
     if (_totalCycleDays == null) return '';
     
-    final totalPhase = _getTotalPhaseD ays();
+    final totalPhase = _getTotalPhaseDays();
     if (totalPhase == null) return '';
     
-    if (totalPhase > _totalCycleDays!) {
-      return '⚠️ Phases exceed cycle length! (${totalPhase} days vs ${_totalCycleDays} days)';
-    } else if (totalPhase < _totalCycleDays!) {
-      final remaining = _totalCycleDays! - totalPhase;
-      return '✓ Phases use $totalPhase of ${_totalCycleDays} days ($remaining days remaining)';
+    if (totalPhase > (_totalCycleDays ?? 0)) {
+      return '⚠️ Phases exceed cycle length! ($totalPhase days vs $_totalCycleDays days)';
+    } else if (totalPhase < (_totalCycleDays ?? 0)) {
+      final remaining = (_totalCycleDays ?? 0) - totalPhase;
+      return '✓ Phases use $totalPhase of $_totalCycleDays days ($remaining days remaining)';
     } else {
-      return '✓ Phases perfectly fit cycle (${totalPhase} days)';
+      return '✓ Phases perfectly fit cycle ($totalPhase days)';
     }
   }
 
@@ -254,6 +254,9 @@ class _CycleSetupFormV2State extends State<CycleSetupFormV2> {
   }
 
   void _submit() {
+    final totalPhase = _getTotalPhaseDays() ?? 0;
+    final cycleDays = _totalCycleDays ?? 0;
+    
     if (_selectedPeptide == null ||
         _totalPeptideMg == null ||
         _desiredDosageMg == null ||
@@ -262,7 +265,7 @@ class _CycleSetupFormV2State extends State<CycleSetupFormV2> {
         _startDate == null ||
         _endDate == null ||
         (_rampUpStartDose == null && _plateauDose == null) ||
-        (_getTotalPhaseD ays() ?? 0) > (_totalCycleDays ?? 0)) {
+        totalPhase > cycleDays) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill in all required fields and fix phase validation'),
@@ -700,22 +703,31 @@ class _CycleSetupFormV2State extends State<CycleSetupFormV2> {
 
           // Phase validation & timeline
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: (_getTotalPhaseD ays() ?? 0) > (_totalCycleDays ?? 999) ? const Color(0xFFFF0040) : AppColors.accent, width: 0.5),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(_getPhaseValidationMessage(), style: TextStyle(color: (_getTotalPhaseD ays() ?? 0) > (_totalCycleDays ?? 999) ? const Color(0xFFFF0040) : AppColors.accent, fontSize: 11, fontWeight: FontWeight.bold)),
-                if (_getPhaseTimeline().isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(_getPhaseTimeline(), style: TextStyle(color: AppColors.accent, fontSize: 10)),
-                ],
-              ],
-            ),
+          Builder(
+            builder: (context) {
+              final totalPhase = _getTotalPhaseDays() ?? 0;
+              final cycleDays = _totalCycleDays ?? 999;
+              final isExceeded = totalPhase > cycleDays;
+              final borderColor = isExceeded ? const Color(0xFFFF0040) : AppColors.accent;
+              
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: borderColor, width: 0.5),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(_getPhaseValidationMessage(), style: TextStyle(color: borderColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                    if (_getPhaseTimeline().isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(_getPhaseTimeline(), style: TextStyle(color: AppColors.accent, fontSize: 10)),
+                    ],
+                  ],
+                ),
+              );
+            },
           ),
 
           const SizedBox(height: 24),
