@@ -10,7 +10,7 @@ import '../services/dose_logs_service.dart';
 import '../services/side_effects_database.dart';
 import '../services/protocol_templates_database.dart';
 import '../services/dose_schedule_service.dart';
-import '../screens/cycle_setup_form_v2.dart';
+import '../screens/cycle_setup_form_v3.dart';
 import '../screens/insights_screen.dart';
 import '../widgets/advanced_dosing_widget.dart';
 import '../widgets/wintermute_dialog.dart';
@@ -1628,7 +1628,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
-      builder: (context) => const CycleSetupFormV2(),
+      builder: (context) => const CycleSetupFormV3(),
     );
 
     if (result == null) {
