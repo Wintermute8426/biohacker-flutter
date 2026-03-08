@@ -1662,132 +1662,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
   }
 
-  Future<void> _showConfigureDosesFlow(Cycle cycle) async {
-    if (!mounted) return;
-    
-    final schedules = <Map<String, dynamic>>[];
-    final peptides = cycle.peptideName.split(',').map((p) => p.trim()).toList();
-    
-    print('[DEBUG FLOW] Starting dose configuration for peptides: $peptides');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('[1/4] Starting dose config for ${peptides.length} peptide(s)'), duration: Duration(seconds: 2)),
-    );
-    
-    for (final peptide in peptides) {
-      if (!mounted) return;
-      
-      print('[DEBUG FLOW] Showing form for peptide: $peptide');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('[2/4] Form for: $peptide'), duration: Duration(seconds: 2)),
-      );
-      
-      final result = await showModalBottomSheet<Map<String, dynamic>>(
-        context: context,
-        backgroundColor: AppColors.surface,
-        isScrollControlled: true,
-        builder: (context) => DoseScheduleForm(
-          cycleId: cycle.id,
-          peptideName: peptide,
-          defaultDoseAmount: cycle.dose,
-        ),
-      );
-      
-      if (result != null) {
-        print('[DEBUG FLOW] Form returned: $result');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('[3/4] Got data for $peptide'), duration: Duration(seconds: 2)),
-        );
-        schedules.add(result);
-      } else {
-        print('[DEBUG FLOW] Form cancelled for: $peptide');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('[!] Form cancelled - no data'), backgroundColor: AppColors.error, duration: Duration(seconds: 3)),
-        );
-        continue;
-      }
-    }
-    
-    print('[DEBUG FLOW] Total schedules collected: ${schedules.length}');
-    
-    if (schedules.isEmpty) {
-      print('[DEBUG FLOW] No schedules collected, showing message');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('No dose schedules configured'),
-            backgroundColor: AppColors.textDim,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-      return;
-    }
-    
-    // Batch create dose schedules
-    try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      print('[DEBUG FLOW] User ID: $userId');
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('[4/4] Saving ${schedules.length} schedules to DB...'), duration: Duration(seconds: 2)),
-      );
-      
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-      
-      for (int i = 0; i < schedules.length; i++) {
-        final schedule = schedules[i];
-        final peptideName = schedule['peptideName'] ?? 'Unknown';
-        print('[DEBUG FLOW] Creating schedule $i: $peptideName');
-        print('[DEBUG FLOW] Schedule data: $schedule');
-        
-        final result = await doseScheduleService.createDoseSchedule(
-          userId: userId,
-          cycleId: cycle.id,
-          peptideName: peptideName,
-          doseAmount: schedule['doseAmount'] ?? 0.0,
-          route: schedule['route'] ?? 'SC',
-          scheduledTime: schedule['scheduledTime'] ?? '08:00',
-          daysOfWeek: List<int>.from(schedule['daysOfWeek'] ?? []),
-          startDate: schedule['startDate'] ?? DateTime.now(),
-          endDate: schedule['endDate'],
-          notes: schedule['notes'],
-        );
-        
-        print('[DEBUG FLOW] Creation result: $result');
-      }
-      
-      print('[DEBUG FLOW] All schedules created successfully');
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('✓ Dose schedules created'),
-            backgroundColor: AppColors.primary,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e, stackTrace) {
-      print('[DEBUG FLOW] Error creating schedules: $e');
-      print('[DEBUG FLOW] Exception type: ${e.runtimeType}');
-      print('[DEBUG FLOW] Stack trace: $stackTrace');
-      
-      final errorMsg = e.toString();
-      print('[DEBUG FLOW] Full error: $errorMsg');
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('ERROR: $errorMsg'),
-            backgroundColor: AppColors.error,
-            duration: const Duration(seconds: 7),
-          ),
-        );
-      }
-    }
-  }
+  // DEPRECATED: _showConfigureDosesFlow - replaced by _showNewUnifiedCycleSetup
+  // Keeping for reference but not used anymore
 
   Future<void> _showNewUnifiedCycleSetup() async {
     if (!mounted) return;
@@ -1849,7 +1725,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
       if (userId == null) throw Exception('User not authenticated');
 
       // Create a master schedule with the first dose amount
-      final firstDose = schedule.isNotEmpty ? (schedule.first['dose'] as double) : 0;
+      final firstDoseRaw = schedule.isNotEmpty ? (schedule.first['dose'] as num) : 0;
+      final firstDose = firstDoseRaw.toDouble();
       final masterSchedule = await doseScheduleService.createDoseSchedule(
         userId: userId,
         cycleId: createdCycle.id,
@@ -1863,7 +1740,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
         notes: 'Ramping: ${schedule.length} days total. BAC: ${bacRequired?.toStringAsFixed(2)}ml',
       );
 
-      print('[DEBUG UNIFIED] Master schedule created: ${masterSchedule.id}');
+      if (masterSchedule == null) {
+        throw Exception('Failed to create dose schedule');
+      }
+
+      print('[DEBUG UNIFIED] Master schedule created: ${masterSchedule!.id}');
 
       // 3. Create dose_logs for each day in the ramp schedule
       final doseLogsService = DoseLogsService(Supabase.instance.client);
@@ -1885,7 +1766,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
           final doseLog = await Supabase.instance.client.from('dose_logs').insert({
             'user_id': userId,
             'cycle_id': createdCycle.id,
-            'dose_schedule_id': masterSchedule.id,
+            'dose_schedule_id': masterSchedule!.id,
             'peptide_name': peptideName,
             'dose_amount': doseAmount.toDouble(),
             'route': 'SC',
