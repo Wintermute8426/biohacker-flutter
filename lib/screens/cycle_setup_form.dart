@@ -248,7 +248,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
             onSelected: (peptide) {
               setState(() {
                 _selectedPeptide = peptide;
-                _peptideAmount = 10; // TODO: Get from peptides.dart library
+                // TODO: Get peptide amount from peptides.dart library
               });
             },
           ),
