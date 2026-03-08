@@ -6,10 +6,11 @@ import '../data/peptides.dart';
 import '../data/dosing_calculator.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
+import '../services/dose_logs_service.dart';
 import '../services/side_effects_database.dart';
 import '../services/protocol_templates_database.dart';
 import '../services/dose_schedule_service.dart';
-import '../screens/dose_schedule_form.dart';
+import '../screens/cycle_setup_form.dart';
 import '../screens/insights_screen.dart';
 import '../widgets/advanced_dosing_widget.dart';
 import '../widgets/wintermute_dialog.dart';
@@ -955,6 +956,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
                     height: 44,
                     child: ElevatedButton(
                       onPressed: () async {
+                        // Use new unified cycle setup form
+                        Navigator.pop(context); // Close this old modal
+                        await _showNewUnifiedCycleSetup();
+                        return;
+
+                        // OLD LOGIC BELOW - DEPRECATED
                         print('[DEBUG CREATE CYCLE] Button pressed');
                         print('[DEBUG CREATE CYCLE] Peptide: "${_peptideController.text}"');
                         print('[DEBUG CREATE CYCLE] Dose: "${_doseController.text}"');
@@ -1776,6 +1783,148 @@ class _CyclesScreenState extends State<CyclesScreen> {
             content: Text('ERROR: $errorMsg'),
             backgroundColor: AppColors.error,
             duration: const Duration(seconds: 7),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showNewUnifiedCycleSetup() async {
+    if (!mounted) return;
+
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      builder: (context) => const CycleSetupForm(),
+    );
+
+    if (result == null) {
+      print('[DEBUG UNIFIED] Setup cancelled');
+      return;
+    }
+
+    print('[DEBUG UNIFIED] Setup result: $result');
+
+    try {
+      final peptideName = result['peptideName'] as String;
+      final vialSizeMl = result['vialSizeMl'] as double;
+      final desiredConcentration = result['desiredConcentration'] as double;
+      final bacRequired = result['bacRequired'] as double?;
+      final schedule = result['schedule'] as List<Map<String, dynamic>>;
+      final scheduledTime = result['scheduledTime'] as String;
+      final daysOfWeek = result['daysOfWeek'] as List<int>;
+      final startDate = result['startDate'] as DateTime;
+      final endDate = result['endDate'] as DateTime?;
+
+      // 1. Create the cycle
+      print('[DEBUG UNIFIED] Creating cycle for $peptideName');
+      final createdCycle = await db.saveCycle(
+        peptideName: peptideName,
+        dose: schedule.isNotEmpty ? (schedule.first['dose'] as double) : 0,
+        route: 'SC', // Default
+        frequency: '${daysOfWeek.length}x weekly',
+        durationWeeks: 8, // Default, will be overridden by schedule
+        startDate: startDate,
+      );
+
+      if (createdCycle == null) {
+        throw Exception('Failed to create cycle');
+      }
+
+      print('[DEBUG UNIFIED] Cycle created: ${createdCycle.id}');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✓ $peptideName cycle created'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
+
+      // 2. Generate dose_schedules for each unique dose amount in schedule
+      // For simplicity, create one master schedule and let dose_logs vary by day
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) throw Exception('User not authenticated');
+
+      // Create a master schedule with the first dose amount
+      final firstDose = schedule.isNotEmpty ? (schedule.first['dose'] as double) : 0;
+      final masterSchedule = await doseScheduleService.createDoseSchedule(
+        userId: userId,
+        cycleId: createdCycle.id,
+        peptideName: peptideName,
+        doseAmount: firstDose,
+        route: 'SC',
+        scheduledTime: scheduledTime,
+        daysOfWeek: daysOfWeek,
+        startDate: startDate,
+        endDate: endDate,
+        notes: 'Ramping: ${schedule.length} days total. BAC: ${bacRequired?.toStringAsFixed(2)}ml',
+      );
+
+      print('[DEBUG UNIFIED] Master schedule created: ${masterSchedule.id}');
+
+      // 3. Create dose_logs for each day in the ramp schedule
+      final doseLogsService = DoseLogsService(Supabase.instance.client);
+      int createdDoseLogs = 0;
+
+      for (final dose in schedule) {
+        final dayOffset = dose['day'] as int;
+        final doseAmount = dose['dose'] as double;
+        final phase = dose['phase'] as String;
+
+        final doseDate = startDate.add(Duration(days: dayOffset));
+        final timeParts = scheduledTime.split(':');
+        final hour = int.parse(timeParts[0]);
+        final minute = int.parse(timeParts[1]);
+        final doseDateTime = DateTime(doseDate.year, doseDate.month, doseDate.day, hour, minute);
+
+        // Insert into dose_logs
+        try {
+          final doseLog = await Supabase.instance.client.from('dose_logs').insert({
+            'user_id': userId,
+            'cycle_id': createdCycle.id,
+            'dose_schedule_id': masterSchedule.id,
+            'peptide_name': peptideName,
+            'dose_amount': doseAmount,
+            'route': 'SC',
+            'logged_at': doseDateTime.toIso8601String(),
+            'status': 'SCHEDULED',
+            'notes': 'Phase: $phase',
+          }).select().single();
+
+          createdDoseLogs++;
+          print('[DEBUG UNIFIED] Created dose_log for day $dayOffset: ${doseAmount}mg');
+        } catch (e) {
+          print('[DEBUG UNIFIED] Error creating dose_log for day $dayOffset: $e');
+        }
+      }
+
+      print('[DEBUG UNIFIED] Created $createdDoseLogs dose logs');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✓ $createdDoseLogs doses scheduled'),
+            backgroundColor: AppColors.primary,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+
+      // 4. Reload cycles
+      _loadCycles();
+    } catch (e, stackTrace) {
+      print('[DEBUG UNIFIED] Error: $e');
+      print('[DEBUG UNIFIED] Stack trace: $stackTrace');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('ERROR: $e'),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
