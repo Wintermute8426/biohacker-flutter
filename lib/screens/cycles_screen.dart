@@ -1642,8 +1642,10 @@ class _CyclesScreenState extends State<CyclesScreen> {
       final peptideName = result['peptideName'] as String;
       final route = result['route'] as String?;
       final vialSizeMl = result['vialSizeMl'] as double;
+      final peptideAmountMg = result['peptideAmountMg'] as double?;
       final desiredConcentration = result['desiredConcentration'] as double;
-      final bacRequired = result['bacRequired'] as double?;
+      final waterRequired = result['waterRequired'] as double?;
+      final mlPerDose = result['mlPerDose'] as double?;
       final schedule = result['schedule'] as List<Map<String, dynamic>>;
       final scheduledTime = result['scheduledTime'] as String;
       final daysOfWeek = result['daysOfWeek'] as List<int>;
@@ -1694,7 +1696,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
         daysOfWeek: daysOfWeek,
         startDate: startDate,
         endDate: endDate,
-        notes: 'Ramping: ${schedule.length} days total. BAC: ${bacRequired?.toStringAsFixed(2)}ml',
+        notes: 'Vial: ${vialSizeMl}ml | Peptide: ${peptideAmountMg}mg | Add ${waterRequired?.toStringAsFixed(2)}ml water | Draw ${mlPerDose?.toStringAsFixed(2)}ml per 1mg',
       );
 
       if (masterSchedule == null) {
