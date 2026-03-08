@@ -979,9 +979,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
 
                         // Save cycle and capture the actual returned cycle with real UUID
                         print('[DEBUG CREATE CYCLE] Calling db.saveCycle()...');
-                        Cycle? createdCycle;
+                        late Cycle createdCycle;
                         try {
-                          createdCycle = await db.saveCycle(
+                          final result = await db.saveCycle(
                             peptideName: peptideName,
                             dose: dose,
                             route: _selectedRoute,
@@ -991,10 +991,10 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             advancedSchedule: _selectedDosingSchedule?.toJson(),
                           );
                           
-                          print('[DEBUG CREATE CYCLE] saveCycle returned: ${createdCycle?.id}');
+                          print('[DEBUG CREATE CYCLE] saveCycle returned: ${result?.id}');
                           
-                          if (createdCycle == null) {
-                            print('[DEBUG CREATE CYCLE] createdCycle is null');
+                          if (result == null) {
+                            print('[DEBUG CREATE CYCLE] result is null');
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -1005,6 +1005,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             }
                             return;
                           }
+                          createdCycle = result;
                           print('[DEBUG CREATE CYCLE] createdCycle is valid - peptideName: ${createdCycle.peptideName}, id: ${createdCycle.id}');
                           
                           ScaffoldMessenger.of(context).showSnackBar(
