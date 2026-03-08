@@ -22,9 +22,10 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
   String? _selectedPeptide;
   double? _vialSizeMl;
   double? _peptideAmountMg; // total mg of peptide powder
-  double? _desiredConcentration; // mg/ml (calculated or user-set)
+  double? _desiredDosageMg; // desired dose per injection (mg)
+  double? _concentration; // calculated mg/ml
   double? _waterRequired; // calculated water in ml
-  double? _mlPerDose; // calculated ml per mg dose (for 1ml syringe)
+  double? _drawAmount; // calculated ml to draw for desired dosage
 
   // Route (full names)
   String? _selectedRoute = 'Subcutaneous (SC)';
@@ -55,7 +56,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
 
   // Controllers
   final _vialSizeController = TextEditingController();
-  final _desiredConcentrationController = TextEditingController();
+  final _desiredDosageController = TextEditingController();
   final _rampUpStartController = TextEditingController();
   final _rampUpIncrementController = TextEditingController();
   final _rampUpDaysController = TextEditingController();
@@ -74,37 +75,44 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
   }
 
   void _calculateReconstition() {
-    if (_vialSizeMl == null || _peptideAmountMg == null || _desiredConcentration == null) {
+    if (_vialSizeMl == null || _peptideAmountMg == null) {
       setState(() {
+        _concentration = null;
         _waterRequired = null;
-        _mlPerDose = null;
+        _drawAmount = null;
       });
       return;
     }
 
-    // Calculate water needed
-    // Final volume = peptide / concentration
-    final finalVolume = _peptideAmountMg! / _desiredConcentration!;
-    final waterNeeded = finalVolume - 0; // assume peptide powder volume is negligible
+    // Calculate concentration: total mg / vial size ml
+    final conc = _peptideAmountMg! / _vialSizeMl!;
     
-    // Calculate ml per dose for 1ml syringe
-    // If concentration is 5mg/ml, then 1mg = 0.2ml
-    final mlPerMg = 1.0 / _desiredConcentration!;
+    // Calculate water needed to dissolve peptide
+    final waterNeeded = _vialSizeMl!; // fill vial to size
+    
+    // Calculate draw amount based on desired dosage
+    double? draw;
+    if (_desiredDosageMg != null && _desiredDosageMg! > 0) {
+      draw = _desiredDosageMg! / conc;
+    }
 
     setState(() {
+      _concentration = conc;
       _waterRequired = waterNeeded;
-      _mlPerDose = mlPerMg;
+      _drawAmount = draw;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Add ${_waterRequired!.toStringAsFixed(2)}ml water | ${_mlPerDose!.toStringAsFixed(2)}ml per 1mg dose',
+    if (draw != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Add ${_waterRequired!.toStringAsFixed(1)}ml water | Draw ${_drawAmount!.toStringAsFixed(2)}ml for ${_desiredDosageMg}mg',
+          ),
+          backgroundColor: AppColors.primary,
+          duration: const Duration(seconds: 2),
         ),
-        backgroundColor: AppColors.primary,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+      );
+    }
   }
 
   List<Map<String, dynamic>> _generateDoseSchedule() {
@@ -175,7 +183,8 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
   void _submit() {
     if (_selectedPeptide == null ||
         _vialSizeMl == null ||
-        _desiredConcentration == null ||
+        _peptideAmountMg == null ||
+        _desiredDosageMg == null ||
         _startDate == null ||
         (_rampUpStartDose == null && _plateauDose == null)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -205,9 +214,10 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       'route': routeShort,
       'vialSizeMl': _vialSizeMl,
       'peptideAmountMg': _peptideAmountMg,
-      'desiredConcentration': _desiredConcentration,
+      'desiredDosageMg': _desiredDosageMg,
+      'concentration': _concentration,
       'waterRequired': _waterRequired,
-      'mlPerDose': _mlPerDose,
+      'drawAmount': _drawAmount,
       'schedule': schedule,
       'scheduledTime': _scheduledTime,
       'daysOfWeek': _daysOfWeek,
@@ -300,27 +310,27 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
           ),
           const SizedBox(height: 12),
 
-          // Desired concentration
+          // Desired dosage per injection
           TextField(
-            controller: _desiredConcentrationController,
+            controller: _desiredDosageController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: TextStyle(color: AppColors.primary),
             decoration: InputDecoration(
-              labelText: 'DESIRED CONCENTRATION (mg/ml)',
+              labelText: 'DESIRED DOSAGE PER INJECTION (mg)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              hintText: 'e.g., 5 (for 5mg per ml)',
+              hintText: 'e.g., 2 (for 2mg per injection)',
               hintStyle: TextStyle(color: AppColors.textDim, fontSize: 11),
               border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             onChanged: (value) {
-              _desiredConcentration = double.tryParse(value);
+              _desiredDosageMg = double.tryParse(value);
               _calculateReconstition();
             },
           ),
 
-          // Reconstitution summary
-          if (_waterRequired != null && _mlPerDose != null) ...[
+          // Reconstitution summary with visual syringe
+          if (_waterRequired != null && _drawAmount != null && _concentration != null) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -332,7 +342,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'RECONSTITUTION STEPS',
+                    'RECONSTITUTION & DOSAGE',
                     style: TextStyle(color: AppColors.primary, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
@@ -344,24 +354,74 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                         style: TextStyle(color: AppColors.textMid, fontSize: 12),
                       ),
                       Text(
-                        '${_waterRequired!.toStringAsFixed(2)}ml',
+                        '${_waterRequired!.toStringAsFixed(1)}ml',
                         style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Per 1mg dose (1ml syringe):',
-                        style: TextStyle(color: AppColors.textMid, fontSize: 12),
-                      ),
-                      Text(
-                        'Draw ${_mlPerDose!.toStringAsFixed(2)}ml',
-                        style: TextStyle(color: AppColors.accent, fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                  Text(
+                    'Concentration: ${_concentration!.toStringAsFixed(1)}mg/ml',
+                    style: TextStyle(color: AppColors.textMid, fontSize: 11),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'DRAW FOR ${_desiredDosageMg}mg:',
+                    style: TextStyle(color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                  ),
+                  const SizedBox(height: 8),
+                  // Visual 1ml syringe
+                  Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.accent),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Stack(
+                      children: [
+                        // Filled portion
+                        Container(
+                          height: 40,
+                          width: (_drawAmount! / 1.0) * (MediaQuery.of(context).size.width - 80),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        // Labels
+                        Positioned.fill(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Text(
+                                  '0ml',
+                                  style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                                ),
+                              ),
+                              Center(
+                                child: Text(
+                                  '${_drawAmount!.toStringAsFixed(2)}ml',
+                                  style: TextStyle(
+                                    color: AppColors.accent,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Text(
+                                  '1ml',
+                                  style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -710,7 +770,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
   @override
   void dispose() {
     _vialSizeController.dispose();
-    _desiredConcentrationController.dispose();
+    _desiredDosageController.dispose();
     _rampUpStartController.dispose();
     _rampUpIncrementController.dispose();
     _rampUpDaysController.dispose();
