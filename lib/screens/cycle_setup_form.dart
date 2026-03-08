@@ -20,12 +20,12 @@ class CycleSetupForm extends StatefulWidget {
 class _CycleSetupFormState extends State<CycleSetupForm> {
   // Reconstitution
   String? _selectedPeptide;
-  double? _vialSizeMl;
-  double? _peptideAmountMg; // total mg of peptide powder
-  double? _desiredDosageMg; // desired dose per injection (mg)
-  double? _concentration; // calculated mg/ml
-  double? _waterRequired; // calculated water in ml
-  double? _drawAmount; // calculated ml to draw for desired dosage
+  double? _totalPeptideMg; // total amount of peptide (e.g., 10mg)
+  double? _desiredDosageMg; // desired per-injection dose (e.g., 1mg)
+  double? _concentrationMg; // desired mg per ml (e.g., 1mg)
+  double? _concentrationMl; // per how many ml (e.g., 0.1ml)
+  double? _bacRequired; // calculated BAC in ml
+  double? _totalVolume; // calculated total volume needed
 
   // Route (full names)
   String? _selectedRoute = 'Subcutaneous (SC)';
@@ -55,8 +55,10 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
   DateTime? _endDate;
 
   // Controllers
-  final _vialSizeController = TextEditingController();
+  final _totalPeptideController = TextEditingController();
   final _desiredDosageController = TextEditingController();
+  final _concentrationMgController = TextEditingController();
+  final _concentrationMlController = TextEditingController();
   final _rampUpStartController = TextEditingController();
   final _rampUpIncrementController = TextEditingController();
   final _rampUpDaysController = TextEditingController();
@@ -75,44 +77,37 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
   }
 
   void _calculateReconstition() {
-    if (_vialSizeMl == null || _peptideAmountMg == null) {
+    if (_totalPeptideMg == null || _concentrationMg == null || _concentrationMl == null) {
       setState(() {
-        _concentration = null;
-        _waterRequired = null;
-        _drawAmount = null;
+        _bacRequired = null;
+        _totalVolume = null;
       });
       return;
     }
 
-    // Calculate concentration: total mg / vial size ml
-    final conc = _peptideAmountMg! / _vialSizeMl!;
+    // Calculate total volume needed
+    // Total peptide / desired mg per ml = total volume
+    // e.g., 10mg / (1mg per 0.1ml) = 10mg / 10mg per ml = 1ml total
+    final mgPerMl = _concentrationMg! / _concentrationMl!;
+    final totalVol = _totalPeptideMg! / mgPerMl;
     
-    // Calculate water needed to dissolve peptide
-    final waterNeeded = _vialSizeMl!; // fill vial to size
-    
-    // Calculate draw amount based on desired dosage
-    double? draw;
-    if (_desiredDosageMg != null && _desiredDosageMg! > 0) {
-      draw = _desiredDosageMg! / conc;
-    }
+    // BAC needed = total volume (peptide volume is negligible)
+    final bac = totalVol;
 
     setState(() {
-      _concentration = conc;
-      _waterRequired = waterNeeded;
-      _drawAmount = draw;
+      _totalVolume = totalVol;
+      _bacRequired = bac;
     });
 
-    if (draw != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Add ${_waterRequired!.toStringAsFixed(1)}ml water | Draw ${_drawAmount!.toStringAsFixed(2)}ml for ${_desiredDosageMg}mg',
-          ),
-          backgroundColor: AppColors.primary,
-          duration: const Duration(seconds: 2),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Add ${_bacRequired!.toStringAsFixed(1)}ml BAC | ${_concentrationMg}mg in ${_concentrationMl}ml per injection',
         ),
-      );
-    }
+        backgroundColor: AppColors.primary,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   List<Map<String, dynamic>> _generateDoseSchedule() {
@@ -182,9 +177,10 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
 
   void _submit() {
     if (_selectedPeptide == null ||
-        _vialSizeMl == null ||
-        _peptideAmountMg == null ||
+        _totalPeptideMg == null ||
         _desiredDosageMg == null ||
+        _concentrationMg == null ||
+        _concentrationMl == null ||
         _startDate == null ||
         (_rampUpStartDose == null && _plateauDose == null)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -212,12 +208,12 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
     Navigator.pop(context, {
       'peptideName': _selectedPeptide,
       'route': routeShort,
-      'vialSizeMl': _vialSizeMl,
-      'peptideAmountMg': _peptideAmountMg,
+      'totalPeptideMg': _totalPeptideMg,
       'desiredDosageMg': _desiredDosageMg,
-      'concentration': _concentration,
-      'waterRequired': _waterRequired,
-      'drawAmount': _drawAmount,
+      'concentrationMg': _concentrationMg,
+      'concentrationMl': _concentrationMl,
+      'bacRequired': _bacRequired,
+      'totalVolume': _totalVolume,
       'schedule': schedule,
       'scheduledTime': _scheduledTime,
       'daysOfWeek': _daysOfWeek,
@@ -271,40 +267,21 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
           ),
           const SizedBox(height: 12),
 
-          // Vial size
+          // Total peptide amount
           TextField(
-            controller: _vialSizeController,
+            controller: _totalPeptideController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: TextStyle(color: AppColors.primary),
             decoration: InputDecoration(
-              labelText: 'VIAL SIZE (ml)',
+              labelText: 'TOTAL PEPTIDE (mg)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              hintText: 'e.g., 2',
+              hintText: 'e.g., 10 (for 10mg KVP vial)',
               hintStyle: TextStyle(color: AppColors.textDim, fontSize: 11),
               border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             onChanged: (value) {
-              _vialSizeMl = double.tryParse(value);
-              _calculateReconstition();
-            },
-          ),
-          const SizedBox(height: 12),
-
-          // Peptide amount
-          TextField(
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: TextStyle(color: AppColors.primary),
-            decoration: InputDecoration(
-              labelText: 'PEPTIDE AMOUNT (mg)',
-              labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              hintText: 'Total mg of powder you have (e.g., 10)',
-              hintStyle: TextStyle(color: AppColors.textDim, fontSize: 11),
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            onChanged: (value) {
-              _peptideAmountMg = double.tryParse(value);
+              _totalPeptideMg = double.tryParse(value);
               _calculateReconstition();
             },
           ),
@@ -318,7 +295,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
             decoration: InputDecoration(
               labelText: 'DESIRED DOSAGE PER INJECTION (mg)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              hintText: 'e.g., 2 (for 2mg per injection)',
+              hintText: 'e.g., 1 (for 1mg per day)',
               hintStyle: TextStyle(color: AppColors.textDim, fontSize: 11),
               border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -328,9 +305,63 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
               _calculateReconstition();
             },
           ),
+          const SizedBox(height: 12),
+
+          // Desired concentration - mg per ml
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _concentrationMgController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: TextStyle(color: AppColors.primary),
+                  decoration: InputDecoration(
+                    labelText: 'DESIRED: X mg',
+                    labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+                    hintText: '1',
+                    hintStyle: TextStyle(color: AppColors.textDim, fontSize: 11),
+                    border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                  ),
+                  onChanged: (value) {
+                    _concentrationMg = double.tryParse(value);
+                    _calculateReconstition();
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'in',
+                  style: TextStyle(color: AppColors.textMid, fontSize: 12),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _concentrationMlController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: TextStyle(color: AppColors.primary),
+                  decoration: InputDecoration(
+                    labelText: 'Y ml',
+                    labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+                    hintText: '0.1',
+                    hintStyle: TextStyle(color: AppColors.textDim, fontSize: 11),
+                    border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                  ),
+                  onChanged: (value) {
+                    _concentrationMl = double.tryParse(value);
+                    _calculateReconstition();
+                  },
+                ),
+              ),
+            ],
+          ),
 
           // Reconstitution summary with visual syringe
-          if (_waterRequired != null && _drawAmount != null && _concentration != null) ...[
+          if (_bacRequired != null && _concentrationMg != null && _concentrationMl != null) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -342,7 +373,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'RECONSTITUTION & DOSAGE',
+                    'RECONSTITUTION INSTRUCTIONS',
                     style: TextStyle(color: AppColors.primary, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
@@ -350,42 +381,37 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Add water:',
+                        'Add BAC (sterile water):',
                         style: TextStyle(color: AppColors.textMid, fontSize: 12),
                       ),
                       Text(
-                        '${_waterRequired!.toStringAsFixed(1)}ml',
+                        '${_bacRequired!.toStringAsFixed(1)}ml',
                         style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Concentration: ${_concentration!.toStringAsFixed(1)}mg/ml',
-                    style: TextStyle(color: AppColors.textMid, fontSize: 11),
-                  ),
                   const SizedBox(height: 12),
                   Text(
-                    'DRAW FOR ${_desiredDosageMg}mg:',
+                    'PER INJECTION - DRAW ${_concentrationMg}mg IN ${_concentrationMl}ml:',
                     style: TextStyle(color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                   ),
                   const SizedBox(height: 8),
                   // Visual 1ml syringe
                   Container(
-                    height: 40,
+                    height: 50,
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.accent),
-                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.accent, width: 2),
+                      borderRadius: BorderRadius.circular(25),
                     ),
                     child: Stack(
                       children: [
-                        // Filled portion
+                        // Filled portion (concentrated at start)
                         Container(
-                          height: 40,
-                          width: (_drawAmount! / 1.0) * (MediaQuery.of(context).size.width - 80),
+                          height: 50,
+                          width: (_concentrationMl! / 1.0) * (MediaQuery.of(context).size.width - 80),
                           decoration: BoxDecoration(
-                            color: AppColors.accent.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(20),
+                            color: AppColors.accent.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(25),
                           ),
                         ),
                         // Labels
@@ -394,27 +420,39 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(left: 8),
+                                padding: const EdgeInsets.only(left: 12),
                                 child: Text(
-                                  '0ml',
-                                  style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                                  '0',
+                                  style: TextStyle(color: AppColors.textMid, fontSize: 11, fontWeight: FontWeight.bold),
                                 ),
                               ),
                               Center(
-                                child: Text(
-                                  '${_drawAmount!.toStringAsFixed(2)}ml',
-                                  style: TextStyle(
-                                    color: AppColors.accent,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      '${_concentrationMg}mg',
+                                      style: TextStyle(
+                                        color: AppColors.accent,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${_concentrationMl}ml',
+                                      style: TextStyle(
+                                        color: AppColors.accent,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.only(right: 12),
                                 child: Text(
                                   '1ml',
-                                  style: TextStyle(color: AppColors.textMid, fontSize: 10),
+                                  style: TextStyle(color: AppColors.textMid, fontSize: 11, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -769,8 +807,10 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
 
   @override
   void dispose() {
-    _vialSizeController.dispose();
+    _totalPeptideController.dispose();
     _desiredDosageController.dispose();
+    _concentrationMgController.dispose();
+    _concentrationMlController.dispose();
     _rampUpStartController.dispose();
     _rampUpIncrementController.dispose();
     _rampUpDaysController.dispose();

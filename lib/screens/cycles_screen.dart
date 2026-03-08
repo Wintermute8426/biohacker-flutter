@@ -1641,12 +1641,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
     try {
       final peptideName = result['peptideName'] as String;
       final route = result['route'] as String?;
-      final vialSizeMl = result['vialSizeMl'] as double;
-      final peptideAmountMg = result['peptideAmountMg'] as double?;
+      final totalPeptideMg = result['totalPeptideMg'] as double?;
       final desiredDosageMg = result['desiredDosageMg'] as double?;
-      final concentration = result['concentration'] as double?;
-      final waterRequired = result['waterRequired'] as double?;
-      final drawAmount = result['drawAmount'] as double?;
+      final concentrationMg = result['concentrationMg'] as double?;
+      final concentrationMl = result['concentrationMl'] as double?;
+      final bacRequired = result['bacRequired'] as double?;
+      final totalVolume = result['totalVolume'] as double?;
       final schedule = result['schedule'] as List<Map<String, dynamic>>;
       final scheduledTime = result['scheduledTime'] as String;
       final daysOfWeek = result['daysOfWeek'] as List<int>;
@@ -1697,7 +1697,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
         daysOfWeek: daysOfWeek,
         startDate: startDate,
         endDate: endDate,
-        notes: 'Vial: ${vialSizeMl}ml | Peptide: ${peptideAmountMg}mg | Concentration: ${concentration?.toStringAsFixed(1)}mg/ml | Add ${waterRequired?.toStringAsFixed(1)}ml water | Draw ${drawAmount?.toStringAsFixed(2)}ml for ${desiredDosageMg}mg dose',
+        notes: 'Peptide: ${totalPeptideMg}mg | Add ${bacRequired?.toStringAsFixed(1)}ml BAC | Draw ${concentrationMg}mg in ${concentrationMl}ml for ${desiredDosageMg}mg dose | Total volume: ${totalVolume?.toStringAsFixed(1)}ml',
       );
 
       if (masterSchedule == null) {
