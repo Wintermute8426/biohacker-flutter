@@ -1035,51 +1035,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           return;
                         }
                         
-                        // Show dose configuration prompt BEFORE closing the modal
-                        if (mounted) {
-                          print('[DEBUG] Dialog trigger - actualCycle: ${createdCycle.peptideName} with ID: ${createdCycle.id}');
-                          
-                          // Show dialog while modal context is still valid
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (dialogContext) => WintermmuteDialog(
-                              title: 'CONFIGURE DOSES?',
-                              content: 'Would you like to configure dose schedules for $peptideName?',
-                              actions: [
-                                WintermmuteDialogAction(
-                                  label: 'SKIP',
-                                  isPrimary: false,
-                                  onPressed: () {
-                                    print('[DEBUG] SKIP clicked');
-                                    Navigator.pop(context); // Close the CREATE CYCLE modal
-                                  },
-                                ),
-                                WintermmuteDialogAction(
-                                  label: 'CONFIGURE',
-                                  isPrimary: true,
-                                  onPressed: () {
-                                    print('[DEBUG] CONFIGURE clicked');
-                                    Navigator.pop(context); // Close the CREATE CYCLE modal
-                                    _showConfigureDosesFlow(createdCycle); // Use actual cycle with real UUID
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                          print('[DEBUG] Dialog shown');
-                        }
-                        
-                        // Clear form
-                        _peptideController.clear();
-                        _doseController.clear();
-                        _weeksController.text = '8';
-                        _selectedFrequency = '1x weekly';
-                        _selectedRoute = 'SC (subcutaneous)';
-                        _selectedDosingSchedule = null;
-                        
-                        // Reload cycles
-                        _loadCycles();
+                        // OLD CODE REMOVED - Using new unified CycleSetupForm now
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
