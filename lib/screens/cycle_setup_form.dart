@@ -267,13 +267,13 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
           ),
           const SizedBox(height: 12),
 
-          // Total peptide amount
+          // Vial size (total peptide)
           TextField(
             controller: _totalPeptideController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: TextStyle(color: AppColors.primary),
             decoration: InputDecoration(
-              labelText: 'TOTAL PEPTIDE (mg)',
+              labelText: 'VIAL SIZE (mg)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
               hintText: 'e.g., 10 (for 10mg KVP vial)',
               hintStyle: TextStyle(color: AppColors.textDim, fontSize: 11),
@@ -391,68 +391,101 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    'PER INJECTION - DRAW ${_concentrationMg}mg IN ${_concentrationMl}ml:',
-                    style: TextStyle(color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                  Row(
+                    children: [
+                      Text(
+                        'PER INJECTION: ',
+                        style: TextStyle(color: AppColors.textMid, fontSize: 11),
+                      ),
+                      Text(
+                        '${_concentrationMg}mg in ${_concentrationMl}ml',
+                        style: TextStyle(color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
-                  // Visual 1ml syringe
-                  Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.accent, width: 2),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Stack(
+                  // Visual 1ml syringe barrel
+                  SizedBox(
+                    height: 60,
+                    child: Row(
                       children: [
-                        // Filled portion (concentrated at start)
+                        // Plunger (left side)
                         Container(
-                          height: 50,
-                          width: (_concentrationMl! / 1.0) * (MediaQuery.of(context).size.width - 80),
+                          width: 20,
+                          height: 40,
                           decoration: BoxDecoration(
-                            color: AppColors.accent.withOpacity(0.4),
-                            borderRadius: BorderRadius.circular(25),
+                            color: AppColors.accent.withOpacity(0.6),
+                            border: Border.all(color: AppColors.accent, width: 1),
+                            borderRadius: BorderRadius.circular(3),
                           ),
+                          child: Icon(Icons.arrow_forward, color: AppColors.background, size: 12),
                         ),
-                        // Labels
-                        Positioned.fill(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        const SizedBox(width: 2),
+                        // Syringe barrel
+                        Expanded(
+                          child: Stack(
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 12),
-                                child: Text(
-                                  '0',
-                                  style: TextStyle(color: AppColors.textMid, fontSize: 11, fontWeight: FontWeight.bold),
+                              // Barrel background
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: AppColors.accent, width: 2),
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(8),
+                                    bottomRight: Radius.circular(8),
+                                  ),
                                 ),
                               ),
-                              Center(
+                              // Filled portion (liquid)
+                              Container(
+                                width: (_concentrationMl! / 1.0) * (MediaQuery.of(context).size.width - 120),
+                                decoration: BoxDecoration(
+                                  color: AppColors.accent.withOpacity(0.5),
+                                  borderRadius: const BorderRadius.only(
+                                    topRight: Radius.circular(6),
+                                    bottomRight: Radius.circular(6),
+                                  ),
+                                ),
+                              ),
+                              // Graduation marks and labels
+                              Positioned.fill(
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      '${_concentrationMg}mg',
-                                      style: TextStyle(
-                                        color: AppColors.accent,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8, top: 4),
+                                      child: Text(
+                                        '0',
+                                        style: TextStyle(color: AppColors.textMid, fontSize: 9),
                                       ),
                                     ),
-                                    Text(
-                                      '${_concentrationMl}ml',
-                                      style: TextStyle(
-                                        color: AppColors.accent,
-                                        fontSize: 11,
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8, bottom: 4),
+                                      child: Text(
+                                        '1ml',
+                                        style: TextStyle(color: AppColors.textMid, fontSize: 9),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 12),
-                                child: Text(
-                                  '1ml',
-                                  style: TextStyle(color: AppColors.textMid, fontSize: 11, fontWeight: FontWeight.bold),
+                              // Draw amount label (centered on fill)
+                              Positioned(
+                                left: (_concentrationMl! / 1.0) * (MediaQuery.of(context).size.width - 120) / 2,
+                                top: 0,
+                                bottom: 0,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      '${_concentrationMl}ml',
+                                      style: TextStyle(
+                                        color: AppColors.accent,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],

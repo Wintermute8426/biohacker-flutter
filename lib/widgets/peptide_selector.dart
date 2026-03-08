@@ -23,12 +23,14 @@ class _PeptideSelectorState extends State<PeptideSelector> {
   late TextEditingController _searchController;
   late String _selectedPeptide;
   List<String> _filteredPeptides = [];
+  bool _showList = true;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
     _selectedPeptide = widget.initialValue ?? '';
+    _showList = widget.initialValue == null; // Hide list if peptide already selected
     _updateFilteredList();
   }
 
@@ -85,7 +87,10 @@ class _PeptideSelectorState extends State<PeptideSelector> {
             suffixIcon: _selectedPeptide.isNotEmpty
                 ? GestureDetector(
                     onTap: () {
-                      setState(() => _selectedPeptide = '');
+                      setState(() {
+                        _selectedPeptide = '';
+                        _showList = true;
+                      });
                       _searchController.clear();
                       _updateFilteredList();
                     },
@@ -129,8 +134,8 @@ class _PeptideSelectorState extends State<PeptideSelector> {
           ),
         const SizedBox(height: 12),
 
-        // Filtered list
-        if (_filteredPeptides.isNotEmpty)
+        // Filtered list (only show if not collapsed after selection)
+        if (_showList && _filteredPeptides.isNotEmpty)
           Container(
             constraints: const BoxConstraints(maxHeight: 200),
             decoration: BoxDecoration(
@@ -148,7 +153,8 @@ class _PeptideSelectorState extends State<PeptideSelector> {
                   onTap: () {
                     setState(() {
                       _selectedPeptide = peptide;
-                      _searchController.text = peptide;
+                      _searchController.clear();
+                      _showList = false; // Hide list after selection
                     });
                     widget.onSelected(peptide);
                   },
