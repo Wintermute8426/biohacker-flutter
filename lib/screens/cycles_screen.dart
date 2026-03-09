@@ -1639,29 +1639,36 @@ class _CyclesScreenState extends State<CyclesScreen> {
     print('[DEBUG UNIFIED] Setup result: $result');
 
     try {
-      final peptideName = result['peptideName'] as String;
+      final peptideName = result['peptideName'] as String?;
       final route = result['route'] as String?;
       final totalPeptideMg = result['totalPeptideMg'] as double?;
       final desiredDosageMg = result['desiredDosageMg'] as double?;
-      final concentrationMg = result['concentrationMg'] as double?;
       final concentrationMl = result['concentrationMl'] as double?;
       final bacRequired = result['bacRequired'] as double?;
-      final totalVolume = result['totalVolume'] as double?;
-      final schedule = result['schedule'] as List<Map<String, dynamic>>;
-      final scheduledTime = result['scheduledTime'] as String;
-      final daysOfWeek = result['daysOfWeek'] as List<int>;
-      final startDate = result['startDate'] as DateTime;
+      final schedule = result['schedule'] as List<Map<String, dynamic>>?;
+      final scheduledTime = result['scheduledTime'] as String? ?? '08:00';
+      final daysOfWeek = result['daysOfWeek'] as List<int>? ?? [0,1,2,3,4,5,6];
+      final startDate = result['startDate'] as DateTime?;
       final endDate = result['endDate'] as DateTime?;
+
+      if (peptideName == null || startDate == null || schedule == null) {
+        throw Exception('Missing required cycle data');
+      }
 
       // 1. Create the cycle
       print('[DEBUG UNIFIED] Creating cycle for $peptideName');
+      final firstDose = schedule!.isNotEmpty 
+          ? ((schedule![0]['dose'] as num?)?.toDouble() ?? desiredDosageMg ?? 1.0)
+          : (desiredDosageMg ?? 1.0);
+      final cycleDurationWeeks = (endDate?.difference(startDate!).inDays ?? 56) ~/ 7;
+      
       final createdCycle = await db.saveCycle(
         peptideName: peptideName,
-        dose: schedule.isNotEmpty ? (schedule.first['dose'] as double) : 0,
+        dose: firstDose,
         route: route ?? 'SC',
         frequency: '${daysOfWeek.length}x weekly',
-        durationWeeks: 8, // Default, will be overridden by schedule
-        startDate: startDate,
+        durationWeeks: cycleDurationWeeks,
+        startDate: startDate!,
       );
 
       if (createdCycle == null) {
@@ -1684,9 +1691,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
       final userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
 
-      // Create a master schedule with the first dose amount
-      final firstDoseRaw = schedule.isNotEmpty ? (schedule.first['dose'] as num) : 0;
-      final firstDose = firstDoseRaw.toDouble();
+      // Create a master schedule with the first dose amount (or desired dose)
       final masterSchedule = await doseScheduleService.createDoseSchedule(
         userId: userId,
         cycleId: createdCycle.id,
@@ -1695,9 +1700,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
         route: route ?? 'SC',
         scheduledTime: scheduledTime,
         daysOfWeek: daysOfWeek,
-        startDate: startDate,
+        startDate: startDate!,
         endDate: endDate,
-        notes: 'Peptide: ${totalPeptideMg}mg | Add ${bacRequired?.toStringAsFixed(1)}ml BAC | Draw ${concentrationMg}mg in ${concentrationMl}ml for ${desiredDosageMg}mg dose | Total volume: ${totalVolume?.toStringAsFixed(1)}ml',
+        notes: 'Peptide: ${totalPeptideMg}mg | Add ${bacRequired?.toStringAsFixed(1)}ml BAC | Draw ${concentrationMl}ml for ${desiredDosageMg}mg dose',
       );
 
       if (masterSchedule == null) {
@@ -1710,16 +1715,21 @@ class _CyclesScreenState extends State<CyclesScreen> {
       final doseLogsService = DoseLogsService(Supabase.instance.client);
       int createdDoseLogs = 0;
 
-      for (final dose in schedule) {
-        final dayOffset = dose['day'] as int;
-        final doseAmount = dose['dose'] as double;
-        final phase = dose['phase'] as String;
+      if (schedule!.isEmpty) {
+        print('[DEBUG UNIFIED] No doses in schedule, skipping dose log creation');
+      } else {
+        for (final dose in schedule!) {
+        final dayOffset = dose['dayOffset'] as int? ?? 0;
+        final doseAmount = (dose['dose'] as num?)?.toDouble() ?? 0.0;
+        final doseDate = dose['date'] as DateTime?;
+        final phase = dose['phase'] as String? ?? 'plateau';
 
-        final doseDate = startDate.add(Duration(days: dayOffset));
+        // Use actual date from schedule if available, otherwise calculate
+        final actualDoseDate = doseDate ?? startDate.add(Duration(days: dayOffset));
         final timeParts = scheduledTime.split(':');
         final hour = int.parse(timeParts[0]);
         final minute = int.parse(timeParts[1]);
-        final doseDateTime = DateTime(doseDate.year, doseDate.month, doseDate.day, hour, minute);
+        final doseDateTime = DateTime(actualDoseDate.year, actualDoseDate.month, actualDoseDate.day, hour, minute);
 
         // Insert into dose_logs
         try {
@@ -1728,7 +1738,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
             'cycle_id': createdCycle.id,
             'dose_schedule_id': masterSchedule!.id,
             'peptide_name': peptideName,
-            'dose_amount': doseAmount.toDouble(),
+            'dose_amount': doseAmount,
             'route': route ?? 'SC',
             'logged_at': doseDateTime.toIso8601String(),
             'status': 'SCHEDULED',
@@ -1736,10 +1746,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
           }).select().single();
 
           createdDoseLogs++;
-          print('[DEBUG UNIFIED] Created dose_log for day $dayOffset: ${doseAmount}mg');
+          print('[DEBUG UNIFIED] Created dose_log for day $dayOffset: ${doseAmount}mg (phase: $phase)');
         } catch (e) {
           print('[DEBUG UNIFIED] Error creating dose_log for day $dayOffset: $e');
         }
+      }
       }
 
       print('[DEBUG UNIFIED] Created $createdDoseLogs dose logs');
