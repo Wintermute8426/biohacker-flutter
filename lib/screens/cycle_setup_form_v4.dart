@@ -120,7 +120,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   void _addPhase(String phaseType) {
-    final defaultDosage = _desiredDosageMg != null ? _desiredDosageMg! / 2 : 50;
+    final defaultDosage = _desiredDosageMg != null ? (_desiredDosageMg! / 2) : 50.0;
     
     setState(() {
       _phases.add(DosePhase(
