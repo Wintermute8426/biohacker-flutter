@@ -147,18 +147,18 @@ class _CycleSetupFormV3State extends State<CycleSetupFormV3> {
       isScrollControlled: true,
       builder: (context) => TitrationModal(
         cycleDurationDays: _cycleDurationDays,
-        onRampUpChanged: (days, startDose, increment) {
+        onRampUpChanged: (tuple) {
           setState(() {
-            _rampUpDays = days;
-            _rampUpStartDose = startDose;
-            _rampUpIncrementPerDay = increment;
+            _rampUpDays = tuple.$1;
+            _rampUpStartDose = tuple.$2;
+            _rampUpIncrementPerDay = tuple.$3;
             _calculatePlateauDays();
           });
         },
-        onRampDownChanged: (days, decrement) {
+        onRampDownChanged: (tuple) {
           setState(() {
-            _rampDownDays = days;
-            _rampDownDecrementPerDay = decrement;
+            _rampDownDays = tuple.$1;
+            _rampDownDecrementPerDay = tuple.$2;
             _calculatePlateauDays();
           });
         },
@@ -745,8 +745,8 @@ class _TitrationModalState extends State<TitrationModal> {
   }
 
   void _save() {
-    widget.onRampUpChanged((_rampUpDays, _rampUpStartDose, _rampUpIncrementPerDay));
-    widget.onRampDownChanged((_rampDownDays, _rampDownDecrementPerDay));
+    widget.onRampUpChanged((_rampUpDays, _rampUpStartDose ?? 0, _rampUpIncrementPerDay ?? 0));
+    widget.onRampDownChanged((_rampDownDays, _rampDownDecrementPerDay ?? 0));
     Navigator.pop(context);
   }
 
