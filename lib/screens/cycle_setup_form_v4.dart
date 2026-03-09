@@ -240,12 +240,18 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       
       // Determine dose for this phase
       double phaseDose = phase.dosage;
+      print('[DOSE GEN]   Phase type: ${phase.type}, phase.dosage: ${phase.dosage}, _desiredDosageMg: $_desiredDosageMg');
+      
       if (phase.type == 'plateau') {
         // Plateau uses DESIRED DOSE, not phase dosage
         phaseDose = _desiredDosageMg ?? phase.dosage;
-        print('[DOSE GEN]   Plateau using desired dose: $phaseDose mg (phase dosage was ${phase.dosage})');
+        print('[DOSE GEN]   ✓ PLATEAU detected: Using desired dose: $phaseDose mg (phase dosage was ${phase.dosage})');
+      } else if (phase.type == 'taper_up') {
+        print('[DOSE GEN]   Taper UP: Using phase dosage: $phaseDose mg');
+      } else if (phase.type == 'taper_down') {
+        print('[DOSE GEN]   Taper DOWN: Using phase dosage: $phaseDose mg');
       } else {
-        print('[DOSE GEN]   Using phase dosage: $phaseDose mg');
+        print('[DOSE GEN]   Unknown phase type: Using phase dosage: $phaseDose mg');
       }
       
       // Generate doses based on phase configuration
@@ -316,18 +322,22 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
     // Ensure phase dates are calculated BEFORE generating schedule
     _recalculatePhaseDates();
     
-    // DEBUG: Check phases before generating schedule
-    print('[FORM DEBUG] Phases before schedule generation:');
+    // DEBUG: Check form state before generating schedule
+    print('[SUBMIT DEBUG] =======================================================');
+    print('[SUBMIT DEBUG] desiredDosageMg: $_desiredDosageMg');
+    print('[SUBMIT DEBUG] Phases count: ${_phases.length}');
     for (int i = 0; i < _phases.length; i++) {
       final p = _phases[i];
-      print('[FORM DEBUG] Phase $i (${p.type}): ${p.startDate} to ${p.endDate}');
+      print('[SUBMIT DEBUG] Phase $i: type=${p.type}, dosage=${p.dosage}, dates=${p.startDate} to ${p.endDate}, frequency=${p.frequency}');
     }
+    print('[SUBMIT DEBUG] =======================================================');
     
     final schedule = _generateDoseSchedule();
-    print('[FORM DEBUG] Generated schedule with ${schedule.length} doses');
-    for (final dose in schedule.take(5)) {
-      print('[FORM DEBUG]   ${dose['dose']}mg on ${dose['date']} (${dose['phase']})');
+    print('[SUBMIT DEBUG] Generated schedule with ${schedule.length} doses');
+    for (final dose in schedule.take(10)) {
+      print('[SUBMIT DEBUG]   Day ${dose['dayOffset']}: ${dose['dose']}mg (phase: ${dose['phase']}, date: ${dose['date']})');
     }
+    print('[SUBMIT DEBUG] =======================================================');
     
     final routeShort = _routeMap[_selectedRoute] ?? 'SC';
     final cycleDays = (_cycleDurationWeeks ?? 0) * 7;
