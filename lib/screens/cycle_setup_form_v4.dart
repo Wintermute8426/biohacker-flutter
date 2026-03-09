@@ -65,20 +65,24 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   void _calculateReconstition() {
-    if (_totalPeptideMg == null || _concentrationMl == null) {
+    if (_totalPeptideMg == null || _concentrationMl == null || _desiredDosageMg == null) {
       setState(() {
         _bacRequired = null;
       });
       return;
     }
 
+    // BAC = (vial_mg × draw_ml) / desired_dose_per_draw
+    // Example: 10mg vial, 0.2ml draw, want 1mg per draw = (10 × 0.2) / 1 = 2ml
+    final bac = (_totalPeptideMg! * _concentrationMl!) / _desiredDosageMg!;
+
     setState(() {
-      _bacRequired = _totalPeptideMg;
+      _bacRequired = bac;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Add ${_bacRequired!.toStringAsFixed(1)}ml BAC | Draw ${_concentrationMl}ml per injection'),
+        content: Text('Add ${_bacRequired!.toStringAsFixed(2)}ml BAC | ${_desiredDosageMg}mg per ${_concentrationMl}ml draw'),
         backgroundColor: AppColors.primary,
         duration: const Duration(seconds: 2),
       ),
@@ -116,12 +120,14 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   void _addPhase(String phaseType) {
+    final defaultDosage = _desiredDosageMg != null ? _desiredDosageMg! / 2 : 50;
+    
     setState(() {
       _phases.add(DosePhase(
         type: phaseType,
         startDate: _startDate,
         endDate: _endDate,
-        dosage: 50,
+        dosage: defaultDosage,
         frequency: 'Daily',
         notes: '',
       ));
@@ -132,48 +138,42 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   void _recalculatePhaseDates() {
     if (_startDate == null || _endDate == null || _phases.isEmpty) return;
 
-    final totalDays = _endDate!.difference(_startDate!).inDays + 1;
-    int usedDays = 0;
+    final cycleStart = _startDate!;
+    final cycleEnd = _endDate!;
+    final cycleDays = cycleEnd.difference(cycleStart).inDays + 1;
 
-    for (int i = 0; i < _phases.length; i++) {
-      final phase = _phases[i];
-      
-      if (phase.type == 'taper_up') {
-        // Ramp up: starts at beginning
-        final phaseDays = phase.durationDays > 0 ? phase.durationDays : 7;
-        final newStart = _startDate!;
-        final newEnd = _startDate!.add(Duration(days: phaseDays - 1));
-        _phases[i] = phase.copyWith(startDate: newStart, endDate: newEnd);
-        usedDays += phaseDays;
-      } 
-      else if (phase.type == 'taper_down') {
-        // Ramp down: ends at end
-        final phaseDays = phase.durationDays > 0 ? phase.durationDays : 7;
-        final newEnd = _endDate!;
-        final newStart = _endDate!.subtract(Duration(days: phaseDays - 1));
-        _phases[i] = phase.copyWith(startDate: newStart, endDate: newEnd);
-        usedDays += phaseDays;
-      }
+    // Find ramp up and ramp down phases and their actual durations
+    final rampUpIndex = _phases.indexWhere((p) => p.type == 'taper_up');
+    final rampDownIndex = _phases.indexWhere((p) => p.type == 'taper_down');
+    final plateauIndex = _phases.indexWhere((p) => p.type == 'plateau');
+
+    // Allocate Ramp Up from START
+    if (rampUpIndex >= 0) {
+      final rampUpDays = _phases[rampUpIndex].durationDays > 0 ? _phases[rampUpIndex].durationDays : 7;
+      final rampUpStart = cycleStart;
+      final rampUpEnd = cycleStart.add(Duration(days: rampUpDays - 1));
+      _phases[rampUpIndex] = _phases[rampUpIndex].copyWith(startDate: rampUpStart, endDate: rampUpEnd);
+    }
+
+    // Allocate Ramp Down to END
+    if (rampDownIndex >= 0) {
+      final rampDownDays = _phases[rampDownIndex].durationDays > 0 ? _phases[rampDownIndex].durationDays : 7;
+      final rampDownEnd = cycleEnd;
+      final rampDownStart = cycleEnd.subtract(Duration(days: rampDownDays - 1));
+      _phases[rampDownIndex] = _phases[rampDownIndex].copyWith(startDate: rampDownStart, endDate: rampDownEnd);
     }
 
     // Plateau fills middle
-    for (int i = 0; i < _phases.length; i++) {
-      if (_phases[i].type == 'plateau') {
-        final rampUpEnd = _phases.where((p) => p.type == 'taper_up').isNotEmpty
-            ? _phases.firstWhere((p) => p.type == 'taper_up').endDate
-            : _startDate;
-        final rampDownStart = _phases.where((p) => p.type == 'taper_down').isNotEmpty
-            ? _phases.firstWhere((p) => p.type == 'taper_down').startDate
-            : _endDate;
+    if (plateauIndex >= 0) {
+      final plateauStart = rampUpIndex >= 0 
+          ? _phases[rampUpIndex].endDate!.add(const Duration(days: 1))
+          : cycleStart;
+      final plateauEnd = rampDownIndex >= 0
+          ? _phases[rampDownIndex].startDate!.subtract(const Duration(days: 1))
+          : cycleEnd;
 
-        if (rampUpEnd != null && rampDownStart != null) {
-          final plateauStart = rampUpEnd.add(const Duration(days: 1));
-          final plateauEnd = rampDownStart.subtract(const Duration(days: 1));
-          
-          if (plateauStart.isBefore(plateauEnd) || plateauStart.isAtSameMomentAs(plateauEnd)) {
-            _phases[i] = _phases[i].copyWith(startDate: plateauStart, endDate: plateauEnd);
-          }
-        }
+      if (plateauStart.isBefore(plateauEnd) || plateauStart.isAtSameMomentAs(plateauEnd)) {
+        _phases[plateauIndex] = _phases[plateauIndex].copyWith(startDate: plateauStart, endDate: plateauEnd);
       }
     }
   }
