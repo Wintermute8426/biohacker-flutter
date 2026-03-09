@@ -117,6 +117,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       _totalInjections = injections;
       _daysOfWeek = daysOfWeek;
     });
+    
+    // Recalculate phase dates when cycle duration changes
+    _recalculatePhaseDates();
   }
 
   void _addPhase(String phaseType) {
@@ -144,44 +147,58 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   void _recalculatePhaseDates() {
-    if (_startDate == null || _endDate == null || _phases.isEmpty) return;
+    if (_startDate == null || _endDate == null || _phases.isEmpty) {
+      print('[RECALC] Skipping - missing startDate, endDate, or phases');
+      return;
+    }
 
+    print('[RECALC] Recalculating ${_phases.length} phases');
+    
     final cycleStart = _startDate!;
     final cycleEnd = _endDate!;
     final cycleDays = cycleEnd.difference(cycleStart).inDays + 1;
+    print('[RECALC] Cycle: $cycleStart to $cycleEnd ($cycleDays days)');
 
     // Find ramp up and ramp down phases and their actual durations
     final rampUpIndex = _phases.indexWhere((p) => p.type == 'taper_up');
     final rampDownIndex = _phases.indexWhere((p) => p.type == 'taper_down');
     final plateauIndex = _phases.indexWhere((p) => p.type == 'plateau');
 
+    print('[RECALC] Indices - RampUp: $rampUpIndex, RampDown: $rampDownIndex, Plateau: $plateauIndex');
+
     // Allocate Ramp Up from START
     if (rampUpIndex >= 0) {
-      final rampUpDays = _phases[rampUpIndex].durationDays > 0 ? _phases[rampUpIndex].durationDays : 7;
+      final phase = _phases[rampUpIndex];
+      final rampUpDays = phase.durationDays > 0 ? phase.durationDays : 7;
       final rampUpStart = cycleStart;
       final rampUpEnd = cycleStart.add(Duration(days: rampUpDays - 1));
-      _phases[rampUpIndex] = _phases[rampUpIndex].copyWith(startDate: rampUpStart, endDate: rampUpEnd);
+      _phases[rampUpIndex] = phase.copyWith(startDate: rampUpStart, endDate: rampUpEnd);
+      print('[RECALC] RampUp: $rampUpStart to $rampUpEnd ($rampUpDays days)');
     }
 
     // Allocate Ramp Down to END
     if (rampDownIndex >= 0) {
-      final rampDownDays = _phases[rampDownIndex].durationDays > 0 ? _phases[rampDownIndex].durationDays : 7;
+      final phase = _phases[rampDownIndex];
+      final rampDownDays = phase.durationDays > 0 ? phase.durationDays : 7;
       final rampDownEnd = cycleEnd;
       final rampDownStart = cycleEnd.subtract(Duration(days: rampDownDays - 1));
-      _phases[rampDownIndex] = _phases[rampDownIndex].copyWith(startDate: rampDownStart, endDate: rampDownEnd);
+      _phases[rampDownIndex] = phase.copyWith(startDate: rampDownStart, endDate: rampDownEnd);
+      print('[RECALC] RampDown: $rampDownStart to $rampDownEnd ($rampDownDays days)');
     }
 
     // Plateau fills middle
     if (plateauIndex >= 0) {
-      final plateauStart = rampUpIndex >= 0 
+      final phase = _phases[plateauIndex];
+      final plateauStart = rampUpIndex >= 0 && _phases[rampUpIndex].endDate != null
           ? _phases[rampUpIndex].endDate!.add(const Duration(days: 1))
           : cycleStart;
-      final plateauEnd = rampDownIndex >= 0
+      final plateauEnd = rampDownIndex >= 0 && _phases[rampDownIndex].startDate != null
           ? _phases[rampDownIndex].startDate!.subtract(const Duration(days: 1))
           : cycleEnd;
 
       if (plateauStart.isBefore(plateauEnd) || plateauStart.isAtSameMomentAs(plateauEnd)) {
-        _phases[plateauIndex] = _phases[plateauIndex].copyWith(startDate: plateauStart, endDate: plateauEnd);
+        _phases[plateauIndex] = phase.copyWith(startDate: plateauStart, endDate: plateauEnd);
+        print('[RECALC] Plateau: $plateauStart to $plateauEnd');
       }
     }
   }
@@ -199,21 +216,33 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   List<Map<String, dynamic>> _generateDoseSchedule() {
+    print('[DOSE GEN] Starting dose generation for ${_phases.length} phases');
     final doses = <Map<String, dynamic>>[];
     
-    for (final phase in _phases) {
-      if (phase.startDate == null || phase.endDate == null) continue;
+    for (int phaseIdx = 0; phaseIdx < _phases.length; phaseIdx++) {
+      final phase = _phases[phaseIdx];
+      print('[DOSE GEN] Phase $phaseIdx (${phase.type}): startDate=${phase.startDate}, endDate=${phase.endDate}');
+      
+      if (phase.startDate == null || phase.endDate == null) {
+        print('[DOSE GEN]   Skipping - null dates');
+        continue;
+      }
       
       final daysDiff = phase.endDate!.difference(phase.startDate!).inDays;
+      print('[DOSE GEN]   Duration: $daysDiff days');
       
       // Determine dose for this phase
       double phaseDose = phase.dosage;
       if (phase.type == 'plateau') {
         // Plateau uses DESIRED DOSE, not phase dosage
         phaseDose = _desiredDosageMg ?? phase.dosage;
+        print('[DOSE GEN]   Plateau using desired dose: $phaseDose mg (phase dosage was ${phase.dosage})');
+      } else {
+        print('[DOSE GEN]   Using phase dosage: $phaseDose mg');
       }
       
       // Generate doses based on phase configuration
+      int phaseDoseCount = 0;
       for (int i = 0; i <= daysDiff; i++) {
         final date = phase.startDate!.add(Duration(days: i));
         
@@ -238,12 +267,15 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             'dayOffset': dayOffset,
             'dose': phaseDose,
             'phase': phase.type,
-            'phaseNumber': _phases.indexOf(phase) + 1,
+            'phaseNumber': phaseIdx + 1,
           });
+          phaseDoseCount++;
         }
       }
+      print('[DOSE GEN]   Generated $phaseDoseCount injection days');
     }
 
+    print('[DOSE GEN] Total doses generated: ${doses.length}');
     return doses;
   }
 
@@ -274,7 +306,22 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       return;
     }
 
+    // Ensure phase dates are calculated BEFORE generating schedule
+    _recalculatePhaseDates();
+    
+    // DEBUG: Check phases before generating schedule
+    print('[FORM DEBUG] Phases before schedule generation:');
+    for (int i = 0; i < _phases.length; i++) {
+      final p = _phases[i];
+      print('[FORM DEBUG] Phase $i (${p.type}): ${p.startDate} to ${p.endDate}');
+    }
+    
     final schedule = _generateDoseSchedule();
+    print('[FORM DEBUG] Generated schedule with ${schedule.length} doses');
+    for (final dose in schedule.take(5)) {
+      print('[FORM DEBUG]   ${dose['dose']}mg on ${dose['date']} (${dose['phase']})');
+    }
+    
     final routeShort = _routeMap[_selectedRoute] ?? 'SC';
     final cycleDays = (_cycleDurationWeeks ?? 0) * 7;
     final injections = _totalInjections ?? 0;
