@@ -147,15 +147,22 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   void _recalculatePhaseDates() {
-    if (_startDate == null || _endDate == null || _phases.isEmpty) {
-      print('[RECALC] Skipping - missing startDate, endDate, or phases');
+    if (_phases.isEmpty) {
+      print('[RECALC] Skipping - no phases');
       return;
     }
+    
+    // If dates aren't set yet, use today as start and add duration
+    DateTime cycleStart = _startDate ?? DateTime.now();
+    DateTime cycleEnd = _endDate ?? cycleStart.add(Duration(days: (_cycleDurationWeeks ?? 4) * 7 - 1));
+    
+    print('[RECALC] Working with cycleStart=$cycleStart, cycleEnd=$cycleEnd');
+    
+    // Update form dates if they were null
+    if (_startDate == null) _startDate = cycleStart;
+    if (_endDate == null) _endDate = cycleEnd;
 
     print('[RECALC] Recalculating ${_phases.length} phases');
-    
-    final cycleStart = _startDate!;
-    final cycleEnd = _endDate!;
     final cycleDays = cycleEnd.difference(cycleStart).inDays + 1;
     print('[RECALC] Cycle: $cycleStart to $cycleEnd ($cycleDays days)');
 
