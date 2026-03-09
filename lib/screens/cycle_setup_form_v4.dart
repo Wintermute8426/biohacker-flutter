@@ -248,18 +248,27 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   void _submit() {
-    if (_selectedPeptide == null ||
-        _totalPeptideMg == null ||
-        _desiredDosageMg == null ||
-        _concentrationMl == null ||
-        _cycleDurationWeeks == null ||
-        _startDate == null ||
-        _endDate == null ||
-        _phases.isEmpty) {
+    String? errorMsg;
+    
+    if (_selectedPeptide == null) errorMsg = 'Select a peptide';
+    else if (_totalPeptideMg == null) errorMsg = 'Enter vial size (mg)';
+    else if (_desiredDosageMg == null) errorMsg = 'Enter desired dosage (mg)';
+    else if (_concentrationMl == null) errorMsg = 'Enter draw per injection (ml)';
+    else if (_cycleDurationWeeks == null) errorMsg = 'Enter cycle duration (weeks)';
+    else if (_startDate == null || _endDate == null) errorMsg = 'Cycle dates not set';
+    else if (_phases.isEmpty) {
+      errorMsg = 'Add at least one phase (Taper Up, Plateau, or Taper Down)';
+      // Auto-add a plateau if user tries to submit without phases
+      _addPhase('plateau');
+      return;
+    }
+
+    if (errorMsg != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all required fields and add at least one phase'),
+        SnackBar(
+          content: Text(errorMsg),
           backgroundColor: Color(0xFFFF0040),
+          duration: const Duration(seconds: 3),
         ),
       );
       return;
@@ -369,10 +378,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             ),
             onChanged: (value) {
               _concentrationMl = double.tryParse(value);
-              if (_concentrationMl != null && _totalPeptideMg != null) {
-                setState(() {
-                  _bacRequired = _totalPeptideMg;
-                });
+              // Recalculate BAC with proper formula
+              if (_concentrationMl != null && _totalPeptideMg != null && _desiredDosageMg != null) {
+                _calculateReconstition();
               }
             },
           ),
