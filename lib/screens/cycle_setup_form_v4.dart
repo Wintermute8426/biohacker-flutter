@@ -126,12 +126,24 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
     // Default dosage depends on phase type
     double defaultDosage;
     if (phaseType == 'plateau') {
-      // Plateau defaults to DESIRED DOSE
-      defaultDosage = _desiredDosageMg ?? 1.0;
+      // Plateau ALWAYS uses DESIRED DOSE - if not set, require it
+      if (_desiredDosageMg == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Fill in DESIRED DOSAGE first'),
+            backgroundColor: Color(0xFFFF0040),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
+      defaultDosage = _desiredDosageMg!;
     } else {
       // Ramp up/down default to half of desired dose
       defaultDosage = _desiredDosageMg != null ? (_desiredDosageMg! / 2) : 0.5;
     }
+    
+    print('[ADD PHASE] Adding phase: type=$phaseType, dosage=$defaultDosage');
     
     setState(() {
       _phases.add(DosePhase(
@@ -969,21 +981,40 @@ class _PhaseCardState extends State<PhaseCard> {
           Row(
             children: [
               Expanded(
-                child: TextField(
-                  controller: _dosageController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(color: AppColors.primary),
-                  decoration: InputDecoration(
-                    labelText: 'Dosage (mg)',
-                    labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
-                    hintText: '50',
-                    border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  ),
-                  onChanged: (v) {
-                    widget.onUpdate(widget.phase.copyWith(dosage: double.tryParse(v) ?? widget.phase.dosage));
-                  },
-                ),
+                child: widget.phase.type == 'plateau'
+                    ? // Plateau: show desired dose as read-only
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.textMid),
+                        borderRadius: BorderRadius.circular(4),
+                        color: AppColors.surface,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Dosage (mg)', style: TextStyle(color: AppColors.textMid, fontSize: 10)),
+                          const SizedBox(height: 4),
+                          Text('${widget.phase.dosage}mg (Desired)', style: TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    )
+                    : // Ramp up/down: editable
+                    TextField(
+                      controller: _dosageController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: TextStyle(color: AppColors.primary),
+                      decoration: InputDecoration(
+                        labelText: 'Dosage (mg)',
+                        labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
+                        hintText: '50',
+                        border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      ),
+                      onChanged: (v) {
+                        widget.onUpdate(widget.phase.copyWith(dosage: double.tryParse(v) ?? widget.phase.dosage));
+                      },
+                    ),
               ),
               const SizedBox(width: 8),
               Expanded(
