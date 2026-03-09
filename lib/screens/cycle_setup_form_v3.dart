@@ -147,6 +147,8 @@ class _CycleSetupFormV3State extends State<CycleSetupFormV3> {
       isScrollControlled: true,
       builder: (context) => TitrationModal(
         cycleDurationDays: _cycleDurationDays,
+        startDate: _startDate,
+        daysOfWeek: _daysOfWeek,
         onRampUpChanged: (tuple) {
           setState(() {
             _rampUpDays = tuple.$1;
@@ -689,9 +691,11 @@ class _CycleSetupFormV3State extends State<CycleSetupFormV3> {
   }
 }
 
-// TITRATION MODAL
+// TITRATION MODAL - Enhanced with dose preview + flexible phase placement
 class TitrationModal extends StatefulWidget {
   final int? cycleDurationDays;
+  final DateTime? startDate;
+  final List<int>? daysOfWeek;
   final ValueChanged<(int?, double?, double?)> onRampUpChanged;
   final ValueChanged<(int?, double?)> onRampDownChanged;
   final int? initialRampUpDays;
@@ -704,6 +708,8 @@ class TitrationModal extends StatefulWidget {
     required this.cycleDurationDays,
     required this.onRampUpChanged,
     required this.onRampDownChanged,
+    this.startDate,
+    this.daysOfWeek,
     this.initialRampUpDays,
     this.initialRampUpStart,
     this.initialRampUpIncrement,
@@ -719,14 +725,18 @@ class _TitrationModalState extends State<TitrationModal> {
   late int? _rampUpDays;
   late double? _rampUpStartDose;
   late double? _rampUpIncrementPerDay;
+  late int? _rampUpStartDay;
   late int? _rampDownDays;
   late double? _rampDownDecrementPerDay;
+  late int? _rampDownStartDay;
 
   final _rampUpDaysController = TextEditingController();
   final _rampUpStartController = TextEditingController();
   final _rampUpIncrementController = TextEditingController();
+  final _rampUpStartDayController = TextEditingController();
   final _rampDownDaysController = TextEditingController();
   final _rampDownDecrementController = TextEditingController();
+  final _rampDownStartDayController = TextEditingController();
 
   @override
   void initState() {
@@ -734,14 +744,92 @@ class _TitrationModalState extends State<TitrationModal> {
     _rampUpDays = widget.initialRampUpDays;
     _rampUpStartDose = widget.initialRampUpStart;
     _rampUpIncrementPerDay = widget.initialRampUpIncrement;
+    _rampUpStartDay = 1;
     _rampDownDays = widget.initialRampDownDays;
     _rampDownDecrementPerDay = widget.initialRampDownDecrement;
+    _rampDownStartDay = 1;
 
     if (_rampUpDays != null) _rampUpDaysController.text = _rampUpDays.toString();
     if (_rampUpStartDose != null) _rampUpStartController.text = _rampUpStartDose.toString();
     if (_rampUpIncrementPerDay != null) _rampUpIncrementController.text = _rampUpIncrementPerDay.toString();
+    _rampUpStartDayController.text = '1';
     if (_rampDownDays != null) _rampDownDaysController.text = _rampDownDays.toString();
     if (_rampDownDecrementPerDay != null) _rampDownDecrementController.text = _rampDownDecrementPerDay.toString();
+    _rampDownStartDayController.text = '1';
+  }
+
+  List<Map<String, dynamic>> _generateDosePreview() {
+    final doses = <Map<String, dynamic>>[];
+    if (widget.cycleDurationDays == null || widget.startDate == null || widget.daysOfWeek == null) return doses;
+
+    int dayOffset = 0;
+    int injectionCount = 0;
+
+    // Ramp up
+    if (_rampUpStartDose != null && _rampUpIncrementPerDay != null && _rampUpDays != null && _rampUpStartDay != null) {
+      final rampUpStart = (_rampUpStartDay! - 1);
+      for (int i = 0; i < _rampUpDays!; i++) {
+        final actualDay = rampUpStart + i;
+        if (actualDay >= widget.cycleDurationDays!) break;
+        
+        final date = widget.startDate!.add(Duration(days: actualDay));
+        if (widget.daysOfWeek!.contains(date.weekday % 7)) {
+          final dose = _rampUpStartDose! + (_rampUpIncrementPerDay! * injectionCount);
+          doses.add({
+            'date': date,
+            'dose': dose,
+            'phase': 'ramp_up',
+            'dayOfCycle': actualDay + 1,
+          });
+          injectionCount++;
+        }
+      }
+    }
+
+    // Plateau
+    if (_rampUpDays != null && _rampDownDays != null) {
+      final plateauStart = (_rampUpStartDay! - 1) + (_rampUpDays ?? 0);
+      final plateauEnd = (_rampDownStartDay! - 1);
+      final plateauDose = doses.isNotEmpty ? doses.last['dose'] as double : (_rampUpStartDose ?? 0);
+      
+      for (int i = plateauStart; i < plateauEnd && i < widget.cycleDurationDays!; i++) {
+        final date = widget.startDate!.add(Duration(days: i));
+        if (widget.daysOfWeek!.contains(date.weekday % 7)) {
+          doses.add({
+            'date': date,
+            'dose': plateauDose,
+            'phase': 'plateau',
+            'dayOfCycle': i + 1,
+          });
+        }
+      }
+    }
+
+    // Ramp down
+    if (_rampDownDecrementPerDay != null && _rampDownDays != null && _rampDownStartDay != null) {
+      final rampDownStart = (_rampDownStartDay! - 1);
+      double currentDose = doses.isNotEmpty ? (doses.last['dose'] as double) : 0;
+      int rampDownCount = 0;
+      
+      for (int i = 0; i < _rampDownDays!; i++) {
+        final actualDay = rampDownStart + i;
+        if (actualDay >= widget.cycleDurationDays!) break;
+        
+        final date = widget.startDate!.add(Duration(days: actualDay));
+        if (widget.daysOfWeek!.contains(date.weekday % 7)) {
+          currentDose = (currentDose - (_rampDownDecrementPerDay! * rampDownCount)).clamp(0, double.infinity);
+          doses.add({
+            'date': date,
+            'dose': currentDose,
+            'phase': 'ramp_down',
+            'dayOfCycle': actualDay + 1,
+          });
+          rampDownCount++;
+        }
+      }
+    }
+
+    return doses;
   }
 
   void _save() {
@@ -752,6 +840,8 @@ class _TitrationModalState extends State<TitrationModal> {
 
   @override
   Widget build(BuildContext context) {
+    final dosePreview = _generateDosePreview();
+    
     return SingleChildScrollView(
       padding: EdgeInsets.only(
         left: 20,
@@ -772,6 +862,16 @@ class _TitrationModalState extends State<TitrationModal> {
             children: [
               Expanded(
                 child: TextField(
+                  controller: _rampUpStartDayController,
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(color: AppColors.primary),
+                  decoration: InputDecoration(labelText: 'START DAY', labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11), border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)), contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8)),
+                  onChanged: (v) => setState(() => _rampUpStartDay = int.tryParse(v)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
                   controller: _rampUpStartController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   style: TextStyle(color: AppColors.primary),
@@ -779,7 +879,11 @@ class _TitrationModalState extends State<TitrationModal> {
                   onChanged: (v) => setState(() => _rampUpStartDose = double.tryParse(v)),
                 ),
               ),
-              const SizedBox(width: 8),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
               Expanded(
                 child: TextField(
                   controller: _rampUpIncrementController,
@@ -809,6 +913,16 @@ class _TitrationModalState extends State<TitrationModal> {
             children: [
               Expanded(
                 child: TextField(
+                  controller: _rampDownStartDayController,
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(color: AppColors.primary),
+                  decoration: InputDecoration(labelText: 'START DAY', labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11), border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)), contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8)),
+                  onChanged: (v) => setState(() => _rampDownStartDay = int.tryParse(v)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
                   controller: _rampDownDecrementController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   style: TextStyle(color: AppColors.primary),
@@ -816,20 +930,52 @@ class _TitrationModalState extends State<TitrationModal> {
                   onChanged: (v) => setState(() => _rampDownDecrementPerDay = double.tryParse(v)),
                 ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: _rampDownDaysController,
-                  keyboardType: TextInputType.number,
-                  style: TextStyle(color: AppColors.primary),
-                  decoration: InputDecoration(labelText: 'DAYS', labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11), border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)), contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8)),
-                  onChanged: (v) => setState(() => _rampDownDays = int.tryParse(v)),
-                ),
-              ),
             ],
           ),
-
+          const SizedBox(height: 12),
+          TextField(
+            controller: _rampDownDaysController,
+            keyboardType: TextInputType.number,
+            style: TextStyle(color: AppColors.primary),
+            decoration: InputDecoration(labelText: 'DAYS', labelStyle: TextStyle(color: AppColors.textMid, fontSize: 11), border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)), contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8)),
+            onChanged: (v) => setState(() => _rampDownDays = int.tryParse(v)),
+          ),
           const SizedBox(height: 24),
+
+          // Dose preview
+          if (dosePreview.isNotEmpty) ...[
+            Text('DOSE PREVIEW', style: TextStyle(color: AppColors.accent, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(border: Border.all(color: AppColors.accent, width: 0.5), borderRadius: BorderRadius.circular(4)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: dosePreview.take(8).map((dose) {
+                  final date = dose['date'] as DateTime;
+                  final mg = (dose['dose'] as double).toStringAsFixed(1);
+                  final phase = dose['phase'] as String;
+                  final dayOfCycle = dose['dayOfCycle'] as int;
+                  final phaseLabel = phase == 'ramp_up' ? '↗' : phase == 'ramp_down' ? '↘' : '═';
+                  
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('$phaseLabel Day $dayOfCycle', style: TextStyle(color: AppColors.textMid, fontSize: 10)),
+                        Text(DateFormat('MMM d').format(date), style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+                        Text('${mg}mg', style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            if (dosePreview.length > 8)
+              Text('+ ${dosePreview.length - 8} more doses', style: TextStyle(color: AppColors.textMid, fontSize: 10, fontStyle: FontStyle.italic)),
+            const SizedBox(height: 24),
+          ],
 
           SizedBox(
             width: double.infinity,
@@ -850,8 +996,10 @@ class _TitrationModalState extends State<TitrationModal> {
     _rampUpDaysController.dispose();
     _rampUpStartController.dispose();
     _rampUpIncrementController.dispose();
+    _rampUpStartDayController.dispose();
     _rampDownDaysController.dispose();
     _rampDownDecrementController.dispose();
+    _rampDownStartDayController.dispose();
     super.dispose();
   }
 }
