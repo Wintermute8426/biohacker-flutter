@@ -120,7 +120,15 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   void _addPhase(String phaseType) {
-    final defaultDosage = _desiredDosageMg != null ? (_desiredDosageMg! / 2) : 50.0;
+    // Default dosage depends on phase type
+    double defaultDosage;
+    if (phaseType == 'plateau') {
+      // Plateau defaults to DESIRED DOSE
+      defaultDosage = _desiredDosageMg ?? 1.0;
+    } else {
+      // Ramp up/down default to half of desired dose
+      defaultDosage = _desiredDosageMg != null ? (_desiredDosageMg! / 2) : 0.5;
+    }
     
     setState(() {
       _phases.add(DosePhase(
@@ -198,6 +206,13 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       
       final daysDiff = phase.endDate!.difference(phase.startDate!).inDays;
       
+      // Determine dose for this phase
+      double phaseDose = phase.dosage;
+      if (phase.type == 'plateau') {
+        // Plateau uses DESIRED DOSE, not phase dosage
+        phaseDose = _desiredDosageMg ?? phase.dosage;
+      }
+      
       // Generate doses based on phase configuration
       for (int i = 0; i <= daysDiff; i++) {
         final date = phase.startDate!.add(Duration(days: i));
@@ -221,7 +236,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
           doses.add({
             'date': date,
             'dayOffset': dayOffset,
-            'dose': phase.dosage,
+            'dose': phaseDose,
             'phase': phase.type,
             'phaseNumber': _phases.indexOf(phase) + 1,
           });
@@ -239,6 +254,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
         _concentrationMl == null ||
         _cycleDurationWeeks == null ||
         _startDate == null ||
+        _endDate == null ||
         _phases.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -251,22 +267,24 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
 
     final schedule = _generateDoseSchedule();
     final routeShort = _routeMap[_selectedRoute] ?? 'SC';
+    final cycleDays = (_cycleDurationWeeks ?? 0) * 7;
+    final injections = _totalInjections ?? 0;
 
     Navigator.pop(context, {
       'peptideName': _selectedPeptide,
       'route': routeShort,
-      'totalPeptideMg': _totalPeptideMg,
-      'desiredDosageMg': _desiredDosageMg,
-      'concentrationMl': _concentrationMl,
-      'bacRequired': _bacRequired,
+      'totalPeptideMg': _totalPeptideMg ?? 0,
+      'desiredDosageMg': _desiredDosageMg ?? 0,
+      'concentrationMl': _concentrationMl ?? 0,
+      'bacRequired': _bacRequired ?? 0,
       'schedule': schedule,
-      'scheduledTime': _scheduledTime,
+      'scheduledTime': _scheduledTime ?? '08:00',
       'daysOfWeek': _daysOfWeek,
       'startDate': _startDate,
       'endDate': _endDate,
-      'cycleDurationDays': _cycleDurationWeeks! * 7,
-      'injectionFrequency': _injectionFrequency,
-      'totalInjections': _totalInjections,
+      'cycleDurationDays': cycleDays,
+      'injectionFrequency': _injectionFrequency ?? 'Daily',
+      'totalInjections': injections,
       'phases': _phases,
     });
   }
@@ -332,7 +350,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             ),
             onChanged: (value) {
               _desiredDosageMg = double.tryParse(value);
-              _calculateReconstition();
+              if (_totalPeptideMg != null && _concentrationMl != null && _desiredDosageMg != null) {
+                _calculateReconstition();
+              }
             },
           ),
           const SizedBox(height: 12),
