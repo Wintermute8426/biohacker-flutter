@@ -116,19 +116,66 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   void _addPhase(String phaseType) {
-    final defaultStart = _startDate ?? DateTime.now();
-    final defaultEnd = _endDate ?? DateTime.now().add(const Duration(days: 6));
-    
     setState(() {
       _phases.add(DosePhase(
-        type: phaseType, // 'taper_up', 'taper_down', 'plateau'
-        startDate: defaultStart,
-        endDate: defaultEnd,
+        type: phaseType,
+        startDate: _startDate,
+        endDate: _endDate,
         dosage: 50,
         frequency: 'Daily',
         notes: '',
       ));
     });
+    _recalculatePhaseDates();
+  }
+
+  void _recalculatePhaseDates() {
+    if (_startDate == null || _endDate == null || _phases.isEmpty) return;
+
+    final totalDays = _endDate!.difference(_startDate!).inDays + 1;
+    int usedDays = 0;
+
+    for (int i = 0; i < _phases.length; i++) {
+      final phase = _phases[i];
+      
+      if (phase.type == 'taper_up') {
+        // Ramp up: starts at beginning
+        final phaseDays = phase.durationDays > 0 ? phase.durationDays : 7;
+        final newStart = _startDate!;
+        final newEnd = _startDate!.add(Duration(days: phaseDays - 1));
+        _phases[i] = phase.copyWith(startDate: newStart, endDate: newEnd);
+        usedDays += phaseDays;
+      } 
+      else if (phase.type == 'taper_down') {
+        // Ramp down: ends at end
+        final phaseDays = phase.durationDays > 0 ? phase.durationDays : 7;
+        final newEnd = _endDate!;
+        final newStart = _endDate!.subtract(Duration(days: phaseDays - 1));
+        _phases[i] = phase.copyWith(startDate: newStart, endDate: newEnd);
+        usedDays += phaseDays;
+      }
+    }
+
+    // Plateau fills middle
+    for (int i = 0; i < _phases.length; i++) {
+      if (_phases[i].type == 'plateau') {
+        final rampUpEnd = _phases.where((p) => p.type == 'taper_up').isNotEmpty
+            ? _phases.firstWhere((p) => p.type == 'taper_up').endDate
+            : _startDate;
+        final rampDownStart = _phases.where((p) => p.type == 'taper_down').isNotEmpty
+            ? _phases.firstWhere((p) => p.type == 'taper_down').startDate
+            : _endDate;
+
+        if (rampUpEnd != null && rampDownStart != null) {
+          final plateauStart = rampUpEnd.add(const Duration(days: 1));
+          final plateauEnd = rampDownStart.subtract(const Duration(days: 1));
+          
+          if (plateauStart.isBefore(plateauEnd) || plateauStart.isAtSameMomentAs(plateauEnd)) {
+            _phases[i] = _phases[i].copyWith(startDate: plateauStart, endDate: plateauEnd);
+          }
+        }
+      }
+    }
   }
 
   void _removePhase(int index) {
@@ -334,55 +381,93 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   const SizedBox(height: 12),
                   Text('DRAW PER INJECTION', style: TextStyle(color: AppColors.textMid, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                   const SizedBox(height: 8),
+                  // REALISTIC SYRINGE VISUAL
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Syringe plunger
+                      // Plunger (darker, with grip)
                       Container(
-                        width: 20,
-                        height: 60,
+                        width: 14,
+                        height: 70,
                         decoration: BoxDecoration(
-                          color: AppColors.accent.withOpacity(0.6),
-                          border: Border.all(color: AppColors.accent, width: 1),
-                          borderRadius: BorderRadius.circular(3),
+                          color: AppColors.textMid,
+                          border: Border.all(color: AppColors.primary, width: 1),
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                        child: Icon(Icons.arrow_forward, color: AppColors.background, size: 12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              width: 12,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(1), topRight: Radius.circular(1)),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(width: 2),
-                      // Syringe barrel (1ml)
+                      const SizedBox(width: 1),
+                      
+                      // Barrel
                       Expanded(
                         child: Stack(
                           children: [
+                            // Outer barrel border
                             Container(
+                              height: 70,
                               decoration: BoxDecoration(
                                 border: Border.all(color: AppColors.accent, width: 2),
-                                borderRadius: const BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8)),
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(6),
+                                  bottomRight: Radius.circular(6),
+                                ),
                               ),
                             ),
-                            // Fill amount
+                            // Fill (liquid in barrel)
                             Container(
-                              width: ((_concentrationMl ?? 0) / 1.0) * (MediaQuery.of(context).size.width - 120),
+                              height: 70,
+                              width: ((_concentrationMl ?? 0) / 1.0) * (MediaQuery.of(context).size.width - 100),
                               decoration: BoxDecoration(
-                                color: AppColors.accent.withOpacity(0.5),
-                                borderRadius: const BorderRadius.only(topRight: Radius.circular(6), bottomRight: Radius.circular(6)),
+                                color: AppColors.accent.withOpacity(0.4),
+                                borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(4),
+                                  bottomRight: Radius.circular(4),
+                                ),
                               ),
                             ),
-                            // Graduation marks and labels
+                            // Graduation marks
                             Positioned.fill(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
-                                child: Row(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Text('0', style: TextStyle(color: AppColors.textMid, fontSize: 9)),
-                                    Text('${_concentrationMl?.toStringAsFixed(2)}ml', style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
-                                    Text('1ml', style: TextStyle(color: AppColors.textMid, fontSize: 9)),
+                                    Text('0', style: TextStyle(color: AppColors.textMid, fontSize: 8, fontWeight: FontWeight.bold)),
+                                    Text('${_concentrationMl?.toStringAsFixed(3) ?? '0.0'}ml', style: TextStyle(color: AppColors.primary, fontSize: 9, fontWeight: FontWeight.bold)),
+                                    Text('1.0', style: TextStyle(color: AppColors.textMid, fontSize: 8, fontWeight: FontWeight.bold)),
                                   ],
                                 ),
                               ),
                             ),
                           ],
                         ),
+                      ),
+                      
+                      // Needle (thin tip)
+                      Container(
+                        width: 3,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(1.5),
+                        ),
+                      ),
+                      Container(
+                        width: 1,
+                        height: 70,
+                        color: AppColors.primary,
                       ),
                     ],
                   ),
@@ -574,6 +659,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                     cycleStart: _startDate,
                     cycleEnd: _endDate,
                     onUpdate: (phase) => _updatePhase(i, phase),
+                    onDurationChange: _recalculatePhaseDates,
                     onRemove: () => _removePhase(i),
                   ),
                   const SizedBox(height: 12),
@@ -672,6 +758,7 @@ class PhaseCard extends StatefulWidget {
   final DateTime? cycleStart;
   final DateTime? cycleEnd;
   final ValueChanged<DosePhase> onUpdate;
+  final Function? onDurationChange; // Callback to recalculate all phases
   final VoidCallback onRemove;
 
   const PhaseCard({
@@ -681,6 +768,7 @@ class PhaseCard extends StatefulWidget {
     required this.onRemove,
     this.cycleStart,
     this.cycleEnd,
+    this.onDurationChange,
   });
 
   @override
@@ -688,12 +776,14 @@ class PhaseCard extends StatefulWidget {
 }
 
 class _PhaseCardState extends State<PhaseCard> {
+  late TextEditingController _durationController;
   late TextEditingController _dosageController;
   late TextEditingController _notesController;
 
   @override
   void initState() {
     super.initState();
+    _durationController = TextEditingController(text: widget.phase.durationDays.toString());
     _dosageController = TextEditingController(text: widget.phase.dosage.toString());
     _notesController = TextEditingController(text: widget.phase.notes);
   }
@@ -702,6 +792,10 @@ class _PhaseCardState extends State<PhaseCard> {
   Widget build(BuildContext context) {
     final phaseLabel = widget.phase.type == 'taper_up' ? '↗ Taper Up' :
                        widget.phase.type == 'taper_down' ? '↘ Taper Down' : '═ Plateau';
+    
+    final dateRange = widget.phase.startDate != null && widget.phase.endDate != null
+        ? '${DateFormat('MMM d').format(widget.phase.startDate!)} → ${DateFormat('MMM d').format(widget.phase.endDate!)}'
+        : 'Auto-calculated';
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -724,55 +818,60 @@ class _PhaseCardState extends State<PhaseCard> {
           ),
           const SizedBox(height: 12),
           
-          // DATE RANGE
-          Row(
-            children: [
-              Expanded(
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text('START', style: TextStyle(color: AppColors.textMid, fontSize: 10)),
-                  trailing: Text(
-                    widget.phase.startDate != null ? DateFormat('MMM d').format(widget.phase.startDate!) : 'Select',
-                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 11),
-                  ),
-                  onTap: () async {
-                    final start = await showDatePicker(
-                      context: context,
-                      initialDate: widget.phase.startDate ?? widget.cycleStart ?? DateTime.now(),
-                      firstDate: widget.cycleStart ?? DateTime.now(),
-                      lastDate: widget.cycleEnd ?? DateTime.now().add(const Duration(days: 365)),
-                    );
-                    if (start != null) {
-                      widget.onUpdate(widget.phase.copyWith(startDate: start));
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text('END', style: TextStyle(color: AppColors.textMid, fontSize: 10)),
-                  trailing: Text(
-                    widget.phase.endDate != null ? DateFormat('MMM d').format(widget.phase.endDate!) : 'Select',
-                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 11),
-                  ),
-                  onTap: () async {
-                    final end = await showDatePicker(
-                      context: context,
-                      initialDate: widget.phase.endDate ?? widget.cycleEnd ?? DateTime.now(),
-                      firstDate: widget.cycleStart ?? DateTime.now(),
-                      lastDate: widget.cycleEnd ?? DateTime.now().add(const Duration(days: 365)),
-                    );
-                    if (end != null) {
-                      widget.onUpdate(widget.phase.copyWith(endDate: end));
-                    }
-                  },
-                ),
-              ),
-            ],
+          // DATE RANGE (DISPLAY ONLY)
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.textMid, width: 0.5),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Dates:', style: TextStyle(color: AppColors.textMid, fontSize: 11)),
+                Text(dateRange, style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
+
           const SizedBox(height: 12),
+
+          // DURATION (INPUT FOR RAMP UP/DOWN)
+          if (widget.phase.type != 'plateau') ...[
+            TextField(
+              controller: _durationController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(color: AppColors.primary),
+              decoration: InputDecoration(
+                labelText: 'DURATION (days)',
+                labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
+                hintText: '7',
+                border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              ),
+              onChanged: (v) {
+                final newDays = int.tryParse(v);
+                if (newDays != null && newDays > 0) {
+                  // Create a temporary phase with updated dates based on duration
+                  DateTime? newStart = widget.phase.startDate;
+                  DateTime? newEnd = widget.phase.startDate?.add(Duration(days: newDays - 1));
+                  
+                  if (widget.phase.type == 'taper_down' && widget.cycleEnd != null) {
+                    // For ramp down, work backwards from cycle end
+                    newEnd = widget.cycleEnd;
+                    newStart = widget.cycleEnd?.subtract(Duration(days: newDays - 1));
+                  }
+                  
+                  widget.onUpdate(widget.phase.copyWith(startDate: newStart, endDate: newEnd));
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    widget.onDurationChange?.call();
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
 
           // DOSAGE | FREQUENCY
           Row(
@@ -832,12 +931,6 @@ class _PhaseCardState extends State<PhaseCard> {
               widget.onUpdate(widget.phase.copyWith(notes: v));
             },
           ),
-
-          // Duration summary
-          if (widget.phase.startDate != null && widget.phase.endDate != null) ...[
-            const SizedBox(height: 8),
-            Text('Duration: ${widget.phase.durationDays} days', style: TextStyle(color: AppColors.accent, fontSize: 10, fontStyle: FontStyle.italic)),
-          ],
         ],
       ),
     );
@@ -845,6 +938,7 @@ class _PhaseCardState extends State<PhaseCard> {
 
   @override
   void dispose() {
+    _durationController.dispose();
     _dosageController.dispose();
     _notesController.dispose();
     super.dispose();
