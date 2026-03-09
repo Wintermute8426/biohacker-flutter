@@ -332,17 +332,29 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
     // DEBUG: Check form state before generating schedule
     print('[SUBMIT DEBUG] =======================================================');
     print('[SUBMIT DEBUG] desiredDosageMg: $_desiredDosageMg');
+    print('[SUBMIT DEBUG] totalPeptideMg: $_totalPeptideMg');
+    print('[SUBMIT DEBUG] concentrationMl: $_concentrationMl');
     print('[SUBMIT DEBUG] Phases count: ${_phases.length}');
     for (int i = 0; i < _phases.length; i++) {
       final p = _phases[i];
-      print('[SUBMIT DEBUG] Phase $i: type=${p.type}, dosage=${p.dosage}, dates=${p.startDate} to ${p.endDate}, frequency=${p.frequency}');
+      print('[SUBMIT DEBUG] 🔹 Phase $i: type=${p.type}, dosage=${p.dosage}mg, userDefined=${p.userDefinedDurationDays}, dates=${p.startDate?.toString().split(' ')[0]} to ${p.endDate?.toString().split(' ')[0]}, freq=${p.frequency}');
     }
     print('[SUBMIT DEBUG] =======================================================');
     
     final schedule = _generateDoseSchedule();
     print('[SUBMIT DEBUG] Generated schedule with ${schedule.length} doses');
+    print('[SUBMIT DEBUG] Doses by phase:');
+    
+    final rampUpDoses = schedule.where((d) => d['phase'] == 'taper_up').toList();
+    final plateauDoses = schedule.where((d) => d['phase'] == 'plateau').toList();
+    final rampDownDoses = schedule.where((d) => d['phase'] == 'taper_down').toList();
+    
+    print('[SUBMIT DEBUG]   Ramp Up: ${rampUpDoses.length} doses at ${rampUpDoses.isNotEmpty ? rampUpDoses.first['dose'] : 'N/A'}mg');
+    print('[SUBMIT DEBUG]   Plateau: ${plateauDoses.length} doses at ${plateauDoses.isNotEmpty ? plateauDoses.first['dose'] : 'N/A'}mg');
+    print('[SUBMIT DEBUG]   Ramp Down: ${rampDownDoses.length} doses at ${rampDownDoses.isNotEmpty ? rampDownDoses.first['dose'] : 'N/A'}mg');
+    print('[SUBMIT DEBUG] Sample doses:');
     for (final dose in schedule.take(10)) {
-      print('[SUBMIT DEBUG]   Day ${dose['dayOffset']}: ${dose['dose']}mg (phase: ${dose['phase']}, date: ${dose['date']})');
+      print('[SUBMIT DEBUG]   ${dose['dose']}mg (${dose['phase']})');
     }
     print('[SUBMIT DEBUG] =======================================================');
     
