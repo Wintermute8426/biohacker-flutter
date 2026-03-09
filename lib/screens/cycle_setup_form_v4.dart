@@ -188,21 +188,23 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
     // Allocate Ramp Up from START
     if (rampUpIndex >= 0) {
       final phase = _phases[rampUpIndex];
-      final rampUpDays = phase.durationDays > 0 ? phase.durationDays : 7;
+      // Use user-defined duration if set, otherwise default to 7
+      final rampUpDays = phase.userDefinedDurationDays ?? (phase.durationDays > 0 ? phase.durationDays : 7);
       final rampUpStart = cycleStart;
       final rampUpEnd = cycleStart.add(Duration(days: rampUpDays - 1));
       _phases[rampUpIndex] = phase.copyWith(startDate: rampUpStart, endDate: rampUpEnd);
-      print('[RECALC] RampUp: $rampUpStart to $rampUpEnd ($rampUpDays days)');
+      print('[RECALC] RampUp: $rampUpStart to $rampUpEnd ($rampUpDays days) [user-defined: ${phase.userDefinedDurationDays}]');
     }
 
     // Allocate Ramp Down to END
     if (rampDownIndex >= 0) {
       final phase = _phases[rampDownIndex];
-      final rampDownDays = phase.durationDays > 0 ? phase.durationDays : 7;
+      // Use user-defined duration if set, otherwise default to 7
+      final rampDownDays = phase.userDefinedDurationDays ?? (phase.durationDays > 0 ? phase.durationDays : 7);
       final rampDownEnd = cycleEnd;
       final rampDownStart = cycleEnd.subtract(Duration(days: rampDownDays - 1));
       _phases[rampDownIndex] = phase.copyWith(startDate: rampDownStart, endDate: rampDownEnd);
-      print('[RECALC] RampDown: $rampDownStart to $rampDownEnd ($rampDownDays days)');
+      print('[RECALC] RampDown: $rampDownStart to $rampDownEnd ($rampDownDays days) [user-defined: ${phase.userDefinedDurationDays}]');
     }
 
     // Plateau fills middle
@@ -821,6 +823,7 @@ class DosePhase {
   final double dosage;
   final String frequency; // 'Daily', '3x/week', '1x/week'
   final String notes;
+  final int? userDefinedDurationDays; // User-entered duration (for ramp up/down)
 
   DosePhase({
     required this.type,
@@ -829,6 +832,7 @@ class DosePhase {
     required this.dosage,
     required this.frequency,
     required this.notes,
+    this.userDefinedDurationDays,
   });
 
   DosePhase copyWith({
@@ -838,6 +842,7 @@ class DosePhase {
     double? dosage,
     String? frequency,
     String? notes,
+    int? userDefinedDurationDays,
   }) {
     return DosePhase(
       type: type ?? this.type,
@@ -846,6 +851,7 @@ class DosePhase {
       dosage: dosage ?? this.dosage,
       frequency: frequency ?? this.frequency,
       notes: notes ?? this.notes,
+      userDefinedDurationDays: userDefinedDurationDays ?? this.userDefinedDurationDays,
     );
   }
 
@@ -887,7 +893,9 @@ class _PhaseCardState extends State<PhaseCard> {
   @override
   void initState() {
     super.initState();
-    _durationController = TextEditingController(text: widget.phase.durationDays.toString());
+    // Show user-defined duration if set, otherwise show calculated duration
+    final displayDuration = widget.phase.userDefinedDurationDays ?? widget.phase.durationDays;
+    _durationController = TextEditingController(text: displayDuration.toString());
     _dosageController = TextEditingController(text: widget.phase.dosage.toString());
     _notesController = TextEditingController(text: widget.phase.notes);
   }
@@ -957,17 +965,8 @@ class _PhaseCardState extends State<PhaseCard> {
               onChanged: (v) {
                 final newDays = int.tryParse(v);
                 if (newDays != null && newDays > 0) {
-                  // Create a temporary phase with updated dates based on duration
-                  DateTime? newStart = widget.phase.startDate;
-                  DateTime? newEnd = widget.phase.startDate?.add(Duration(days: newDays - 1));
-                  
-                  if (widget.phase.type == 'taper_down' && widget.cycleEnd != null) {
-                    // For ramp down, work backwards from cycle end
-                    newEnd = widget.cycleEnd;
-                    newStart = widget.cycleEnd?.subtract(Duration(days: newDays - 1));
-                  }
-                  
-                  widget.onUpdate(widget.phase.copyWith(startDate: newStart, endDate: newEnd));
+                  // Store the user-defined duration and update callback
+                  widget.onUpdate(widget.phase.copyWith(userDefinedDurationDays: newDays));
                   Future.delayed(const Duration(milliseconds: 100), () {
                     widget.onDurationChange?.call();
                   });
