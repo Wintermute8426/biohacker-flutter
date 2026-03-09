@@ -123,27 +123,20 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   void _addPhase(String phaseType) {
+    // If desired dosage not set, use 1.0 as default
+    final desiredDose = _desiredDosageMg ?? 1.0;
+    
     // Default dosage depends on phase type
     double defaultDosage;
     if (phaseType == 'plateau') {
-      // Plateau ALWAYS uses DESIRED DOSE - if not set, require it
-      if (_desiredDosageMg == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Fill in DESIRED DOSAGE first'),
-            backgroundColor: Color(0xFFFF0040),
-            duration: Duration(seconds: 3),
-          ),
-        );
-        return;
-      }
-      defaultDosage = _desiredDosageMg!;
+      // Plateau ALWAYS uses DESIRED DOSE
+      defaultDosage = desiredDose;
     } else {
       // Ramp up/down default to half of desired dose
-      defaultDosage = _desiredDosageMg != null ? (_desiredDosageMg! / 2) : 0.5;
+      defaultDosage = desiredDose / 2;
     }
     
-    print('[ADD PHASE] Adding phase: type=$phaseType, dosage=$defaultDosage');
+    print('[ADD PHASE] Adding phase: type=$phaseType, dosage=$defaultDosage, desired=$desiredDose');
     
     setState(() {
       _phases.add(DosePhase(
