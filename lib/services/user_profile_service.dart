@@ -4,6 +4,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // Models
 class UserProfile {
   final String userId;
+  // Tier 1 fields (Profile Screen)
+  final String? username;
+  final int? age;
+  final String? gender; // 'male', 'female', 'other', 'prefer_not_to_say'
+  final int? heightCm;
+  final String? allergies;
+  final List<String> medicalConditions; // ['diabetes', 'hypertension', ...]
+  // Existing fields (Onboarding)
   final String experienceLevel; // beginner, intermediate, advanced
   final List<String> healthGoals; // muscle, recovery, longevity, metabolic, sleep, immune
   final double? baselineWeight;
@@ -15,6 +23,12 @@ class UserProfile {
 
   UserProfile({
     required this.userId,
+    this.username,
+    this.age,
+    this.gender,
+    this.heightCm,
+    this.allergies,
+    this.medicalConditions = const [],
     required this.experienceLevel,
     required this.healthGoals,
     this.baselineWeight,
@@ -28,6 +42,14 @@ class UserProfile {
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
       userId: json['id'] ?? '',
+      username: json['username'],
+      age: json['age'],
+      gender: json['gender'],
+      heightCm: json['height_cm'],
+      allergies: json['allergies'],
+      medicalConditions: json['medical_conditions'] != null
+          ? List<String>.from(json['medical_conditions'])
+          : [],
       experienceLevel: json['experience_level'] ?? 'beginner',
       healthGoals: List<String>.from(json['health_goals'] ?? []),
       baselineWeight: json['baseline_weight']?.toDouble(),
@@ -44,6 +66,12 @@ class UserProfile {
   Map<String, dynamic> toJson() {
     return {
       'id': userId,
+      'username': username,
+      'age': age,
+      'gender': gender,
+      'height_cm': heightCm,
+      'allergies': allergies,
+      'medical_conditions': medicalConditions,
       'experience_level': experienceLevel,
       'health_goals': healthGoals,
       'baseline_weight': baselineWeight,
@@ -56,6 +84,12 @@ class UserProfile {
   }
 
   UserProfile copyWith({
+    String? username,
+    int? age,
+    String? gender,
+    int? heightCm,
+    String? allergies,
+    List<String>? medicalConditions,
     String? experienceLevel,
     List<String>? healthGoals,
     double? baselineWeight,
@@ -67,6 +101,12 @@ class UserProfile {
   }) {
     return UserProfile(
       userId: userId,
+      username: username ?? this.username,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
+      heightCm: heightCm ?? this.heightCm,
+      allergies: allergies ?? this.allergies,
+      medicalConditions: medicalConditions ?? this.medicalConditions,
       experienceLevel: experienceLevel ?? this.experienceLevel,
       healthGoals: healthGoals ?? this.healthGoals,
       baselineWeight: baselineWeight ?? this.baselineWeight,
@@ -130,6 +170,12 @@ class UserProfileService {
 
   // Update user profile (during onboarding)
   Future<UserProfile?> updateUserProfile(String userId, {
+    String? username,
+    int? age,
+    String? gender,
+    int? heightCm,
+    String? allergies,
+    List<String>? medicalConditions,
     String? experienceLevel,
     List<String>? healthGoals,
     double? baselineWeight,
@@ -141,6 +187,15 @@ class UserProfileService {
     try {
       final updates = <String, dynamic>{};
       
+      // NEW: Profile screen fields
+      if (username != null) updates['username'] = username;
+      if (age != null) updates['age'] = age;
+      if (gender != null) updates['gender'] = gender;
+      if (heightCm != null) updates['height_cm'] = heightCm;
+      if (allergies != null) updates['allergies'] = allergies;
+      if (medicalConditions != null) updates['medical_conditions'] = medicalConditions;
+      
+      // EXISTING: Onboarding fields
       if (experienceLevel != null) updates['experience_level'] = experienceLevel;
       if (healthGoals != null) updates['health_goals'] = healthGoals;
       if (baselineWeight != null) updates['baseline_weight'] = baselineWeight;
@@ -178,6 +233,42 @@ class UserProfileService {
       print('[UserProfile] ERROR updating user profile: $e');
       print('[UserProfile] Stack trace: ${StackTrace.current}');
       rethrow; // Let caller handle the error
+    }
+  }
+
+  // Get latest weight for profile display
+  Future<String> getLatestWeight(String userId) async {
+    try {
+      final response = await _supabase
+          .from('weight_logs')
+          .select('weight_kg, logged_at')
+          .eq('user_id', userId)
+          .order('logged_at', ascending: false)
+          .limit(1)
+          .maybeSingle();
+
+      if (response == null) {
+        return 'No weight logged yet';
+      }
+
+      final weightKg = (response['weight_kg'] as num).toDouble();
+      final loggedAt = DateTime.parse(response['logged_at']);
+      final now = DateTime.now();
+      final difference = now.difference(loggedAt);
+
+      String timeAgo;
+      if (difference.inMinutes < 60) {
+        timeAgo = '${difference.inMinutes} minutes ago';
+      } else if (difference.inHours < 24) {
+        timeAgo = '${difference.inHours} hours ago';
+      } else {
+        timeAgo = '${difference.inDays} days ago';
+      }
+
+      return '$weightKg kg (logged $timeAgo)';
+    } catch (e) {
+      print('Error fetching latest weight: $e');
+      return 'Error loading weight';
     }
   }
 

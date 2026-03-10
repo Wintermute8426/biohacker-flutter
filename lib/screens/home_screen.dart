@@ -13,6 +13,7 @@ import 'labs_screen.dart';
 import 'reports_screen.dart';
 import 'calendar_screen.dart';
 import 'settings_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -57,7 +58,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             title: const Text('Profile'),
             onTap: () {
               Navigator.pop(context);
-              // Navigate to profile
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
             },
           ),
           ListTile(
