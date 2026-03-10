@@ -1739,7 +1739,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
             'cycle_id': createdCycle.id,
             'dose_amount': doseAmount,
             'logged_at': doseDateTime.toIso8601String(),
-            'status': 'SCHEDULED',
             'notes': 'Phase: $phase',
           };
           print('[DEBUG UNIFIED]   Data: $insertData');

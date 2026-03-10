@@ -105,7 +105,6 @@ class DoseLogsService {
             'cycle_id': cycleId,
             'dose_amount': doseAmount,
             'logged_at': loggedAt.toIso8601String(),
-            'status': 'SCHEDULED',
           };
           
           if (scheduleId.isNotEmpty) data['schedule_id'] = scheduleId;
