@@ -147,6 +147,23 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
         frequency: 'Daily',
         notes: '',
       ));
+      
+      // AUTO-ADD PLATEAU: If both ramp_up and ramp_down exist, auto-add plateau in between
+      final hasRampUp = _phases.any((p) => p.type == 'taper_up');
+      final hasRampDown = _phases.any((p) => p.type == 'taper_down');
+      final hasPlateau = _phases.any((p) => p.type == 'plateau');
+      
+      if (hasRampUp && hasRampDown && !hasPlateau) {
+        print('[AUTO PLATEAU] Both ramp phases detected - auto-adding plateau');
+        _phases.add(DosePhase(
+          type: 'plateau',
+          startDate: _startDate,
+          endDate: _endDate,
+          dosage: desiredDose, // Plateau always at FULL desired dose
+          frequency: 'Daily',
+          notes: '',
+        ));
+      }
     });
     _recalculatePhaseDates();
   }
