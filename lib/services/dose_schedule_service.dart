@@ -194,7 +194,7 @@ class DoseScheduleService {
       // Create a map of dose_logs by schedule_id + logged_at date for quick lookup
       final doseLogMap = <String, Map<String, dynamic>>{};
       for (final log in doseLogs as List) {
-        final scheduleId = log['dose_schedule_id'] as String? ?? '';
+        final scheduleId = log['schedule_id'] as String? ?? '';  // Changed from dose_schedule_id
         final doseAmount = log['dose_amount'] as num? ?? 0;
         final loggedAt = DateTime.parse(log['logged_at'] as String);
         final logDateKey = '${scheduleId}_${loggedAt.year}-${loggedAt.month.toString().padLeft(2, '0')}-${loggedAt.day.toString().padLeft(2, '0')}';
