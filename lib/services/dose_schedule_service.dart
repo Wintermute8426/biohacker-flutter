@@ -220,12 +220,15 @@ class DoseScheduleService {
 
             final doseLogId = doseLog?['id'] as String? ?? '';
             final status = doseLog?['status'] as String? ?? 'SCHEDULED';
+            
+            // Use dose_log's dose_amount if available (varies by phase), otherwise use schedule default
+            final doseAmount = (doseLog?['dose_amount'] as num?)?.toDouble() ?? schedule.doseAmount;
 
             instances.add(DoseInstance(
               date: date,
               time: schedule.scheduledTime,
               peptideName: schedule.peptideName,
-              doseAmount: schedule.doseAmount,
+              doseAmount: doseAmount,
               route: schedule.route,
               scheduleId: schedule.id,
               cycleId: schedule.cycleId,
