@@ -267,6 +267,109 @@ class DoseScheduleService {
     }
   }
 
+  // ===== BUILD #280: OPTIMIZED WEEK-BASED QUERIES =====
+  
+  // Get doses for a specific week (7-day range)
+  // Much faster than getUpcomingDoses for single week view
+  Future<List<DoseInstance>> getWeekDoses(
+    String userId, {
+    DateTime? weekStart,
+    String? cycleId,
+  }) async {
+    try {
+      final start = weekStart ?? _getWeekStart(DateTime.now());
+      final end = start.add(const Duration(days: 7));
+
+      print('[SERVICE] Fetching week doses: ${start.toString().split(' ')[0]} to ${end.toString().split(' ')[0]}');
+
+      // Fetch dose_logs for the week (indexed query, should be <100ms)
+      var query = _supabase
+          .from('dose_logs')
+          .select()
+          .eq('user_id', userId)
+          .gte('logged_at', start.toIso8601String())
+          .lt('logged_at', end.toIso8601String());
+
+      if (cycleId != null && cycleId.isNotEmpty) {
+        query = query.eq('cycle_id', cycleId);
+      }
+
+      final doseLogs = await query.order('logged_at', ascending: true);
+
+      print('[SERVICE] Fetched ${(doseLogs as List).length} dose_logs for week');
+
+      // Build map for quick lookup
+      final doseLogMap = <String, Map<String, dynamic>>{};
+      for (final log in doseLogs as List) {
+        final cycleIdKey = log['cycle_id'] as String? ?? '';
+        final loggedAt = DateTime.parse(log['logged_at'] as String);
+        final logDateKey = '${cycleIdKey}_${loggedAt.year}-${loggedAt.month.toString().padLeft(2, '0')}-${loggedAt.day.toString().padLeft(2, '0')}';
+        doseLogMap[logDateKey] = log as Map<String, dynamic>;
+      }
+
+      // Get all schedules for user (needed for frequency info)
+      final schedules = await getDoseSchedules(userId);
+      final instances = <DoseInstance>[];
+
+      // Generate instances for each schedule, day, and frequency
+      for (final schedule in schedules) {
+        if (cycleId != null && schedule.cycleId != cycleId) continue;
+        if (schedule.endDate != null && start.isAfter(schedule.endDate!)) continue;
+
+        for (int i = 0; i < 7; i++) {
+          final date = start.add(Duration(days: i));
+
+          // Check if this day matches frequency
+          final dayOfWeek = date.weekday;
+          final adjustedDayOfWeek = dayOfWeek == 7 ? 0 : dayOfWeek;
+
+          if (schedule.daysOfWeek.contains(adjustedDayOfWeek)) {
+            // Look up the actual dose from dose_logs
+            final logDateKey = '${schedule.cycleId}_${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+            final doseLog = doseLogMap[logDateKey];
+
+            final doseLogId = doseLog?['id'] as String? ?? '';
+            final status = doseLog?['status'] as String? ?? 'SCHEDULED';
+            final doseAmount = (doseLog?['dose_amount'] as num?)?.toDouble() ?? schedule.doseAmount;
+
+            instances.add(DoseInstance(
+              date: date,
+              time: schedule.scheduledTime,
+              peptideName: schedule.peptideName,
+              doseAmount: doseAmount,
+              route: schedule.route,
+              scheduleId: schedule.id,
+              cycleId: schedule.cycleId,
+              isLogged: status != 'SCHEDULED',
+              doseLogId: doseLogId,
+              status: status,
+            ));
+          }
+        }
+      }
+
+      // Sort by date + time
+      instances.sort((a, b) {
+        final aDateTime = DateTime(a.date.year, a.date.month, a.date.day);
+        final bDateTime = DateTime(b.date.year, b.date.month, b.date.day);
+        if (aDateTime != bDateTime) return aDateTime.compareTo(bDateTime);
+        return a.time.compareTo(b.time);
+      });
+
+      return instances;
+    } catch (e) {
+      print('[SERVICE ERROR] Error getting week doses: $e');
+      return [];
+    }
+  }
+
+  // Helper: Get Monday of week
+  DateTime _getWeekStart(DateTime date) {
+    final weekday = date.weekday;
+    return DateTime(date.year, date.month, date.day)
+        .subtract(Duration(days: weekday - 1));
+  }
+
   // Update dose schedule
   Future<DoseSchedule?> updateDoseSchedule(
     String scheduleId, {
