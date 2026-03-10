@@ -1732,8 +1732,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
         final doseDateTime = DateTime(actualDoseDate.year, actualDoseDate.month, actualDoseDate.day, hour, minute);
 
         // Insert into dose_logs
+        print('[DEBUG UNIFIED] Inserting dose_log: amount=${doseAmount}mg, date=$doseDateTime, phase=$phase');
         try {
-          final doseLog = await Supabase.instance.client.from('dose_logs').insert({
+          final insertData = {
             'user_id': userId,
             'cycle_id': createdCycle.id,
             'dose_schedule_id': masterSchedule!.id,
@@ -1743,12 +1744,17 @@ class _CyclesScreenState extends State<CyclesScreen> {
             'logged_at': doseDateTime.toIso8601String(),
             'status': 'SCHEDULED',
             'notes': 'Phase: $phase',
-          }).select().single();
+          };
+          print('[DEBUG UNIFIED]   Data: $insertData');
+          
+          final doseLog = await Supabase.instance.client.from('dose_logs').insert(insertData).select().single();
 
           createdDoseLogs++;
-          print('[DEBUG UNIFIED] Created dose_log for day $dayOffset: ${doseAmount}mg (phase: $phase)');
-        } catch (e) {
-          print('[DEBUG UNIFIED] Error creating dose_log for day $dayOffset: $e');
+          print('[DEBUG UNIFIED] ✓ Created dose_log: ${doseLog['id']} for ${doseAmount}mg (phase: $phase)');
+        } catch (e, stackTrace) {
+          print('[DEBUG UNIFIED] ✗ FAILED to create dose_log for day $dayOffset: $e');
+          print('[DEBUG UNIFIED]   Stack: $stackTrace');
+          rethrow; // Re-throw so outer catch sees it
         }
       }
       }
