@@ -191,13 +191,13 @@ class DoseScheduleService {
 
       print('[DEBUG CALENDAR] Fetched ${(doseLogs as List).length} dose_logs');
       
-      // Create a map of dose_logs by schedule_id + logged_at date for quick lookup
+      // Create a map of dose_logs by cycle_id + logged_at date for quick lookup
       final doseLogMap = <String, Map<String, dynamic>>{};
       for (final log in doseLogs as List) {
-        final scheduleId = log['schedule_id'] as String? ?? '';  // Changed from dose_schedule_id
+        final cycleId = log['cycle_id'] as String? ?? '';
         final doseAmount = log['dose_amount'] as num? ?? 0;
         final loggedAt = DateTime.parse(log['logged_at'] as String);
-        final logDateKey = '${scheduleId}_${loggedAt.year}-${loggedAt.month.toString().padLeft(2, '0')}-${loggedAt.day.toString().padLeft(2, '0')}';
+        final logDateKey = '${cycleId}_${loggedAt.year}-${loggedAt.month.toString().padLeft(2, '0')}-${loggedAt.day.toString().padLeft(2, '0')}';
         print('[DEBUG CALENDAR]   Dose: $logDateKey = ${doseAmount}mg');
         doseLogMap[logDateKey] = log as Map<String, dynamic>;
       }
@@ -220,8 +220,8 @@ class DoseScheduleService {
           final adjustedDayOfWeek = dayOfWeek == 7 ? 0 : dayOfWeek; // Convert to 0=Sunday
 
           if (schedule.daysOfWeek.contains(adjustedDayOfWeek)) {
-            // Look up dose_log for this schedule + date
-            final logDateKey = '${schedule.id}_${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+            // Look up dose_log for this cycle + date (use cycleId not scheduleId)
+            final logDateKey = '${schedule.cycleId}_${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
             final doseLog = doseLogMap[logDateKey];
 
             final doseLogId = doseLog?['id'] as String? ?? '';

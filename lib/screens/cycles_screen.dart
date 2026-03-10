@@ -1737,9 +1737,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
           final insertData = {
             'user_id': userId,
             'cycle_id': createdCycle.id,
-            'schedule_id': masterSchedule!.id,
             'dose_amount': doseAmount,
-            'route': route ?? 'SC',
             'logged_at': doseDateTime.toIso8601String(),
             'status': 'SCHEDULED',
             'notes': 'Phase: $phase',
