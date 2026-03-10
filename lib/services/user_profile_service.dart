@@ -12,6 +12,12 @@ class UserProfile {
   final int? heightInches; // 0-11 inches
   final String? allergies;
   final List<String> medicalConditions; // ['diabetes', 'hypertension', ...]
+  // Tier 3 fields (Profile Preferences)
+  final Map<String, dynamic>? notificationPreferences; // {email: true, push: false, sms: false}
+  final List<String> healthGoalsList; // ['longevity', 'recovery', 'hormone_optimization', ...]
+  final String? unitsPreference; // 'metric' or 'imperial'
+  final String? contactMethod; // 'email', 'phone', 'push'
+  final String? bio; // optional bio text (max 200 chars)
   // Existing fields (Onboarding)
   final String experienceLevel; // beginner, intermediate, advanced
   final List<String> healthGoals; // muscle, recovery, longevity, metabolic, sleep, immune
@@ -31,6 +37,11 @@ class UserProfile {
     this.heightInches,
     this.allergies,
     this.medicalConditions = const [],
+    this.notificationPreferences,
+    this.healthGoalsList = const [],
+    this.unitsPreference,
+    this.contactMethod,
+    this.bio,
     required this.experienceLevel,
     required this.healthGoals,
     this.baselineWeight,
@@ -65,6 +76,13 @@ class UserProfile {
       medicalConditions: json['medical_conditions'] != null
           ? List<String>.from(json['medical_conditions'])
           : [],
+      notificationPreferences: json['notification_preferences'],
+      healthGoalsList: json['health_goals_list'] != null
+          ? List<String>.from(json['health_goals_list'])
+          : [],
+      unitsPreference: json['units_preference'],
+      contactMethod: json['contact_method'],
+      bio: json['bio'],
       experienceLevel: json['experience_level'] ?? 'beginner',
       healthGoals: List<String>.from(json['health_goals'] ?? []),
       baselineWeight: json['baseline_weight']?.toDouble(),
@@ -88,6 +106,11 @@ class UserProfile {
       'height_inches': heightInches,
       'allergies': allergies,
       'medical_conditions': medicalConditions,
+      'notification_preferences': notificationPreferences,
+      'health_goals_list': healthGoalsList,
+      'units_preference': unitsPreference,
+      'contact_method': contactMethod,
+      'bio': bio,
       'experience_level': experienceLevel,
       'health_goals': healthGoals,
       'baseline_weight': baselineWeight,
@@ -107,6 +130,11 @@ class UserProfile {
     int? heightInches,
     String? allergies,
     List<String>? medicalConditions,
+    Map<String, dynamic>? notificationPreferences,
+    List<String>? healthGoalsList,
+    String? unitsPreference,
+    String? contactMethod,
+    String? bio,
     String? experienceLevel,
     List<String>? healthGoals,
     double? baselineWeight,
@@ -125,6 +153,11 @@ class UserProfile {
       heightInches: heightInches ?? this.heightInches,
       allergies: allergies ?? this.allergies,
       medicalConditions: medicalConditions ?? this.medicalConditions,
+      notificationPreferences: notificationPreferences ?? this.notificationPreferences,
+      healthGoalsList: healthGoalsList ?? this.healthGoalsList,
+      unitsPreference: unitsPreference ?? this.unitsPreference,
+      contactMethod: contactMethod ?? this.contactMethod,
+      bio: bio ?? this.bio,
       experienceLevel: experienceLevel ?? this.experienceLevel,
       healthGoals: healthGoals ?? this.healthGoals,
       baselineWeight: baselineWeight ?? this.baselineWeight,
@@ -195,6 +228,11 @@ class UserProfileService {
     int? heightInches,
     String? allergies,
     List<String>? medicalConditions,
+    Map<String, dynamic>? notificationPreferences,
+    List<String>? healthGoalsList,
+    String? unitsPreference,
+    String? contactMethod,
+    String? bio,
     String? experienceLevel,
     List<String>? healthGoals,
     double? baselineWeight,
@@ -206,7 +244,7 @@ class UserProfileService {
     try {
       final updates = <String, dynamic>{};
       
-      // NEW: Profile screen fields
+      // NEW: Profile screen fields (Tier 1)
       if (username != null) updates['username'] = username;
       if (age != null) updates['age'] = age;
       if (gender != null) updates['gender'] = gender;
@@ -214,6 +252,13 @@ class UserProfileService {
       if (heightInches != null) updates['height_inches'] = heightInches;
       if (allergies != null) updates['allergies'] = allergies;
       if (medicalConditions != null) updates['medical_conditions'] = medicalConditions;
+      
+      // NEW: Profile preferences (Tier 3)
+      if (notificationPreferences != null) updates['notification_preferences'] = notificationPreferences;
+      if (healthGoalsList != null) updates['health_goals_list'] = healthGoalsList;
+      if (unitsPreference != null) updates['units_preference'] = unitsPreference;
+      if (contactMethod != null) updates['contact_method'] = contactMethod;
+      if (bio != null) updates['bio'] = bio;
       
       // EXISTING: Onboarding fields
       if (experienceLevel != null) updates['experience_level'] = experienceLevel;

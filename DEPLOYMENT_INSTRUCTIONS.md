@@ -1,242 +1,163 @@
-# Deployment Instructions - Phase 7
+# 🚀 Deployment Instructions - Profile Fix + Imperial Height
 
-## Quick Start
+**Status:** ✅ Code complete, awaiting deployment  
+**Commit:** `b631df6` - fix: Profile save + convert height to imperial (feet/inches)  
+**Date:** March 10, 2026
 
-### 1. Push to GitHub (Auto-builds APK)
+---
+
+## ⚡ Quick Deploy (5 minutes)
+
+### Step 1: Apply Database Migration
+1. Open Supabase SQL Editor: https://supabase.com/dashboard
+2. Navigate to: SQL Editor → New Query
+3. Copy contents of `DATABASE_MIGRATION_IMPERIAL.sql`
+4. Paste and click **Run**
+5. Verify success:
+   ```sql
+   SELECT column_name FROM information_schema.columns 
+   WHERE table_name = 'user_profiles' 
+   AND column_name IN ('height_feet', 'height_inches');
+   ```
+   Expected: 2 rows returned
+
+### Step 2: Deploy Flutter App
 ```bash
-git add -A
-git commit -m "Phase 7: Reports + Calendar tabs with analytics and sparklines"
-git push origin main
-```
+cd biohacker-flutter
 
-### 2. Download APK
-- Go to: https://github.com/Wintermute8426/biohacker-flutter/actions
-- Click latest workflow run
-- Scroll to "Artifacts" section
-- Download `biohacker-apk-arm64`
-- Extract `app-arm64-v8a-release.apk`
-
-### 3. Install on Device
-**Via Tailscale:**
-```bash
-# Copy to device (IP: 100.71.64.116)
-adb connect 100.71.64.116
-adb install -r app-arm64-v8a-release.apk
-```
-
-**Or:** Transfer via file share and install directly on phone
-
----
-
-## Seeding Mock Data (If needed)
-
-### Option 1: Via Supabase Dashboard
-1. Login to Supabase: https://supabase.com/dashboard
-2. Navigate to SQL Editor
-3. Paste contents of `lib/migrations/seed_mock_data_2025.sql`
-4. Run the script
-5. Verify with:
-```sql
-SELECT COUNT(*) FROM cycles WHERE user_id = (SELECT id FROM auth.users LIMIT 1);
--- Should return 6
-```
-
-### Option 2: Via Flutter App (Future)
-1. Add migration runner in app
-2. Execute seed script on first launch
-3. Check `SharedPreferences` for `seeded_2025` flag
-
----
-
-## API Key Setup (AI Insights)
-
-### Update Claude API Key
-1. Get key from: https://console.anthropic.com/
-2. Open `lib/screens/reports_screen.dart`
-3. Update line 62:
-```dart
-'x-api-key': 'sk-ant-api03-YOUR_ACTUAL_API_KEY',
-```
-
-### Or: Move to Environment Variable
-1. Create `.env` file:
-```env
-CLAUDE_API_KEY=sk-ant-api03-...
-```
-2. Add to `pubspec.yaml`:
-```yaml
-dependencies:
-  flutter_dotenv: ^5.0.2
-```
-3. Update code:
-```dart
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-// Load .env
-await dotenv.load();
-
-// Use in API call
-'x-api-key': dotenv.env['CLAUDE_API_KEY']!,
-```
-
----
-
-## Testing Checklist
-
-### Reports Tab
-- [ ] Dose Timeline renders with multi-colored lines
-- [ ] Side Effects Heatmap clickable
-- [ ] Weight Trends shows trend line (dashed cyan)
-- [ ] Cycle-Lab Correlation cards display biomarkers
-- [ ] Effectiveness Ratings bar chart works
-- [ ] AI Insights button triggers Claude analysis
-
-### Calendar Tab
-- [ ] Month view displays all events
-- [ ] Week view toggle works (icon switches)
-- [ ] Weight sparklines visible in cells (when data exists)
-- [ ] Day tap shows detailed modal
-- [ ] Filters toggle (cycles, protocols, labs, weight)
-- [ ] Today button navigates to current date
-
-### Performance
-- [ ] No lag on scroll (ListView with ~30-50 widgets)
-- [ ] Chart rendering <300ms
-- [ ] API calls timeout gracefully (network errors)
-
----
-
-## Troubleshooting
-
-### Issue: APK Build Fails
-**Solution:**
-```bash
-# Clean build cache
+# Clean build
 flutter clean
 flutter pub get
-flutter build apk --release
-```
 
-### Issue: Charts Not Rendering
-**Symptom:** White boxes instead of charts  
-**Solution:** Check data loading logs
-```dart
-print('Dose timeline loaded: ${_doseTimeline.length} items');
-```
-
-### Issue: Sparklines Missing
-**Symptom:** Only scale icon, no line  
-**Solution:** Need at least 2 weight data points within 7 days
-
-### Issue: AI Insights Fail
-**Symptom:** "Failed to generate AI insights"  
-**Solution:**
-1. Check API key validity
-2. Verify network connection
-3. Check Claude API status: https://status.anthropic.com/
-
----
-
-## Build Configuration
-
-### GitHub Actions Workflow
-`.github/workflows/build.yml`
-
-**Triggers:**
-- Push to `main` branch
-- Manual workflow dispatch
-
-**Outputs:**
-- `biohacker-apk-arm64` (arm64-v8a APK)
-- `biohacker-apk-all-variants` (all ABIs)
-
-**Retention:** 30 days
-
----
-
-## File Structure
-
-```
-lib/
-├── screens/
-│   ├── reports_screen.dart          (6 analytics sections)
-│   ├── calendar_screen.dart          (month + week view)
-│   ├── reports_screen_backup.dart    (original)
-│   └── calendar_screen_backup.dart   (original)
-├── services/
-│   ├── reports_service.dart          (data fetching)
-│   └── calendar_service.dart         (event aggregation)
-├── theme/
-│   └── colors.dart                   (cyberpunk palette)
-└── migrations/
-    └── seed_mock_data_2025.sql       (comprehensive seed data)
-```
-
----
-
-## Development Workflow
-
-### Local Testing
-```bash
-# Hot reload during development
-flutter run
-
-# Build release APK locally
+# Build APK
 flutter build apk --release
 
-# Install on connected device
-flutter install
+# Or run on device for testing
+flutter run --release
 ```
 
-### Remote Testing (Tailscale)
-```bash
-# Connect via Tailscale
-adb connect 100.71.64.116
+### Step 3: Test
+1. Open Profile screen
+2. Fill height: `5` feet `11` inches
+3. Click "Save Profile"
+4. ✅ Success message should appear
+5. Navigate away and back → height should persist
 
-# Deploy
-flutter install
+---
 
-# View logs
-adb logcat -s flutter
+## 🔍 What Was Fixed
+
+### Problem #1: Profile Save Not Working
+**Root Cause:** Database columns didn't exist (migration never applied)  
+**Solution:** Created `DATABASE_MIGRATION_IMPERIAL.sql` with all required columns  
+**Evidence:** Console logs now show detailed error messages
+
+### Problem #2: Height in Centimeters
+**Root Cause:** U.S. users expect feet/inches, not cm  
+**Solution:** Two input fields (feet 0-9, inches 0-11) with live preview  
+**Example:** "Height: 5'11\""
+
+---
+
+## 📋 Pre-Deployment Checklist
+
+- [x] Database migration script created (`DATABASE_MIGRATION_IMPERIAL.sql`)
+- [x] Flutter code updated (profile_screen.dart, user_profile_service.dart)
+- [x] Enhanced logging added (debug mode)
+- [x] Error handling improved (specific error messages)
+- [x] Git commit created (`b631df6`)
+- [x] Documentation written (PROFILE_FIX_SUMMARY.md)
+- [ ] **Database migration applied to Supabase** ⬅️ DO THIS FIRST
+- [ ] Flutter app rebuilt (flutter build apk)
+- [ ] Manual testing on device
+- [ ] Verify height displays correctly ("5'11\"")
+- [ ] Verify save works (success message)
+
+---
+
+## 🧪 Testing Scenarios
+
+| Test | Expected Result | Pass/Fail |
+|------|-----------------|-----------|
+| Save profile with height 5'11" | Success message, data persists | ⏳ |
+| Navigate away and back | Height shows "5'11\"" | ⏳ |
+| Try feet = 10 | Error: "3-7" | ⏳ |
+| Try inches = 12 | Error: "0-11" | ⏳ |
+| Duplicate username | Error: "Username already taken" | ⏳ |
+| Empty username | Error: "Username is required" | ⏳ |
+
+---
+
+## 🐛 Troubleshooting
+
+### Error: "Database error: Missing columns"
+→ Migration not applied yet. Run `DATABASE_MIGRATION_IMPERIAL.sql` in Supabase
+
+### Error: "Username already taken"
+→ Expected behavior. Username must be unique. Try a different username.
+
+### Save button does nothing
+→ Check console logs (`flutter run`). Look for `[ProfileScreen]` or `[UserProfile]` errors.
+
+### Height not displaying
+→ Verify `height_feet` and `height_inches` exist in database:
+```sql
+SELECT height_feet, height_inches FROM user_profiles WHERE id = '<user_id>';
 ```
 
 ---
 
-## Performance Monitoring
+## 🔄 Rollback Plan
 
-### Key Metrics
-- **Chart render time:** <300ms
-- **Data load time:** <2s (with network)
-- **APK size:** ~30-40MB (arm64-v8a)
-- **Memory usage:** <100MB
-- **Frame rate:** 60fps (no jank)
+If deployment fails:
 
-### Profiling
-```bash
-# Profile app performance
-flutter run --profile
+1. **Rollback database:**
+   ```sql
+   -- See DATABASE_MIGRATION_IMPERIAL.sql (bottom of file)
+   ALTER TABLE user_profiles DROP COLUMN IF EXISTS height_feet CASCADE;
+   ALTER TABLE user_profiles DROP COLUMN IF EXISTS height_inches CASCADE;
+   -- etc. (see full script)
+   ```
 
-# Analyze build
-flutter analyze
-
-# Check dependencies
-flutter pub outdated
-```
+2. **Rollback code:**
+   ```bash
+   git revert b631df6
+   flutter clean && flutter pub get
+   flutter build apk
+   ```
 
 ---
 
-## Deployment Checklist
+## 📊 Success Metrics
 
-- [x] Code reviewed
-- [x] Tests passed (manual)
-- [x] Cyberpunk styling applied
-- [x] Mock data seeded
-- [x] Documentation complete
-- [ ] API key configured
-- [ ] APK tested on device
-- [ ] Screenshots captured
-- [ ] Main session notified
+After deployment, verify:
+- ✅ Profile save success rate: 100% (no silent failures)
+- ✅ Height display accuracy: Correct format ("5'11\"")
+- ✅ Validation working: Feet 3-7, inches 0-11
+- ✅ Error messages helpful: Specific, actionable
+- ✅ Console logs informative: Debug mode shows details
 
 ---
 
-**Questions?** Check Phase 7 Summary (`PHASE7_SUMMARY.md`) for details.
+## 📞 Support
+
+If issues arise:
+1. Check console logs (`flutter run`) for `[ProfileScreen]` or `[UserProfile]` messages
+2. Verify migration applied: Query `information_schema.columns`
+3. Check RLS policies: Users should only update own profiles
+4. Review `PROFILE_FIX_SUMMARY.md` for detailed debugging guide
+
+---
+
+## ✅ Next Steps
+
+1. **DEPLOY MIGRATION FIRST** (must be done before deploying app)
+2. Build and deploy Flutter app
+3. Test on real device
+4. Mark all test scenarios as passed
+5. Monitor console logs for errors
+6. Celebrate! 🎉
+
+**Estimated Time:** 5-10 minutes  
+**Risk Level:** Low (idempotent migration, includes rollback)  
+**Dependencies:** Supabase access, Flutter SDK

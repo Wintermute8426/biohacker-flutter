@@ -21,10 +21,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   late TextEditingController _heightInchesController;
   late TextEditingController _allergiesController;
   late TextEditingController _otherConditionController;
+  late TextEditingController _bioController;
 
   // Dropdown values
   String? _selectedGender;
   String? _selectedTimezone;
+  String _selectedUnits = 'imperial'; // default
+  String _selectedContactMethod = 'email'; // default
 
   // Medical conditions
   final Map<String, bool> _medicalConditions = {
@@ -36,12 +39,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     'other': false,
   };
 
+  // NEW: Notification preferences
+  final Map<String, bool> _notificationPreferences = {
+    'email': true,
+    'push': false,
+    'sms': false,
+  };
+
+  // NEW: Health goals
+  final Map<String, bool> _healthGoals = {
+    'longevity': false,
+    'recovery': false,
+    'hormone_optimization': false,
+    'athletic_performance': false,
+    'weight_loss': false,
+    'other': false,
+  };
+
   // State
   bool _isLoading = true;
   bool _isSaving = false;
   String? _successMessage;
   String? _errorMessage;
   String _latestWeight = 'Loading...';
+  String _heightDisplay = 'Not set';
 
   @override
   void initState() {
@@ -52,6 +73,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _heightInchesController = TextEditingController();
     _allergiesController = TextEditingController();
     _otherConditionController = TextEditingController();
+    _bioController = TextEditingController();
     _loadProfile();
   }
 
@@ -63,6 +85,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _heightInchesController.dispose();
     _allergiesController.dispose();
     _otherConditionController.dispose();
+    _bioController.dispose();
     super.dispose();
   }
 
@@ -88,8 +111,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _heightFeetController.text = profile.heightFeet?.toString() ?? '';
           _heightInchesController.text = profile.heightInches?.toString() ?? '';
           _allergiesController.text = profile.allergies ?? '';
+          _bioController.text = profile.bio ?? '';
           _selectedGender = profile.gender;
           _selectedTimezone = profile.timezone;
+          _selectedUnits = profile.unitsPreference ?? 'imperial';
+          _selectedContactMethod = profile.contactMethod ?? 'email';
+          
+          // Update height display using the formatted getter
+          _heightDisplay = profile.heightFormatted;
 
           // Load medical conditions
           for (var condition in profile.medicalConditions) {
@@ -100,16 +129,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               _otherConditionController.text = condition.substring(6).trim();
             }
           }
+
+          // Load notification preferences
+          if (profile.notificationPreferences != null) {
+            profile.notificationPreferences!.forEach((key, value) {
+              if (_notificationPreferences.containsKey(key)) {
+                _notificationPreferences[key] = value as bool;
+              }
+            });
+          }
+
+          // Load health goals
+          for (var goal in profile.healthGoalsList) {
+            if (_healthGoals.containsKey(goal)) {
+              _healthGoals[goal] = true;
+            }
+          }
         });
       }
 
-      // Load latest weight
-      final weight = await profileService.getLatestWeight(userId);
+      // Load latest weight with better error handling
+      try {
+        final weight = await profileService.getLatestWeight(userId);
+        setState(() {
+          _latestWeight = weight;
+        });
+      } catch (e) {
+        print('[ProfileScreen] Error loading weight: $e');
+        setState(() {
+          _latestWeight = 'Error loading weight (check RLS policies)';
+        });
+      }
+
       setState(() {
-        _latestWeight = weight;
         _isLoading = false;
       });
     } catch (e) {
+      print('[ProfileScreen] Error loading profile: $e');
       setState(() {
         _errorMessage = 'Error loading profile: $e';
         _isLoading = false;
@@ -129,6 +185,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       }
     });
     return selected;
+  }
+
+  List<String> _getSelectedHealthGoals() {
+    final selected = <String>[];
+    _healthGoals.forEach((key, value) {
+      if (value) {
+        selected.add(key);
+      }
+    });
+    return selected;
+  }
+
+  void _updateHeightDisplay() {
+    final feet = _heightFeetController.text;
+    final inches = _heightInchesController.text;
+    if (feet.isNotEmpty && inches.isNotEmpty) {
+      setState(() {
+        _heightDisplay = '$feet\'$inches"';
+      });
+    } else {
+      setState(() {
+        _heightDisplay = 'Not set';
+      });
+    }
   }
 
   Future<void> _saveProfile() async {
@@ -154,6 +234,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       print('[ProfileScreen] Gender: $_selectedGender');
       print('[ProfileScreen] Height: ${_heightFeetController.text}\' ${_heightInchesController.text}"');
       print('[ProfileScreen] Timezone: $_selectedTimezone');
+      print('[ProfileScreen] Units: $_selectedUnits');
+      print('[ProfileScreen] Contact Method: $_selectedContactMethod');
+      print('[ProfileScreen] Bio: ${_bioController.text}');
+      print('[ProfileScreen] Notification Prefs: $_notificationPreferences');
+      print('[ProfileScreen] Health Goals: ${_getSelectedHealthGoals()}');
 
       await profileService.updateUserProfile(
         userId,
@@ -165,9 +250,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         allergies: _allergiesController.text.isEmpty ? null : _allergiesController.text,
         medicalConditions: _getSelectedMedicalConditions(),
         timezone: _selectedTimezone,
+        unitsPreference: _selectedUnits,
+        contactMethod: _selectedContactMethod,
+        bio: _bioController.text.isEmpty ? null : _bioController.text,
+        notificationPreferences: _notificationPreferences,
+        healthGoalsList: _getSelectedHealthGoals(),
       );
 
       print('[ProfileScreen] ✅ Profile saved successfully!');
+
+      // Update height display after save
+      _updateHeightDisplay();
 
       setState(() {
         _isSaving = false;
@@ -187,7 +280,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (e.toString().contains('duplicate')) {
         errorMsg = 'Username already taken. Please choose another.';
       } else if (e.toString().contains('column') && e.toString().contains('does not exist')) {
-        errorMsg = 'Database error: Missing columns. Contact support.';
+        errorMsg = 'Database error: Missing columns. Run migration!';
       } else if (e.toString().contains('check constraint')) {
         errorMsg = 'Invalid data. Please check all fields.';
       } else {
@@ -287,12 +380,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Latest Weight (Read-only)',
+                    'Latest Weight',
                     style: TextStyle(fontSize: 12, color: AppColors.textMid),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     _latestWeight,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: _latestWeight.contains('Error') 
+                        ? AppColors.error 
+                        : AppColors.textLight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Height Display (Read-only, formatted)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.textDim),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Current Height',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMid),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _heightDisplay,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -371,7 +495,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Height (Imperial: Feet + Inches)
+            // Height (Imperial: Feet + Inches) - Input fields
+            Text(
+              'Update Height',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textLight,
+              ),
+            ),
+            const SizedBox(height: 8),
             Row(
               children: [
                 // Feet
@@ -380,7 +513,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     controller: _heightFeetController,
                     style: TextStyle(color: AppColors.textLight),
                     decoration: InputDecoration(
-                      labelText: 'Height (Feet)',
+                      labelText: 'Feet',
                       labelStyle: TextStyle(color: AppColors.textMid),
                       border: OutlineInputBorder(
                         borderSide: BorderSide(color: AppColors.primary),
@@ -395,6 +528,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       hintStyle: TextStyle(color: AppColors.textDim),
                     ),
                     keyboardType: TextInputType.number,
+                    onChanged: (_) => _updateHeightDisplay(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Required';
@@ -414,7 +548,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     controller: _heightInchesController,
                     style: TextStyle(color: AppColors.textLight),
                     decoration: InputDecoration(
-                      labelText: 'Height (Inches)',
+                      labelText: 'Inches',
                       labelStyle: TextStyle(color: AppColors.textMid),
                       border: OutlineInputBorder(
                         borderSide: BorderSide(color: AppColors.primary),
@@ -429,6 +563,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       hintStyle: TextStyle(color: AppColors.textDim),
                     ),
                     keyboardType: TextInputType.number,
+                    onChanged: (_) => _updateHeightDisplay(),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Required';
@@ -443,20 +578,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            // Height preview
-            if (_heightFeetController.text.isNotEmpty && _heightInchesController.text.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: Text(
-                  'Height: ${_heightFeetController.text}\'${_heightInchesController.text}"',
-                  style: TextStyle(
-                    color: AppColors.textMid,
-                    fontSize: 14,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ),
             const SizedBox(height: 16),
 
             // Timezone
@@ -497,6 +618,212 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please select a timezone';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // Section: Preferences (Tier 3)
+            Text(
+              'PREFERENCES',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textMid,
+              ),
+            ),
+            const Divider(),
+            const SizedBox(height: 16),
+
+            // Units Preference
+            DropdownButtonFormField<String>(
+              value: _selectedUnits,
+              style: TextStyle(color: AppColors.textLight),
+              dropdownColor: AppColors.surface,
+              decoration: InputDecoration(
+                labelText: 'Units Preference',
+                labelStyle: TextStyle(color: AppColors.textMid),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.textDim),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'imperial', child: Text('Imperial (lbs, ft/in, mg)')),
+                DropdownMenuItem(value: 'metric', child: Text('Metric (kg, cm, ml)')),
+              ],
+              onChanged: (value) => setState(() => _selectedUnits = value!),
+            ),
+            const SizedBox(height: 16),
+
+            // Preferred Contact Method
+            Text(
+              'Preferred Contact Method',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textLight,
+              ),
+            ),
+            const SizedBox(height: 8),
+            RadioListTile<String>(
+              title: Text('Email', style: TextStyle(color: AppColors.textLight)),
+              value: 'email',
+              groupValue: _selectedContactMethod,
+              activeColor: AppColors.primary,
+              onChanged: (value) => setState(() => _selectedContactMethod = value!),
+            ),
+            RadioListTile<String>(
+              title: Text('Phone', style: TextStyle(color: AppColors.textLight)),
+              value: 'phone',
+              groupValue: _selectedContactMethod,
+              activeColor: AppColors.primary,
+              onChanged: (value) => setState(() => _selectedContactMethod = value!),
+            ),
+            RadioListTile<String>(
+              title: Text('Push Notification', style: TextStyle(color: AppColors.textLight)),
+              value: 'push',
+              groupValue: _selectedContactMethod,
+              activeColor: AppColors.primary,
+              onChanged: (value) => setState(() => _selectedContactMethod = value!),
+            ),
+            const SizedBox(height: 16),
+
+            // Notification Preferences
+            Text(
+              'Notification Preferences',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textLight,
+              ),
+            ),
+            const SizedBox(height: 8),
+            CheckboxListTile(
+              title: Text('Email Notifications', style: TextStyle(color: AppColors.textLight)),
+              value: _notificationPreferences['email'],
+              activeColor: AppColors.primary,
+              checkColor: AppColors.background,
+              onChanged: (value) {
+                setState(() => _notificationPreferences['email'] = value ?? false);
+              },
+            ),
+            CheckboxListTile(
+              title: Text('Push Notifications', style: TextStyle(color: AppColors.textLight)),
+              value: _notificationPreferences['push'],
+              activeColor: AppColors.primary,
+              checkColor: AppColors.background,
+              onChanged: (value) {
+                setState(() => _notificationPreferences['push'] = value ?? false);
+              },
+            ),
+            CheckboxListTile(
+              title: Text('SMS Notifications', style: TextStyle(color: AppColors.textLight)),
+              value: _notificationPreferences['sms'],
+              activeColor: AppColors.primary,
+              checkColor: AppColors.background,
+              onChanged: (value) {
+                setState(() => _notificationPreferences['sms'] = value ?? false);
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Health Goals
+            Text(
+              'Health Goals',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textLight,
+              ),
+            ),
+            const SizedBox(height: 8),
+            CheckboxListTile(
+              title: Text('Improve Longevity', style: TextStyle(color: AppColors.textLight)),
+              value: _healthGoals['longevity'],
+              activeColor: AppColors.primary,
+              checkColor: AppColors.background,
+              onChanged: (value) {
+                setState(() => _healthGoals['longevity'] = value ?? false);
+              },
+            ),
+            CheckboxListTile(
+              title: Text('Recover from Injury', style: TextStyle(color: AppColors.textLight)),
+              value: _healthGoals['recovery'],
+              activeColor: AppColors.primary,
+              checkColor: AppColors.background,
+              onChanged: (value) {
+                setState(() => _healthGoals['recovery'] = value ?? false);
+              },
+            ),
+            CheckboxListTile(
+              title: Text('Optimize Hormone Levels', style: TextStyle(color: AppColors.textLight)),
+              value: _healthGoals['hormone_optimization'],
+              activeColor: AppColors.primary,
+              checkColor: AppColors.background,
+              onChanged: (value) {
+                setState(() => _healthGoals['hormone_optimization'] = value ?? false);
+              },
+            ),
+            CheckboxListTile(
+              title: Text('Athletic Performance', style: TextStyle(color: AppColors.textLight)),
+              value: _healthGoals['athletic_performance'],
+              activeColor: AppColors.primary,
+              checkColor: AppColors.background,
+              onChanged: (value) {
+                setState(() => _healthGoals['athletic_performance'] = value ?? false);
+              },
+            ),
+            CheckboxListTile(
+              title: Text('Weight Loss', style: TextStyle(color: AppColors.textLight)),
+              value: _healthGoals['weight_loss'],
+              activeColor: AppColors.primary,
+              checkColor: AppColors.background,
+              onChanged: (value) {
+                setState(() => _healthGoals['weight_loss'] = value ?? false);
+              },
+            ),
+            CheckboxListTile(
+              title: Text('Other', style: TextStyle(color: AppColors.textLight)),
+              value: _healthGoals['other'],
+              activeColor: AppColors.primary,
+              checkColor: AppColors.background,
+              onChanged: (value) {
+                setState(() => _healthGoals['other'] = value ?? false);
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Bio (Optional)
+            TextFormField(
+              controller: _bioController,
+              style: TextStyle(color: AppColors.textLight),
+              decoration: InputDecoration(
+                labelText: 'Bio (optional)',
+                labelStyle: TextStyle(color: AppColors.textMid),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.textDim),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+                hintText: 'Tell us a bit about yourself...',
+                hintStyle: TextStyle(color: AppColors.textDim),
+              ),
+              maxLines: 3,
+              maxLength: 200,
+              validator: (value) {
+                if (value != null && value.length > 200) {
+                  return 'Bio must be 200 characters or less';
                 }
                 return null;
               },
