@@ -186,6 +186,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                               color: AppColors.primary,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.none,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -196,6 +197,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                                 style: TextStyle(
                                   color: AppColors.textDim,
                                   fontSize: 10,
+                                  decoration: TextDecoration.none,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -204,6 +206,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                                 style: TextStyle(
                                   color: AppColors.textDim,
                                   fontSize: 10,
+                                  decoration: TextDecoration.none,
                                 ),
                               ),
                               const Spacer(),
@@ -239,6 +242,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
             fontSize: 12,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
+            decoration: TextDecoration.none,
           ),
         ),
         const SizedBox(height: 8),
@@ -249,6 +253,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
             style: TextStyle(
               color: AppColors.textMid,
               fontSize: 12,
+              decoration: TextDecoration.none,
             ),
           ),
         )),
@@ -267,6 +272,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
             fontSize: 12,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
+            decoration: TextDecoration.none,
           ),
         ),
         const SizedBox(height: 8),
@@ -288,6 +294,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                       item,
                       style: TextStyle(
                         color: color,
+                        decoration: TextDecoration.none,
                         fontSize: 11,
                       ),
                     ),
