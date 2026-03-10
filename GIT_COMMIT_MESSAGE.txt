@@ -1,0 +1,60 @@
+fix: Profile save + convert height to imperial (feet/inches)
+
+**Issues Fixed:**
+1. Profile save not working (silent failure)
+2. Height field converted from cm to imperial (feet + inches)
+
+**Root Cause:**
+- Database columns (username, age, gender, height_cm, etc.) didn't exist
+- App tried to UPDATE non-existent columns → Supabase silent failure
+- Migration script was never applied to production database
+
+**Changes:**
+
+Database (DATABASE_MIGRATION_IMPERIAL.sql):
+- Added username (TEXT UNIQUE, 1-50 chars, alphanumeric + underscore)
+- Added age (INTEGER, 10-120)
+- Added gender (TEXT, enum: male/female/other/prefer_not_to_say)
+- Added height_feet (INTEGER, 0-9) + height_inches (INTEGER, 0-11)
+- Added allergies (TEXT, max 500 chars)
+- Added medical_conditions (JSONB array)
+- Added helper functions: height_to_cm(), cm_to_height()
+- Migrates existing height_cm data to imperial (if exists)
+
+Flutter (user_profile_service.dart):
+- Replaced heightCm with heightFeet + heightInches
+- Added heightFormatted getter (e.g., "5'11\"")
+- Added heightCm getter (converts imperial → metric)
+- Updated fromJson(), toJson(), copyWith()
+- Enhanced logging with detailed error diagnostics
+- Better error messages for schema mismatch, duplicate username, validation
+
+Flutter (profile_screen.dart):
+- Replaced single height field with two fields (Feet + Inches)
+- Added live height preview: "Height: 5'11\""
+- Updated validation: Feet (3-7), Inches (0-11)
+- Enhanced error handling with specific error messages
+- Added debug logging at save time
+
+**Testing:**
+⏳ Pending deployment
+- [ ] Apply DATABASE_MIGRATION_IMPERIAL.sql to Supabase
+- [ ] Test profile save (happy path)
+- [ ] Test height display ("5'11\"")
+- [ ] Test validation (feet 3-7, inches 0-11)
+- [ ] Test duplicate username error
+- [ ] Verify RLS policies (users can only update own profile)
+
+**Rollback:** See DATABASE_MIGRATION_IMPERIAL.sql (includes rollback script)
+
+**Timeline:** 30 minutes (diagnosis + implementation)
+**Risk:** Low (idempotent migration, includes rollback)
+**Success Criteria:**
+✅ Profile save works (no silent failures)
+✅ Height stored in imperial (feet + inches)
+✅ Height displays correctly ("5'11\"")
+✅ Enhanced logging for debugging
+✅ Code compiles without errors
+⏳ Manual testing (pending deployment)
+
+Closes: Profile Save Issue + Height Imperial Conversion

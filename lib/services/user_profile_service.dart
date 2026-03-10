@@ -8,7 +8,8 @@ class UserProfile {
   final String? username;
   final int? age;
   final String? gender; // 'male', 'female', 'other', 'prefer_not_to_say'
-  final int? heightCm;
+  final int? heightFeet; // 0-9 feet
+  final int? heightInches; // 0-11 inches
   final String? allergies;
   final List<String> medicalConditions; // ['diabetes', 'hypertension', ...]
   // Existing fields (Onboarding)
@@ -26,7 +27,8 @@ class UserProfile {
     this.username,
     this.age,
     this.gender,
-    this.heightCm,
+    this.heightFeet,
+    this.heightInches,
     this.allergies,
     this.medicalConditions = const [],
     required this.experienceLevel,
@@ -39,13 +41,26 @@ class UserProfile {
     this.onboardingCompletedAt,
   });
 
+  // Helper: Get height as formatted string (e.g., "5'11\"")
+  String get heightFormatted {
+    if (heightFeet == null || heightInches == null) return 'Not set';
+    return '$heightFeet\'$heightInches"';
+  }
+
+  // Helper: Convert height to centimeters
+  double? get heightCm {
+    if (heightFeet == null || heightInches == null) return null;
+    return ((heightFeet! * 12) + heightInches!) * 2.54;
+  }
+
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
       userId: json['id'] ?? '',
       username: json['username'],
       age: json['age'],
       gender: json['gender'],
-      heightCm: json['height_cm'],
+      heightFeet: json['height_feet'],
+      heightInches: json['height_inches'],
       allergies: json['allergies'],
       medicalConditions: json['medical_conditions'] != null
           ? List<String>.from(json['medical_conditions'])
@@ -69,7 +84,8 @@ class UserProfile {
       'username': username,
       'age': age,
       'gender': gender,
-      'height_cm': heightCm,
+      'height_feet': heightFeet,
+      'height_inches': heightInches,
       'allergies': allergies,
       'medical_conditions': medicalConditions,
       'experience_level': experienceLevel,
@@ -87,7 +103,8 @@ class UserProfile {
     String? username,
     int? age,
     String? gender,
-    int? heightCm,
+    int? heightFeet,
+    int? heightInches,
     String? allergies,
     List<String>? medicalConditions,
     String? experienceLevel,
@@ -104,7 +121,8 @@ class UserProfile {
       username: username ?? this.username,
       age: age ?? this.age,
       gender: gender ?? this.gender,
-      heightCm: heightCm ?? this.heightCm,
+      heightFeet: heightFeet ?? this.heightFeet,
+      heightInches: heightInches ?? this.heightInches,
       allergies: allergies ?? this.allergies,
       medicalConditions: medicalConditions ?? this.medicalConditions,
       experienceLevel: experienceLevel ?? this.experienceLevel,
@@ -168,12 +186,13 @@ class UserProfileService {
     }
   }
 
-  // Update user profile (during onboarding)
+  // Update user profile (during onboarding + Profile Screen)
   Future<UserProfile?> updateUserProfile(String userId, {
     String? username,
     int? age,
     String? gender,
-    int? heightCm,
+    int? heightFeet,
+    int? heightInches,
     String? allergies,
     List<String>? medicalConditions,
     String? experienceLevel,
@@ -191,7 +210,8 @@ class UserProfileService {
       if (username != null) updates['username'] = username;
       if (age != null) updates['age'] = age;
       if (gender != null) updates['gender'] = gender;
-      if (heightCm != null) updates['height_cm'] = heightCm;
+      if (heightFeet != null) updates['height_feet'] = heightFeet;
+      if (heightInches != null) updates['height_inches'] = heightInches;
       if (allergies != null) updates['allergies'] = allergies;
       if (medicalConditions != null) updates['medical_conditions'] = medicalConditions;
       
@@ -209,8 +229,10 @@ class UserProfileService {
         }
       }
 
+      print('[UserProfile] ========================================');
       print('[UserProfile] Updating profile for user: $userId');
       print('[UserProfile] Updates: $updates');
+      print('[UserProfile] ========================================');
 
       final response = await _supabase
           .from('user_profiles')
@@ -221,17 +243,39 @@ class UserProfileService {
       print('[UserProfile] Update response: $response');
 
       if (response.isEmpty) {
-        print('[UserProfile] ERROR: Empty response from update. User ID may not exist.');
+        print('[UserProfile] ⚠️  WARNING: Empty response from update.');
+        print('[UserProfile] This usually means:');
+        print('[UserProfile]   1. User profile does not exist (creating new one...)');
+        print('[UserProfile]   2. RLS policy is blocking the UPDATE');
+        print('[UserProfile]   3. Database columns do not exist (run migration!)');
+        
         // Try to create if doesn't exist
         return await createUserProfile(userId);
       }
 
       final profile = UserProfile.fromJson(response.first);
-      print('[UserProfile] Successfully updated profile');
+      print('[UserProfile] ✅ Successfully updated profile');
+      print('[UserProfile] Profile data: ${profile.toJson()}');
       return profile;
-    } catch (e) {
-      print('[UserProfile] ERROR updating user profile: $e');
-      print('[UserProfile] Stack trace: ${StackTrace.current}');
+    } catch (e, stackTrace) {
+      print('[UserProfile] ❌ ERROR updating user profile');
+      print('[UserProfile] Error type: ${e.runtimeType}');
+      print('[UserProfile] Error message: $e');
+      print('[UserProfile] Stack trace:');
+      print(stackTrace);
+      
+      // Check for specific error types
+      if (e.toString().contains('column') && e.toString().contains('does not exist')) {
+        print('[UserProfile] 🚨 DATABASE SCHEMA MISMATCH!');
+        print('[UserProfile] Run DATABASE_MIGRATION_IMPERIAL.sql in Supabase SQL Editor');
+      } else if (e.toString().contains('duplicate key')) {
+        print('[UserProfile] 🚨 DUPLICATE USERNAME!');
+        print('[UserProfile] Username already exists. Choose a different one.');
+      } else if (e.toString().contains('violates check constraint')) {
+        print('[UserProfile] 🚨 VALIDATION FAILED!');
+        print('[UserProfile] Data does not meet database constraints.');
+      }
+      
       rethrow; // Let caller handle the error
     }
   }

@@ -17,7 +17,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // Controllers
   late TextEditingController _usernameController;
   late TextEditingController _ageController;
-  late TextEditingController _heightController;
+  late TextEditingController _heightFeetController;
+  late TextEditingController _heightInchesController;
   late TextEditingController _allergiesController;
   late TextEditingController _otherConditionController;
 
@@ -47,7 +48,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.initState();
     _usernameController = TextEditingController();
     _ageController = TextEditingController();
-    _heightController = TextEditingController();
+    _heightFeetController = TextEditingController();
+    _heightInchesController = TextEditingController();
     _allergiesController = TextEditingController();
     _otherConditionController = TextEditingController();
     _loadProfile();
@@ -57,7 +59,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   void dispose() {
     _usernameController.dispose();
     _ageController.dispose();
-    _heightController.dispose();
+    _heightFeetController.dispose();
+    _heightInchesController.dispose();
     _allergiesController.dispose();
     _otherConditionController.dispose();
     super.dispose();
@@ -82,7 +85,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         setState(() {
           _usernameController.text = profile.username ?? '';
           _ageController.text = profile.age?.toString() ?? '';
-          _heightController.text = profile.heightCm?.toString() ?? '';
+          _heightFeetController.text = profile.heightFeet?.toString() ?? '';
+          _heightInchesController.text = profile.heightInches?.toString() ?? '';
           _allergiesController.text = profile.allergies ?? '';
           _selectedGender = profile.gender;
           _selectedTimezone = profile.timezone;
@@ -144,16 +148,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
       final profileService = ref.read(userProfileServiceProvider);
       
+      print('[ProfileScreen] Saving profile...');
+      print('[ProfileScreen] Username: ${_usernameController.text.trim()}');
+      print('[ProfileScreen] Age: ${_ageController.text}');
+      print('[ProfileScreen] Gender: $_selectedGender');
+      print('[ProfileScreen] Height: ${_heightFeetController.text}\' ${_heightInchesController.text}"');
+      print('[ProfileScreen] Timezone: $_selectedTimezone');
+
       await profileService.updateUserProfile(
         userId,
         username: _usernameController.text.trim(),
         age: int.tryParse(_ageController.text),
         gender: _selectedGender,
-        heightCm: int.tryParse(_heightController.text),
+        heightFeet: int.tryParse(_heightFeetController.text),
+        heightInches: int.tryParse(_heightInchesController.text),
         allergies: _allergiesController.text.isEmpty ? null : _allergiesController.text,
         medicalConditions: _getSelectedMedicalConditions(),
         timezone: _selectedTimezone,
       );
+
+      print('[ProfileScreen] ✅ Profile saved successfully!');
 
       setState(() {
         _isSaving = false;
@@ -167,11 +181,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         }
       });
     } catch (e) {
+      print('[ProfileScreen] ❌ Error saving profile: $e');
+      
+      String errorMsg;
+      if (e.toString().contains('duplicate')) {
+        errorMsg = 'Username already taken. Please choose another.';
+      } else if (e.toString().contains('column') && e.toString().contains('does not exist')) {
+        errorMsg = 'Database error: Missing columns. Contact support.';
+      } else if (e.toString().contains('check constraint')) {
+        errorMsg = 'Invalid data. Please check all fields.';
+      } else {
+        errorMsg = 'Could not save profile. Check console logs for details.';
+      }
+      
       setState(() {
         _isSaving = false;
-        _errorMessage = e.toString().contains('duplicate')
-            ? 'Username already taken'
-            : 'Could not save profile. Please try again.';
+        _errorMessage = errorMsg;
       });
     }
   }
@@ -346,35 +371,92 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Height
-            TextFormField(
-              controller: _heightController,
-              style: TextStyle(color: AppColors.textLight),
-              decoration: InputDecoration(
-                labelText: 'Height (cm)',
-                labelStyle: TextStyle(color: AppColors.textMid),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary),
+            // Height (Imperial: Feet + Inches)
+            Row(
+              children: [
+                // Feet
+                Expanded(
+                  child: TextFormField(
+                    controller: _heightFeetController,
+                    style: TextStyle(color: AppColors.textLight),
+                    decoration: InputDecoration(
+                      labelText: 'Height (Feet)',
+                      labelStyle: TextStyle(color: AppColors.textMid),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primary),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.textDim),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                      hintText: '3-7',
+                      hintStyle: TextStyle(color: AppColors.textDim),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Required';
+                      }
+                      final feet = int.tryParse(value);
+                      if (feet == null || feet < 3 || feet > 7) {
+                        return '3-7';
+                      }
+                      return null;
+                    },
+                  ),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.textDim),
+                const SizedBox(width: 16),
+                // Inches
+                Expanded(
+                  child: TextFormField(
+                    controller: _heightInchesController,
+                    style: TextStyle(color: AppColors.textLight),
+                    decoration: InputDecoration(
+                      labelText: 'Height (Inches)',
+                      labelStyle: TextStyle(color: AppColors.textMid),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primary),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.textDim),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                      hintText: '0-11',
+                      hintStyle: TextStyle(color: AppColors.textDim),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Required';
+                      }
+                      final inches = int.tryParse(value);
+                      if (inches == null || inches < 0 || inches > 11) {
+                        return '0-11';
+                      }
+                      return null;
+                    },
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Height preview
+            if (_heightFeetController.text.isNotEmpty && _heightInchesController.text.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: Text(
+                  'Height: ${_heightFeetController.text}\'${_heightInchesController.text}"',
+                  style: TextStyle(
+                    color: AppColors.textMid,
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Height is required';
-                }
-                final height = int.tryParse(value);
-                if (height == null || height < 50 || height > 300) {
-                  return 'Height must be between 50 and 300 cm';
-                }
-                return null;
-              },
-            ),
             const SizedBox(height: 16),
 
             // Timezone
