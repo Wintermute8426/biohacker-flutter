@@ -51,6 +51,17 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   // Schedule
   String? _scheduledTime = '08:00';
 
+  // VALIDATION STATE
+  final Map<String, String?> _fieldErrors = {
+    'peptide': null,
+    'vialSize': null,
+    'desiredDose': null,
+    'draw': null,
+    'cycleDuration': null,
+    'startDate': null,
+    'phases': null,
+  };
+
   // Controllers
   final _totalPeptideController = TextEditingController();
   final _desiredDosageController = TextEditingController();
@@ -62,6 +73,120 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
     super.initState();
     _startDate = DateTime.now();
     _selectedPeptide = widget.defaultPeptideName;
+  }
+
+  // ===== VALIDATION METHODS =====
+  
+  void _validatePeptide() {
+    setState(() {
+      _fieldErrors['peptide'] = _selectedPeptide == null ? 'Select a peptide' : null;
+    });
+  }
+
+  void _validateVialSize() {
+    setState(() {
+      if (_totalPeptideMg == null) {
+        _fieldErrors['vialSize'] = 'Required';
+      } else if (_totalPeptideMg! < 5 || _totalPeptideMg! > 500) {
+        _fieldErrors['vialSize'] = 'Vial size should be 5-500mg';
+      } else {
+        _fieldErrors['vialSize'] = null;
+      }
+    });
+  }
+
+  void _validateDesiredDose() {
+    setState(() {
+      if (_desiredDosageMg == null) {
+        _fieldErrors['desiredDose'] = 'Required';
+      } else if (_desiredDosageMg! < 0.1 || _desiredDosageMg! > 10) {
+        _fieldErrors['desiredDose'] = 'Dose should be 0.1-10mg';
+      } else if (_totalPeptideMg != null && _desiredDosageMg! > _totalPeptideMg!) {
+        _fieldErrors['desiredDose'] = 'Dose can\'t exceed vial size';
+      } else {
+        _fieldErrors['desiredDose'] = null;
+      }
+    });
+  }
+
+  void _validateDraw() {
+    setState(() {
+      if (_concentrationMl == null) {
+        _fieldErrors['draw'] = 'Required';
+      } else if (_concentrationMl! < 0.05 || _concentrationMl! > 1.0) {
+        _fieldErrors['draw'] = 'Draw should be 0.05-1.0ml';
+      } else {
+        _fieldErrors['draw'] = null;
+      }
+    });
+  }
+
+  void _validateCycleDuration() {
+    setState(() {
+      if (_cycleDurationWeeks == null) {
+        _fieldErrors['cycleDuration'] = 'Required';
+      } else if (_cycleDurationWeeks! < 1 || _cycleDurationWeeks! > 52) {
+        _fieldErrors['cycleDuration'] = 'Cycle should be 1-52 weeks';
+      } else {
+        _fieldErrors['cycleDuration'] = null;
+      }
+    });
+  }
+
+  void _validateStartDate() {
+    setState(() {
+      if (_startDate == null) {
+        _fieldErrors['startDate'] = 'Select start date';
+      } else if (_startDate!.isBefore(DateTime.now())) {
+        _fieldErrors['startDate'] = 'Start date can\'t be in the past';
+      } else {
+        _fieldErrors['startDate'] = null;
+      }
+    });
+  }
+
+  void _validatePhases() {
+    setState(() {
+      if (_phases.isEmpty) {
+        _fieldErrors['phases'] = 'Add at least one phase (Taper Up, Plateau, or Taper Down)';
+      } else if (_cycleDurationWeeks != null) {
+        final totalDays = _cycleDurationWeeks! * 7;
+        final totalPhaseDays = _phases.fold<int>(
+          0,
+          (sum, phase) => sum + (phase.endDate != null && phase.startDate != null
+              ? phase.endDate!.difference(phase.startDate!).inDays + 1
+              : 0),
+        );
+        if (totalPhaseDays > totalDays) {
+          _fieldErrors['phases'] = 'Phases exceed cycle duration';
+        } else {
+          _fieldErrors['phases'] = null;
+        }
+      } else {
+        _fieldErrors['phases'] = null;
+      }
+    });
+  }
+
+  bool _isFormValid() {
+    return _selectedPeptide != null &&
+        _totalPeptideMg != null &&
+        _desiredDosageMg != null &&
+        _concentrationMl != null &&
+        _cycleDurationWeeks != null &&
+        _startDate != null &&
+        _phases.isNotEmpty &&
+        _fieldErrors.values.every((error) => error == null);
+  }
+
+  void _validateAllFields() {
+    _validatePeptide();
+    _validateVialSize();
+    _validateDesiredDose();
+    _validateDraw();
+    _validateCycleDuration();
+    _validateStartDate();
+    _validatePhases();
   }
 
   void _calculateReconstition() {
@@ -422,8 +547,16 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
           PeptideSelector(
             initialValue: _selectedPeptide,
             label: 'Select peptide',
-            onSelected: (peptide) => setState(() => _selectedPeptide = peptide),
+            onSelected: (peptide) {
+              setState(() => _selectedPeptide = peptide);
+              _validatePeptide();
+            },
           ),
+          if (_fieldErrors['peptide'] != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(_fieldErrors['peptide']!, style: TextStyle(color: AppColors.error, fontSize: 10)),
+            ),
           const SizedBox(height: 24),
 
           // ===== RECONSTITUTION =====
@@ -437,11 +570,19 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               labelText: 'VIAL SIZE (mg)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
               hintText: 'e.g., 10',
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+              helperText: '5-500mg recommended',
+              errorText: _fieldErrors['vialSize'],
+              errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: _fieldErrors['vialSize'] != null ? AppColors.error : AppColors.textMid,
+                ),
+              ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             onChanged: (value) {
               _totalPeptideMg = double.tryParse(value);
+              _validateVialSize();
               _calculateReconstition();
             },
           ),
@@ -454,11 +595,19 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               labelText: 'DESIRED DOSAGE PER INJECTION (mg)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
               hintText: 'e.g., 1',
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+              helperText: '0.1-10mg recommended',
+              errorText: _fieldErrors['desiredDose'],
+              errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: _fieldErrors['desiredDose'] != null ? AppColors.error : AppColors.textMid,
+                ),
+              ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             onChanged: (value) {
               _desiredDosageMg = double.tryParse(value);
+              _validateDesiredDose();
               if (_totalPeptideMg != null && _concentrationMl != null && _desiredDosageMg != null) {
                 _calculateReconstition();
               }
@@ -473,11 +622,19 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               labelText: 'DRAW PER INJECTION (ml)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
               hintText: '0.1',
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+              helperText: '0.05-1.0ml recommended',
+              errorText: _fieldErrors['draw'],
+              errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: _fieldErrors['draw'] != null ? AppColors.error : AppColors.textMid,
+                ),
+              ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             onChanged: (value) {
               _concentrationMl = double.tryParse(value);
+              _validateDraw();
               // Recalculate BAC with proper formula
               if (_concentrationMl != null && _totalPeptideMg != null && _desiredDosageMg != null) {
                 _calculateReconstition();
@@ -659,11 +816,20 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               labelText: 'DURATION (weeks)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
               hintText: 'e.g., 4',
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+              helperText: '1-52 weeks recommended',
+              errorText: _fieldErrors['cycleDuration'],
+              errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: _fieldErrors['cycleDuration'] != null ? AppColors.error : AppColors.textMid,
+                ),
+              ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
             onChanged: (value) {
               _cycleDurationWeeks = int.tryParse(value);
+              _validateCycleDuration();
+              _validatePhases();
               _updateCycleDuration();
             },
           ),
@@ -816,11 +982,47 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             width: double.infinity,
             height: 44,
             child: ElevatedButton(
-              onPressed: _submit,
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              child: Text('CREATE CYCLE', style: TextStyle(color: AppColors.background, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              onPressed: _isFormValid() ? _submit : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _isFormValid() ? AppColors.primary : AppColors.textMid.withOpacity(0.3),
+              ),
+              child: Text(
+                _isFormValid() ? 'CREATE CYCLE' : 'Complete form to create',
+                style: TextStyle(
+                  color: _isFormValid() ? AppColors.background : AppColors.textMid,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
             ),
           ),
+          
+          // Show validation summary if form invalid
+          if (!_isFormValid() && (_selectedPeptide != null || _totalPeptideMg != null || _cycleDurationWeeks != null)) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.error, width: 0.5),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('⚠️ Fix the following to continue:', style: TextStyle(color: AppColors.error, fontSize: 11, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  ..._fieldErrors.entries
+                      .where((e) => e.value != null)
+                      .map(
+                        (e) => Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text('• ${e.value}', style: TextStyle(color: AppColors.error, fontSize: 10)),
+                        ),
+                      ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
         ],
       ),
