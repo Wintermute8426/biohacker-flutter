@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
 import '../screens/research_screen.dart';
 import 'weight_tracker_screen.dart';
+
+// Import authProviderProvider from main
+import '../main.dart' show authProviderProvider;
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -281,7 +283,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const WeightTrackerScreen(),
+                              builder: (context) => WeightTrackerScreen(),
                             ),
                           );
                         },
