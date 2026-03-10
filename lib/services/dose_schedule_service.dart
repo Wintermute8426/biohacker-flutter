@@ -189,14 +189,20 @@ class DoseScheduleService {
           .gte('logged_at', now.toIso8601String())
           .lte('logged_at', endDate.toIso8601String());
 
+      print('[DEBUG CALENDAR] Fetched ${(doseLogs as List).length} dose_logs');
+      
       // Create a map of dose_logs by schedule_id + logged_at date for quick lookup
       final doseLogMap = <String, Map<String, dynamic>>{};
       for (final log in doseLogs as List) {
         final scheduleId = log['dose_schedule_id'] as String? ?? '';
+        final doseAmount = log['dose_amount'] as num? ?? 0;
         final loggedAt = DateTime.parse(log['logged_at'] as String);
         final logDateKey = '${scheduleId}_${loggedAt.year}-${loggedAt.month.toString().padLeft(2, '0')}-${loggedAt.day.toString().padLeft(2, '0')}';
+        print('[DEBUG CALENDAR]   Dose: $logDateKey = ${doseAmount}mg');
         doseLogMap[logDateKey] = log as Map<String, dynamic>;
       }
+      
+      print('[DEBUG CALENDAR] Built doseLogMap with ${doseLogMap.length} entries');
 
       for (final schedule in schedules) {
         // Skip if schedule hasn't started yet
@@ -223,6 +229,12 @@ class DoseScheduleService {
             
             // Use dose_log's dose_amount if available (varies by phase), otherwise use schedule default
             final doseAmount = (doseLog?['dose_amount'] as num?)?.toDouble() ?? schedule.doseAmount;
+            
+            if (doseLog != null) {
+              print('[DEBUG CALENDAR] ✓ Found dose for $logDateKey: ${doseAmount}mg');
+            } else {
+              print('[DEBUG CALENDAR] ✗ No dose_log found for $logDateKey, using schedule default: ${schedule.doseAmount}mg');
+            }
 
             instances.add(DoseInstance(
               date: date,
