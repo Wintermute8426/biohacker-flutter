@@ -1079,16 +1079,40 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   'CYCLES',
                   style: WintermmuteStyles.titleStyle,
                 ),
-                ElevatedButton.icon(
-                  onPressed: _showNewUnifiedCycleSetup,
-                  icon: const Icon(Icons.add),
-                  label: const Text('NEW'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
+                Row(
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ProtocolsScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.bookmark),
+                      label: const Text('PROTOCOLS'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(color: AppColors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      onPressed: _showNewUnifiedCycleSetup,
+                      icon: const Icon(Icons.add),
+                      label: const Text('NEW'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
