@@ -26,18 +26,96 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<Widget> _screens = [
     const DashboardScreen(),
     const CyclesScreen(),
-    const ResearchScreen(),
-    const ProtocolsScreen(),
     const LabsScreen(),
     const ReportsScreen(),
     const CalendarScreen(),
-    const SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  void _showHamburgerMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      builder: (context) => _buildHamburgerMenu(context),
+    );
+  }
+
+  Widget _buildHamburgerMenu(BuildContext context) {
+    return Container(
+      color: AppColors.surface,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Profile'),
+            onTap: () {
+              Navigator.pop(context);
+              // Navigate to profile
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.book),
+            title: const Text('Research'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ResearchScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text('About'),
+            onTap: () {
+              Navigator.pop(context);
+              // Show about dialog
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Biohacker'),
+                  content: const Text('Version 1.0.0\n\nPeptide tracking & optimization'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
+            textColor: AppColors.error,
+            iconColor: AppColors.error,
+            onTap: () {
+              Navigator.pop(context);
+              // Logout logic
+              Supabase.instance.client.auth.signOut();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -54,6 +132,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         
         // Show main app
         return Scaffold(
+          appBar: AppBar(
+            backgroundColor: AppColors.background,
+            elevation: 0,
+            title: Text(
+              'BIOHACKER',
+              style: WintermmuteStyles.titleStyle.copyWith(fontSize: 18),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () => _showHamburgerMenu(context),
+                color: AppColors.primary,
+              ),
+            ],
+          ),
           body: Stack(
             children: [
               _screens[_selectedIndex],
@@ -83,14 +176,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 label: 'Cycles',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.book),
-                label: 'Research',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.bookmark),
-                label: 'Protocols',
-              ),
-              BottomNavigationBarItem(
                 icon: Icon(Icons.science),
                 label: 'Labs',
               ),
@@ -101,10 +186,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.calendar_month),
                 label: 'Calendar',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: 'Settings',
               ),
             ],
           ),
