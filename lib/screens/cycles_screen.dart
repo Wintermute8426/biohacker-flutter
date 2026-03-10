@@ -12,6 +12,7 @@ import '../services/protocol_templates_database.dart';
 import '../services/dose_schedule_service.dart';
 import '../screens/cycle_setup_form_v4.dart';
 import '../screens/insights_screen.dart';
+import '../screens/protocols_screen.dart';
 import '../widgets/advanced_dosing_widget.dart';
 import '../widgets/wintermute_dialog.dart';
 import '../widgets/peptide_selector.dart';
