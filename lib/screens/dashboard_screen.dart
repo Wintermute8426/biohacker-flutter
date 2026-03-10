@@ -4,10 +4,8 @@ import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
-import '../screens/research_screen.dart';
+import 'research_screen.dart';
 import 'weight_tracker_screen.dart';
-
-// Import authProviderProvider from main
 import '../main.dart' show authProviderProvider;
 
 class DashboardScreen extends ConsumerStatefulWidget {
