@@ -281,7 +281,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => WeightTrackerScreen(),
+                              builder: (context) => const WeightTrackerWidget(),
                             ),
                           );
                         },
