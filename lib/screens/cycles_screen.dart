@@ -1086,7 +1086,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ProtocolsScreen(),
+                            builder: (context) => ProtocolsScreen(),
                           ),
                         );
                       },
