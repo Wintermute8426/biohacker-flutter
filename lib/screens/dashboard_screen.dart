@@ -1,4 +1,3 @@
-import '../main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import '../providers/auth_provider.dart';
@@ -130,6 +129,30 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       );
                     }
 
+                    if (snapshot.hasError) {
+                      return Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: WintermmuteStyles.cardDecoration,
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: AppColors.error,
+                                size: 40,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Error loading cycles',
+                                style: WintermmuteStyles.bodyStyle
+                                    .copyWith(color: AppColors.error),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return Container(
                         padding: const EdgeInsets.all(20),
@@ -253,33 +276,43 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: AppColors.accent.withOpacity(0.4),
-                            width: 1,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const WeightTrackerScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: AppColors.accent.withOpacity(0.4),
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                            color: AppColors.surface,
                           ),
-                          borderRadius: BorderRadius.circular(4),
-                          color: AppColors.surface,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.scale_outlined,
-                              color: AppColors.accent,
-                              size: 32,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'WEIGHT',
-                              style: WintermmuteStyles.smallStyle.copyWith(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.scale_outlined,
                                 color: AppColors.accent,
-                                fontWeight: FontWeight.bold,
+                                size: 32,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 8),
+                              Text(
+                                'WEIGHT',
+                                style: WintermmuteStyles.smallStyle.copyWith(
+                                  color: AppColors.accent,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
