@@ -1737,8 +1737,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
           final insertData = {
             'user_id': userId,
             'cycle_id': createdCycle.id,
-            'schedule_id': masterSchedule!.id,  // Changed from dose_schedule_id
-            'peptide_name': peptideName,
+            'schedule_id': masterSchedule!.id,
             'dose_amount': doseAmount,
             'route': route ?? 'SC',
             'logged_at': doseDateTime.toIso8601String(),

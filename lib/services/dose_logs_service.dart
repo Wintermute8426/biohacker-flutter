@@ -5,8 +5,7 @@ class DoseLog {
   final String id;
   final String userId;
   final String cycleId;
-  final String? scheduleId;  // Column name: schedule_id (not dose_schedule_id)
-  final String peptideName;
+  final String? scheduleId;
   final double doseAmount;
   final String route;
   final String? injectionSite;
@@ -21,7 +20,6 @@ class DoseLog {
     required this.userId,
     required this.cycleId,
     this.scheduleId,
-    required this.peptideName,
     required this.doseAmount,
     required this.route,
     this.injectionSite,
@@ -37,8 +35,7 @@ class DoseLog {
       id: json['id'] ?? '',
       userId: json['user_id'] ?? '',
       cycleId: json['cycle_id'] ?? '',
-      scheduleId: json['schedule_id'] as String?,  // Correct column name
-      peptideName: json['peptide_name'] ?? '',
+      scheduleId: json['schedule_id'] as String?,
       doseAmount: (json['dose_amount'] as num?)?.toDouble() ?? 0,
       route: json['route'] ?? '',
       injectionSite: json['injection_site'],
@@ -55,7 +52,6 @@ class DoseLog {
       'user_id': userId,
       'cycle_id': cycleId,
       'schedule_id': scheduleId,
-      'peptide_name': peptideName,
       'dose_amount': doseAmount,
       'route': route,
       'injection_site': injectionSite,
@@ -112,8 +108,7 @@ class DoseLogsService {
             'status': 'SCHEDULED',
           };
           
-          if (scheduleId.isNotEmpty) data['schedule_id'] = scheduleId;  // Changed from dose_schedule_id
-          if (peptideName.isNotEmpty) data['peptide_name'] = peptideName;
+          if (scheduleId.isNotEmpty) data['schedule_id'] = scheduleId;
           
           final response = await _supabase.from('dose_logs').insert(data).select().single();
           generatedDoses.add(DoseLog.fromJson(response as Map<String, dynamic>));
