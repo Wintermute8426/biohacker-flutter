@@ -352,7 +352,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           const SizedBox(height: 4),
                           Text(
                             '${dayDoses.length}',
-                            style: WintermmuteStyles.captionStyle
+                            style: WintermmuteStyles.smallStyle
                                 .copyWith(color: AppColors.primary),
                           ),
                           if (dayDoses.isNotEmpty)
@@ -426,7 +426,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         ),
         Text(
           label,
-          style: WintermmuteStyles.captionStyle.copyWith(
+          style: WintermmuteStyles.smallStyle.copyWith(
             color: AppColors.textMid,
           ),
         ),
@@ -520,7 +520,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               const SizedBox(height: 4),
               Text(
                 '${dose.time} • ${dose.route}',
-                style: WintermmuteStyles.captionStyle
+                style: WintermmuteStyles.smallStyle
                     .copyWith(color: AppColors.textMid),
               ),
             ],
@@ -534,7 +534,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             ),
             child: Text(
               dose.status,
-              style: WintermmuteStyles.captionStyle.copyWith(
+              style: WintermmuteStyles.smallStyle.copyWith(
                 color: statusColor,
                 fontWeight: FontWeight.bold,
               ),
