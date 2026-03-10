@@ -11,6 +11,7 @@ class WintermmuteStyles {
     color: AppColors.primary, // Cyan
     fontFamily: 'JetBrains Mono',
     letterSpacing: 2.0,
+    decoration: TextDecoration.none,
   );
 
   // Section Headers: 18px, bold, cyan, letter-spacing 1px
@@ -20,6 +21,7 @@ class WintermmuteStyles {
     color: AppColors.primary, // Cyan
     fontFamily: 'JetBrains Mono',
     letterSpacing: 1.0,
+    decoration: TextDecoration.none,
   );
 
   // Subheaders: 14px, regular, cyan, letter-spacing 0.5px
@@ -29,6 +31,7 @@ class WintermmuteStyles {
     color: AppColors.primary, // Cyan
     fontFamily: 'JetBrains Mono',
     letterSpacing: 0.5,
+    decoration: TextDecoration.none,
   );
 
   // Body Text: 14px, regular, light gray
@@ -37,6 +40,7 @@ class WintermmuteStyles {
     fontWeight: FontWeight.normal,
     color: AppColors.textLight,
     fontFamily: 'JetBrains Mono',
+    decoration: TextDecoration.none,
   );
 
   // Small Text: 12px, regular, mid gray
@@ -45,6 +49,7 @@ class WintermmuteStyles {
     fontWeight: FontWeight.normal,
     color: AppColors.textMid,
     fontFamily: 'JetBrains Mono',
+    decoration: TextDecoration.none,
   );
 
   // Tiny Text: 10px, regular, dim gray
@@ -53,6 +58,7 @@ class WintermmuteStyles {
     fontWeight: FontWeight.normal,
     color: AppColors.textDim,
     fontFamily: 'JetBrains Mono',
+    decoration: TextDecoration.none,
   );
 
   // Tab Labels: Uppercase, cyan, JetBrains Mono
@@ -62,6 +68,7 @@ class WintermmuteStyles {
     color: AppColors.primary,
     fontFamily: 'JetBrains Mono',
     letterSpacing: 1.0,
+    decoration: TextDecoration.none,
   );
 
   // Stat Value (Primary): Cyan, clean
@@ -71,6 +78,7 @@ class WintermmuteStyles {
     color: AppColors.primary,
     fontFamily: 'JetBrains Mono',
     letterSpacing: 1.0,
+    decoration: TextDecoration.none,
   );
 
   // Stat Value (Accent): Green, clean
@@ -80,6 +88,7 @@ class WintermmuteStyles {
     color: AppColors.accent,
     fontFamily: 'JetBrains Mono',
     letterSpacing: 1.0,
+    decoration: TextDecoration.none,
   );
 
   // ==================== BOX SHADOWS (MINIMAL) ====================
