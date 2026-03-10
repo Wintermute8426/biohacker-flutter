@@ -93,6 +93,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
         _fieldErrors['vialSize'] = null;
       }
     });
+    
+    // Re-validate dose since it depends on vial size
+    _validateDesiredDose();
   }
 
   void _validateDesiredDose() {
@@ -123,8 +126,15 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
 
   void _validateCycleDuration() {
     setState(() {
+      final rawValue = _cycleDurationController.text.trim();
+      
       if (_cycleDurationWeeks == null) {
-        _fieldErrors['cycleDuration'] = 'Required';
+        if (rawValue.isEmpty) {
+          _fieldErrors['cycleDuration'] = 'Required';
+        } else {
+          // User entered something but int.tryParse failed
+          _fieldErrors['cycleDuration'] = 'Must be a whole number (e.g., 4, not 4.5)';
+        }
       } else if (_cycleDurationWeeks! < 1 || _cycleDurationWeeks! > 52) {
         _fieldErrors['cycleDuration'] = 'Cycle should be 1-52 weeks';
       } else {
@@ -137,10 +147,18 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
     setState(() {
       if (_startDate == null) {
         _fieldErrors['startDate'] = 'Select start date';
-      } else if (_startDate!.isBefore(DateTime.now())) {
-        _fieldErrors['startDate'] = 'Start date can\'t be in the past';
       } else {
-        _fieldErrors['startDate'] = null;
+        // Compare dates only (ignore time)
+        final today = DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+        );
+        if (_startDate!.isBefore(today)) {
+          _fieldErrors['startDate'] = 'Start date can\'t be in the past';
+        } else {
+          _fieldErrors['startDate'] = null;
+        }
       }
     });
   }
