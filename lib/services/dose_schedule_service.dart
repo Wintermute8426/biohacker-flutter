@@ -181,13 +181,14 @@ class DoseScheduleService {
       final instances = <DoseInstance>[];
       final now = DateTime.now();
 
-      // Fetch all dose_logs for next 30 days
+      // Fetch all dose_logs for the past 30 days AND next 30 days (to show missed doses)
+      final startDate = now.subtract(Duration(days: 30));
       final endDate = now.add(Duration(days: daysAhead));
       final doseLogs = await _supabase
           .from('dose_logs')
           .select()
           .eq('user_id', userId)
-          .gte('logged_at', now.toIso8601String())
+          .gte('logged_at', startDate.toIso8601String())
           .lte('logged_at', endDate.toIso8601String());
 
       print('[DEBUG CALENDAR] Fetched ${(doseLogs as List).length} dose_logs');
@@ -206,12 +207,13 @@ class DoseScheduleService {
       print('[DEBUG CALENDAR] Built doseLogMap with ${doseLogMap.length} entries');
 
       for (final schedule in schedules) {
-        // Skip if schedule hasn't started yet
-        if (schedule.startDate.isAfter(now)) continue;
-
-        // Generate dose instances for next 30 days
-        for (int i = 0; i < daysAhead; i++) {
+        // Generate dose instances for past 30 days + next 30 days (60 days total)
+        // Start from 30 days ago to capture missed doses
+        for (int i = -30; i < daysAhead; i++) {
           final date = DateTime(now.year, now.month, now.day).add(Duration(days: i));
+
+          // Skip if before schedule start date
+          if (date.isBefore(schedule.startDate)) continue;
 
           // Skip if past end date
           if (schedule.endDate != null && date.isAfter(schedule.endDate!)) continue;
