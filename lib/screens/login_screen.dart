@@ -17,6 +17,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _showPassword = false;
+  bool _isGoogleLoading = false;
   String? _error;
 
   @override
@@ -41,6 +42,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     } catch (e) {
       setState(() => _error = e.toString());
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _error = null;
+      _isGoogleLoading = true;
+    });
+
+    try {
+      await ref.read(authProviderProvider).signInWithGoogle();
+    } catch (e) {
+      setState(() {
+        _error = 'Google sign-in failed. Please try again.';
+        _isGoogleLoading = false;
+      });
     }
   }
 
@@ -187,6 +204,82 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       letterSpacing: 1,
                     ),
                   ),
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Divider with OR text
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color: AppColors.border,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'OR',
+                      style: TextStyle(
+                        color: AppColors.textMid,
+                        fontSize: 12,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color: AppColors.border,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+
+              // Google Sign-In Button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.primary, width: 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    backgroundColor: Colors.transparent,
+                  ),
+                  child: _isGoogleLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.network(
+                              'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                              height: 20,
+                              width: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              'CONTINUE WITH GOOGLE',
+                              style: TextStyle(
+                                color: AppColors.textLight,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ],

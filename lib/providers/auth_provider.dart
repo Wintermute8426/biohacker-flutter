@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthProvider with ChangeNotifier {
   final supabase = Supabase.instance.client;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   User? _user;
   bool _isLoading = true;
 
@@ -70,9 +72,30 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<void> signInWithGoogle() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      // Sign in with Google using Supabase's OAuth
+      await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'com.example.biohacker://login-callback',
+      );
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<void> signOut() async {
     try {
       await supabase.auth.signOut();
+      await _googleSignIn.signOut();
       _user = null;
       notifyListeners();
     } catch (e) {
