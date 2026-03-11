@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
+import '../services/dose_logs_service.dart';
 import '../services/dose_schedule_service.dart';
 import '../services/weight_logs_database.dart';
 import '../widgets/side_effects_modal.dart';
@@ -66,41 +68,59 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
   }
 
-  Future<void> _markDoseTaken(DoseInstance dose) async {
+  Future<void> _markDoseMissed(DoseInstance dose) async {
     try {
       final userId = ref.read(authProviderProvider).user?.id;
       if (userId == null) return;
 
-      // Log the dose
-      await doseDb.logDose(
-        cycleId: dose.cycleId,
-        doseAmount: dose.doseAmount,
-        loggedAt: DateTime.now(),
-        route: dose.route,
-        location: null,
-        notes: null,
-      );
+      // Mark the dose as MISSED using DoseLogsService
+      final doseLogsService = ref.read(doseLogsServiceProvider);
+      await doseLogsService.markAsMissed(dose.doseLogId);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Dose marked as taken',
+              'Dose marked as missed',
               style: WintermmuteStyles.bodyStyle,
             ),
-            backgroundColor: AppColors.accent,
+            backgroundColor: const Color(0xFFFF6B00), // Orange warning color
             duration: const Duration(seconds: 2),
           ),
         );
         _loadData();
       }
     } catch (e) {
-      print('[Dashboard] Error marking dose: $e');
+      print('[Dashboard] Error marking dose as missed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               'Error marking dose',
+              style: WintermmuteStyles.bodyStyle,
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _openResearchLink() async {
+    final url = Uri.parse('https://peptides.org');
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      print('[Dashboard] Error opening research link: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Could not open research link',
               style: WintermmuteStyles.bodyStyle,
             ),
             backgroundColor: AppColors.error,
@@ -308,8 +328,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   Widget _buildDoseCard(DoseInstance dose) {
     final isCompleted = dose.status == 'COMPLETED';
+    final isMissed = dose.status == 'MISSED';
     final maxDose = 10.0; // Max expected dose for progress bar scaling
     final fillPercent = (dose.doseAmount / maxDose).clamp(0.0, 1.0);
+
+    // Find the corresponding cycle for progress info
+    final cycle = _activeCycles.firstWhere(
+      (c) => c.id == dose.cycleId,
+      orElse: () => _activeCycles.isNotEmpty ? _activeCycles.first : null as Cycle,
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -318,7 +345,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         border: Border.all(
           color: isCompleted
               ? AppColors.accent.withOpacity(0.5)
-              : AppColors.primary.withOpacity(0.5),
+              : isMissed
+                  ? const Color(0xFFFF6B00).withOpacity(0.5)
+                  : AppColors.primary.withOpacity(0.5),
           width: 2,
         ),
         borderRadius: BorderRadius.circular(8),
@@ -450,6 +479,85 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
           const SizedBox(height: 12),
 
+          // Cycle progress bar
+          if (cycle != null) ...[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      color: AppColors.textMid,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'CYCLE PROGRESS',
+                      style: WintermmuteStyles.smallStyle.copyWith(
+                        color: AppColors.textMid,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Stack(
+                  children: [
+                    Container(
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    FractionallySizedBox(
+                      widthFactor: _calculateCycleProgress(cycle).clamp(0.0, 1.0),
+                      child: Container(
+                        height: 20,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              const Color(0xFF00FFFF), // Cyan
+                              const Color(0xFF00FF41), // Neon green
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF00FFFF).withOpacity(0.5),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: 20,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Day ${_getCurrentDay(cycle)} of ${_getTotalDays(cycle)} (${(_calculateCycleProgress(cycle) * 100).toInt()}%)',
+                        style: WintermmuteStyles.bodyStyle.copyWith(
+                          color: AppColors.textLight,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          shadows: [
+                            Shadow(
+                              color: AppColors.background,
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+
           // Route and site info
           Row(
             children: [
@@ -459,26 +567,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ],
           ),
 
-          if (!isCompleted) ...[
+          if (!isCompleted && !isMissed) ...[
             const SizedBox(height: 16),
             // Action buttons
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () => _markDoseTaken(dose),
-                    icon: const Icon(Icons.check, size: 18),
+                    onPressed: () => _markDoseMissed(dose),
+                    icon: const Icon(Icons.cancel_outlined, size: 18),
                     label: Text(
-                      'MARK TAKEN',
+                      'MARK MISSED',
                       style: WintermmuteStyles.bodyStyle.copyWith(
-                        color: AppColors.background,
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      foregroundColor: AppColors.background,
+                      backgroundColor: const Color(0xFFFF6B00), // Orange warning color
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
@@ -783,6 +891,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                   );
                 },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.biotech,
+                label: '🔬 RESEARCH',
+                color: AppColors.secondary,
+                onTap: _openResearchLink,
               ),
             ),
           ],
