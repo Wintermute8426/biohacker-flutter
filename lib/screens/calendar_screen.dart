@@ -7,8 +7,7 @@ import '../theme/wintermute_styles.dart';
 import '../services/dose_schedule_service.dart';
 import '../services/dose_logs_service.dart';
 import '../services/labs_database.dart';
-import '../screens/mark_missed_modal.dart';
-import '../screens/add_symptoms_modal.dart';
+import '../widgets/side_effects_modal.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -297,14 +296,16 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   // Compliance tracker widget
   Widget _buildComplianceTracker(List<DoseInstance> doses) {
-    final completed = doses.where((d) => d.status == 'COMPLETED').length;
-    final total = doses.length;
-    final complianceRate = total > 0 ? (completed / total * 100).toStringAsFixed(1) : '0.0';
-
+    // NEW MODEL: Assume all past scheduled doses are taken unless explicitly marked as MISSED
     final pastDoses = doses.where((d) => d.date.isBefore(DateTime.now())).toList();
-    final pastCompleted = pastDoses.where((d) => d.status == 'COMPLETED').length;
+    final pastMissed = pastDoses.where((d) => d.status == 'MISSED').length;
     final pastTotal = pastDoses.length;
-    final pastComplianceRate = pastTotal > 0 ? (pastCompleted / pastTotal * 100).toStringAsFixed(1) : '0.0';
+    final pastTaken = pastTotal - pastMissed; // Everything except explicitly missed
+    final pastComplianceRate = pastTotal > 0 ? (pastTaken / pastTotal * 100).toStringAsFixed(1) : '100.0';
+
+    // For display: count logged doses (COMPLETED status)
+    final logged = doses.where((d) => d.status == 'COMPLETED').length;
+    final total = doses.length;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -327,7 +328,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 style: WintermmuteStyles.smallStyle.copyWith(color: AppColors.textMid),
               ),
               Text(
-                '($pastCompleted/$pastTotal logged)',
+                '($pastTaken/$pastTotal assumed taken)',
                 style: WintermmuteStyles.smallStyle.copyWith(
                   color: AppColors.textDim,
                   fontSize: 10,
@@ -343,7 +344,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           Column(
             children: [
               Text(
-                '$completed',
+                '$logged',
                 style: WintermmuteStyles.statValueStyle.copyWith(fontSize: 20),
               ),
               Text(
@@ -360,14 +361,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           Column(
             children: [
               Text(
-                '${total - completed}',
+                '$pastMissed',
                 style: WintermmuteStyles.statValueStyle.copyWith(
                   fontSize: 20,
-                  color: AppColors.textMid,
+                  color: AppColors.error,
                 ),
               ),
               Text(
-                'Pending',
+                'Missed',
                 style: WintermmuteStyles.smallStyle.copyWith(color: AppColors.textMid),
               ),
             ],
@@ -492,14 +493,26 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 .where((d) => d.status == 'MISSED')
                 .length;
 
-            // Determine cell color based on status
+            final isToday = date.year == DateTime.now().year &&
+                date.month == DateTime.now().month &&
+                date.day == DateTime.now().day;
+            final isPast = date.isBefore(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+            final isFuture = date.isAfter(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+
+            // NEW MODEL: Determine cell color based on new logic
             Color cellColor = AppColors.surface;
             if (missed > 0) {
+              // Red for explicitly missed doses
               cellColor = AppColors.error;
-            } else if (scheduled > 0 && completed == 0) {
-              cellColor = const Color(0xFF1E4620); // Dark green for pending
-            } else if (completed > 0) {
-              cellColor = const Color(0xFF0D2E1F); // Darker green for done
+            } else if (isPast && dayDoses.isNotEmpty) {
+              // Green for past scheduled doses (assumed taken unless missed)
+              cellColor = const Color(0xFF0D2E1F);
+            } else if (isFuture && dayDoses.isNotEmpty) {
+              // Cyan for future scheduled doses
+              cellColor = const Color(0xFF1E4620);
+            } else if (isToday && dayDoses.isNotEmpty) {
+              // Cyan for today's scheduled doses
+              cellColor = const Color(0xFF1E4620);
             }
 
             final isToday = date.year == DateTime.now().year &&
@@ -671,19 +684,27 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             final scheduled = dayDoses.where((d) => d.status == 'SCHEDULED').length;
             final missed = dayDoses.where((d) => d.status == 'MISSED').length;
 
-            // Determine cell color
-            Color cellColor = AppColors.surface;
-            if (missed > 0) {
-              cellColor = AppColors.error.withOpacity(0.2);
-            } else if (scheduled > 0 && completed == 0) {
-              cellColor = const Color(0xFF1E4620);
-            } else if (completed > 0) {
-              cellColor = const Color(0xFF0D2E1F);
-            }
-
             final isToday = date.year == DateTime.now().year &&
                 date.month == DateTime.now().month &&
                 date.day == DateTime.now().day;
+            final isPast = date.isBefore(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+            final isFuture = date.isAfter(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+
+            // NEW MODEL: Determine cell color based on new logic
+            Color cellColor = AppColors.surface;
+            if (missed > 0) {
+              // Red for explicitly missed doses
+              cellColor = AppColors.error.withOpacity(0.2);
+            } else if (isPast && dayDoses.isNotEmpty) {
+              // Green for past scheduled doses (assumed taken unless missed)
+              cellColor = const Color(0xFF0D2E1F);
+            } else if (isFuture && dayDoses.isNotEmpty) {
+              // Cyan for future scheduled doses
+              cellColor = const Color(0xFF1E4620);
+            } else if (isToday && dayDoses.isNotEmpty) {
+              // Cyan for today's scheduled doses
+              cellColor = const Color(0xFF1E4620);
+            }
 
             final hasLab = labDates.any((labDate) =>
                 labDate.year == date.year &&
@@ -767,17 +788,24 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   // Status bar with counts
   Widget _buildStatusBar(List<DoseInstance> weekDoses) {
-    final completed =
-        weekDoses.where((d) => d.status == 'COMPLETED').length;
-    final scheduled =
-        weekDoses.where((d) => d.status == 'SCHEDULED').length;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final logged = weekDoses.where((d) => d.status == 'COMPLETED').length;
+    final pastScheduled = weekDoses.where((d) =>
+        d.status == 'SCHEDULED' && d.date.isBefore(today)).length;
+    final futureScheduled = weekDoses.where((d) =>
+        d.status == 'SCHEDULED' && (d.date.isAfter(today) || d.date.isAtSameMomentAs(today))).length;
     final missed = weekDoses.where((d) => d.status == 'MISSED').length;
+
+    // NEW MODEL: Show "Assumed Taken" for past scheduled doses
+    final assumedTaken = pastScheduled + logged;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildStatusChip('$completed', 'Logged', const Color(0xFF39FF14)),
-        _buildStatusChip('$scheduled', 'Pending', const Color(0xFF00FFFF)),
+        _buildStatusChip('$assumedTaken', 'Assumed Taken', const Color(0xFF39FF14)),
+        _buildStatusChip('$futureScheduled', 'Upcoming', const Color(0xFF00FFFF)),
         _buildStatusChip('$missed', 'Missed', AppColors.error),
       ],
     );
@@ -862,11 +890,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   Widget _buildDoseListItem(BuildContext context, DoseInstance dose) {
+    // NEW MODEL: Assume all past doses are taken unless explicitly marked as missed
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final isPast = dose.date.isBefore(today);
+
     final statusColor = dose.status == 'COMPLETED'
         ? const Color(0xFF39FF14)
         : dose.status == 'MISSED'
             ? AppColors.error
-            : const Color(0xFF00FFFF);
+            : isPast
+                ? const Color(0xFF39FF14) // Past scheduled = assumed taken (green)
+                : const Color(0xFF00FFFF); // Future scheduled = upcoming (cyan)
+
+    final displayStatus = dose.status == 'SCHEDULED' && isPast
+        ? 'ASSUMED TAKEN'
+        : dose.status;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -907,10 +946,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  dose.status,
+                  displayStatus,
                   style: WintermmuteStyles.smallStyle.copyWith(
                     color: statusColor,
                     fontWeight: FontWeight.bold,
+                    fontSize: 9,
                   ),
                 ),
               ),
@@ -918,23 +958,46 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ),
           if (dose.status == 'SCHEDULED') ...[
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _showQuickLogModal(context, dose),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  foregroundColor: AppColors.background,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                child: Text(
-                  'MARK AS TAKEN',
-                  style: WintermmuteStyles.bodyStyle.copyWith(
-                    color: AppColors.background,
-                    fontWeight: FontWeight.bold,
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _markAsMissed(context, dose),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      foregroundColor: AppColors.background,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      'MARK AS MISSED',
+                      style: WintermmuteStyles.bodyStyle.copyWith(
+                        color: AppColors.background,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _showSideEffectsModal(context, dose),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: AppColors.background,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      'LOG SIDE EFFECTS',
+                      style: WintermmuteStyles.bodyStyle.copyWith(
+                        color: AppColors.background,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ],
@@ -942,174 +1005,53 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
-  // Quick-log modal with injection site picker
-  void _showQuickLogModal(BuildContext context, DoseInstance dose) {
-    String? selectedSite;
-    final injectionSites = [
-      'Left Abdomen',
-      'Right Abdomen',
-      'Left Thigh',
-      'Right Thigh',
-      'Left Deltoid',
-      'Right Deltoid',
-      'Left Glute',
-      'Right Glute',
-    ];
+  // Mark dose as missed
+  Future<void> _markAsMissed(BuildContext context, DoseInstance dose) async {
+    try {
+      if (dose.doseLogId.isEmpty) return;
 
+      final service = ref.read(doseLogsServiceProvider);
+      await service.markAsMissed(dose.doseLogId);
+
+      if (context.mounted) {
+        // Close the day detail sheet
+        Navigator.pop(context);
+        // Refresh the calendar
+        ref.refresh(upcomingDosesProvider);
+        // Show feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Dose marked as missed',
+              style: WintermmuteStyles.bodyStyle,
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error marking dose as missed: $e');
+    }
+  }
+
+  // Show side effects modal
+  void _showSideEffectsModal(BuildContext context, DoseInstance dose) {
+    // Import the SideEffectsModal widget
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
       isScrollControlled: true,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Log Dose',
-                      style: WintermmuteStyles.titleStyle,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      '${dose.peptideName} - ${dose.doseAmount}mg',
-                      style: WintermmuteStyles.bodyStyle,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${dose.time} • ${dose.route}',
-                      style: WintermmuteStyles.smallStyle
-                          .copyWith(color: AppColors.textMid),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Injection Site (Optional)',
-                      style: WintermmuteStyles.bodyStyle.copyWith(
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      value: selectedSite,
-                      decoration: InputDecoration(
-                        hintText: 'Select injection site',
-                        hintStyle: WintermmuteStyles.bodyStyle
-                            .copyWith(color: AppColors.textDim),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.primary),
-                        ),
-                      ),
-                      dropdownColor: AppColors.surface,
-                      style: WintermmuteStyles.bodyStyle,
-                      items: injectionSites.map((site) {
-                        return DropdownMenuItem(
-                          value: site,
-                          child: Text(site),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedSite = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: AppColors.border),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: Text(
-                              'CANCEL',
-                              style: WintermmuteStyles.bodyStyle,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              await _logDose(dose, selectedSite);
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                                // Close the day detail sheet too
-                                Navigator.pop(context);
-                                // Refresh the calendar
-                                ref.refresh(upcomingDosesProvider);
-                                // Show success message
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Dose logged successfully!',
-                                      style: WintermmuteStyles.bodyStyle,
-                                    ),
-                                    backgroundColor: AppColors.accent,
-                                  ),
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.accent,
-                              foregroundColor: AppColors.background,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: Text(
-                              'LOG DOSE',
-                              style: WintermmuteStyles.bodyStyle.copyWith(
-                                color: AppColors.background,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
+        return SideEffectsModal(
+          dose: dose,
+          onSaved: () {
+            // Close the day detail sheet
+            Navigator.pop(context);
+            // Refresh the calendar
+            ref.refresh(upcomingDosesProvider);
           },
         );
       },
     );
-  }
-
-  // Log dose to database
-  Future<void> _logDose(DoseInstance dose, String? injectionSite) async {
-    try {
-      final service = ref.read(doseLogsServiceProvider);
-
-      // Update the dose_log status to COMPLETED
-      if (dose.doseLogId.isNotEmpty) {
-        await service.markAsCompleted(dose.doseLogId);
-
-        // If injection site is provided, update it too
-        if (injectionSite != null) {
-          await Supabase.instance.client
-              .from('dose_logs')
-              .update({'injection_site': injectionSite})
-              .eq('id', dose.doseLogId);
-        }
-      }
-    } catch (e) {
-      print('Error logging dose: $e');
-    }
   }
 }
