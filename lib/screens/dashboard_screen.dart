@@ -7,6 +7,7 @@ import '../services/dose_logs_database.dart';
 import '../services/user_profile_service.dart';
 import 'research_screen.dart';
 import 'weight_tracker_screen.dart';
+import 'dashboard_insights_screen.dart';
 import '../main.dart' show authProviderProvider;
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -216,31 +217,68 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // NEWS & UPDATES
-                Text(
-                  'NEWS & UPDATES',
-                  style: WintermmuteStyles.headerStyle.copyWith(fontSize: 14),
-                ),
-                const SizedBox(height: 12),
-                _buildNewsCard(
-                  title: 'BPC-157 Research',
-                  subtitle: 'New study on muscle repair',
-                  icon: Icons.science_outlined,
-                  color: AppColors.secondary,
-                ),
-                const SizedBox(height: 8),
-                _buildNewsCard(
-                  title: 'Protocol Update',
-                  subtitle: 'Longevity stack now optimized',
-                  icon: Icons.update_outlined,
-                  color: AppColors.accent,
-                ),
-                const SizedBox(height: 8),
-                _buildNewsCard(
-                  title: 'Q1 2026 Analysis',
-                  subtitle: 'Protocol effectiveness report',
-                  icon: Icons.analytics_outlined,
-                  color: AppColors.primary,
+                // DASHBOARD INSIGHTS LINK
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DashboardInsightsScreen(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: AppColors.accent.withOpacity(0.5),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.accent.withOpacity(0.1),
+                          AppColors.primary.withOpacity(0.1),
+                        ],
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.analytics_outlined,
+                          color: AppColors.accent,
+                          size: 32,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'DASHBOARD INSIGHTS',
+                                style: WintermmuteStyles.bodyStyle.copyWith(
+                                  color: AppColors.accent,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Compliance, effectiveness & analytics',
+                                style: WintermmuteStyles.smallStyle.copyWith(
+                                  color: AppColors.textMid,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: AppColors.accent,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
 
