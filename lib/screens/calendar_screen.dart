@@ -515,10 +515,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               cellColor = const Color(0xFF1E4620);
             }
 
-            final isToday = date.year == DateTime.now().year &&
-                date.month == DateTime.now().month &&
-                date.day == DateTime.now().day;
-
             // Check if this date has a lab result
             final hasLab = labDates.any((labDate) =>
                 labDate.year == date.year &&
