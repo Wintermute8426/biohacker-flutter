@@ -643,7 +643,7 @@ class _DashboardInsightsScreenState extends ConsumerState<DashboardInsightsScree
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '$/Month:',
+                '\$/Month:',
                 style: WintermmuteStyles.bodyStyle.copyWith(
                   color: AppColors.textMid,
                 ),
