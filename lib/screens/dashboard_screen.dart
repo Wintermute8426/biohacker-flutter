@@ -4,6 +4,7 @@ import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
+import '../services/user_profile_service.dart';
 import 'research_screen.dart';
 import 'weight_tracker_screen.dart';
 import '../main.dart' show authProviderProvider;
@@ -21,11 +22,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   late Future<List<Cycle>> activeCycles;
   late Future<List<DoseLog>> doseLogs;
+  String _username = 'USER'; // Default fallback
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _loadUsername();
   }
 
   void _loadData() {
@@ -34,10 +37,26 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     setState(() {});
   }
 
+  Future<void> _loadUsername() async {
+    try {
+      final userId = ref.read(authProviderProvider).user?.id;
+      if (userId != null) {
+        final profileService = ref.read(userProfileServiceProvider);
+        final profile = await profileService.getUserProfile(userId);
+        if (profile?.username != null && profile!.username!.isNotEmpty) {
+          setState(() {
+            _username = profile.username!;
+          });
+        }
+      }
+    } catch (e) {
+      print('[Dashboard] Error loading username: $e');
+      // Keep default 'USER'
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(authProviderProvider).user;
-    final username = user?.email?.split('@')[0] ?? 'User';
 
     return SafeArea(
       child: Stack(
@@ -77,7 +96,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                username.toUpperCase(),
+                                _username.toUpperCase(),
                                 style: WintermmuteStyles.titleStyle
                                     .copyWith(fontSize: 20),
                               ),
