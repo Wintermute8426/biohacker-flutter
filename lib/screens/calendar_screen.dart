@@ -1055,8 +1055,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       if (context.mounted) {
         // Close the day detail sheet
         Navigator.pop(context);
-        // Refresh the calendar
-        ref.refresh(upcomingDosesProvider);
+        // Invalidate providers to force complete refresh of calendar and cycle data
+        ref.invalidate(upcomingDosesProvider);
+        ref.invalidate(doseSchedulesProvider);
         // Show feedback
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1097,8 +1098,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           onSaved: () {
             // Close the day detail sheet
             Navigator.pop(context);
-            // Refresh the calendar
-            ref.refresh(upcomingDosesProvider);
+            // Invalidate providers to force complete refresh of calendar and cycle data
+            ref.invalidate(upcomingDosesProvider);
+            ref.invalidate(doseSchedulesProvider);
           },
         );
       },
