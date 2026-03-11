@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/user_profile_service.dart';
+import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
+import '../main.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -255,6 +257,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   // CYBERPUNK ID CARD VIEW
   Widget _buildIDCard() {
+    final user = Supabase.instance.client.auth.currentUser;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -492,8 +496,170 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ],
             ),
           ),
+
+          const SizedBox(height: 24),
+
+          // ACCOUNT SECTION
+          _buildSectionCard(
+            'ACCOUNT',
+            Column(
+              children: [
+                _buildInfoRow('Email', user?.email ?? 'N/A'),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      ref.read(authProviderProvider).signOut();
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: Text(
+                      'SIGN OUT',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // NOTIFICATIONS SECTION
+          _buildSectionCard(
+            'NOTIFICATIONS',
+            Column(
+              children: [
+                _buildToggleRow('Dose Reminders', _notificationPreferences['email'] ?? true, 'email'),
+                const Divider(height: 24, color: AppColors.textDim),
+                _buildToggleRow('Lab Alerts', _notificationPreferences['push'] ?? false, 'push'),
+                const Divider(height: 24, color: AppColors.textDim),
+                _buildToggleRow('Quiet Hours', _notificationPreferences['sms'] ?? false, 'sms'),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // APP SETTINGS SECTION
+          _buildSectionCard(
+            'APP SETTINGS',
+            Column(
+              children: [
+                _buildInfoRow('Units', _selectedUnits == 'imperial' ? 'Imperial (lbs, ft/in)' : 'Metric (kg, cm)'),
+                const Divider(height: 24, color: AppColors.textDim),
+                _buildInfoRow('Theme', 'Cyberpunk (default)'),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
         ],
       ),
+    );
+  }
+
+  Widget _buildSectionCard(String title, Widget child) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.3),
+        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 13,
+            color: AppColors.textMid,
+          ),
+        ),
+        Flexible(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 13,
+              color: AppColors.textLight,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.right,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildToggleRow(String label, bool value, String key) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 13,
+            color: AppColors.textMid,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: value ? AppColors.accent.withOpacity(0.2) : AppColors.textDim.withOpacity(0.2),
+            border: Border.all(
+              color: value ? AppColors.accent : AppColors.textDim,
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            value ? 'ON' : 'OFF',
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 11,
+              color: value ? AppColors.accent : AppColors.textDim,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

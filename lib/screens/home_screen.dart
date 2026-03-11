@@ -12,7 +12,6 @@ import 'protocols_screen.dart';
 import 'labs_screen.dart';
 import 'reports_screen.dart';
 import 'calendar_screen.dart';
-import 'settings_screen.dart';
 import 'profile_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -55,7 +54,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Profile'),
+            title: const Text('Profile & Settings'),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -72,17 +71,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ResearchScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
           ),
