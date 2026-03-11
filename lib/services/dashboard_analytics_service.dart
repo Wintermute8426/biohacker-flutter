@@ -163,7 +163,7 @@ class DashboardAnalyticsService {
                 biomarker: item['biomarker'] ?? '',
                 changePercent: (item['change'] as num?)?.toDouble() ?? 0.0,
                 contributingPeptides: List<String>.from(item['peptides'] ?? []),
-                isImprovement: (item['change'] as num?)?.toDouble() ?? 0.0 > 0,
+                isImprovement: ((item['change'] as num?)?.toDouble() ?? 0.0) > 0,
               ))
           .toList(),
       costEfficiency: json['monthly_cost'] != null
@@ -230,7 +230,7 @@ class DashboardAnalyticsService {
 
       if (scheduledDoses == 0) scheduledDoses = 1; // Avoid division by zero
 
-      final percentage = (dosesLogged / scheduledDoses * 100).clamp(0, 100);
+      final percentage = (dosesLogged / scheduledDoses * 100).clamp(0, 100).toDouble();
 
       return ComplianceData(
         dosesLogged: dosesLogged,
@@ -289,7 +289,7 @@ class DashboardAnalyticsService {
 
       // Calculate rating (normalize to 10)
       final maxLogs = peptideScores.values.reduce(max);
-      final rating = (topPeptide.value / maxLogs * 10).clamp(0, 10);
+      final rating = (topPeptide.value / maxLogs * 10).clamp(0, 10).toDouble();
 
       return TopPeptideData(
         peptideName: topPeptide.key,
@@ -517,7 +517,7 @@ class DashboardAnalyticsService {
           .eq('user_id', userId);
 
       final totalDoses = (logsResponse as List).length;
-      final costPerDose = totalDoses > 0 ? totalCost / totalDoses : 0;
+      final costPerDose = totalDoses > 0 ? (totalCost / totalDoses).toDouble() : 0.0;
 
       // Monthly cost (last 30 days)
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));

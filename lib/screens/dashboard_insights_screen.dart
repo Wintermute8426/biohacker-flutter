@@ -42,7 +42,7 @@ class _DashboardInsightsScreenState extends ConsumerState<DashboardInsightsScree
         body: Center(
           child: Text(
             'Please log in to view insights',
-            style: TextStyle(color: AppColors.textMain),
+            style: TextStyle(color: AppColors.textLight),
           ),
         ),
       );
@@ -364,7 +364,7 @@ class _DashboardInsightsScreenState extends ConsumerState<DashboardInsightsScree
           Text(
             topPeptide.peptideName,
             style: WintermmuteStyles.bodyStyle.copyWith(
-              color: AppColors.textMain,
+              color: AppColors.textLight,
               fontWeight: FontWeight.bold,
             ),
             textAlign: TextAlign.center,
@@ -518,7 +518,7 @@ class _DashboardInsightsScreenState extends ConsumerState<DashboardInsightsScree
                     child: Text(
                       peptide,
                       style: WintermmuteStyles.tinyStyle.copyWith(
-                        color: AppColors.textMain,
+                        color: AppColors.textLight,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -543,7 +543,7 @@ class _DashboardInsightsScreenState extends ConsumerState<DashboardInsightsScree
                           child: Text(
                             count > 0 ? '$count' : '',
                             style: WintermmuteStyles.tinyStyle.copyWith(
-                              color: AppColors.textMain,
+                              color: AppColors.textLight,
                               fontSize: 10,
                             ),
                           ),
@@ -596,7 +596,7 @@ class _DashboardInsightsScreenState extends ConsumerState<DashboardInsightsScree
                     child: Text(
                       corr.biomarker,
                       style: WintermmuteStyles.bodyStyle.copyWith(
-                        color: AppColors.textMain,
+                        color: AppColors.textLight,
                       ),
                     ),
                   ),
@@ -670,7 +670,7 @@ class _DashboardInsightsScreenState extends ConsumerState<DashboardInsightsScree
               Text(
                 '\$${cost.costPerDose.toStringAsFixed(2)}',
                 style: WintermmuteStyles.bodyStyle.copyWith(
-                  color: AppColors.textMain,
+                  color: AppColors.textLight,
                 ),
               ),
             ],
@@ -691,7 +691,7 @@ class _DashboardInsightsScreenState extends ConsumerState<DashboardInsightsScree
                 Text(
                   cost.bestValuePeptide!,
                   style: WintermmuteStyles.smallStyle.copyWith(
-                    color: AppColors.textMain,
+                    color: AppColors.textLight,
                   ),
                 ),
               ],
