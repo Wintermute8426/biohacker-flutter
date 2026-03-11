@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dose_logs_service.dart' show currentUserIdProvider;
 
 // Models
 class DoseSchedule {
@@ -421,10 +422,6 @@ final supabaseProvider = Provider<SupabaseClient>((ref) {
 final doseScheduleServiceProvider = Provider<DoseScheduleService>((ref) {
   final supabase = ref.watch(supabaseProvider);
   return DoseScheduleService(supabase);
-});
-
-final currentUserIdProvider = Provider<String?>((ref) {
-  return Supabase.instance.client.auth.currentUser?.id;
 });
 
 final upcomingDosesProvider = FutureProvider<List<DoseInstance>>((ref) async {
