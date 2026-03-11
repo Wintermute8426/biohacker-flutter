@@ -4,10 +4,11 @@ import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/cycles_database.dart';
 import '../services/dose_logs_database.dart';
-import '../services/user_profile_service.dart';
-import 'research_screen.dart';
-import 'weight_tracker_screen.dart';
-import 'dashboard_insights_screen.dart';
+import '../services/dose_schedule_service.dart';
+import '../services/weight_logs_database.dart';
+import '../widgets/side_effects_modal.dart';
+import '../widgets/weight_log_modal.dart';
+import 'labs_screen.dart';
 import '../main.dart' show authProviderProvider;
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -21,364 +22,199 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   final cycleDb = CyclesDatabase();
   final doseDb = DoseLogsDatabase();
 
-  late Future<List<Cycle>> activeCycles;
-  late Future<List<DoseLog>> doseLogs;
-  String _username = 'USER'; // Default fallback
+  List<DoseInstance> _todaysDoses = [];
+  List<Cycle> _activeCycles = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadData();
-    _loadUsername();
   }
 
-  void _loadData() {
-    activeCycles = cycleDb.getActiveCycles();
-    doseLogs = doseDb.getAllDoseLogs();
-    setState(() {});
-  }
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
 
-  Future<void> _loadUsername() async {
     try {
       final userId = ref.read(authProviderProvider).user?.id;
-      if (userId != null) {
-        final profileService = ref.read(userProfileServiceProvider);
-        final profile = await profileService.getUserProfile(userId);
-        if (profile?.username != null && profile!.username!.isNotEmpty) {
-          setState(() {
-            _username = profile.username!;
-          });
-        }
+      if (userId == null) return;
+
+      final doseService = ref.read(doseScheduleServiceProvider);
+
+      // Get today's doses
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final tomorrow = today.add(const Duration(days: 1));
+
+      final allDoses = await doseService.getUpcomingDoses(userId, daysAhead: 1);
+      _todaysDoses = allDoses.where((dose) {
+        final doseDate = DateTime(dose.date.year, dose.date.month, dose.date.day);
+        return doseDate.isAtSameMomentAs(today);
+      }).toList();
+
+      // Get active cycles
+      _activeCycles = await cycleDb.getActiveCycles();
+
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     } catch (e) {
-      print('[Dashboard] Error loading username: $e');
-      // Keep default 'USER'
+      print('[Dashboard] Error loading data: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
+  }
+
+  Future<void> _markDoseTaken(DoseInstance dose) async {
+    try {
+      final userId = ref.read(authProviderProvider).user?.id;
+      if (userId == null) return;
+
+      // Log the dose
+      await doseDb.logDose(
+        cycleId: dose.cycleId,
+        doseAmount: dose.doseAmount,
+        loggedAt: DateTime.now(),
+        route: dose.route,
+        location: null,
+        notes: null,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Dose marked as taken',
+              style: WintermmuteStyles.bodyStyle,
+            ),
+            backgroundColor: AppColors.accent,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        _loadData();
+      }
+    } catch (e) {
+      print('[Dashboard] Error marking dose: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error marking dose',
+              style: WintermmuteStyles.bodyStyle,
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showSideEffectsModal(DoseInstance dose) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SideEffectsModal(
+        dose: dose,
+        onSaved: _loadData,
+      ),
+    );
+  }
+
+  void _showWeightLogModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => WeightLogModal(
+        onSaved: () {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Weight logged successfully',
+                  style: WintermmuteStyles.bodyStyle,
+                ),
+                backgroundColor: AppColors.accent,
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  double _calculateCycleProgress(Cycle cycle) {
+    final now = DateTime.now();
+    final totalDays = cycle.endDate.difference(cycle.startDate).inDays;
+    final currentDay = now.difference(cycle.startDate).inDays + 1;
+
+    if (currentDay <= 0) return 0.0;
+    if (currentDay >= totalDays) return 1.0;
+
+    return currentDay / totalDays;
+  }
+
+  int _getCurrentDay(Cycle cycle) {
+    final now = DateTime.now();
+    return now.difference(cycle.startDate).inDays + 1;
+  }
+
+  int _getTotalDays(Cycle cycle) {
+    return cycle.endDate.difference(cycle.startDate).inDays;
   }
 
   @override
   Widget build(BuildContext context) {
-
     return SafeArea(
       child: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Hero Section: Welcome + Status
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.primary.withOpacity(0.3),
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.circular(4),
-                    color: AppColors.background,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'SYSTEM STATUS',
-                        style: WintermmuteStyles.smallStyle.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _username.toUpperCase(),
-                                style: WintermmuteStyles.titleStyle
-                                    .copyWith(fontSize: 20),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Active User Session',
-                                style: WintermmuteStyles.smallStyle.copyWith(
-                                  color: AppColors.textMid,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: AppColors.accent,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.accent,
-                                  blurRadius: 8,
-                                  spreadRadius: 1,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // ACTIVE CYCLES (Snapshot Grid)
-                Text(
-                  'ACTIVE CYCLES',
-                  style: WintermmuteStyles.headerStyle.copyWith(fontSize: 14),
-                ),
-                const SizedBox(height: 12),
-                FutureBuilder<List<Cycle>>(
-                  future: activeCycles,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      );
-                    }
-
-                    if (snapshot.hasError) {
-                      return Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: WintermmuteStyles.cardDecoration,
-                        child: Center(
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: AppColors.error,
-                                size: 40,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'Error loading cycles',
-                                style: WintermmuteStyles.bodyStyle
-                                    .copyWith(color: AppColors.error),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: WintermmuteStyles.cardDecoration,
-                        child: Center(
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.schedule_outlined,
-                                color: AppColors.primary,
-                                size: 40,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'No active cycles',
-                                style: WintermmuteStyles.bodyStyle,
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-
-                    final cycles = snapshot.data!;
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 1.3,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                      ),
-                      itemCount: cycles.length,
-                      itemBuilder: (context, index) {
-                        final cycle = cycles[index];
-                        return _buildCycleCard(cycle);
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 24),
-
-                // DASHBOARD INSIGHTS LINK
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const DashboardInsightsScreen(),
-                      ),
-                    );
-                  },
-                  child: Container(
+          _isLoading
+              ? Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                )
+              : RefreshIndicator(
+                  onRefresh: _loadData,
+                  color: AppColors.primary,
+                  backgroundColor: AppColors.surface,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: AppColors.accent.withOpacity(0.5),
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(4),
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.accent.withOpacity(0.1),
-                          AppColors.primary.withOpacity(0.1),
-                        ],
-                      ),
-                    ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.analytics_outlined,
-                          color: AppColors.accent,
-                          size: 32,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'DASHBOARD INSIGHTS',
-                                style: WintermmuteStyles.bodyStyle.copyWith(
-                                  color: AppColors.accent,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Compliance, effectiveness & analytics',
-                                style: WintermmuteStyles.smallStyle.copyWith(
-                                  color: AppColors.textMid,
-                                ),
-                              ),
-                            ],
+                        // Header
+                        Text(
+                          'DAILY ACTIONS',
+                          style: WintermmuteStyles.headerStyle.copyWith(
+                            fontSize: 18,
+                            letterSpacing: 2,
                           ),
                         ),
-                        Icon(
-                          Icons.arrow_forward,
-                          color: AppColors.accent,
-                          size: 20,
-                        ),
+                        const SizedBox(height: 20),
+
+                        // TODAY'S DOSES SECTION
+                        _buildTodaysDosesSection(),
+                        const SizedBox(height: 32),
+
+                        // CYCLE PROGRESS SECTION
+                        _buildCycleProgressSection(),
+                        const SizedBox(height: 32),
+
+                        // QUICK ACTIONS SECTION
+                        _buildQuickActionsSection(),
+                        const SizedBox(height: 32),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                // QUICK LINKS
-                Text(
-                  'QUICK LINKS',
-                  style: WintermmuteStyles.headerStyle.copyWith(fontSize: 14),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ResearchScreen(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: AppColors.primary.withOpacity(0.4),
-                              width: 1,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                            color: AppColors.surface,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.book_outlined,
-                                color: AppColors.primary,
-                                size: 32,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'RESEARCH',
-                                style: WintermmuteStyles.smallStyle.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const WeightTrackerWidget(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: AppColors.accent.withOpacity(0.4),
-                              width: 1,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                            color: AppColors.surface,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.scale_outlined,
-                                color: AppColors.accent,
-                                size: 32,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'WEIGHT',
-                                style: WintermmuteStyles.smallStyle.copyWith(
-                                  color: AppColors.accent,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-              ],
-            ),
-          ),
           // Scanlines overlay
           Positioned.fill(
             child: IgnorePointer(
@@ -392,122 +228,620 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildCycleCard(Cycle cycle) {
+  Widget _buildTodaysDosesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.medication_outlined,
+              color: AppColors.primary,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'TODAY\'S DOSES',
+              style: WintermmuteStyles.bodyStyle.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        if (_todaysDoses.isEmpty) _buildNoDosesToday() else _buildDosesList(),
+      ],
+    );
+  }
+
+  Widget _buildNoDosesToday() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         border: Border.all(
-          color: AppColors.secondary.withOpacity(0.3),
-          width: 1,
+          color: AppColors.accent.withOpacity(0.3),
+          width: 2,
         ),
-        borderRadius: BorderRadius.circular(4),
-        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(8),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.accent.withOpacity(0.05),
+            AppColors.primary.withOpacity(0.05),
+          ],
+        ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                cycle.peptideName,
-                style: WintermmuteStyles.smallStyle.copyWith(
-                  color: AppColors.secondary,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.none,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${cycle.dose}mg',
-                style: WintermmuteStyles.smallStyle.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.none,
-                ),
-              ),
-            ],
+          Icon(
+            Icons.check_circle_outline,
+            color: AppColors.accent,
+            size: 48,
           ),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  cycle.frequency,
-                  style: WintermmuteStyles.tinyStyle.copyWith(
-                    color: AppColors.textMid,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: AppColors.accent,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
+          const SizedBox(height: 12),
+          Text(
+            'All doses complete!',
+            style: WintermmuteStyles.titleStyle.copyWith(
+              color: AppColors.accent,
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'No doses scheduled for today',
+            style: WintermmuteStyles.bodyStyle.copyWith(
+              color: AppColors.textMid,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNewsCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-  }) {
+  Widget _buildDosesList() {
+    return Column(
+      children: _todaysDoses.map((dose) => _buildDoseCard(dose)).toList(),
+    );
+  }
+
+  Widget _buildDoseCard(DoseInstance dose) {
+    final isCompleted = dose.status == 'COMPLETED';
+    final maxDose = 10.0; // Max expected dose for progress bar scaling
+    final fillPercent = (dose.doseAmount / maxDose).clamp(0.0, 1.0);
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
+          color: isCompleted
+              ? AppColors.accent.withOpacity(0.5)
+              : AppColors.primary.withOpacity(0.5),
+          width: 2,
         ),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(8),
         color: AppColors.surface,
+        boxShadow: isCompleted
+            ? [
+                BoxShadow(
+                  color: AppColors.accent.withOpacity(0.2),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                )
+              ]
+            : null,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: WintermmuteStyles.smallStyle.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.none,
+          // Header row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  dose.peptideName.toUpperCase(),
+                  style: WintermmuteStyles.titleStyle.copyWith(
+                    color: AppColors.primary,
+                    fontSize: 18,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: WintermmuteStyles.tinyStyle.copyWith(
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isCompleted
+                      ? AppColors.accent.withOpacity(0.2)
+                      : AppColors.secondary.withOpacity(0.2),
+                  border: Border.all(
+                    color: isCompleted ? AppColors.accent : AppColors.secondary,
+                  ),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  dose.time,
+                  style: WintermmuteStyles.bodyStyle.copyWith(
+                    color: isCompleted ? AppColors.accent : AppColors.secondary,
+                    fontWeight: FontWeight.bold,
+                    fontFeatures: [const FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Syringe visual indicator
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.vaccines_outlined,
                     color: AppColors.textMid,
-                    decoration: TextDecoration.none,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'DOSE AMOUNT',
+                    style: WintermmuteStyles.smallStyle.copyWith(
+                      color: AppColors.textMid,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Stack(
+                children: [
+                  Container(
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  FractionallySizedBox(
+                    widthFactor: fillPercent,
+                    child: Container(
+                      height: 24,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primary,
+                            AppColors.accent,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.5),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: 24,
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${dose.doseAmount}mg',
+                      style: WintermmuteStyles.bodyStyle.copyWith(
+                        color: AppColors.textLight,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        shadows: [
+                          Shadow(
+                            color: AppColors.background,
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Route and site info
+          Row(
+            children: [
+              _buildInfoChip(Icons.route, dose.route),
+              const SizedBox(width: 8),
+              _buildInfoChip(Icons.location_on_outlined, 'Rotate site'),
+            ],
+          ),
+
+          if (!isCompleted) ...[
+            const SizedBox(height: 16),
+            // Action buttons
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _markDoseTaken(dose),
+                    icon: const Icon(Icons.check, size: 18),
+                    label: Text(
+                      'MARK TAKEN',
+                      style: WintermmuteStyles.bodyStyle.copyWith(
+                        color: AppColors.background,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: AppColors.background,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _showSideEffectsModal(dose),
+                    icon: const Icon(Icons.warning_amber_outlined, size: 18),
+                    label: Text(
+                      'LOG EFFECTS',
+                      style: WintermmuteStyles.bodyStyle.copyWith(
+                        color: AppColors.secondary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.secondary,
+                      side: BorderSide(color: AppColors.secondary, width: 2),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          Icon(
-            Icons.arrow_forward,
-            color: color.withOpacity(0.5),
-            size: 16,
+          ] else ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: AppColors.accent,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'COMPLETED',
+                  style: WintermmuteStyles.bodyStyle.copyWith(
+                    color: AppColors.accent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: AppColors.textMid),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: WintermmuteStyles.smallStyle.copyWith(
+              color: AppColors.textMid,
+              fontSize: 11,
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCycleProgressSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.trending_up,
+              color: AppColors.secondary,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'CYCLE PROGRESS',
+              style: WintermmuteStyles.bodyStyle.copyWith(
+                color: AppColors.secondary,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        if (_activeCycles.isEmpty)
+          _buildNoCyclesState()
+        else
+          Column(
+            children: _activeCycles.map((cycle) => _buildCycleProgressCard(cycle)).toList(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildNoCyclesState() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.3),
+          width: 2,
+        ),
+        borderRadius: BorderRadius.circular(8),
+        color: AppColors.surface,
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.add_circle_outline,
+            color: AppColors.primary,
+            size: 48,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No active cycles',
+            style: WintermmuteStyles.titleStyle.copyWith(
+              color: AppColors.primary,
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Create your first cycle to get started',
+            style: WintermmuteStyles.bodyStyle.copyWith(
+              color: AppColors.textMid,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCycleProgressCard(Cycle cycle) {
+    final progress = _calculateCycleProgress(cycle);
+    final currentDay = _getCurrentDay(cycle);
+    final totalDays = _getTotalDays(cycle);
+    final isOnTrack = progress <= 1.0;
+    final progressColor = isOnTrack ? AppColors.accent : AppColors.secondary;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: progressColor.withOpacity(0.5),
+          width: 2,
+        ),
+        borderRadius: BorderRadius.circular(8),
+        color: AppColors.surface,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Cycle name
+          Text(
+            cycle.peptideName.toUpperCase(),
+            style: WintermmuteStyles.titleStyle.copyWith(
+              color: AppColors.primary,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${cycle.dose}mg • ${cycle.frequency} • ${cycle.route}',
+            style: WintermmuteStyles.smallStyle.copyWith(
+              color: AppColors.textMid,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Progress bar
+          Stack(
+            children: [
+              Container(
+                height: 20,
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  border: Border.all(color: AppColors.border),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              FractionallySizedBox(
+                widthFactor: progress.clamp(0.0, 1.0),
+                child: Container(
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: progressColor,
+                    borderRadius: BorderRadius.circular(4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: progressColor.withOpacity(0.5),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                height: 20,
+                alignment: Alignment.center,
+                child: Text(
+                  '${(progress * 100).toInt()}%',
+                  style: WintermmuteStyles.bodyStyle.copyWith(
+                    color: AppColors.textLight,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    shadows: [
+                      Shadow(
+                        color: AppColors.background,
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Day count
+          Text(
+            'Day $currentDay of $totalDays',
+            style: WintermmuteStyles.bodyStyle.copyWith(
+              color: progressColor,
+              fontWeight: FontWeight.bold,
+              fontFeatures: [const FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.flash_on,
+              color: AppColors.accent,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'QUICK ACTIONS',
+              style: WintermmuteStyles.bodyStyle.copyWith(
+                color: AppColors.accent,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.scale_outlined,
+                label: 'LOG WEIGHT',
+                color: AppColors.accent,
+                onTap: _showWeightLogModal,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildQuickActionCard(
+                icon: Icons.science_outlined,
+                label: 'VIEW LABS',
+                color: AppColors.primary,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LabsScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickActionCard({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: color.withOpacity(0.5),
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(8),
+          gradient: LinearGradient(
+            colors: [
+              color.withOpacity(0.1),
+              color.withOpacity(0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.2),
+              blurRadius: 8,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 48,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              style: WintermmuteStyles.bodyStyle.copyWith(
+                color: color,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
