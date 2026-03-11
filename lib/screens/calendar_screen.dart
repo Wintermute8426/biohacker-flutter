@@ -1004,10 +1004,53 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   // Mark dose as missed
   Future<void> _markAsMissed(BuildContext context, DoseInstance dose) async {
     try {
-      if (dose.doseLogId.isEmpty) return;
-
       final service = ref.read(doseLogsServiceProvider);
-      await service.markAsMissed(dose.doseLogId);
+      final userId = ref.read(currentUserIdProvider);
+
+      if (userId == null) {
+        print('Error: No user ID found');
+        return;
+      }
+
+      String doseLogId = dose.doseLogId;
+
+      // If no dose_log exists yet, create one first
+      if (doseLogId.isEmpty) {
+        print('[DEBUG] Creating new dose_log entry for missed dose');
+        final supabase = Supabase.instance.client;
+
+        // Parse time to create proper DateTime
+        final timeParts = dose.time.split(':');
+        final hour = int.parse(timeParts[0]);
+        final minute = int.parse(timeParts[1]);
+        final loggedAt = DateTime(
+          dose.date.year,
+          dose.date.month,
+          dose.date.day,
+          hour,
+          minute
+        );
+
+        final response = await supabase
+            .from('dose_logs')
+            .insert({
+              'user_id': userId,
+              'cycle_id': dose.cycleId,
+              'schedule_id': dose.scheduleId,
+              'dose_amount': dose.doseAmount,
+              'route': dose.route,
+              'logged_at': loggedAt.toIso8601String(),
+              'status': 'MISSED',
+            })
+            .select()
+            .single();
+
+        doseLogId = response['id'] as String;
+        print('[DEBUG] Created dose_log with ID: $doseLogId');
+      } else {
+        // Update existing dose_log
+        await service.markAsMissed(doseLogId);
+      }
 
       if (context.mounted) {
         // Close the day detail sheet
@@ -1027,6 +1070,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       }
     } catch (e) {
       print('Error marking dose as missed: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error marking dose as missed: $e',
+              style: WintermmuteStyles.bodyStyle,
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
   }
 
