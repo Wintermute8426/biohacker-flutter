@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import '../models/lab_result.dart';
 
@@ -140,3 +141,13 @@ class LabsDatabase {
     }
   }
 }
+
+// Riverpod Providers
+final labsDatabaseProvider = Provider<LabsDatabase>((ref) {
+  return LabsDatabase();
+});
+
+final userLabResultsProvider = FutureProvider.family<List<LabResult>, String>((ref, userId) async {
+  final db = ref.watch(labsDatabaseProvider);
+  return db.getUserLabResults(userId);
+});
