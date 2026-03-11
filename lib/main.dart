@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/onboarding/welcome_screen.dart';
+import 'services/onboarding_service.dart';
 import 'theme/colors.dart';
 
 void main() async {
@@ -32,7 +34,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authProvider = ref.watch(authProviderProvider);
-    
+
     return MaterialApp(
       title: 'Biohacker',
       debugShowCheckedModeBanner: false,
@@ -46,6 +48,9 @@ class MyApp extends ConsumerWidget {
           elevation: 0,
         ),
       ),
+      routes: {
+        '/home': (context) => const HomeScreen(),
+      },
       home: authProvider.isLoading
           ? Scaffold(
               backgroundColor: AppColors.background,
@@ -56,8 +61,41 @@ class MyApp extends ConsumerWidget {
               ),
             )
           : authProvider.user != null
-              ? const HomeScreen()
+              ? const OnboardingCheck()
               : const LoginScreen(),
+    );
+  }
+}
+
+/// OnboardingCheck determines whether to show onboarding or home screen
+class OnboardingCheck extends ConsumerWidget {
+  const OnboardingCheck({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final onboardingStatus = ref.watch(isOnboardingCompletedProvider);
+
+    return onboardingStatus.when(
+      data: (isCompleted) {
+        if (isCompleted) {
+          return const HomeScreen();
+        } else {
+          return const WelcomeScreen();
+        }
+      },
+      loading: () => Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
+        ),
+      ),
+      error: (error, stack) {
+        print('[OnboardingCheck] Error checking onboarding status: $error');
+        // On error, assume onboarding is complete and show home screen
+        return const HomeScreen();
+      },
     );
   }
 }
