@@ -24,24 +24,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // Dropdown values
   String? _selectedGender;
   String? _selectedTimezone;
-  String _selectedUnits = 'imperial'; // default
+  String _selectedUnits = 'imperial';
 
-  // NEW: Notification preferences
+  // Notification preferences
   final Map<String, bool> _notificationPreferences = {
     'email': true,
     'push': false,
     'sms': false,
   };
 
-  // Health goals (READ-ONLY from onboarding)
+  // Health goals
   List<String> _healthGoalsFromOnboarding = [];
 
   // State
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _isEditMode = false; // NEW: Toggle between ID card and form
   String? _successMessage;
   String? _errorMessage;
-  String? _latestWeight; // Nullable - if error, just hide
+  String? _latestWeight;
   String _heightDisplay = 'Not set';
 
   @override
@@ -72,11 +73,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         setState(() {
           _errorMessage = 'Not authenticated';
           _isLoading = false;
+          _isEditMode = true; // Show form if not authenticated
         });
         return;
       }
 
-      // Load profile
       final profileService = ref.read(userProfileServiceProvider);
       final profile = await profileService.getUserProfile(userId);
 
@@ -90,11 +91,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _selectedGender = profile.gender;
           _selectedTimezone = profile.timezone;
           _selectedUnits = profile.unitsPreference ?? 'imperial';
-          
-          // Update height display using the formatted getter
           _heightDisplay = profile.heightFormatted;
 
-          // Load notification preferences
           if (profile.notificationPreferences != null) {
             profile.notificationPreferences!.forEach((key, value) {
               if (_notificationPreferences.containsKey(key)) {
@@ -103,29 +101,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             });
           }
 
-          // Load health goals from ONBOARDING (read-only)
           _healthGoalsFromOnboarding = profile.healthGoals;
+
+          // If profile is incomplete, show form
+          _isEditMode = profile.username == null || 
+                         profile.age == null || 
+                         profile.gender == null;
+        });
+      } else {
+        // No profile exists, show form
+        setState(() {
+          _isEditMode = true;
         });
       }
 
-      // Load latest weight - if error, just hide (no red error display)
+      // Load latest weight
       try {
         final weight = await profileService.getLatestWeight(userId);
         if (!weight.contains('Error')) {
           setState(() {
             _latestWeight = weight;
           });
-        } else {
-          print('[ProfileScreen] Weight loading skipped (RLS policy issue or no data)');
-          setState(() {
-            _latestWeight = null; // Hide weight section
-          });
         }
       } catch (e) {
-        print('[ProfileScreen] Weight loading error (hiding weight): $e');
-        setState(() {
-          _latestWeight = null; // Hide weight section
-        });
+        print('[ProfileScreen] Weight loading error: $e');
       }
 
       setState(() {
@@ -136,6 +135,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       setState(() {
         _errorMessage = 'Error loading profile: $e';
         _isLoading = false;
+        _isEditMode = true;
       });
     }
   }
@@ -170,16 +170,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (userId == null) throw Exception('Not authenticated');
 
       final profileService = ref.read(userProfileServiceProvider);
-      
-      print('[ProfileScreen] Saving profile...');
-      print('[ProfileScreen] Username: ${_usernameController.text.trim()}');
-      print('[ProfileScreen] Age: ${_ageController.text}');
-      print('[ProfileScreen] Gender: $_selectedGender');
-      print('[ProfileScreen] Height: ${_heightFeetController.text}\' ${_heightInchesController.text}"');
-      print('[ProfileScreen] Timezone: $_selectedTimezone');
-      print('[ProfileScreen] Units: $_selectedUnits');
-      print('[ProfileScreen] Bio: ${_bioController.text}');
-      print('[ProfileScreen] Notification Prefs: $_notificationPreferences');
 
       await profileService.updateUserProfile(
         userId,
@@ -192,17 +182,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         unitsPreference: _selectedUnits,
         bio: _bioController.text.isEmpty ? null : _bioController.text,
         notificationPreferences: _notificationPreferences,
-        // REMOVED: allergies, medicalConditions, contactMethod, healthGoalsList
       );
 
-      print('[ProfileScreen] ✅ Profile saved successfully!');
-
-      // Update height display after save
       _updateHeightDisplay();
 
       setState(() {
         _isSaving = false;
         _successMessage = 'Profile saved successfully';
+        _isEditMode = false; // Switch to ID card view after save
       });
 
       // Clear success message after 3 seconds
@@ -212,17 +199,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         }
       });
     } catch (e) {
-      print('[ProfileScreen] ❌ Error saving profile: $e');
+      print('[ProfileScreen] Error saving profile: $e');
       
       String errorMsg;
       if (e.toString().contains('duplicate')) {
-        errorMsg = 'Username already taken. Please choose another.';
+        errorMsg = 'Username already taken';
       } else if (e.toString().contains('column') && e.toString().contains('does not exist')) {
-        errorMsg = 'Database error: Missing columns. Contact support.';
-      } else if (e.toString().contains('check constraint')) {
-        errorMsg = 'Invalid data. Please check all fields.';
+        errorMsg = 'Database error: Missing columns';
       } else {
-        errorMsg = 'Could not save profile: ${e.toString()}';
+        errorMsg = 'Could not save profile';
       }
       
       setState(() {
@@ -256,88 +241,399 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          if (!_isEditMode)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => setState(() => _isEditMode = true),
+            ),
+        ],
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Username
-            TextFormField(
-              controller: _usernameController,
-              style: TextStyle(color: AppColors.textLight),
-              decoration: InputDecoration(
-                labelText: 'Username',
-                labelStyle: TextStyle(color: AppColors.textMid),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.textDim),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Username is required';
-                }
-                if (value.trim().length < 1 || value.trim().length > 50) {
-                  return 'Username must be 1-50 characters';
-                }
-                if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value.trim())) {
-                  return 'Only letters, numbers, and underscores allowed';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
+      body: _isEditMode ? _buildForm() : _buildIDCard(),
+    );
+  }
 
-            // Section: Health Basics
-            Text(
-              'HEALTH BASICS',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textMid,
+  // CYBERPUNK ID CARD VIEW
+  Widget _buildIDCard() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          // ID Card Container
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              border: Border.all(
+                color: AppColors.primary,
+                width: 2,
               ),
-            ),
-            const Divider(),
-            const SizedBox(height: 16),
-
-            // Latest Weight (Read-only) - ONLY show if available
-            if (_latestWeight != null) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.textDim),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.3),
+                  blurRadius: 20,
+                  spreadRadius: 2,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Latest Weight',
-                      style: TextStyle(fontSize: 12, color: AppColors.textMid),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header: USERNAME + ID Number
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(6),
+                      topRight: Radius.circular(6),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _latestWeight!,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textLight,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BIOHACKER ID',
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 10,
+                          letterSpacing: 2,
+                          color: AppColors.textMid,
+                        ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _usernameController.text.toUpperCase(),
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      Text(
+                        'ID: ${Supabase.instance.client.auth.currentUser?.id.substring(0, 8).toUpperCase() ?? 'UNKNOWN'}',
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 10,
+                          color: AppColors.textDim,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Scanline effect (decorative)
+                Container(
+                  height: 2,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        AppColors.accent,
+                        Colors.transparent,
+                      ],
                     ),
-                  ],
+                  ),
+                ),
+
+                // Stats Grid
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Bio
+                      if (_bioController.text.isNotEmpty) ...[
+                        _buildStatRow('BIO', _bioController.text),
+                        const Divider(height: 24),
+                      ],
+
+                      // Core Stats
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatBlock(
+                              'AGE',
+                              _ageController.text,
+                              Icons.calendar_today,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatBlock(
+                              'GENDER',
+                              _formatGender(_selectedGender),
+                              Icons.person,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatBlock(
+                              'HEIGHT',
+                              _heightDisplay,
+                              Icons.straighten,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatBlock(
+                              'WEIGHT',
+                              _latestWeight ?? 'N/A',
+                              Icons.monitor_weight,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _buildStatBlock(
+                        'TIMEZONE',
+                        _selectedTimezone?.split('/').last ?? 'Not set',
+                        Icons.access_time,
+                      ),
+
+                      // Health Goals
+                      if (_healthGoalsFromOnboarding.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        const Divider(),
+                        const SizedBox(height: 16),
+                        Text(
+                          'OBJECTIVES',
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textMid,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _healthGoalsFromOnboarding.map((goal) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: AppColors.accent,
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                _capitalizeGoal(goal).toUpperCase(),
+                                style: TextStyle(
+                                  fontFamily: 'monospace',
+                                  fontSize: 10,
+                                  color: AppColors.accent,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+
+                      // Footer: Status indicator
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: AppColors.accent,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.accent,
+                                  blurRadius: 4,
+                                  spreadRadius: 1,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'ACTIVE',
+                            style: TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 10,
+                              color: AppColors.accent,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            'BIOHACKER V2',
+                            style: TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 9,
+                              color: AppColors.textDim,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatRow(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 10,
+            color: AppColors.textMid,
+            letterSpacing: 1,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14,
+            color: AppColors.textLight,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatBlock(String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.3),
+        border: Border.all(color: AppColors.textDim.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 12, color: AppColors.textMid),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 10,
+                  color: AppColors.textMid,
+                  letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(height: 16),
             ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textLight,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Height Display (Read-only, formatted)
+  String _formatGender(String? gender) {
+    if (gender == null) return 'N/A';
+    switch (gender) {
+      case 'male':
+        return 'M';
+      case 'female':
+        return 'F';
+      case 'other':
+        return 'X';
+      case 'prefer_not_to_say':
+        return 'N/A';
+      default:
+        return 'N/A';
+    }
+  }
+
+  // FORM VIEW (existing form code)
+  Widget _buildForm() {
+    return Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Username
+          TextFormField(
+            controller: _usernameController,
+            style: TextStyle(color: AppColors.textLight),
+            decoration: InputDecoration(
+              labelText: 'Username',
+              labelStyle: TextStyle(color: AppColors.textMid),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.textDim),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary, width: 2),
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Username is required';
+              }
+              if (value.trim().length < 1 || value.trim().length > 50) {
+                return 'Username must be 1-50 characters';
+              }
+              if (!RegExp(r'^[a-zA-Z0-9_]+$').hasMatch(value.trim())) {
+                return 'Only letters, numbers, and underscores allowed';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 24),
+
+          // Health Basics Section
+          Text(
+            'HEALTH BASICS',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textMid,
+            ),
+          ),
+          const Divider(),
+          const SizedBox(height: 16),
+
+          // Latest Weight (Read-only)
+          if (_latestWeight != null) ...[
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -349,12 +645,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Current Height',
+                    'Latest Weight',
                     style: TextStyle(fontSize: 12, color: AppColors.textMid),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _heightDisplay,
+                    _latestWeight!,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -365,445 +661,457 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Age
-            TextFormField(
-              controller: _ageController,
-              style: TextStyle(color: AppColors.textLight),
-              decoration: InputDecoration(
-                labelText: 'Age',
-                labelStyle: TextStyle(color: AppColors.textMid),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.textDim),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
-                ),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Age is required';
-                }
-                final age = int.tryParse(value);
-                if (age == null || age < 10 || age > 120) {
-                  return 'Age must be between 10 and 120';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Gender
-            DropdownButtonFormField<String>(
-              value: _selectedGender,
-              style: TextStyle(color: AppColors.textLight),
-              dropdownColor: AppColors.surface,
-              decoration: InputDecoration(
-                labelText: 'Gender',
-                labelStyle: TextStyle(color: AppColors.textMid),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.textDim),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
-                ),
-              ),
-              items: const [
-                DropdownMenuItem(value: 'male', child: Text('Male')),
-                DropdownMenuItem(value: 'female', child: Text('Female')),
-                DropdownMenuItem(value: 'other', child: Text('Other')),
-                DropdownMenuItem(
-                    value: 'prefer_not_to_say',
-                    child: Text('Prefer not to say')),
-              ],
-              onChanged: (value) => setState(() => _selectedGender = value),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please select a gender';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Height (Imperial: Feet + Inches) - Input fields
-            Text(
-              'Update Height',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textLight,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                // Feet
-                Expanded(
-                  child: TextFormField(
-                    controller: _heightFeetController,
-                    style: TextStyle(color: AppColors.textLight),
-                    decoration: InputDecoration(
-                      labelText: 'Feet',
-                      labelStyle: TextStyle(color: AppColors.textMid),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primary),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.textDim),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primary, width: 2),
-                      ),
-                      hintText: '3-7',
-                      hintStyle: TextStyle(color: AppColors.textDim),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => _updateHeightDisplay(),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Required';
-                      }
-                      final feet = int.tryParse(value);
-                      if (feet == null || feet < 3 || feet > 7) {
-                        return '3-7';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Inches
-                Expanded(
-                  child: TextFormField(
-                    controller: _heightInchesController,
-                    style: TextStyle(color: AppColors.textLight),
-                    decoration: InputDecoration(
-                      labelText: 'Inches',
-                      labelStyle: TextStyle(color: AppColors.textMid),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primary),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.textDim),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: AppColors.primary, width: 2),
-                      ),
-                      hintText: '0-11',
-                      hintStyle: TextStyle(color: AppColors.textDim),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => _updateHeightDisplay(),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Required';
-                      }
-                      final inches = int.tryParse(value);
-                      if (inches == null || inches < 0 || inches > 11) {
-                        return '0-11';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Timezone
-            DropdownButtonFormField<String>(
-              value: _selectedTimezone,
-              style: TextStyle(color: AppColors.textLight),
-              dropdownColor: AppColors.surface,
-              decoration: InputDecoration(
-                labelText: 'Timezone',
-                labelStyle: TextStyle(color: AppColors.textMid),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.textDim),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
-                ),
-              ),
-              items: const [
-                DropdownMenuItem(
-                    value: 'America/New_York', child: Text('Eastern Time')),
-                DropdownMenuItem(
-                    value: 'America/Chicago', child: Text('Central Time')),
-                DropdownMenuItem(
-                    value: 'America/Denver', child: Text('Mountain Time')),
-                DropdownMenuItem(
-                    value: 'America/Los_Angeles', child: Text('Pacific Time')),
-                DropdownMenuItem(
-                    value: 'Europe/London', child: Text('London')),
-                DropdownMenuItem(
-                    value: 'Europe/Paris', child: Text('Paris')),
-                DropdownMenuItem(
-                    value: 'Asia/Tokyo', child: Text('Tokyo')),
-              ],
-              onChanged: (value) => setState(() => _selectedTimezone = value),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please select a timezone';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
-
-            // Section: Preferences
-            Text(
-              'PREFERENCES',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textMid,
-              ),
-            ),
-            const Divider(),
-            const SizedBox(height: 16),
-
-            // Units Preference
-            DropdownButtonFormField<String>(
-              value: _selectedUnits,
-              style: TextStyle(color: AppColors.textLight),
-              dropdownColor: AppColors.surface,
-              decoration: InputDecoration(
-                labelText: 'Units Preference',
-                labelStyle: TextStyle(color: AppColors.textMid),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.textDim),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
-                ),
-              ),
-              items: const [
-                DropdownMenuItem(value: 'imperial', child: Text('Imperial (lbs, ft/in, mg)')),
-                DropdownMenuItem(value: 'metric', child: Text('Metric (kg, cm, ml)')),
-              ],
-              onChanged: (value) => setState(() => _selectedUnits = value!),
-            ),
-            const SizedBox(height: 16),
-
-            // Notification Preferences
-            Text(
-              'Notification Preferences',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textLight,
-              ),
-            ),
-            const SizedBox(height: 8),
-            CheckboxListTile(
-              title: Text('Email Notifications', style: TextStyle(color: AppColors.textLight)),
-              value: _notificationPreferences['email'],
-              activeColor: AppColors.primary,
-              checkColor: AppColors.background,
-              onChanged: (value) {
-                setState(() => _notificationPreferences['email'] = value ?? false);
-              },
-            ),
-            CheckboxListTile(
-              title: Text('Push Notifications', style: TextStyle(color: AppColors.textLight)),
-              value: _notificationPreferences['push'],
-              activeColor: AppColors.primary,
-              checkColor: AppColors.background,
-              onChanged: (value) {
-                setState(() => _notificationPreferences['push'] = value ?? false);
-              },
-            ),
-            CheckboxListTile(
-              title: Text('SMS Notifications', style: TextStyle(color: AppColors.textLight)),
-              value: _notificationPreferences['sms'],
-              activeColor: AppColors.primary,
-              checkColor: AppColors.background,
-              onChanged: (value) {
-                setState(() => _notificationPreferences['sms'] = value ?? false);
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Health Goals (READ-ONLY from onboarding)
-            if (_healthGoalsFromOnboarding.isNotEmpty) ...[
-              Text(
-                'Health Goals',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textLight,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.textDim),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'From Onboarding (Read-Only)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textMid,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _healthGoalsFromOnboarding.map((goal) {
-                        return Chip(
-                          label: Text(
-                            _capitalizeGoal(goal),
-                            style: TextStyle(
-                              color: AppColors.textLight,
-                              fontSize: 12,
-                            ),
-                          ),
-                          backgroundColor: AppColors.primary.withOpacity(0.2),
-                          side: BorderSide(color: AppColors.primary, width: 1),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'To change: Re-run onboarding',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textDim,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Bio (Optional)
-            TextFormField(
-              controller: _bioController,
-              style: TextStyle(color: AppColors.textLight),
-              decoration: InputDecoration(
-                labelText: 'Bio (optional)',
-                labelStyle: TextStyle(color: AppColors.textMid),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.textDim),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.primary, width: 2),
-                ),
-                hintText: 'Tell us a bit about yourself...',
-                hintStyle: TextStyle(color: AppColors.textDim),
-              ),
-              maxLines: 3,
-              maxLength: 200,
-              validator: (value) {
-                if (value != null && value.length > 200) {
-                  return 'Bio must be 200 characters or less';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
-
-            // Save Button
-            ElevatedButton(
-              onPressed: _isSaving ? null : _saveProfile,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: AppColors.primary,
-                disabledBackgroundColor: AppColors.textDim,
-              ),
-              child: _isSaving
-                  ? SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.background),
-                      ),
-                    )
-                  : Text(
-                      'Save Profile',
-                      style: TextStyle(
-                        color: AppColors.background,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
-            const SizedBox(height: 16),
-
-            // Success/Error Messages
-            if (_successMessage != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.accent.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.accent),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle, color: AppColors.accent),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _successMessage!,
-                        style: TextStyle(color: AppColors.accent),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            if (_errorMessage != null)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.error.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.error),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.error, color: AppColors.error),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: TextStyle(color: AppColors.error),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
           ],
-        ),
+
+          // Height Display
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.textDim),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Current Height',
+                  style: TextStyle(fontSize: 12, color: AppColors.textMid),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _heightDisplay,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textLight,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Age
+          TextFormField(
+            controller: _ageController,
+            style: TextStyle(color: AppColors.textLight),
+            decoration: InputDecoration(
+              labelText: 'Age',
+              labelStyle: TextStyle(color: AppColors.textMid),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.textDim),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary, width: 2),
+              ),
+            ),
+            keyboardType: TextInputType.number,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Age is required';
+              }
+              final age = int.tryParse(value);
+              if (age == null || age < 10 || age > 120) {
+                return 'Age must be between 10 and 120';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Gender
+          DropdownButtonFormField<String>(
+            value: _selectedGender,
+            style: TextStyle(color: AppColors.textLight),
+            dropdownColor: AppColors.surface,
+            decoration: InputDecoration(
+              labelText: 'Gender',
+              labelStyle: TextStyle(color: AppColors.textMid),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.textDim),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary, width: 2),
+              ),
+            ),
+            items: const [
+              DropdownMenuItem(value: 'male', child: Text('Male')),
+              DropdownMenuItem(value: 'female', child: Text('Female')),
+              DropdownMenuItem(value: 'other', child: Text('Other')),
+              DropdownMenuItem(
+                  value: 'prefer_not_to_say',
+                  child: Text('Prefer not to say')),
+            ],
+            onChanged: (value) => setState(() => _selectedGender = value),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select a gender';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Height Input
+          Text(
+            'Update Height',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textLight,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _heightFeetController,
+                  style: TextStyle(color: AppColors.textLight),
+                  decoration: InputDecoration(
+                    labelText: 'Feet',
+                    labelStyle: TextStyle(color: AppColors.textMid),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.textDim),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    hintText: '3-7',
+                    hintStyle: TextStyle(color: AppColors.textDim),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => _updateHeightDisplay(),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Required';
+                    }
+                    final feet = int.tryParse(value);
+                    if (feet == null || feet < 3 || feet > 7) {
+                      return '3-7';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  controller: _heightInchesController,
+                  style: TextStyle(color: AppColors.textLight),
+                  decoration: InputDecoration(
+                    labelText: 'Inches',
+                    labelStyle: TextStyle(color: AppColors.textMid),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.textDim),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    hintText: '0-11',
+                    hintStyle: TextStyle(color: AppColors.textDim),
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (_) => _updateHeightDisplay(),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Required';
+                    }
+                    final inches = int.tryParse(value);
+                    if (inches == null || inches < 0 || inches > 11) {
+                      return '0-11';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Timezone
+          DropdownButtonFormField<String>(
+            value: _selectedTimezone,
+            style: TextStyle(color: AppColors.textLight),
+            dropdownColor: AppColors.surface,
+            decoration: InputDecoration(
+              labelText: 'Timezone',
+              labelStyle: TextStyle(color: AppColors.textMid),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.textDim),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary, width: 2),
+              ),
+            ),
+            items: const [
+              DropdownMenuItem(
+                  value: 'America/New_York', child: Text('Eastern Time')),
+              DropdownMenuItem(
+                  value: 'America/Chicago', child: Text('Central Time')),
+              DropdownMenuItem(
+                  value: 'America/Denver', child: Text('Mountain Time')),
+              DropdownMenuItem(
+                  value: 'America/Los_Angeles', child: Text('Pacific Time')),
+              DropdownMenuItem(
+                  value: 'Europe/London', child: Text('London')),
+              DropdownMenuItem(
+                  value: 'Europe/Paris', child: Text('Paris')),
+              DropdownMenuItem(
+                  value: 'Asia/Tokyo', child: Text('Tokyo')),
+            ],
+            onChanged: (value) => setState(() => _selectedTimezone = value),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select a timezone';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 24),
+
+          // Preferences Section
+          Text(
+            'PREFERENCES',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textMid,
+            ),
+          ),
+          const Divider(),
+          const SizedBox(height: 16),
+
+          // Units
+          DropdownButtonFormField<String>(
+            value: _selectedUnits,
+            style: TextStyle(color: AppColors.textLight),
+            dropdownColor: AppColors.surface,
+            decoration: InputDecoration(
+              labelText: 'Units Preference',
+              labelStyle: TextStyle(color: AppColors.textMid),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.textDim),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary, width: 2),
+              ),
+            ),
+            items: const [
+              DropdownMenuItem(value: 'imperial', child: Text('Imperial (lbs, ft/in, mg)')),
+              DropdownMenuItem(value: 'metric', child: Text('Metric (kg, cm, ml)')),
+            ],
+            onChanged: (value) => setState(() => _selectedUnits = value!),
+          ),
+          const SizedBox(height: 16),
+
+          // Notification Preferences
+          Text(
+            'Notification Preferences',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textLight,
+            ),
+          ),
+          const SizedBox(height: 8),
+          CheckboxListTile(
+            title: Text('Email Notifications', style: TextStyle(color: AppColors.textLight)),
+            value: _notificationPreferences['email'],
+            activeColor: AppColors.primary,
+            checkColor: AppColors.background,
+            onChanged: (value) {
+              setState(() => _notificationPreferences['email'] = value ?? false);
+            },
+          ),
+          CheckboxListTile(
+            title: Text('Push Notifications', style: TextStyle(color: AppColors.textLight)),
+            value: _notificationPreferences['push'],
+            activeColor: AppColors.primary,
+            checkColor: AppColors.background,
+            onChanged: (value) {
+              setState(() => _notificationPreferences['push'] = value ?? false);
+            },
+          ),
+          CheckboxListTile(
+            title: Text('SMS Notifications', style: TextStyle(color: AppColors.textLight)),
+            value: _notificationPreferences['sms'],
+            activeColor: AppColors.primary,
+            checkColor: AppColors.background,
+            onChanged: (value) {
+              setState(() => _notificationPreferences['sms'] = value ?? false);
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // Health Goals (read-only)
+          if (_healthGoalsFromOnboarding.isNotEmpty) ...[
+            Text(
+              'Health Goals',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textLight,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.textDim),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'From Onboarding (Read-Only)',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMid,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _healthGoalsFromOnboarding.map((goal) {
+                      return Chip(
+                        label: Text(
+                          _capitalizeGoal(goal),
+                          style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 12,
+                          ),
+                        ),
+                        backgroundColor: AppColors.primary.withOpacity(0.2),
+                        side: BorderSide(color: AppColors.primary, width: 1),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // Bio
+          TextFormField(
+            controller: _bioController,
+            style: TextStyle(color: AppColors.textLight),
+            decoration: InputDecoration(
+              labelText: 'Bio (optional)',
+              labelStyle: TextStyle(color: AppColors.textMid),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.textDim),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: AppColors.primary, width: 2),
+              ),
+              hintText: 'Tell us a bit about yourself...',
+              hintStyle: TextStyle(color: AppColors.textDim),
+            ),
+            maxLines: 3,
+            maxLength: 200,
+          ),
+          const SizedBox(height: 24),
+
+          // Save Button
+          ElevatedButton(
+            onPressed: _isSaving ? null : _saveProfile,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: AppColors.primary,
+              disabledBackgroundColor: AppColors.textDim,
+            ),
+            child: _isSaving
+                ? SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.background),
+                    ),
+                  )
+                : Text(
+                    'Save Profile',
+                    style: TextStyle(
+                      color: AppColors.background,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 16),
+
+          // Success/Error Messages
+          if (_successMessage != null)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.accent),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, color: AppColors.accent),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _successMessage!,
+                      style: TextStyle(color: AppColors.accent),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (_errorMessage != null)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.error),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error, color: AppColors.error),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(color: AppColors.error),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
