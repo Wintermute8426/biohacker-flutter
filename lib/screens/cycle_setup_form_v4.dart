@@ -165,8 +165,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
 
   void _validatePhases() {
     setState(() {
+      // Phases are now optional - skip validation if empty
       if (_phases.isEmpty) {
-        _fieldErrors['phases'] = 'Add at least one phase (Taper Up, Plateau, or Taper Down)';
+        _fieldErrors['phases'] = null;
       } else if (_cycleDurationWeeks != null) {
         final totalDays = _cycleDurationWeeks! * 7;
         final totalPhaseDays = _phases.fold<int>(
@@ -193,7 +194,6 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
         _concentrationMl != null &&
         _cycleDurationWeeks != null &&
         _startDate != null &&
-        _phases.isNotEmpty &&
         _fieldErrors.values.every((error) => error == null);
   }
 
@@ -461,19 +461,13 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
 
   void _submit() {
     String? errorMsg;
-    
+
     if (_selectedPeptide == null) errorMsg = 'Select a peptide';
     else if (_totalPeptideMg == null) errorMsg = 'Enter vial size (mg)';
     else if (_desiredDosageMg == null) errorMsg = 'Enter desired dosage (mg)';
     else if (_concentrationMl == null) errorMsg = 'Enter draw per injection (ml)';
     else if (_cycleDurationWeeks == null) errorMsg = 'Enter cycle duration (weeks)';
     else if (_startDate == null || _endDate == null) errorMsg = 'Cycle dates not set';
-    else if (_phases.isEmpty) {
-      errorMsg = 'Add at least one phase (Taper Up, Plateau, or Taper Down)';
-      // Auto-add a plateau if user tries to submit without phases
-      _addPhase('plateau');
-      return;
-    }
 
     if (errorMsg != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -922,7 +916,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
           const SizedBox(height: 24),
 
           // ===== DOSING PHASES (LIKE WEB APP) =====
-          Text('CREATE MULTI-PHASE DOSING', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+          Text('CREATE MULTI-PHASE DOSING (OPTIONAL)', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
           const SizedBox(height: 12),
 
           // Quick add buttons
