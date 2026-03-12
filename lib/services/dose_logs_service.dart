@@ -169,13 +169,28 @@ class DoseLogsService {
   // Mark dose as MISSED
   Future<bool> markAsMissed(String doseLogId) async {
     try {
-      await _supabase
+      print('[DoseLogsService] 🔵 Attempting to mark dose as MISSED');
+      print('[DoseLogsService] 🔵 doseLogId: $doseLogId');
+
+      final response = await _supabase
           .from('dose_logs')
           .update({'status': 'MISSED'})
-          .eq('id', doseLogId);
+          .eq('id', doseLogId)
+          .select();
+
+      print('[DoseLogsService] ✅ Database UPDATE successful!');
+      print('[DoseLogsService] ✅ Response: $response');
+
+      if (response.isEmpty) {
+        print('[DoseLogsService] ⚠️ WARNING: Update succeeded but no rows returned. ID may not exist: $doseLogId');
+        return false;
+      }
+
       return true;
-    } catch (e) {
-      print('[ERROR] Failed to mark dose as missed: $e');
+    } catch (e, stackTrace) {
+      print('[DoseLogsService] ❌ CRITICAL ERROR: Failed to mark dose as missed');
+      print('[DoseLogsService] ❌ Error: $e');
+      print('[DoseLogsService] ❌ Stack trace: $stackTrace');
       return false;
     }
   }

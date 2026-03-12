@@ -92,7 +92,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
       // If dose_log doesn't exist, create it first
       if (dose.doseLogId.isEmpty) {
-        print('[Dashboard] No dose_log exists, creating new one...');
+        print('[Dashboard] 🟡 No dose_log exists, creating new one...');
         final supabase = Supabase.instance.client;
 
         // Parse time to create proper DateTime
@@ -106,6 +106,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           hour,
           minute,
         );
+
+        print('[Dashboard] 🟡 Attempting INSERT with data:');
+        print('[Dashboard] 🟡   user_id: $userId');
+        print('[Dashboard] 🟡   cycle_id: ${dose.cycleId}');
+        print('[Dashboard] 🟡   schedule_id: ${dose.scheduleId}');
+        print('[Dashboard] 🟡   dose_amount: ${dose.doseAmount}');
+        print('[Dashboard] 🟡   route: ${dose.route}');
+        print('[Dashboard] 🟡   logged_at: ${loggedAt.toIso8601String()}');
+        print('[Dashboard] 🟡   status: MISSED');
 
         final response = await supabase
             .from('dose_logs')
@@ -121,14 +130,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             .select()
             .single();
 
-        print('[Dashboard] Created dose_log: ${response['id']}');
-        print('[Dashboard] Stored data: cycle_id=${response['cycle_id']}, logged_at=${response['logged_at']}, status=${response['status']}');
+        print('[Dashboard] ✅ SUCCESS: Created dose_log: ${response['id']}');
+        print('[Dashboard] ✅ Verified data: cycle_id=${response['cycle_id']}, logged_at=${response['logged_at']}, status=${response['status']}');
       } else {
         // Update existing dose_log
-        print('[Dashboard] Updating existing dose_log...');
+        print('[Dashboard] 🔵 Updating existing dose_log...');
+        print('[Dashboard] 🔵 Calling markAsMissed with doseLogId: ${dose.doseLogId}');
         final doseLogsService = ref.read(doseLogsServiceProvider);
-        await doseLogsService.markAsMissed(dose.doseLogId);
-        print('[Dashboard] Updated dose_log ${dose.doseLogId} to MISSED');
+
+        final success = await doseLogsService.markAsMissed(dose.doseLogId);
+
+        if (!success) {
+          print('[Dashboard] ❌ ERROR: markAsMissed returned false - database save FAILED!');
+          throw Exception('Database save failed - markAsMissed returned false');
+        }
+
+        print('[Dashboard] ✅ SUCCESS: Updated dose_log ${dose.doseLogId} to MISSED');
       }
 
       if (mounted) {
@@ -160,16 +177,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         print('[Dashboard] === MARK AS MISSED COMPLETE - CALENDAR SYNCED ===');
       }
     } catch (e, stackTrace) {
-      print('[Dashboard] ERROR marking dose as missed: $e');
-      print('[Dashboard] Stack trace: $stackTrace');
+      print('[Dashboard] ❌ CRITICAL ERROR: Failed to mark dose as missed');
+      print('[Dashboard] ❌ Error details: $e');
+      print('[Dashboard] ❌ Stack trace: $stackTrace');
+      print('[Dashboard] ❌ Dose details: cycleId=${dose.cycleId}, scheduleId=${dose.scheduleId}, doseLogId=${dose.doseLogId}');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error marking dose: $e',
+              '❌ DATABASE SAVE FAILED\n'
+              'Could not mark dose as missed.\n'
+              'Error: ${e.toString().substring(0, e.toString().length > 100 ? 100 : e.toString().length)}',
               style: WintermmuteStyles.bodyStyle,
             ),
             backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'DISMISS',
+              textColor: Colors.white,
+              onPressed: () {},
+            ),
           ),
         );
       }
