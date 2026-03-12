@@ -93,28 +93,66 @@ class WintermmuteStyles {
 
   // ==================== BOX SHADOWS (GLOW EFFECTS) ====================
 
-  // Cyan glow for buttons/inputs
+  // Cyan glow for buttons/inputs (ENHANCED)
   static List<BoxShadow> cyanGlowShadow = [
     BoxShadow(
-      color: colorCyan.withOpacity(0.5),
-      blurRadius: 12,
-      spreadRadius: 2,
+      color: colorCyan.withOpacity(0.6),
+      blurRadius: 20,
+      spreadRadius: 3,
+    ),
+    BoxShadow(
+      color: colorCyan.withOpacity(0.3),
+      blurRadius: 8,
+      spreadRadius: 1,
     ),
   ];
 
-  // Green glow for accent elements
+  // Green glow for accent elements (ENHANCED)
   static List<BoxShadow> greenGlowShadow = [
     BoxShadow(
-      color: colorGreen.withOpacity(0.5),
-      blurRadius: 12,
-      spreadRadius: 2,
+      color: colorGreen.withOpacity(0.6),
+      blurRadius: 20,
+      spreadRadius: 3,
+    ),
+    BoxShadow(
+      color: colorGreen.withOpacity(0.3),
+      blurRadius: 8,
+      spreadRadius: 1,
     ),
   ];
 
-  // Red glow for errors/warnings
+  // Red glow for errors/warnings (ENHANCED)
   static List<BoxShadow> redGlowShadow = [
     BoxShadow(
-      color: Color(0xFFFF0040).withOpacity(0.5),
+      color: Color(0xFFFF0040).withOpacity(0.6),
+      blurRadius: 20,
+      spreadRadius: 3,
+    ),
+    BoxShadow(
+      color: Color(0xFFFF0040).withOpacity(0.3),
+      blurRadius: 8,
+      spreadRadius: 1,
+    ),
+  ];
+
+  // Subtle glow for cards
+  static List<BoxShadow> cardGlowShadow = [
+    BoxShadow(
+      color: colorCyan.withOpacity(0.15),
+      blurRadius: 12,
+      spreadRadius: 0,
+    ),
+  ];
+
+  // Intense glow for active/focused elements
+  static List<BoxShadow> intenseCyanGlow = [
+    BoxShadow(
+      color: colorCyan.withOpacity(0.8),
+      blurRadius: 24,
+      spreadRadius: 4,
+    ),
+    BoxShadow(
+      color: colorCyan.withOpacity(0.4),
       blurRadius: 12,
       spreadRadius: 2,
     ),
@@ -137,6 +175,17 @@ class WintermmuteStyles {
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
+  );
+
+  // Glowing card: Standard card with subtle glow
+  static BoxDecoration cardDecorationGlow = BoxDecoration(
+    color: AppColors.surface,
+    border: Border.all(
+      color: colorCyan.withOpacity(0.35),
+      width: 1.5,
+    ),
+    borderRadius: BorderRadius.circular(4),
+    boxShadow: cardGlowShadow,
   );
 
   // Accent card: Green border

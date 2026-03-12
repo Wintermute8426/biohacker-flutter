@@ -10,6 +10,7 @@ import '../services/dose_schedule_service.dart';
 import '../services/weight_logs_database.dart';
 import '../widgets/side_effects_modal.dart';
 import '../widgets/weight_log_modal.dart';
+import '../widgets/cyberpunk_frame.dart';
 import 'labs_screen.dart';
 import 'research_screen.dart';
 import '../main.dart' show authProviderProvider;
@@ -342,21 +343,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   Widget _buildNoDosesToday() {
     return Container(
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColors.accent.withOpacity(0.3),
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(8),
         gradient: LinearGradient(
           colors: [
             AppColors.accent.withOpacity(0.05),
             AppColors.primary.withOpacity(0.05),
           ],
         ),
+        borderRadius: BorderRadius.circular(4),
       ),
-      child: Column(
+      child: CyberpunkFrame(
+        padding: const EdgeInsets.all(24),
+        frameColor: AppColors.accent,
+        glowColor: AppColors.accent,
+        showStatusLed: true,
+        statusLedActive: true,
+        child: Column(
         children: [
           Icon(
             Icons.check_circle_outline,
@@ -379,6 +381,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -410,40 +413,28 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: isCompleted
-              ? AppColors.accent.withOpacity(0.5)
-              : isMissed
-                  ? const Color(0xFFFF6B00).withOpacity(0.8)
-                  : AppColors.primary.withOpacity(0.5),
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(8),
         // ISSUE 3 FIX: Red/orange background for missed doses
         color: isMissed
             ? const Color(0xFFFF6B00).withOpacity(0.2)
             : AppColors.surface,
-        boxShadow: isCompleted
-            ? [
-                BoxShadow(
-                  color: AppColors.accent.withOpacity(0.2),
-                  blurRadius: 8,
-                  spreadRadius: 1,
-                )
-              ]
-            : isMissed
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFFFF6B00).withOpacity(0.3),
-                      blurRadius: 8,
-                      spreadRadius: 1,
-                    )
-                  ]
-                : null,
+        borderRadius: BorderRadius.circular(4),
       ),
-      child: Column(
+      child: CyberpunkFrame(
+        padding: const EdgeInsets.all(16),
+        frameColor: isCompleted
+            ? AppColors.accent
+            : isMissed
+                ? const Color(0xFFFF6B00)
+                : AppColors.primary,
+        glowColor: isCompleted
+            ? AppColors.accent
+            : isMissed
+                ? const Color(0xFFFF6B00)
+                : AppColors.primary,
+        showStatusLed: true,
+        statusLedActive: isCompleted,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header row
@@ -741,6 +732,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ],
         ],
+        ),
       ),
     );
   }

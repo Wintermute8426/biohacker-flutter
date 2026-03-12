@@ -16,6 +16,7 @@ import '../screens/protocols_screen.dart';
 import '../widgets/advanced_dosing_widget.dart';
 import '../widgets/wintermute_dialog.dart';
 import '../widgets/peptide_selector.dart';
+import '../widgets/cyberpunk_frame.dart';
 
 class CyclesScreen extends StatefulWidget {
   const CyclesScreen({Key? key}) : super(key: key);
@@ -1132,9 +1133,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         child: Column(
                           children: [
                             const SizedBox(height: 40),
-                            Container(
+                            CyberpunkFrame(
                               padding: const EdgeInsets.all(32),
-                              decoration: WintermmuteStyles.cardDecoration,
+                              showStatusLed: false,
                               child: Column(
                                 children: [
                                   Icon(
@@ -1179,13 +1180,11 @@ class _CyclesScreenState extends State<CyclesScreen> {
 
                           return Container(
                             margin: const EdgeInsets.only(bottom: 16),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              border: Border.all(color: AppColors.border),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Column(
+                            child: CyberpunkFrame(
+                              padding: const EdgeInsets.all(16),
+                              showStatusLed: true,
+                              statusLedActive: daysRemaining > 0,
+                              child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 // Header
@@ -1660,6 +1659,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                 ),
                                 const SizedBox(height: 16),
                               ],
+                              ),
                             ),
                           );
                         },

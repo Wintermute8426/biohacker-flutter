@@ -4,6 +4,8 @@ import '../theme/wintermute_styles.dart';
 import '../services/protocol_templates_database.dart';
 import '../services/cycles_database.dart';
 import '../data/peptides.dart';
+import '../widgets/scanline_overlay.dart';
+import '../widgets/cyberpunk_frame.dart';
 
 class ProtocolsScreen extends StatefulWidget {
   const ProtocolsScreen({Key? key}) : super(key: key);
@@ -101,15 +103,16 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       context: context,
       backgroundColor: AppColors.surface,
       isScrollControlled: true,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: Column(
+      builder: (context) => ScanlineOverlay(
+        child: StatefulBuilder(
+          builder: (context, setModalState) => SingleChildScrollView(
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            ),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -245,6 +248,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               ),
               const SizedBox(height: 20),
             ],
+            ),
           ),
         ),
       ),
@@ -258,14 +262,15 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       context: context,
       backgroundColor: AppColors.surface,
       isScrollControlled: true,
-      builder: (context) => SingleChildScrollView(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-        ),
-        child: Column(
+      builder: (context) => ScanlineOverlay(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -362,14 +367,15 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       context: context,
       backgroundColor: AppColors.surface,
       isScrollControlled: true,
-      builder: (context) => SingleChildScrollView(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-        ),
-        child: Column(
+      builder: (context) => ScanlineOverlay(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -494,9 +500,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       onTap: () => _showStackDetail(stack),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
-        decoration: WintermmuteStyles.cardDecoration,
-        child: Column(
+        child: CyberpunkFrame(
+          padding: const EdgeInsets.all(12),
+          showStatusLed: true,
+          statusLedActive: true,
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -568,6 +576,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               ],
             ),
           ],
+          ),
         ),
       ),
     );
@@ -578,9 +587,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       onTap: () => _showProtocolDetail(protocol),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
-        decoration: WintermmuteStyles.cardDecoration,
-        child: Column(
+        child: CyberpunkFrame(
+          padding: const EdgeInsets.all(12),
+          showStatusLed: protocol.usageCount > 0,
+          statusLedActive: true,
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -682,6 +693,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               ],
             ),
           ],
+          ),
         ),
       ),
     );
