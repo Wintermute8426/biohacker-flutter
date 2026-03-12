@@ -420,10 +420,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final fillPercent = (dose.doseAmount / maxDose).clamp(0.0, 1.0);
 
     // Find the corresponding cycle for progress info
-    final cycle = _activeCycles.firstWhere(
-      (c) => c.id == dose.cycleId,
-      orElse: () => _activeCycles.isNotEmpty ? _activeCycles.first : null as Cycle,
-    );
+    Cycle? cycle;
+    try {
+      cycle = _activeCycles.firstWhere((c) => c.id == dose.cycleId);
+    } catch (e) {
+      // No matching cycle found, leave cycle as null
+      cycle = null;
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
