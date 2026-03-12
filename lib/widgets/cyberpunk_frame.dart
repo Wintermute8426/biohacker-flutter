@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 
-/// Cyberpunk frame with corner brackets, glowing edges, and optional status LED
-/// Perfect for cards, containers, and mechanical cyberdeck aesthetics
+/// Cyberpunk frame with FULL BORDERS and hardware elements
+/// Industrial cyberdeck aesthetic with rivets, LEDs, and panel indicators
 class CyberpunkFrame extends StatelessWidget {
   final Widget child;
-  final double cornerSize;
   final double strokeWidth;
   final Color frameColor;
   final Color glowColor;
   final bool showStatusLed;
   final bool statusLedActive;
   final EdgeInsets padding;
-  final bool showScanlines;
+  final bool showHardware; // Show rivets, ports, indicators
+  final bool showPanelIndicators; // Show LED indicators on sides
 
   const CyberpunkFrame({
     Key? key,
     required this.child,
-    this.cornerSize = 12.0,
-    this.strokeWidth = 1.5,
+    this.strokeWidth = 2.0, // Thicker for hardware feel
     this.frameColor = const Color(0xFF00FFFF),
     this.glowColor = const Color(0xFF00FFFF),
     this.showStatusLed = false,
     this.statusLedActive = true,
     this.padding = const EdgeInsets.all(12),
-    this.showScanlines = false,
+    this.showHardware = true, // Default ON
+    this.showPanelIndicators = false,
   }) : super(key: key);
 
   @override
@@ -34,67 +34,160 @@ class CyberpunkFrame extends StatelessWidget {
 
     return Stack(
       children: [
-        // Glow effect layer
+        // Minimal glow effect (subtle outer shadow only)
         Container(
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: effectiveGlowColor.withOpacity(0.3),
-                blurRadius: 12,
+                color: effectiveGlowColor.withOpacity(0.15), // Reduced from 0.3
+                blurRadius: 6, // Reduced from 12
                 spreadRadius: 0,
               ),
             ],
           ),
           child: CustomPaint(
-            painter: _CyberpunkFramePainter(
-              cornerSize: cornerSize,
+            painter: _HardwareFramePainter(
               strokeWidth: strokeWidth,
               frameColor: effectiveFrameColor,
+              showHardware: showHardware,
+              showPanelIndicators: showPanelIndicators,
             ),
-            child: Padding(
-              padding: padding,
-              child: child,
+            child: Container(
+              margin: EdgeInsets.all(strokeWidth + 2), // Space for full border
+              child: Padding(
+                padding: padding,
+                child: child,
+              ),
             ),
           ),
         ),
 
-        // Status LED indicator
+        // Corner rivets/screws (hardware decorations)
+        if (showHardware) ...[
+          _buildRivet(Alignment.topLeft),
+          _buildRivet(Alignment.topRight),
+          _buildRivet(Alignment.bottomLeft),
+          _buildRivet(Alignment.bottomRight),
+        ],
+
+        // Status LED indicator (top right, inside frame)
         if (showStatusLed)
           Positioned(
-            top: 8,
-            right: 8,
-            child: Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: statusLedActive ? AppColors.accent : AppColors.textDim,
-                shape: BoxShape.circle,
-                boxShadow: statusLedActive
-                    ? [
-                        BoxShadow(
-                          color: AppColors.accent.withOpacity(0.6),
-                          blurRadius: 4,
-                          spreadRadius: 1,
-                        ),
-                      ]
-                    : null,
-              ),
-            ),
+            top: 10,
+            right: 10,
+            child: _buildStatusLed(statusLedActive, effectiveFrameColor),
           ),
+
+        // Side panel LED indicators
+        if (showPanelIndicators) ...[
+          // Left side indicators
+          Positioned(
+            left: 4,
+            top: 30,
+            child: _buildPanelLED(Colors.green),
+          ),
+          Positioned(
+            left: 4,
+            top: 45,
+            child: _buildPanelLED(Colors.orange),
+          ),
+          // Right side indicators
+          Positioned(
+            right: 4,
+            top: 30,
+            child: _buildPanelLED(Colors.red),
+          ),
+        ],
       ],
+    );
+  }
+
+  Widget _buildRivet(Alignment alignment) {
+    return Align(
+      alignment: alignment,
+      child: Container(
+        width: 8,
+        height: 8,
+        margin: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppColors.background,
+          border: Border.all(
+            color: frameColor == const Color(0xFF00FFFF) ? AppColors.primary : frameColor,
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 2,
+              offset: const Offset(1, 1),
+            ),
+          ],
+        ),
+        child: Container(
+          margin: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: (frameColor == const Color(0xFF00FFFF) ? AppColors.primary : frameColor).withOpacity(0.3),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusLed(bool active, Color color) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: active ? color : AppColors.textDim,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: active ? color : AppColors.textDim,
+          width: 1,
+        ),
+        boxShadow: active
+            ? [
+                BoxShadow(
+                  color: color.withOpacity(0.6),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+              ]
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildPanelLED(Color color) {
+    return Container(
+      width: 4,
+      height: 4,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.5),
+            blurRadius: 3,
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _CyberpunkFramePainter extends CustomPainter {
-  final double cornerSize;
+class _HardwareFramePainter extends CustomPainter {
   final double strokeWidth;
   final Color frameColor;
+  final bool showHardware;
+  final bool showPanelIndicators;
 
-  _CyberpunkFramePainter({
-    required this.cornerSize,
+  _HardwareFramePainter({
     required this.strokeWidth,
     required this.frameColor,
+    required this.showHardware,
+    required this.showPanelIndicators,
   });
 
   @override
@@ -105,52 +198,126 @@ class _CyberpunkFramePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.square;
 
-    // Top-left corner bracket
-    canvas.drawLine(Offset(0, cornerSize), Offset(0, 0), paint);
-    canvas.drawLine(Offset(0, 0), Offset(cornerSize, 0), paint);
-
-    // Top-right corner bracket
-    canvas.drawLine(Offset(size.width - cornerSize, 0), Offset(size.width, 0), paint);
-    canvas.drawLine(Offset(size.width, 0), Offset(size.width, cornerSize), paint);
-
-    // Bottom-left corner bracket
-    canvas.drawLine(Offset(0, size.height - cornerSize), Offset(0, size.height), paint);
-    canvas.drawLine(Offset(0, size.height), Offset(cornerSize, size.height), paint);
-
-    // Bottom-right corner bracket
-    canvas.drawLine(Offset(size.width - cornerSize, size.height), Offset(size.width, size.height), paint);
-    canvas.drawLine(Offset(size.width, size.height), Offset(size.width, size.height - cornerSize), paint);
-
-    // Optional: Add small decorative dashes at mid-points
-    final dashSize = 4.0;
-
-    // Top mid dash
-    canvas.drawLine(
-      Offset(size.width / 2 - dashSize, 0),
-      Offset(size.width / 2 + dashSize, 0),
-      paint,
+    // FULL RECTANGULAR BORDER (like dashboard cards)
+    final rect = Rect.fromLTWH(
+      strokeWidth / 2,
+      strokeWidth / 2,
+      size.width - strokeWidth,
+      size.height - strokeWidth,
     );
+    canvas.drawRect(rect, paint);
 
-    // Bottom mid dash
-    canvas.drawLine(
-      Offset(size.width / 2 - dashSize, size.height),
-      Offset(size.width / 2 + dashSize, size.height),
-      paint,
-    );
+    if (showHardware) {
+      // Top edge notches/cuts (hardware aesthetic)
+      final notchPaint = Paint()
+        ..color = frameColor
+        ..strokeWidth = strokeWidth
+        ..style = PaintingStyle.fill;
 
-    // Left mid dash
-    canvas.drawLine(
-      Offset(0, size.height / 2 - dashSize),
-      Offset(0, size.height / 2 + dashSize),
-      paint,
-    );
+      // Small rectangular notches on top edge
+      final notchWidth = 8.0;
+      final notchHeight = 4.0;
 
-    // Right mid dash
-    canvas.drawLine(
-      Offset(size.width, size.height / 2 - dashSize),
-      Offset(size.width, size.height / 2 + dashSize),
-      paint,
-    );
+      // Left notch
+      canvas.drawRect(
+        Rect.fromLTWH(size.width * 0.25 - notchWidth / 2, 0, notchWidth, notchHeight),
+        notchPaint,
+      );
+
+      // Right notch
+      canvas.drawRect(
+        Rect.fromLTWH(size.width * 0.75 - notchWidth / 2, 0, notchWidth, notchHeight),
+        notchPaint,
+      );
+
+      // Corner reinforcement lines (diagonal struts)
+      final strutPaint = Paint()
+        ..color = frameColor.withOpacity(0.5)
+        ..strokeWidth = strokeWidth * 0.5
+        ..style = PaintingStyle.stroke;
+
+      final strutLength = 12.0;
+
+      // Top-left corner strut
+      canvas.drawLine(
+        Offset(strokeWidth / 2 + 5, strokeWidth / 2),
+        Offset(strokeWidth / 2, strokeWidth / 2 + strutLength),
+        strutPaint,
+      );
+
+      // Top-right corner strut
+      canvas.drawLine(
+        Offset(size.width - strokeWidth / 2 - 5, strokeWidth / 2),
+        Offset(size.width - strokeWidth / 2, strokeWidth / 2 + strutLength),
+        strutPaint,
+      );
+
+      // Bottom-left corner strut
+      canvas.drawLine(
+        Offset(strokeWidth / 2 + 5, size.height - strokeWidth / 2),
+        Offset(strokeWidth / 2, size.height - strokeWidth / 2 - strutLength),
+        strutPaint,
+      );
+
+      // Bottom-right corner strut
+      canvas.drawLine(
+        Offset(size.width - strokeWidth / 2 - 5, size.height - strokeWidth / 2),
+        Offset(size.width - strokeWidth / 2, size.height - strokeWidth / 2 - strutLength),
+        strutPaint,
+      );
+
+      // Panel seam lines (vertical lines on sides)
+      final seamPaint = Paint()
+        ..color = frameColor.withOpacity(0.3)
+        ..strokeWidth = 1
+        ..style = PaintingStyle.stroke;
+
+      // Left side seam
+      canvas.drawLine(
+        Offset(strokeWidth + 2, size.height * 0.3),
+        Offset(strokeWidth + 2, size.height * 0.7),
+        seamPaint,
+      );
+
+      // Right side seam
+      canvas.drawLine(
+        Offset(size.width - strokeWidth - 2, size.height * 0.3),
+        Offset(size.width - strokeWidth - 2, size.height * 0.7),
+        seamPaint,
+      );
+    }
+
+    if (showPanelIndicators) {
+      // Port indicators (small rectangles on bottom edge)
+      final portPaint = Paint()
+        ..color = frameColor
+        ..style = PaintingStyle.fill;
+
+      final portWidth = 6.0;
+      final portHeight = 3.0;
+
+      // Bottom left port
+      canvas.drawRect(
+        Rect.fromLTWH(
+          size.width * 0.3 - portWidth / 2,
+          size.height - portHeight,
+          portWidth,
+          portHeight,
+        ),
+        portPaint,
+      );
+
+      // Bottom right port
+      canvas.drawRect(
+        Rect.fromLTWH(
+          size.width * 0.7 - portWidth / 2,
+          size.height - portHeight,
+          portWidth,
+          portHeight,
+        ),
+        portPaint,
+      );
+    }
   }
 
   @override
