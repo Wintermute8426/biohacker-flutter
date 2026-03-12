@@ -83,12 +83,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Biohacker'),
-                  content: const Text('Version 1.0.0\n\nPeptide tracking & optimization'),
+                  backgroundColor: AppColors.surface,
+                  title: Text('Biohacker', style: TextStyle(color: AppColors.primary)),
+                  content: Text('Version 1.0.0\n\nPeptide tracking & optimization', style: TextStyle(color: AppColors.textMid)),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'),
+                      child: Text('Close', style: TextStyle(color: AppColors.primary)),
                     ),
                   ],
                 ),

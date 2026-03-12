@@ -544,7 +544,7 @@ class _CycleSetupFormV3State extends State<CycleSetupFormV3> {
                     onTap: () => setState(() => _showDateEditor = !_showDateEditor),
                     child: Text(
                       _showDateEditor ? 'Hide date editor' : 'Edit dates',
-                      style: TextStyle(color: AppColors.accent, fontSize: 11, decoration: TextDecoration.underline),
+                      style: TextStyle(color: AppColors.accent, fontSize: 11),
                     ),
                   ),
                 ],
