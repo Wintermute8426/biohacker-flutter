@@ -46,8 +46,28 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       return;
     }
 
-    if (_passwordController.text.length < 6) {
-      setState(() => _error = 'Password must be at least 6 characters');
+    // Strengthen password validation
+    final password = _passwordController.text;
+    if (password.length < 8) {
+      setState(() => _error = 'Password must be at least 8 characters');
+      return;
+    }
+
+    // Check for uppercase
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      setState(() => _error = 'Password must contain at least one uppercase letter');
+      return;
+    }
+
+    // Check for lowercase
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      setState(() => _error = 'Password must contain at least one lowercase letter');
+      return;
+    }
+
+    // Check for number
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      setState(() => _error = 'Password must contain at least one number');
       return;
     }
 
