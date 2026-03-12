@@ -169,8 +169,53 @@ class DoseLogsService {
   // Mark dose as MISSED
   Future<bool> markAsMissed(String doseLogId) async {
     try {
-      print('[DoseLogsService] 🔵 Attempting to mark dose as MISSED');
-      print('[DoseLogsService] 🔵 doseLogId: $doseLogId');
+      print('[DoseLogsService] 🔵🔵🔵 === START markAsMissed() ===');
+      print('[DoseLogsService] 🔵 Input doseLogId: $doseLogId');
+      print('[DoseLogsService] 🔵 doseLogId type: ${doseLogId.runtimeType}');
+      print('[DoseLogsService] 🔵 doseLogId length: ${doseLogId.length}');
+      print('[DoseLogsService] 🔵 doseLogId isEmpty: ${doseLogId.isEmpty}');
+
+      // Step 1: Check current user
+      final currentUser = _supabase.auth.currentUser;
+      print('[DoseLogsService] 👤 Current user ID: ${currentUser?.id}');
+      print('[DoseLogsService] 👤 Current user email: ${currentUser?.email}');
+
+      // Step 2: Check if dose log exists BEFORE update
+      print('[DoseLogsService] 🔍 Querying dose_logs table to verify entry exists...');
+      final existingRecords = await _supabase
+          .from('dose_logs')
+          .select()
+          .eq('id', doseLogId);
+
+      print('[DoseLogsService] 🔍 Query result: $existingRecords');
+      print('[DoseLogsService] 🔍 Records found: ${existingRecords.length}');
+
+      if (existingRecords.isEmpty) {
+        print('[DoseLogsService] ❌ FATAL: No dose_log entry exists with ID: $doseLogId');
+        print('[DoseLogsService] ❌ Cannot update non-existent record!');
+        return false;
+      }
+
+      final existingRecord = existingRecords.first;
+      print('[DoseLogsService] 📋 Existing record details:');
+      print('[DoseLogsService] 📋   id: ${existingRecord['id']}');
+      print('[DoseLogsService] 📋   user_id: ${existingRecord['user_id']}');
+      print('[DoseLogsService] 📋   cycle_id: ${existingRecord['cycle_id']}');
+      print('[DoseLogsService] 📋   status: ${existingRecord['status']}');
+      print('[DoseLogsService] 📋   logged_at: ${existingRecord['logged_at']}');
+      print('[DoseLogsService] 📋   dose_amount: ${existingRecord['dose_amount']}');
+
+      // Step 3: Check if current user owns this record
+      if (existingRecord['user_id'] != currentUser?.id) {
+        print('[DoseLogsService] ⚠️ WARNING: User mismatch!');
+        print('[DoseLogsService] ⚠️ Record user_id: ${existingRecord['user_id']}');
+        print('[DoseLogsService] ⚠️ Current user_id: ${currentUser?.id}');
+        print('[DoseLogsService] ⚠️ This may trigger RLS policy rejection!');
+      }
+
+      // Step 4: Attempt UPDATE
+      print('[DoseLogsService] 💾 Executing UPDATE query...');
+      print('[DoseLogsService] 💾 UPDATE dose_logs SET status = MISSED WHERE id = $doseLogId');
 
       final response = await _supabase
           .from('dose_logs')
@@ -178,19 +223,33 @@ class DoseLogsService {
           .eq('id', doseLogId)
           .select();
 
-      print('[DoseLogsService] ✅ Database UPDATE successful!');
-      print('[DoseLogsService] ✅ Response: $response');
+      print('[DoseLogsService] ✅ UPDATE query executed without throwing exception');
+      print('[DoseLogsService] ✅ Response type: ${response.runtimeType}');
+      print('[DoseLogsService] ✅ Response value: $response');
+      print('[DoseLogsService] ✅ Response length: ${response.length}');
 
       if (response.isEmpty) {
-        print('[DoseLogsService] ⚠️ WARNING: Update succeeded but no rows returned. ID may not exist: $doseLogId');
+        print('[DoseLogsService] ❌ CRITICAL: UPDATE returned empty array!');
+        print('[DoseLogsService] ❌ Possible causes:');
+        print('[DoseLogsService] ❌   1. RLS policy blocked the update (user_id mismatch)');
+        print('[DoseLogsService] ❌   2. Row was deleted between SELECT and UPDATE');
+        print('[DoseLogsService] ❌   3. Database constraint prevented update');
         return false;
       }
 
+      final updatedRecord = response.first;
+      print('[DoseLogsService] ✅✅✅ SUCCESS: Dose marked as MISSED!');
+      print('[DoseLogsService] ✅ Updated record: $updatedRecord');
+      print('[DoseLogsService] ✅ New status: ${updatedRecord['status']}');
+      print('[DoseLogsService] 🔵🔵🔵 === END markAsMissed() ===');
+
       return true;
     } catch (e, stackTrace) {
-      print('[DoseLogsService] ❌ CRITICAL ERROR: Failed to mark dose as missed');
-      print('[DoseLogsService] ❌ Error: $e');
-      print('[DoseLogsService] ❌ Stack trace: $stackTrace');
+      print('[DoseLogsService] ❌❌❌ EXCEPTION THROWN in markAsMissed()');
+      print('[DoseLogsService] ❌ Error type: ${e.runtimeType}');
+      print('[DoseLogsService] ❌ Error message: $e');
+      print('[DoseLogsService] ❌ Full stack trace:');
+      print('[DoseLogsService] ❌ $stackTrace');
       return false;
     }
   }
