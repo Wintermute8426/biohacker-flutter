@@ -91,9 +91,34 @@ class WintermmuteStyles {
     decoration: TextDecoration.none,
   );
 
-  // ==================== BOX SHADOWS (MINIMAL) ====================
+  // ==================== BOX SHADOWS (GLOW EFFECTS) ====================
 
-  // None needed - dashboard aesthetic uses clean borders, no glow
+  // Cyan glow for buttons/inputs
+  static List<BoxShadow> cyanGlowShadow = [
+    BoxShadow(
+      color: colorCyan.withOpacity(0.5),
+      blurRadius: 12,
+      spreadRadius: 2,
+    ),
+  ];
+
+  // Green glow for accent elements
+  static List<BoxShadow> greenGlowShadow = [
+    BoxShadow(
+      color: colorGreen.withOpacity(0.5),
+      blurRadius: 12,
+      spreadRadius: 2,
+    ),
+  ];
+
+  // Red glow for errors/warnings
+  static List<BoxShadow> redGlowShadow = [
+    BoxShadow(
+      color: Color(0xFFFF0040).withOpacity(0.5),
+      blurRadius: 12,
+      spreadRadius: 2,
+    ),
+  ];
 
   // ==================== BOX DECORATIONS (MULTI-COLOR) ====================
 

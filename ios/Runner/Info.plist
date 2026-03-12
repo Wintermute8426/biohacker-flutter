@@ -71,5 +71,15 @@
 		<string>https</string>
 		<string>http</string>
 	</array>
+	<!-- Deep link for Google OAuth callback -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.example.biohacker</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

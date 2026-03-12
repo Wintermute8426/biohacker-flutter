@@ -18,6 +18,7 @@ class UserProfile {
   final String? unitsPreference; // 'metric' or 'imperial'
   final String? contactMethod; // 'email', 'phone', 'push'
   final String? bio; // optional bio text (max 200 chars)
+  final String? photoUrl; // profile photo URL
   // Existing fields (Onboarding)
   final String experienceLevel; // beginner, intermediate, advanced
   final List<String> healthGoals; // muscle, recovery, longevity, metabolic, sleep, immune
@@ -42,6 +43,7 @@ class UserProfile {
     this.unitsPreference,
     this.contactMethod,
     this.bio,
+    this.photoUrl,
     required this.experienceLevel,
     required this.healthGoals,
     this.baselineWeight,
@@ -83,6 +85,7 @@ class UserProfile {
       unitsPreference: json['units_preference'],
       contactMethod: json['contact_method'],
       bio: json['bio'],
+      photoUrl: json['photo_url'],
       experienceLevel: json['experience_level'] ?? 'beginner',
       healthGoals: List<String>.from(json['health_goals'] ?? []),
       baselineWeight: json['baseline_weight']?.toDouble(),
@@ -111,6 +114,7 @@ class UserProfile {
       'units_preference': unitsPreference,
       'contact_method': contactMethod,
       'bio': bio,
+      'photo_url': photoUrl,
       'experience_level': experienceLevel,
       'health_goals': healthGoals,
       'baseline_weight': baselineWeight,
@@ -135,6 +139,7 @@ class UserProfile {
     String? unitsPreference,
     String? contactMethod,
     String? bio,
+    String? photoUrl,
     String? experienceLevel,
     List<String>? healthGoals,
     double? baselineWeight,
@@ -158,6 +163,7 @@ class UserProfile {
       unitsPreference: unitsPreference ?? this.unitsPreference,
       contactMethod: contactMethod ?? this.contactMethod,
       bio: bio ?? this.bio,
+      photoUrl: photoUrl ?? this.photoUrl,
       experienceLevel: experienceLevel ?? this.experienceLevel,
       healthGoals: healthGoals ?? this.healthGoals,
       baselineWeight: baselineWeight ?? this.baselineWeight,
@@ -233,6 +239,7 @@ class UserProfileService {
     String? unitsPreference,
     String? contactMethod,
     String? bio,
+    String? photoUrl,
     String? experienceLevel,
     List<String>? healthGoals,
     double? baselineWeight,
@@ -259,7 +266,8 @@ class UserProfileService {
       if (unitsPreference != null) updates['units_preference'] = unitsPreference;
       if (contactMethod != null) updates['contact_method'] = contactMethod;
       if (bio != null) updates['bio'] = bio;
-      
+      if (photoUrl != null) updates['photo_url'] = photoUrl;
+
       // EXISTING: Onboarding fields
       if (experienceLevel != null) updates['experience_level'] = experienceLevel;
       if (healthGoals != null) updates['health_goals'] = healthGoals;

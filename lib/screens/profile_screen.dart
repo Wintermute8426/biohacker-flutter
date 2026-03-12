@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/user_profile_service.dart';
+import '../services/profile_photo_service.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
 import '../main.dart';
@@ -42,10 +44,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isEditMode = false; // NEW: Toggle between ID card and form
+  bool _isUploadingPhoto = false;
   String? _successMessage;
   String? _errorMessage;
   String? _latestWeight;
   String _heightDisplay = 'Not set';
+  String? _photoUrl;
 
   @override
   void initState() {
@@ -94,6 +98,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _selectedTimezone = profile.timezone;
           _selectedUnits = profile.unitsPreference ?? 'imperial';
           _heightDisplay = profile.heightFormatted;
+          _photoUrl = profile.photoUrl;
 
           if (profile.notificationPreferences != null) {
             profile.notificationPreferences!.forEach((key, value) {
@@ -153,6 +158,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       setState(() {
         _heightDisplay = 'Not set';
       });
+    }
+  }
+
+  Future<void> _uploadProfilePhoto() async {
+    setState(() => _isUploadingPhoto = true);
+
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) throw Exception('Not authenticated');
+
+      final photoService = ProfilePhotoService();
+      final newPhotoUrl = await photoService.pickAndUploadPhoto(userId, oldPhotoUrl: _photoUrl);
+
+      if (newPhotoUrl != null) {
+        setState(() {
+          _photoUrl = newPhotoUrl;
+          _successMessage = 'Profile photo updated successfully';
+        });
+
+        // Clear success message after 3 seconds
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            setState(() => _successMessage = null);
+          }
+        });
+      }
+    } catch (e) {
+      print('[ProfileScreen] Error uploading photo: $e');
+      setState(() {
+        _errorMessage = 'Failed to upload photo: ${e.toString()}';
+      });
+    } finally {
+      setState(() => _isUploadingPhoto = false);
     }
   }
 
@@ -338,6 +376,83 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Colors.transparent,
                         AppColors.accent,
                         Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Profile Photo Section
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Center(
+                    child: Stack(
+                      children: [
+                        // Profile photo with cyan glow
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primary,
+                              width: 3,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withOpacity(0.5),
+                                blurRadius: 16,
+                                spreadRadius: 3,
+                              ),
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: _photoUrl != null && _photoUrl!.isNotEmpty
+                                ? Image.network(
+                                    _photoUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return _buildDefaultAvatar();
+                                    },
+                                  )
+                                : _buildDefaultAvatar(),
+                          ),
+                        ),
+                        // Edit button
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: _isUploadingPhoto ? null : _uploadProfilePhoto,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.accent,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.accent.withOpacity(0.5),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  ),
+                                ],
+                              ),
+                              child: _isUploadingPhoto
+                                  ? SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.background,
+                                      ),
+                                    )
+                                  : Icon(
+                                      Icons.camera_alt,
+                                      color: AppColors.background,
+                                      size: 16,
+                                    ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -1287,5 +1402,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         .split('_')
         .map((word) => word.isEmpty ? '' : word[0].toUpperCase() + word.substring(1))
         .join(' ');
+  }
+
+  Widget _buildDefaultAvatar() {
+    return Container(
+      color: AppColors.surface,
+      child: Center(
+        child: Icon(
+          Icons.person,
+          size: 48,
+          color: AppColors.primary,
+        ),
+      ),
+    );
   }
 }

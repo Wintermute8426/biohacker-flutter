@@ -78,13 +78,22 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
 
       // Sign in with Google using Supabase's OAuth
-      await supabase.auth.signInWithOAuth(
+      // The OAuth flow will redirect to com.example.biohacker://login-callback
+      // Deep linking is configured in AndroidManifest.xml and Info.plist
+      final response = await supabase.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: 'com.example.biohacker://login-callback',
       );
 
+      // Note: OAuth flow is async and will complete via deep link callback
+      // The auth state listener will handle user updates automatically
       _isLoading = false;
       notifyListeners();
+
+      // If OAuth URL was not opened, throw error
+      if (response == false) {
+        throw Exception('Failed to open Google sign-in');
+      }
     } catch (e) {
       _isLoading = false;
       notifyListeners();

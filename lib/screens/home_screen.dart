@@ -100,10 +100,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             title: const Text('Logout'),
             textColor: AppColors.error,
             iconColor: AppColors.error,
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              // Logout logic
-              Supabase.instance.client.auth.signOut();
+              // Logout logic with error handling
+              try {
+                await Supabase.instance.client.auth.signOut();
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to logout: ${e.toString()}'),
+                      backgroundColor: AppColors.error,
+                    ),
+                  );
+                }
+              }
             },
           ),
         ],

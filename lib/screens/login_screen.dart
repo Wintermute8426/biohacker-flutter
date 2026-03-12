@@ -84,55 +84,75 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: 40),
 
               // Email Field
-              TextField(
-                controller: _emailController,
-                style: const TextStyle(color: AppColors.textLight),
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  labelStyle: const TextStyle(color: AppColors.textMid),
-                  hintText: 'user@example.com',
-                  hintStyle: const TextStyle(color: AppColors.textDim),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.border),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: WintermmuteStyles.cyanGlowShadow,
+                ),
+                child: TextField(
+                  controller: _emailController,
+                  style: const TextStyle(color: AppColors.textLight),
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    labelStyle: const TextStyle(color: AppColors.textMid),
+                    hintText: 'user@example.com',
+                    hintStyle: const TextStyle(color: AppColors.textDim),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.primary),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.primary),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.background,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                  ),
-                  filled: true,
-                  fillColor: AppColors.surface,
                 ),
               ),
               const SizedBox(height: 16),
 
               // Password Field
-              TextField(
-                controller: _passwordController,
-                style: const TextStyle(color: AppColors.textLight),
-                obscureText: !_showPassword,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  labelStyle: const TextStyle(color: AppColors.textMid),
-                  hintText: '••••••••',
-                  hintStyle: const TextStyle(color: AppColors.textDim),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                  ),
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _showPassword ? Icons.visibility : Icons.visibility_off,
-                      color: AppColors.textMid,
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: WintermmuteStyles.cyanGlowShadow,
+                ),
+                child: TextField(
+                  controller: _passwordController,
+                  style: const TextStyle(color: AppColors.textLight),
+                  obscureText: !_showPassword,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    labelStyle: const TextStyle(color: AppColors.textMid),
+                    hintText: '••••••••',
+                    hintStyle: const TextStyle(color: AppColors.textDim),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.primary),
                     ),
-                    onPressed: () => setState(() => _showPassword = !_showPassword),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.primary),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.background,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _showPassword ? Icons.visibility : Icons.visibility_off,
+                        color: AppColors.textMid,
+                      ),
+                      onPressed: () => setState(() => _showPassword = !_showPassword),
+                    ),
                   ),
                 ),
               ),
@@ -155,9 +175,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: 24),
 
               // Login Button
-              SizedBox(
+              Container(
                 width: double.infinity,
                 height: 48,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: WintermmuteStyles.cyanGlowShadow,
+                ),
                 child: ElevatedButton(
                   onPressed: _handleLogin,
                   style: ElevatedButton.styleFrom(
