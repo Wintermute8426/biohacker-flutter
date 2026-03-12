@@ -513,6 +513,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 .where((d) => d.status == 'MISSED')
                 .length;
 
+            // Debug logging for this day
+            if (dayDoses.isNotEmpty) {
+              print('[Calendar Week] Date ${date.year}-${date.month}-${date.day}: ${dayDoses.length} doses');
+              for (final d in dayDoses) {
+                print('[Calendar Week]   - ${d.peptideName} ${d.doseAmount}mg status=${d.status} doseLogId=${d.doseLogId}');
+              }
+              print('[Calendar Week]   Counts: completed=$completed, scheduled=$scheduled, missed=$missed');
+            }
+
             final isToday = date.year == DateTime.now().year &&
                 date.month == DateTime.now().month &&
                 date.day == DateTime.now().day;
@@ -524,15 +533,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             if (missed > 0) {
               // Red for explicitly missed doses
               cellColor = AppColors.error;
+              print('[Calendar Week]   → Cell color: RED (missed doses)');
             } else if (isPast && dayDoses.isNotEmpty) {
               // Green for past scheduled doses (assumed taken unless missed)
               cellColor = const Color(0xFF0D2E1F);
+              print('[Calendar Week]   → Cell color: GREEN (past assumed taken)');
             } else if (isFuture && dayDoses.isNotEmpty) {
               // Cyan for future scheduled doses
               cellColor = const Color(0xFF1E4620);
+              print('[Calendar Week]   → Cell color: CYAN (future scheduled)');
             } else if (isToday && dayDoses.isNotEmpty) {
               // Cyan for today's scheduled doses
               cellColor = const Color(0xFF1E4620);
+              print('[Calendar Week]   → Cell color: CYAN (today scheduled)');
             }
 
             // Check if this date has a lab result
@@ -700,6 +713,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             final scheduled = dayDoses.where((d) => d.status == 'SCHEDULED').length;
             final missed = dayDoses.where((d) => d.status == 'MISSED').length;
 
+            // Debug logging for this day
+            if (dayDoses.isNotEmpty) {
+              print('[Calendar Month] Date ${date.year}-${date.month}-${date.day}: ${dayDoses.length} doses');
+              for (final d in dayDoses) {
+                print('[Calendar Month]   - ${d.peptideName} ${d.doseAmount}mg status=${d.status} doseLogId=${d.doseLogId}');
+              }
+              print('[Calendar Month]   Counts: completed=$completed, scheduled=$scheduled, missed=$missed');
+            }
+
             final isToday = date.year == DateTime.now().year &&
                 date.month == DateTime.now().month &&
                 date.day == DateTime.now().day;
@@ -711,15 +733,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             if (missed > 0) {
               // Red for explicitly missed doses
               cellColor = AppColors.error.withOpacity(0.2);
+              print('[Calendar Month]   → Cell color: RED (missed doses)');
             } else if (isPast && dayDoses.isNotEmpty) {
               // Green for past scheduled doses (assumed taken unless missed)
               cellColor = const Color(0xFF0D2E1F);
+              print('[Calendar Month]   → Cell color: GREEN (past assumed taken)');
             } else if (isFuture && dayDoses.isNotEmpty) {
               // Cyan for future scheduled doses
               cellColor = const Color(0xFF1E4620);
+              print('[Calendar Month]   → Cell color: CYAN (future scheduled)');
             } else if (isToday && dayDoses.isNotEmpty) {
               // Cyan for today's scheduled doses
               cellColor = const Color(0xFF1E4620);
+              print('[Calendar Month]   → Cell color: CYAN (today scheduled)');
             }
 
             final hasLab = labDates.any((labDate) =>

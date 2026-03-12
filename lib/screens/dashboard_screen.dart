@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/cycles_database.dart';
@@ -11,6 +11,7 @@ import '../services/weight_logs_database.dart';
 import '../widgets/side_effects_modal.dart';
 import '../widgets/weight_log_modal.dart';
 import 'labs_screen.dart';
+import 'research_screen.dart';
 import '../main.dart' show authProviderProvider;
 // Import providers for invalidation after marking dose as missed
 import '../services/dose_schedule_service.dart' show upcomingDosesProvider, doseSchedulesProvider;
@@ -73,11 +74,59 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Future<void> _markDoseMissed(DoseInstance dose) async {
     try {
       final userId = ref.read(authProviderProvider).user?.id;
-      if (userId == null) return;
+      if (userId == null) {
+        print('[Dashboard] ERROR: No user ID found');
+        return;
+      }
 
-      // Mark the dose as MISSED using DoseLogsService
-      final doseLogsService = ref.read(doseLogsServiceProvider);
-      await doseLogsService.markAsMissed(dose.doseLogId);
+      print('[Dashboard] === MARKING DOSE AS MISSED ===');
+      print('[Dashboard] Dose Log ID: ${dose.doseLogId}');
+      print('[Dashboard] Cycle ID: ${dose.cycleId}');
+      print('[Dashboard] Peptide: ${dose.peptideName}');
+      print('[Dashboard] Date: ${dose.date}');
+      print('[Dashboard] Amount: ${dose.doseAmount}mg');
+      print('[Dashboard] Current Status: ${dose.status}');
+
+      // If dose_log doesn't exist, create it first
+      if (dose.doseLogId.isEmpty) {
+        print('[Dashboard] No dose_log exists, creating new one...');
+        final supabase = Supabase.instance.client;
+
+        // Parse time to create proper DateTime
+        final timeParts = dose.time.split(':');
+        final hour = int.parse(timeParts[0]);
+        final minute = int.parse(timeParts[1]);
+        final loggedAt = DateTime(
+          dose.date.year,
+          dose.date.month,
+          dose.date.day,
+          hour,
+          minute,
+        );
+
+        final response = await supabase
+            .from('dose_logs')
+            .insert({
+              'user_id': userId,
+              'cycle_id': dose.cycleId,
+              'schedule_id': dose.scheduleId,
+              'dose_amount': dose.doseAmount,
+              'route': dose.route,
+              'logged_at': loggedAt.toIso8601String(),
+              'status': 'MISSED',
+            })
+            .select()
+            .single();
+
+        print('[Dashboard] Created dose_log: ${response['id']}');
+        print('[Dashboard] Stored data: cycle_id=${response['cycle_id']}, logged_at=${response['logged_at']}, status=${response['status']}');
+      } else {
+        // Update existing dose_log
+        print('[Dashboard] Updating existing dose_log...');
+        final doseLogsService = ref.read(doseLogsServiceProvider);
+        await doseLogsService.markAsMissed(dose.doseLogId);
+        print('[Dashboard] Updated dose_log ${dose.doseLogId} to MISSED');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -90,18 +139,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             duration: const Duration(seconds: 2),
           ),
         );
+
+        print('[Dashboard] Invalidating providers...');
         // Invalidate providers to refresh both dashboard and calendar
         ref.invalidate(upcomingDosesProvider);
         ref.invalidate(doseSchedulesProvider);
-        _loadData();
+
+        print('[Dashboard] Reloading dashboard data...');
+        await _loadData();
+        print('[Dashboard] === MARK AS MISSED COMPLETE ===');
       }
-    } catch (e) {
-      print('[Dashboard] Error marking dose as missed: $e');
+    } catch (e, stackTrace) {
+      print('[Dashboard] ERROR marking dose as missed: $e');
+      print('[Dashboard] Stack trace: $stackTrace');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error marking dose',
+              'Error marking dose: $e',
               style: WintermmuteStyles.bodyStyle,
             ),
             backgroundColor: AppColors.error,
@@ -111,28 +166,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
   }
 
-  Future<void> _openResearchLink() async {
-    final url = Uri.parse('https://peptides.org');
-    try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
-        throw 'Could not launch $url';
-      }
-    } catch (e) {
-      print('[Dashboard] Error opening research link: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Could not open research link',
-              style: WintermmuteStyles.bodyStyle,
-            ),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
+  void _navigateToResearch() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ResearchScreen(),
+      ),
+    );
   }
 
   void _showSideEffectsModal(DoseInstance dose) {
@@ -908,7 +948,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 icon: Icons.biotech,
                 label: '🔬 RESEARCH',
                 color: AppColors.secondary,
-                onTap: _openResearchLink,
+                onTap: _navigateToResearch,
               ),
             ),
           ],
