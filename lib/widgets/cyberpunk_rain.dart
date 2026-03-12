@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui' show PointMode;
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 
