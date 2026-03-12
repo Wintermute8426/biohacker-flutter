@@ -81,7 +81,7 @@ class ProfilePhotoService {
       await _supabase
           .from('user_profiles')
           .update({'photo_url': photoUrl})
-          .eq('user_id', userId);
+          .eq('id', userId);
 
       print('[ProfilePhotoService] Updated user profile with photo URL');
     } catch (e) {
