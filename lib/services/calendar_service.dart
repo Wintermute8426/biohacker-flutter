@@ -162,14 +162,15 @@ class CalendarService {
           final date = DateTime(year, month, day);
           if (date.isAfter(cycleStart.subtract(const Duration(days: 1))) &&
               date.isBefore(cycleEnd.add(const Duration(days: 1)))) {
+            final existing = events[date] ?? CalendarEvent(date: date);
             events[date] = CalendarEvent(
               date: date,
-              cycles: [...events[date]!.cycles, cycleEvent],
-              protocols: events[date]!.protocols,
-              labs: events[date]!.labs,
-              weight: events[date]!.weight,
-              doses: events[date]!.doses,
-              sideEffects: events[date]!.sideEffects,
+              cycles: [...existing.cycles, cycleEvent],
+              protocols: existing.protocols,
+              labs: existing.labs,
+              weight: existing.weight,
+              doses: existing.doses,
+              sideEffects: existing.sideEffects,
             );
           }
         }
@@ -195,14 +196,15 @@ class CalendarService {
             isActive: true,
           )).toList();
 
+          final existing = events[date] ?? CalendarEvent(date: date);
           events[date] = CalendarEvent(
             date: date,
-            cycles: events[date]!.cycles,
+            cycles: existing.cycles,
             protocols: protocolEvents,
-            labs: events[date]!.labs,
-            weight: events[date]!.weight,
-            doses: events[date]!.doses,
-            sideEffects: events[date]!.sideEffects,
+            labs: existing.labs,
+            weight: existing.weight,
+            doses: existing.doses,
+            sideEffects: existing.sideEffects,
           );
         }
       }
@@ -228,14 +230,15 @@ class CalendarService {
             extractedData: lab['extracted_data'] ?? {},
           );
 
+          final existing = events[dayKey] ?? CalendarEvent(date: dayKey);
           events[dayKey] = CalendarEvent(
             date: dayKey,
-            cycles: events[dayKey]!.cycles,
-            protocols: events[dayKey]!.protocols,
-            labs: [...events[dayKey]!.labs, labEvent],
-            weight: events[dayKey]!.weight,
-            doses: events[dayKey]!.doses,
-            sideEffects: events[dayKey]!.sideEffects,
+            cycles: existing.cycles,
+            protocols: existing.protocols,
+            labs: [...existing.labs, labEvent],
+            weight: existing.weight,
+            doses: existing.doses,
+            sideEffects: existing.sideEffects,
           );
         }
       }
@@ -263,14 +266,15 @@ class CalendarService {
             notes: weight['notes'],
           );
 
+          final existing = events[dayKey] ?? CalendarEvent(date: dayKey);
           events[dayKey] = CalendarEvent(
             date: dayKey,
-            cycles: events[dayKey]!.cycles,
-            protocols: events[dayKey]!.protocols,
-            labs: events[dayKey]!.labs,
+            cycles: existing.cycles,
+            protocols: existing.protocols,
+            labs: existing.labs,
             weight: weightEvent,
-            doses: events[dayKey]!.doses,
-            sideEffects: events[dayKey]!.sideEffects,
+            doses: existing.doses,
+            sideEffects: existing.sideEffects,
           );
         }
       }
@@ -297,14 +301,15 @@ class CalendarService {
             loggedAt: loggedAt,
           );
 
+          final existing = events[dayKey] ?? CalendarEvent(date: dayKey);
           events[dayKey] = CalendarEvent(
             date: dayKey,
-            cycles: events[dayKey]!.cycles,
-            protocols: events[dayKey]!.protocols,
-            labs: events[dayKey]!.labs,
-            weight: events[dayKey]!.weight,
-            doses: [...events[dayKey]!.doses, doseEvent],
-            sideEffects: events[dayKey]!.sideEffects,
+            cycles: existing.cycles,
+            protocols: existing.protocols,
+            labs: existing.labs,
+            weight: existing.weight,
+            doses: [...existing.doses, doseEvent],
+            sideEffects: existing.sideEffects,
           );
         }
       }
@@ -330,14 +335,15 @@ class CalendarService {
             notes: effect['notes'],
           );
 
+          final existing = events[dayKey] ?? CalendarEvent(date: dayKey);
           events[dayKey] = CalendarEvent(
             date: dayKey,
-            cycles: events[dayKey]!.cycles,
-            protocols: events[dayKey]!.protocols,
-            labs: events[dayKey]!.labs,
-            weight: events[dayKey]!.weight,
-            doses: events[dayKey]!.doses,
-            sideEffects: [...events[dayKey]!.sideEffects, sideEffectEvent],
+            cycles: existing.cycles,
+            protocols: existing.protocols,
+            labs: existing.labs,
+            weight: existing.weight,
+            doses: existing.doses,
+            sideEffects: [...existing.sideEffects, sideEffectEvent],
           );
         }
       }
