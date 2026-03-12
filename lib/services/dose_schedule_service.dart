@@ -234,7 +234,7 @@ class DoseScheduleService {
       print('[ISSUE1 DEBUG]   SCHEDULED: $scheduledCount');
       print('[ISSUE1 DEBUG]   COMPLETED: $completedCount');
       print('[ISSUE1 DEBUG] Built doseLogMap with ${doseLogMap.length} entries');
-      print('[ISSUE1 DEBUG] ========================================')
+      print('[ISSUE1 DEBUG] ========================================');
 
       for (final schedule in schedules) {
         // Generate dose instances for past 30 days + next 30 days (60 days total)
