@@ -31,6 +31,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   List<Cycle> _activeCycles = [];
   bool _isLoading = true;
 
+  // Track locally marked missed doses to update UI immediately
+  final Set<String> _locallyMarkedMissed = {};
+
   @override
   void initState() {
     super.initState();
@@ -129,6 +132,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       }
 
       if (mounted) {
+        // Add to local tracking for immediate UI update
+        final doseKey = '${dose.scheduleId}_${dose.date.year}-${dose.date.month.toString().padLeft(2, '0')}-${dose.date.day.toString().padLeft(2, '0')}';
+        setState(() {
+          _locallyMarkedMissed.add(doseKey);
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -141,7 +150,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         );
 
         print('[Dashboard] Invalidating providers...');
-        // Invalidate providers to refresh both dashboard and calendar
+        // AGGRESSIVE: Invalidate providers to force complete calendar refresh
         ref.invalidate(upcomingDosesProvider);
         ref.invalidate(doseSchedulesProvider);
 
@@ -372,8 +381,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildDoseCard(DoseInstance dose) {
+    // Check if locally marked as missed
+    final doseKey = '${dose.scheduleId}_${dose.date.year}-${dose.date.month.toString().padLeft(2, '0')}-${dose.date.day.toString().padLeft(2, '0')}';
+    final isLocallyMissed = _locallyMarkedMissed.contains(doseKey);
+
     final isCompleted = dose.status == 'COMPLETED';
-    final isMissed = dose.status == 'MISSED';
+    final isMissed = dose.status == 'MISSED' || isLocallyMissed;
     final maxDose = 10.0; // Max expected dose for progress bar scaling
     final fillPercent = (dose.doseAmount / maxDose).clamp(0.0, 1.0);
 
@@ -391,12 +404,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           color: isCompleted
               ? AppColors.accent.withOpacity(0.5)
               : isMissed
-                  ? const Color(0xFFFF6B00).withOpacity(0.5)
+                  ? const Color(0xFFFF6B00).withOpacity(0.8)
                   : AppColors.primary.withOpacity(0.5),
           width: 2,
         ),
         borderRadius: BorderRadius.circular(8),
-        color: AppColors.surface,
+        // ISSUE 3 FIX: Red/orange background for missed doses
+        color: isMissed
+            ? const Color(0xFFFF6B00).withOpacity(0.2)
+            : AppColors.surface,
         boxShadow: isCompleted
             ? [
                 BoxShadow(
@@ -405,7 +421,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   spreadRadius: 1,
                 )
               ]
-            : null,
+            : isMissed
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFFFF6B00).withOpacity(0.3),
+                      blurRadius: 8,
+                      spreadRadius: 1,
+                    )
+                  ]
+                : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,7 +688,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ],
             ),
-          ] else ...[
+          ] else if (isMissed) ...[
+            // ISSUE 3 FIX: Show missed status instead of buttons
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  Icons.cancel,
+                  color: const Color(0xFFFF6B00),
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'MARKED AS MISSED',
+                  style: WintermmuteStyles.bodyStyle.copyWith(
+                    color: const Color(0xFFFF6B00),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ] else if (isCompleted) ...[
             const SizedBox(height: 12),
             Row(
               children: [

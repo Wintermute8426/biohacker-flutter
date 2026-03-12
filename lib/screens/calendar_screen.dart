@@ -16,18 +16,37 @@ class CalendarScreen extends ConsumerStatefulWidget {
   ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
 }
 
-class _CalendarScreenState extends ConsumerState<CalendarScreen> {
+class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBindingObserver {
   late DateTime _weekStart;
   late DateTime _monthStart;
   String? _selectedCycleId;
   String? _selectedDate;
   bool _showMonthView = false; // Toggle between week and month views
+  int _buildCounter = 0; // Debug: Track rebuilds
 
   @override
   void initState() {
     super.initState();
     _weekStart = _getWeekStart(DateTime.now());
     _monthStart = _getMonthStart(DateTime.now());
+    WidgetsBinding.instance.addObserver(this);
+    print('[Calendar] ISSUE 1 FIX: initState called, observer added');
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // ISSUE 1 FIX: Aggressively refresh when app resumes
+    if (state == AppLifecycleState.resumed) {
+      print('[Calendar] ISSUE 1 FIX: App resumed, forcing refresh');
+      ref.invalidate(upcomingDosesProvider);
+      ref.invalidate(doseSchedulesProvider);
+    }
   }
 
   // Get Monday of week
@@ -81,7 +100,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _buildCounter++;
+    // ISSUE 1 FIX: Aggressively watch the provider and log when it changes
     final upcomingDoses = ref.watch(upcomingDosesProvider);
+    print('[Calendar] ISSUE 1 DEBUG: Build #$_buildCounter called. Provider state: ${upcomingDoses.runtimeType}');
+
     final userId = ref.watch(currentUserIdProvider);
 
     // Fetch lab results for bloodwork integration
@@ -113,8 +136,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             child: IconButton(
               icon: Icon(_showMonthView ? Icons.view_week : Icons.calendar_month),
               onPressed: () {
+                print('[Calendar] ISSUE 2 FIX: Toggle button pressed. Current: $_showMonthView');
                 setState(() {
                   _showMonthView = !_showMonthView;
+                  print('[Calendar] ISSUE 2 FIX: New value: $_showMonthView');
                 });
                 // Show feedback that view changed
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -127,6 +152,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     duration: const Duration(milliseconds: 800),
                   ),
                 );
+                print('[Calendar] ISSUE 2 FIX: setState complete, SnackBar shown');
               },
               color: AppColors.accent,
               tooltip: _showMonthView ? 'Switch to Week View' : 'Switch to Month View',
@@ -137,15 +163,46 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             onPressed: _goToToday,
             color: AppColors.primary,
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.refresh(upcomingDosesProvider),
-            color: AppColors.primary,
+          // ISSUE 1 FIX: Aggressive refresh button with visual feedback
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.5),
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                print('[Calendar] ISSUE 1 FIX: Manual refresh triggered');
+                ref.invalidate(upcomingDosesProvider);
+                ref.invalidate(doseSchedulesProvider);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Calendar refreshed',
+                      style: WintermmuteStyles.bodyStyle,
+                    ),
+                    backgroundColor: AppColors.primary,
+                    duration: const Duration(milliseconds: 800),
+                  ),
+                );
+              },
+              color: AppColors.primary,
+              tooltip: 'Refresh calendar',
+            ),
           ),
         ],
       ),
       body: upcomingDoses.when(
         data: (doses) {
+          // ISSUE 1 FIX: Log dose data to verify missed status is reflected
+          print('[Calendar] ISSUE 1 DEBUG: Got ${doses.length} doses from provider');
+          final missedCount = doses.where((d) => d.status == 'MISSED').length;
+          print('[Calendar] ISSUE 1 DEBUG: Found $missedCount missed doses');
+
           if (doses.isEmpty) {
             return Center(
               child: Column(
@@ -209,6 +266,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ISSUE 2 DEBUG: Log current view mode
+                Builder(builder: (context) {
+                  print('[Calendar] ISSUE 2 DEBUG: Rendering view. _showMonthView = $_showMonthView');
+                  return const SizedBox.shrink();
+                }),
+
                 // View header with navigation
                 _showMonthView
                     ? _buildMonthHeader()
@@ -224,9 +287,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 const SizedBox(height: 16),
 
                 // Calendar grid
-                _showMonthView
-                    ? _buildMonthGrid(displayDoses, labDates)
-                    : _buildWeekGrid(displayDoses, labDates),
+                Builder(builder: (context) {
+                  print('[Calendar] ISSUE 2 DEBUG: Building grid. _showMonthView = $_showMonthView');
+                  return _showMonthView
+                      ? _buildMonthGrid(displayDoses, labDates)
+                      : _buildWeekGrid(displayDoses, labDates);
+                }),
                 const SizedBox(height: 16),
 
                 // Status bar
