@@ -101,9 +101,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
   @override
   Widget build(BuildContext context) {
     _buildCounter++;
+    debugPrint('🔴 [Calendar] BUILD START: Build #$_buildCounter called');
     // ISSUE 1 FIX: Aggressively watch the provider and log when it changes
     final upcomingDoses = ref.watch(upcomingDosesProvider);
-    print('[Calendar] ISSUE 1 DEBUG: Build #$_buildCounter called. Provider state: ${upcomingDoses.runtimeType}');
+    debugPrint('🔴 [Calendar] ISSUE 1 DEBUG: Build #$_buildCounter called. Provider state: ${upcomingDoses.runtimeType}');
 
     final userId = ref.watch(currentUserIdProvider);
 
@@ -561,12 +562,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           itemCount: 7,
           itemBuilder: (context, index) {
             final date = _weekStart.add(Duration(days: index));
+            debugPrint('🔴 [WEEK CELL] Building cell for date: ${date.year}-${date.month}-${date.day}');
+
             final dayDoses = weekDoses
                 .where((d) =>
                     d.date.year == date.year &&
                     d.date.month == date.month &&
                     d.date.day == date.day)
                 .toList();
+
+            debugPrint('🔴 [WEEK CELL] Query result for ${date.year}-${date.month}-${date.day}: ${dayDoses.length} doses found');
+            for (final d in dayDoses) {
+              debugPrint('🔴   - Dose: ${d.peptideName} ${d.doseAmount}mg, status=${d.status}, logId=${d.doseLogId}');
+            }
 
             // Count by status
             final completed = dayDoses
@@ -600,26 +608,27 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
             // NEW MODEL: Determine cell color based on new logic
             Color cellColor = AppColors.surface;
-            print('[ISSUE1 DEBUG]   Cell color logic for ${date.year}-${date.month}-${date.day}:');
-            print('[ISSUE1 DEBUG]     missed=$missed, isPast=$isPast, isFuture=$isFuture, isToday=$isToday');
+            debugPrint('🔴 [WEEK CELL] Cell color logic for ${date.year}-${date.month}-${date.day}:');
+            debugPrint('🔴   missed=$missed, completed=$completed, scheduled=$scheduled');
+            debugPrint('🔴   isPast=$isPast, isFuture=$isFuture, isToday=$isToday');
             if (missed > 0) {
               // Bright red for explicitly missed doses
               cellColor = AppColors.error.withOpacity(0.5);
-              print('[ISSUE1 DEBUG]     → Cell color: RED (missed=$missed doses)');
+              debugPrint('🔴   → Cell color: RED (missed=$missed doses)');
             } else if (isPast && dayDoses.isNotEmpty) {
               // Green for past scheduled doses (assumed taken unless missed)
               cellColor = const Color(0xFF0D2E1F);
-              print('[ISSUE1 DEBUG]     → Cell color: GREEN (past assumed taken)');
+              debugPrint('🔴   → Cell color: GREEN (past assumed taken)');
             } else if (isFuture && dayDoses.isNotEmpty) {
               // Cyan for future scheduled doses
               cellColor = const Color(0xFF1E4620);
-              print('[ISSUE1 DEBUG]     → Cell color: CYAN (future scheduled)');
+              debugPrint('🔴   → Cell color: CYAN (future scheduled)');
             } else if (isToday && dayDoses.isNotEmpty) {
               // Cyan for today's scheduled doses
               cellColor = const Color(0xFF1E4620);
-              print('[ISSUE1 DEBUG]     → Cell color: CYAN (today scheduled)');
+              debugPrint('🔴   → Cell color: CYAN (today scheduled)');
             } else {
-              print('[ISSUE1 DEBUG]     → Cell color: DEFAULT (no doses or no match)');
+              debugPrint('🔴   → Cell color: DEFAULT (no doses or no match)');
             }
 
             // Check if this date has a lab result
@@ -792,12 +801,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
             final dayNumber = index - paddingDays + 1;
             final date = DateTime(_monthStart.year, _monthStart.month, dayNumber);
+            debugPrint('🔴 [MONTH CELL] Building cell for date: ${date.year}-${date.month}-${date.day}');
+
             final dayDoses = monthDoses
                 .where((d) =>
                     d.date.year == date.year &&
                     d.date.month == date.month &&
                     d.date.day == date.day)
                 .toList();
+
+            debugPrint('🔴 [MONTH CELL] Query result for ${date.year}-${date.month}-${date.day}: ${dayDoses.length} doses found');
+            for (final d in dayDoses) {
+              debugPrint('🔴   - Dose: ${d.peptideName} ${d.doseAmount}mg, status=${d.status}, logId=${d.doseLogId}');
+            }
 
             // Count by status
             final completed = dayDoses.where((d) => d.status == 'COMPLETED').length;
@@ -825,26 +841,27 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
             // NEW MODEL: Determine cell color based on new logic
             Color cellColor = AppColors.surface;
-            print('[ISSUE1 DEBUG]   Cell color logic for ${date.year}-${date.month}-${date.day}:');
-            print('[ISSUE1 DEBUG]     missed=$missed, isPast=$isPast, isFuture=$isFuture, isToday=$isToday');
+            debugPrint('🔴 [MONTH CELL] Cell color logic for ${date.year}-${date.month}-${date.day}:');
+            debugPrint('🔴   missed=$missed, completed=$completed, scheduled=$scheduled');
+            debugPrint('🔴   isPast=$isPast, isFuture=$isFuture, isToday=$isToday');
             if (missed > 0) {
               // Bright red for explicitly missed doses - more visible in month view
               cellColor = AppColors.error.withOpacity(0.4);
-              print('[ISSUE1 DEBUG]     → Cell color: RED (missed=$missed doses)');
+              debugPrint('🔴   → Cell color: RED (missed=$missed doses)');
             } else if (isPast && dayDoses.isNotEmpty) {
               // Green for past scheduled doses (assumed taken unless missed)
               cellColor = const Color(0xFF0D2E1F);
-              print('[ISSUE1 DEBUG]     → Cell color: GREEN (past assumed taken)');
+              debugPrint('🔴   → Cell color: GREEN (past assumed taken)');
             } else if (isFuture && dayDoses.isNotEmpty) {
               // Cyan for future scheduled doses
               cellColor = const Color(0xFF1E4620);
-              print('[ISSUE1 DEBUG]     → Cell color: CYAN (future scheduled)');
+              debugPrint('🔴   → Cell color: CYAN (future scheduled)');
             } else if (isToday && dayDoses.isNotEmpty) {
               // Cyan for today's scheduled doses
               cellColor = const Color(0xFF1E4620);
-              print('[ISSUE1 DEBUG]     → Cell color: CYAN (today scheduled)');
+              debugPrint('🔴   → Cell color: CYAN (today scheduled)');
             } else {
-              print('[ISSUE1 DEBUG]     → Cell color: DEFAULT (no doses or no match)');
+              debugPrint('🔴   → Cell color: DEFAULT (no doses or no match)');
             }
 
             final hasLab = labDates.any((labDate) =>
