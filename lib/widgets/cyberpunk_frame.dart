@@ -34,14 +34,14 @@ class CyberpunkFrame extends StatelessWidget {
 
     return Stack(
       children: [
-        // Minimal glow effect (subtle outer shadow only)
+        // Enhanced glow effect (vibrant like dashboard cards)
         Container(
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: effectiveGlowColor.withOpacity(0.15), // Reduced from 0.3
-                blurRadius: 6, // Reduced from 12
-                spreadRadius: 0,
+                color: effectiveGlowColor.withOpacity(0.4), // Increased for visibility
+                blurRadius: 12, // Increased for better glow
+                spreadRadius: 2, // Added to extend glow outward
               ),
             ],
           ),
@@ -103,20 +103,31 @@ class CyberpunkFrame extends StatelessWidget {
   }
 
   Widget _buildRivet(Alignment alignment) {
+    final effectiveFrameColor = frameColor == const Color(0xFF00FFFF) ? AppColors.primary : frameColor;
     return Align(
       alignment: alignment,
       child: Container(
-        width: 8,
-        height: 8,
+        width: 12, // Increased from 8 for better visibility
+        height: 12,
         margin: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.background,
+          gradient: RadialGradient(
+            colors: [
+              effectiveFrameColor,
+              effectiveFrameColor.withOpacity(0.3),
+            ],
+          ),
           border: Border.all(
-            color: frameColor == const Color(0xFF00FFFF) ? AppColors.primary : frameColor,
-            width: 1.5,
+            color: effectiveFrameColor,
+            width: 2, // Increased from 1.5
           ),
           boxShadow: [
+            BoxShadow(
+              color: effectiveFrameColor.withOpacity(0.6), // Enhanced glow
+              blurRadius: 6, // Increased from 2
+              spreadRadius: 1, // Added for better visibility
+            ),
             BoxShadow(
               color: Colors.black.withOpacity(0.3),
               blurRadius: 2,
@@ -124,34 +135,27 @@ class CyberpunkFrame extends StatelessWidget {
             ),
           ],
         ),
-        child: Container(
-          margin: const EdgeInsets.all(2),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: (frameColor == const Color(0xFF00FFFF) ? AppColors.primary : frameColor).withOpacity(0.3),
-          ),
-        ),
       ),
     );
   }
 
   Widget _buildStatusLed(bool active, Color color) {
     return Container(
-      width: 8,
-      height: 8,
+      width: 10, // Increased from 8 for better visibility
+      height: 10,
       decoration: BoxDecoration(
         color: active ? color : AppColors.textDim,
         shape: BoxShape.circle,
         border: Border.all(
           color: active ? color : AppColors.textDim,
-          width: 1,
+          width: 1.5, // Increased border width
         ),
         boxShadow: active
             ? [
                 BoxShadow(
-                  color: color.withOpacity(0.6),
-                  blurRadius: 6,
-                  spreadRadius: 1,
+                  color: color.withOpacity(0.8), // Increased from 0.6
+                  blurRadius: 8, // Increased from 6
+                  spreadRadius: 2, // Increased from 1
                 ),
               ]
             : null,
@@ -161,15 +165,20 @@ class CyberpunkFrame extends StatelessWidget {
 
   Widget _buildPanelLED(Color color) {
     return Container(
-      width: 4,
-      height: 4,
+      width: 5, // Increased from 4 for better visibility
+      height: 5,
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
+        border: Border.all(
+          color: color.withOpacity(0.5),
+          width: 0.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.5),
-            blurRadius: 3,
+            color: color.withOpacity(0.7), // Increased from 0.5
+            blurRadius: 4, // Increased from 3
+            spreadRadius: 1, // Added for better glow
           ),
         ],
       ),
