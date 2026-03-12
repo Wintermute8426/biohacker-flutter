@@ -149,14 +149,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
         );
 
-        print('[Dashboard] Invalidating providers...');
-        // AGGRESSIVE: Invalidate providers to force complete calendar refresh
-        ref.invalidate(upcomingDosesProvider);
-        ref.invalidate(doseSchedulesProvider);
+        print('[Dashboard] SYNC FIX: Refreshing providers immediately...');
+        // CRITICAL FIX: Use ref.refresh for immediate calendar sync
+        // ref.invalidate only marks for rebuild, ref.refresh forces immediate refetch
+        ref.refresh(upcomingDosesProvider);
+        ref.refresh(doseSchedulesProvider);
 
         print('[Dashboard] Reloading dashboard data...');
         await _loadData();
-        print('[Dashboard] === MARK AS MISSED COMPLETE ===');
+        print('[Dashboard] === MARK AS MISSED COMPLETE - CALENDAR SYNCED ===');
       }
     } catch (e, stackTrace) {
       print('[Dashboard] ERROR marking dose as missed: $e');

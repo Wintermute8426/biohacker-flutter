@@ -30,7 +30,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     _weekStart = _getWeekStart(DateTime.now());
     _monthStart = _getMonthStart(DateTime.now());
     WidgetsBinding.instance.addObserver(this);
-    print('[Calendar] ISSUE 1 FIX: initState called, observer added');
+    print('[Calendar] SYNC FIX: initState called, lifecycle observer added for missed dose sync');
   }
 
   @override
@@ -41,11 +41,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // ISSUE 1 FIX: Aggressively refresh when app resumes
+    // SYNC FIX: Aggressively refresh when app resumes
     if (state == AppLifecycleState.resumed) {
-      print('[Calendar] ISSUE 1 FIX: App resumed, forcing refresh');
-      ref.invalidate(upcomingDosesProvider);
-      ref.invalidate(doseSchedulesProvider);
+      print('[Calendar] SYNC FIX: App resumed, forcing immediate refresh');
+      ref.refresh(upcomingDosesProvider);
+      ref.refresh(doseSchedulesProvider);
     }
   }
 
@@ -163,7 +163,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             onPressed: _goToToday,
             color: AppColors.primary,
           ),
-          // ISSUE 1 FIX: Aggressive refresh button with visual feedback
+          // SYNC FIX: Aggressive refresh button with immediate provider refetch
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
@@ -176,9 +176,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             child: IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () {
-                print('[Calendar] ISSUE 1 FIX: Manual refresh triggered');
-                ref.invalidate(upcomingDosesProvider);
-                ref.invalidate(doseSchedulesProvider);
+                print('[Calendar] SYNC FIX: Manual refresh triggered');
+                ref.refresh(upcomingDosesProvider);
+                ref.refresh(doseSchedulesProvider);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
@@ -1198,9 +1198,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
       if (context.mounted) {
         // Close the day detail sheet
         Navigator.pop(context);
-        // Invalidate providers to force complete refresh of calendar and cycle data
-        ref.invalidate(upcomingDosesProvider);
-        ref.invalidate(doseSchedulesProvider);
+        // CRITICAL FIX: Use ref.refresh instead of invalidate for immediate sync
+        // ref.invalidate only marks for rebuild, ref.refresh forces immediate refetch
+        ref.refresh(upcomingDosesProvider);
+        ref.refresh(doseSchedulesProvider);
+        print('[Calendar] SYNC FIX: Forced immediate provider refresh after marking missed');
         // Show feedback
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1241,9 +1243,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           onSaved: () {
             // Close the day detail sheet
             Navigator.pop(context);
-            // Invalidate providers to force complete refresh of calendar and cycle data
-            ref.invalidate(upcomingDosesProvider);
-            ref.invalidate(doseSchedulesProvider);
+            // SYNC FIX: Use ref.refresh for immediate calendar sync
+            ref.refresh(upcomingDosesProvider);
+            ref.refresh(doseSchedulesProvider);
+            print('[Calendar] SYNC FIX: Side effects saved, providers refreshed');
           },
         );
       },
