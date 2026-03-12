@@ -531,8 +531,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             // NEW MODEL: Determine cell color based on new logic
             Color cellColor = AppColors.surface;
             if (missed > 0) {
-              // Red for explicitly missed doses
-              cellColor = AppColors.error;
+              // Bright red for explicitly missed doses
+              cellColor = AppColors.error.withOpacity(0.5);
               print('[Calendar Week]   → Cell color: RED (missed doses)');
             } else if (isPast && dayDoses.isNotEmpty) {
               // Green for past scheduled doses (assumed taken unless missed)
@@ -604,13 +604,30 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                     ),
                                   ),
                                 if (scheduled > 0)
-                                  const SizedBox(
-                                    width: 4,
-                                    height: 4,
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFF00FFFF),
-                                        shape: BoxShape.circle,
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 2),
+                                    child: SizedBox(
+                                      width: 4,
+                                      height: 4,
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFF00FFFF),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                if (missed > 0)
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 2),
+                                    child: SizedBox(
+                                      width: 4,
+                                      height: 4,
+                                      child: DecoratedBox(
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFFF0000),
+                                          shape: BoxShape.circle,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -647,12 +664,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   // Month grid (shows full 30 days)
   Widget _buildMonthGrid(List<DoseInstance> monthDoses, List<DateTime> labDates) {
-    const daysOfWeek = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+    const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
     final daysInMonth = _getDaysInMonth(_monthStart);
     final firstDayOfWeek = _monthStart.weekday; // 1=Monday, 7=Sunday
 
-    // Calculate padding days for alignment
-    final paddingDays = firstDayOfWeek - 1;
+    // Calculate padding days for alignment (convert to Sunday-based: 1=Mon->1, 7=Sun->0)
+    final paddingDays = firstDayOfWeek == 7 ? 0 : firstDayOfWeek;
     final totalCells = paddingDays + daysInMonth;
     final rows = (totalCells / 7).ceil();
 
@@ -731,8 +748,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             // NEW MODEL: Determine cell color based on new logic
             Color cellColor = AppColors.surface;
             if (missed > 0) {
-              // Red for explicitly missed doses
-              cellColor = AppColors.error.withOpacity(0.2);
+              // Bright red for explicitly missed doses - more visible in month view
+              cellColor = AppColors.error.withOpacity(0.4);
               print('[Calendar Month]   → Cell color: RED (missed doses)');
             } else if (isPast && dayDoses.isNotEmpty) {
               // Green for past scheduled doses (assumed taken unless missed)
@@ -801,6 +818,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
                                     color: Color(0xFF00FFFF),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (missed > 0)
+                            const Padding(
+                              padding: EdgeInsets.only(left: 1),
+                              child: SizedBox(
+                                width: 3,
+                                height: 3,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFFFF0000),
                                     shape: BoxShape.circle,
                                   ),
                                 ),
