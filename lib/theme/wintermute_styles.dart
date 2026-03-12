@@ -169,7 +169,7 @@ class WintermmuteStyles {
 
   // Standard card: Dark background, cyan border
   static BoxDecoration cardDecoration = BoxDecoration(
-    color: AppColors.surface,
+    color: AppColors.surface.withOpacity(0.05),
     border: Border.all(
       color: colorCyan.withOpacity(0.25),
       width: 1,
@@ -179,7 +179,7 @@ class WintermmuteStyles {
 
   // Glowing card: Standard card with subtle glow
   static BoxDecoration cardDecorationGlow = BoxDecoration(
-    color: AppColors.surface,
+    color: AppColors.surface.withOpacity(0.05),
     border: Border.all(
       color: colorCyan.withOpacity(0.35),
       width: 1.5,
@@ -190,7 +190,7 @@ class WintermmuteStyles {
 
   // Accent card: Green border
   static BoxDecoration cardDecorationAccent = BoxDecoration(
-    color: AppColors.surface,
+    color: AppColors.surface.withOpacity(0.05),
     border: Border.all(
       color: colorGreen.withOpacity(0.25),
       width: 1,
@@ -200,7 +200,7 @@ class WintermmuteStyles {
 
   // Orange card: For secondary sections
   static BoxDecoration cardDecorationOrange = BoxDecoration(
-    color: AppColors.surface,
+    color: AppColors.surface.withOpacity(0.05),
     border: Border.all(
       color: colorOrange.withOpacity(0.25),
       width: 1,
@@ -210,7 +210,7 @@ class WintermmuteStyles {
 
   // Magenta card: For tertiary sections
   static BoxDecoration cardDecorationMagenta = BoxDecoration(
-    color: AppColors.surface,
+    color: AppColors.surface.withOpacity(0.05),
     border: Border.all(
       color: colorMagenta.withOpacity(0.25),
       width: 1,
@@ -220,7 +220,7 @@ class WintermmuteStyles {
 
   // BTC/Bitcoin card: For financial data
   static BoxDecoration cardDecorationBTC = BoxDecoration(
-    color: AppColors.surface,
+    color: AppColors.surface.withOpacity(0.05),
     border: Border.all(
       color: colorBTC.withOpacity(0.25),
       width: 1,
@@ -230,7 +230,7 @@ class WintermmuteStyles {
 
   // Chart tooltip: Cyan
   static BoxDecoration chartTooltipDecoration = BoxDecoration(
-    color: AppColors.surface,
+    color: AppColors.surface.withOpacity(0.05),
     border: Border.all(
       color: colorCyan.withOpacity(0.4),
       width: 1,

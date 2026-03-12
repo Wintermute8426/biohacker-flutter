@@ -17,6 +17,8 @@ import '../widgets/advanced_dosing_widget.dart';
 import '../widgets/wintermute_dialog.dart';
 import '../widgets/peptide_selector.dart';
 import '../widgets/cyberpunk_frame.dart';
+import '../widgets/cyberpunk_rain.dart';
+import '../widgets/city_background.dart';
 
 class CyclesScreen extends StatefulWidget {
   const CyclesScreen({Key? key}) : super(key: key);
@@ -1069,6 +1071,22 @@ class _CyclesScreenState extends State<CyclesScreen> {
     return SafeArea(
       child: Stack(
         children: [
+          // City background layer
+          const Positioned.fill(
+            child: CityBackground(
+              enabled: true,
+              animateLights: true,
+              opacity: 0.3,
+            ),
+          ),
+          // Rain effect layer
+          const Positioned.fill(
+            child: CyberpunkRain(
+              enabled: true,
+              particleCount: 40,
+              opacity: 0.25,
+            ),
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

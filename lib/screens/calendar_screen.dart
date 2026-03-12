@@ -8,6 +8,8 @@ import '../services/dose_schedule_service.dart';
 import '../services/dose_logs_service.dart';
 import '../services/labs_database.dart';
 import '../widgets/side_effects_modal.dart';
+import '../widgets/cyberpunk_rain.dart';
+import '../widgets/city_background.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -115,6 +117,27 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      body: Stack(
+        children: [
+          // City background layer
+          const Positioned.fill(
+            child: CityBackground(
+              enabled: true,
+              animateLights: true,
+              opacity: 0.3,
+            ),
+          ),
+          // Rain effect layer
+          const Positioned.fill(
+            child: CyberpunkRain(
+              enabled: true,
+              particleCount: 40,
+              opacity: 0.25,
+            ),
+          ),
+          // Main scaffold content
+          Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(
           'DOSE CALENDAR',
@@ -315,6 +338,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             ),
           ),
         ),
+      ),
+          ),
+        ],
       ),
     );
   }

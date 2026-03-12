@@ -6,6 +6,8 @@ import '../services/cycles_database.dart';
 import '../data/peptides.dart';
 import '../widgets/scanline_overlay.dart';
 import '../widgets/cyberpunk_frame.dart';
+import '../widgets/cyberpunk_rain.dart';
+import '../widgets/city_background.dart';
 
 class ProtocolsScreen extends StatefulWidget {
   const ProtocolsScreen({Key? key}) : super(key: key);
@@ -706,6 +708,22 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
     return SafeArea(
       child: Stack(
         children: [
+          // City background layer
+          const Positioned.fill(
+            child: CityBackground(
+              enabled: true,
+              animateLights: true,
+              opacity: 0.3,
+            ),
+          ),
+          // Rain effect layer
+          const Positioned.fill(
+            child: CyberpunkRain(
+              enabled: true,
+              particleCount: 40,
+              opacity: 0.25,
+            ),
+          ),
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(

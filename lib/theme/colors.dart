@@ -6,8 +6,8 @@ class AppColors {
   static const Color secondary = Color(0xFFFF00FF); // Magenta
   static const Color accent = Color(0xFF39FF14); // Neon Green
   static const Color background = Color(0xFF000000); // Pure Black
-  static const Color surface = Color(0xFF0A0A0A); // Dark gray (cards)
-  static const Color surfaceAlt = Color(0xFF111111); // Slightly lighter gray
+  static const Color surface = Color(0x0D0A0A0A); // Dark gray (cards) - now 5% opacity for better transparency
+  static const Color surfaceAlt = Color(0x0D111111); // Slightly lighter gray - now 5% opacity
   static const Color border = Color(0xFF00FFFF); // Cyan border
   static const Color borderDim = Color(0xFF1A2540); // Dim border
   static const Color textLight = Color(0xFFFFFFFF); // White
