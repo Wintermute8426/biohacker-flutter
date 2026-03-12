@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -169,72 +170,50 @@ class DoseLogsService {
   // Mark dose as MISSED
   Future<bool> markAsMissed(String doseLogId) async {
     try {
-      print('[DoseLogsService] 🔵🔵🔵 === START markAsMissed() ===');
-      print('[DoseLogsService] 🔵 Input doseLogId: $doseLogId');
-      print('[DoseLogsService] 🔵 doseLogId type: ${doseLogId.runtimeType}');
-      print('[DoseLogsService] 🔵 doseLogId length: ${doseLogId.length}');
-      print('[DoseLogsService] 🔵 doseLogId isEmpty: ${doseLogId.isEmpty}');
+      if (kDebugMode) {
+        print('[DoseLogsService] markAsMissed() called for ID: $doseLogId');
+      }
 
-      // Step 1: Check current user
-      final currentUser = _supabase.auth.currentUser;
-      print('[DoseLogsService] 👤 Current user ID: ${currentUser?.id}');
-      print('[DoseLogsService] 👤 Current user email: ${currentUser?.email}');
+      // Validate input
+      if (doseLogId.isEmpty) {
+        if (kDebugMode) print('[DoseLogsService] ERROR: Empty doseLogId');
+        return false;
+      }
 
-      // Step 2: Check if dose log exists BEFORE update
-      print('[DoseLogsService] 🔍 Querying dose_logs table to verify entry exists...');
+      // Check if dose log exists before update
       final existingRecords = await _supabase
           .from('dose_logs')
           .select()
           .eq('id', doseLogId);
 
-      print('[DoseLogsService] 🔍 Query result: $existingRecords');
-      print('[DoseLogsService] 🔍 Records found: ${existingRecords.length}');
-
       if (existingRecords.isEmpty) {
-        print('[DoseLogsService] ❌ FATAL: No dose_log entry exists with ID: $doseLogId');
-        print('[DoseLogsService] ❌ Cannot update non-existent record!');
+        if (kDebugMode) {
+          print('[DoseLogsService] ERROR: Dose log $doseLogId not found');
+        }
         return false;
       }
 
-      final existingRecord = existingRecords.first;
-      print('[DoseLogsService] 📋 Existing record details:');
-      print('[DoseLogsService] 📋   id: ${existingRecord['id']}');
-      print('[DoseLogsService] 📋   user_id: ${existingRecord['user_id']}');
-      print('[DoseLogsService] 📋   cycle_id: ${existingRecord['cycle_id']}');
-      print('[DoseLogsService] 📋   status: ${existingRecord['status']}');
-      print('[DoseLogsService] 📋   logged_at: ${existingRecord['logged_at']}');
-      print('[DoseLogsService] 📋   dose_amount: ${existingRecord['dose_amount']}');
-
-      // Step 3: Check if current user owns this record
-      if (existingRecord['user_id'] != currentUser?.id) {
-        print('[DoseLogsService] ⚠️ WARNING: User mismatch!');
-        print('[DoseLogsService] ⚠️ Record user_id: ${existingRecord['user_id']}');
-        print('[DoseLogsService] ⚠️ Current user_id: ${currentUser?.id}');
-        print('[DoseLogsService] ⚠️ This may trigger RLS policy rejection!');
+      if (kDebugMode) {
+        final record = existingRecords.first;
+        print('[DoseLogsService] Marking dose as MISSED: ${record['cycle_id']}, ${record['logged_at']}');
       }
 
-      // Step 4: Attempt UPDATE
-      print('[DoseLogsService] 💾 Executing UPDATE query...');
-      print('[DoseLogsService] 💾 UPDATE dose_logs SET status = MISSED WHERE id = $doseLogId');
-
+      // Perform UPDATE
       await _supabase
           .from('dose_logs')
           .update({'status': 'MISSED'})
           .eq('id', doseLogId);
 
-      print('[DoseLogsService] ✅ UPDATE query executed without throwing exception');
-      print('[DoseLogsService] ✅✅✅ SUCCESS: Dose marked as MISSED!');
-      print('[DoseLogsService] ✅ UPDATE succeeded (no exception thrown)');
-      print('[DoseLogsService] ✅ Note: Empty response [] is SUCCESS for UPDATE queries');
-      print('[DoseLogsService] 🔵🔵🔵 === END markAsMissed() ===');
+      if (kDebugMode) {
+        print('[DoseLogsService] SUCCESS: Dose marked as MISSED');
+      }
 
       return true;
     } catch (e, stackTrace) {
-      print('[DoseLogsService] ❌❌❌ EXCEPTION THROWN in markAsMissed()');
-      print('[DoseLogsService] ❌ Error type: ${e.runtimeType}');
-      print('[DoseLogsService] ❌ Error message: $e');
-      print('[DoseLogsService] ❌ Full stack trace:');
-      print('[DoseLogsService] ❌ $stackTrace');
+      if (kDebugMode) {
+        print('[DoseLogsService] ERROR in markAsMissed(): $e');
+        print('[DoseLogsService] Stack trace: $stackTrace');
+      }
       return false;
     }
   }
