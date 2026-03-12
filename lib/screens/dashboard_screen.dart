@@ -11,6 +11,8 @@ import '../services/weight_logs_database.dart';
 import '../widgets/side_effects_modal.dart';
 import '../widgets/weight_log_modal.dart';
 import '../widgets/cyberpunk_frame.dart';
+import '../widgets/cyberpunk_rain.dart';
+import '../widgets/city_background.dart';
 import 'labs_screen.dart';
 import 'research_screen.dart';
 import '../main.dart' show authProviderProvider;
@@ -260,6 +262,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return SafeArea(
       child: Stack(
         children: [
+          // City background layer
+          const Positioned.fill(
+            child: CityBackground(
+              enabled: true,
+              animateLights: true,
+              opacity: 0.3,
+            ),
+          ),
+          // Rain effect layer
+          const Positioned.fill(
+            child: CyberpunkRain(
+              enabled: true,
+              particleCount: 40,
+              opacity: 0.25,
+            ),
+          ),
           _isLoading
               ? Center(
                   child: CircularProgressIndicator(color: AppColors.primary),

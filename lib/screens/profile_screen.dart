@@ -6,6 +6,8 @@ import '../services/user_profile_service.dart';
 import '../services/profile_photo_service.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
+import '../widgets/cyberpunk_rain.dart';
+import '../widgets/city_background.dart';
 import '../main.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -289,7 +291,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
         ],
       ),
-      body: _isEditMode ? _buildForm() : _buildIDCard(),
+      body: Stack(
+        children: [
+          // City background layer
+          const Positioned.fill(
+            child: CityBackground(
+              enabled: true,
+              animateLights: true,
+              opacity: 0.3,
+            ),
+          ),
+          // Rain effect layer
+          const Positioned.fill(
+            child: CyberpunkRain(
+              enabled: true,
+              particleCount: 40,
+              opacity: 0.25,
+            ),
+          ),
+          _isEditMode ? _buildForm() : _buildIDCard(),
+        ],
+      ),
     );
   }
 

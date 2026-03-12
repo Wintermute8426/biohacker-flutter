@@ -4,6 +4,8 @@ import '../main.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../theme/wintermute_background.dart';
+import '../widgets/cyberpunk_rain.dart';
+import '../widgets/city_background.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -69,6 +71,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: SafeArea(
         child: Stack(
           children: [
+            // City background layer
+            const Positioned.fill(
+              child: CityBackground(
+                enabled: true,
+                animateLights: true,
+                opacity: 0.5,
+              ),
+            ),
+            // Rain effect layer
+            const Positioned.fill(
+              child: CyberpunkRain(
+                enabled: true,
+                particleCount: 60,
+                opacity: 0.35,
+              ),
+            ),
             SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
