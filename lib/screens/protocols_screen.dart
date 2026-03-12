@@ -355,6 +355,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             ),
             const SizedBox(height: 20),
           ],
+          ),
         ),
       ),
     );
@@ -483,6 +484,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             ),
             const SizedBox(height: 20),
           ],
+          ),
         ),
       ),
     );
