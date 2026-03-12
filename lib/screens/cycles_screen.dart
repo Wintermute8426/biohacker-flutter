@@ -1360,11 +1360,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                     final totalDoses = data['totalDoses'] as int? ?? 0;
                                     final lastDose = data['lastDose'] as String?;
                                     final recentSideEffects = data['recentSideEffects'] as List<String>? ?? [];
-                                    
-                                    if (totalDoses == 0 && recentSideEffects.isEmpty) {
+                                    final missedDoses = data['missedDoses'] as List<String>? ?? [];
+
+                                    if (totalDoses == 0 && recentSideEffects.isEmpty && missedDoses.isEmpty) {
                                       return const SizedBox.shrink();
                                     }
-                                    
+
                                     return Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
@@ -1400,6 +1401,41 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                                 ),
                                             ],
                                           ),
+                                        ],
+                                        // ISSUE 2: Display missed doses
+                                        if (missedDoses.isNotEmpty) ...[
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'MISSED DOSES (${missedDoses.length})',
+                                            style: TextStyle(
+                                              color: AppColors.error,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0.5,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          ...missedDoses.map((missedDose) => Padding(
+                                            padding: const EdgeInsets.only(bottom: 4),
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.close,
+                                                  color: AppColors.error,
+                                                  size: 12,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  missedDose,
+                                                  style: TextStyle(
+                                                    color: AppColors.textMid,
+                                                    fontSize: 11,
+                                                    decoration: TextDecoration.lineThrough,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )),
                                         ],
                                         if (recentSideEffects.isNotEmpty) ...[
                                           const SizedBox(height: 8),
@@ -1898,35 +1934,70 @@ class _CyclesScreenState extends State<CyclesScreen> {
 
   Future<Map<String, dynamic>> _loadCycleSummary(String cycleId) async {
     try {
-      // Fetch dose logs
-      final doseLogs = await doseDb.getCycleDoseLogs(cycleId);
-      final totalDoses = doseLogs.length;
-      
-      String? lastDose;
-      if (doseLogs.isNotEmpty) {
-        final last = doseLogs.first;
-        final date = last.loggedAt.toString().split(' ')[0];
-        lastDose = date;
+      // ISSUE 2: Query dose_logs to get missed doses
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) {
+        return {
+          'totalDoses': 0,
+          'lastDose': null,
+          'recentSideEffects': [],
+          'missedDoses': [],
+        };
       }
-      
+
+      // Fetch all dose logs for this cycle
+      final response = await Supabase.instance.client
+          .from('dose_logs')
+          .select()
+          .eq('user_id', userId)
+          .eq('cycle_id', cycleId)
+          .order('logged_at', ascending: false);
+
+      final allDoseLogs = response as List;
+      final totalDoses = allDoseLogs.length;
+
+      // ISSUE 2: Filter for missed doses
+      final missedDoseLogs = allDoseLogs
+          .where((log) => log['status'] == 'MISSED')
+          .toList();
+
+      print('[ISSUE2 DEBUG] Cycle $cycleId: ${missedDoseLogs.length} missed doses out of $totalDoses total');
+
+      // Build missed dose list with date + amount
+      final missedDoses = missedDoseLogs.take(5).map((log) {
+        final loggedAt = DateTime.parse(log['logged_at'] as String);
+        final doseAmount = (log['dose_amount'] as num?)?.toDouble() ?? 0;
+        final dateStr = '${loggedAt.month}/${loggedAt.day}/${loggedAt.year}';
+        return '$dateStr (${doseAmount}mg)';
+      }).toList();
+
+      String? lastDose;
+      if (allDoseLogs.isNotEmpty) {
+        final last = allDoseLogs.first;
+        final loggedAt = DateTime.parse(last['logged_at'] as String);
+        lastDose = '${loggedAt.month}/${loggedAt.day}/${loggedAt.year}';
+      }
+
       // Fetch side effects
       final sideEffects = await sideEffectDb.getCycleSideEffects(cycleId);
       final recentSideEffects = sideEffects
           .take(3)
           .map((e) => '${e.symptom} (${e.severity}/10)')
           .toList();
-      
+
       return {
         'totalDoses': totalDoses,
         'lastDose': lastDose,
         'recentSideEffects': recentSideEffects,
+        'missedDoses': missedDoses,
       };
     } catch (e) {
-      print('Error loading cycle summary: $e');
+      print('[ISSUE2 ERROR] Error loading cycle summary: $e');
       return {
         'totalDoses': 0,
         'lastDose': null,
         'recentSideEffects': [],
+        'missedDoses': [],
       };
     }
   }

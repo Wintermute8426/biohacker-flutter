@@ -184,6 +184,14 @@ class DoseScheduleService {
       // Fetch all dose_logs for the past 30 days AND next 30 days (to show missed doses)
       final startDate = now.subtract(Duration(days: 30));
       final endDate = now.add(Duration(days: daysAhead));
+
+      // ISSUE 1 DEBUG: Log the query parameters
+      print('[ISSUE1 DEBUG] ========================================');
+      print('[ISSUE1 DEBUG] QUERY PARAMETERS:');
+      print('[ISSUE1 DEBUG]   user_id: $userId');
+      print('[ISSUE1 DEBUG]   startDate: ${startDate.toIso8601String()}');
+      print('[ISSUE1 DEBUG]   endDate: ${endDate.toIso8601String()}');
+
       final doseLogs = await _supabase
           .from('dose_logs')
           .select()
@@ -191,20 +199,42 @@ class DoseScheduleService {
           .gte('logged_at', startDate.toIso8601String())
           .lte('logged_at', endDate.toIso8601String());
 
-      print('[DEBUG CALENDAR] Fetched ${(doseLogs as List).length} dose_logs');
-      
+      print('[ISSUE1 DEBUG] QUERY RESULTS:');
+      print('[ISSUE1 DEBUG]   Fetched ${(doseLogs as List).length} total dose_logs');
+
       // Create a map of dose_logs by cycle_id + logged_at date for quick lookup
       final doseLogMap = <String, Map<String, dynamic>>{};
+      int missedCount = 0;
+      int scheduledCount = 0;
+      int completedCount = 0;
+
       for (final log in doseLogs as List) {
         final cycleId = log['cycle_id'] as String? ?? '';
         final doseAmount = log['dose_amount'] as num? ?? 0;
+        final status = log['status'] as String? ?? 'SCHEDULED';
         final loggedAt = DateTime.parse(log['logged_at'] as String);
         final logDateKey = '${cycleId}_${loggedAt.year}-${loggedAt.month.toString().padLeft(2, '0')}-${loggedAt.day.toString().padLeft(2, '0')}';
-        print('[DEBUG CALENDAR]   Dose: $logDateKey = ${doseAmount}mg');
+
+        // Count statuses
+        if (status == 'MISSED') missedCount++;
+        if (status == 'SCHEDULED') scheduledCount++;
+        if (status == 'COMPLETED') completedCount++;
+
+        print('[ISSUE1 DEBUG]   Log: $logDateKey');
+        print('[ISSUE1 DEBUG]     - amount: ${doseAmount}mg');
+        print('[ISSUE1 DEBUG]     - status: $status');
+        print('[ISSUE1 DEBUG]     - logged_at: ${loggedAt.toIso8601String()}');
+        print('[ISSUE1 DEBUG]     - cycle_id: $cycleId');
+
         doseLogMap[logDateKey] = log as Map<String, dynamic>;
       }
-      
-      print('[DEBUG CALENDAR] Built doseLogMap with ${doseLogMap.length} entries');
+
+      print('[ISSUE1 DEBUG] STATUS SUMMARY:');
+      print('[ISSUE1 DEBUG]   MISSED: $missedCount');
+      print('[ISSUE1 DEBUG]   SCHEDULED: $scheduledCount');
+      print('[ISSUE1 DEBUG]   COMPLETED: $completedCount');
+      print('[ISSUE1 DEBUG] Built doseLogMap with ${doseLogMap.length} entries');
+      print('[ISSUE1 DEBUG] ========================================')
 
       for (final schedule in schedules) {
         // Generate dose instances for past 30 days + next 30 days (60 days total)
@@ -229,14 +259,18 @@ class DoseScheduleService {
 
             final doseLogId = doseLog?['id'] as String? ?? '';
             final status = doseLog?['status'] as String? ?? 'SCHEDULED';
-            
+
             // Use dose_log's dose_amount if available (varies by phase), otherwise use schedule default
             final doseAmount = (doseLog?['dose_amount'] as num?)?.toDouble() ?? schedule.doseAmount;
-            
+
+            // ISSUE 1 DEBUG: Log the lookup process
+            print('[ISSUE1 DEBUG] Generating instance for date: ${date.year}-${date.month}-${date.day}');
+            print('[ISSUE1 DEBUG]   Lookup key: $logDateKey');
+            print('[ISSUE1 DEBUG]   Found in map: ${doseLog != null}');
             if (doseLog != null) {
-              print('[DEBUG CALENDAR] ✓ Found dose for $logDateKey: ${doseAmount}mg');
+              print('[ISSUE1 DEBUG]   ✓ Dose found: ${doseAmount}mg, status=$status, id=$doseLogId');
             } else {
-              print('[DEBUG CALENDAR] ✗ No dose_log found for $logDateKey, using schedule default: ${schedule.doseAmount}mg');
+              print('[ISSUE1 DEBUG]   ✗ No dose_log, defaulting to SCHEDULED with ${schedule.doseAmount}mg');
             }
 
             instances.add(DoseInstance(
