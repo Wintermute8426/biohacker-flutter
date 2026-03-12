@@ -12,6 +12,8 @@ import '../widgets/side_effects_modal.dart';
 import '../widgets/weight_log_modal.dart';
 import 'labs_screen.dart';
 import '../main.dart' show authProviderProvider;
+// Import providers for invalidation after marking dose as missed
+import '../services/dose_schedule_service.dart' show upcomingDosesProvider, doseSchedulesProvider;
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -88,6 +90,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             duration: const Duration(seconds: 2),
           ),
         );
+        // Invalidate providers to refresh both dashboard and calendar
+        ref.invalidate(upcomingDosesProvider);
+        ref.invalidate(doseSchedulesProvider);
         _loadData();
       }
     } catch (e) {

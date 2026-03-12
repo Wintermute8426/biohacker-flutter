@@ -79,12 +79,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     });
   }
 
-  void _toggleViewMode() {
-    setState(() {
-      _showMonthView = !_showMonthView;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final upcomingDoses = ref.watch(upcomingDosesProvider);
@@ -106,11 +100,37 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: Icon(_showMonthView ? Icons.view_week : Icons.calendar_month),
-            onPressed: _toggleViewMode,
-            color: AppColors.accent,
-            tooltip: _showMonthView ? 'Week View' : 'Month View',
+          // View toggle button - switches between week and month view
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: AppColors.accent.withOpacity(0.5),
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: Icon(_showMonthView ? Icons.view_week : Icons.calendar_month),
+              onPressed: () {
+                setState(() {
+                  _showMonthView = !_showMonthView;
+                });
+                // Show feedback that view changed
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      _showMonthView ? 'Switched to Month View' : 'Switched to Week View',
+                      style: WintermmuteStyles.bodyStyle,
+                    ),
+                    backgroundColor: AppColors.accent,
+                    duration: const Duration(milliseconds: 800),
+                  ),
+                );
+              },
+              color: AppColors.accent,
+              tooltip: _showMonthView ? 'Switch to Week View' : 'Switch to Month View',
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.today),
