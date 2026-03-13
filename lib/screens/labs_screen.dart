@@ -847,10 +847,6 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
               const SizedBox(height: 24),
             ],
           ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
