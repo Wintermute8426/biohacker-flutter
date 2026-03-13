@@ -263,14 +263,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: const Text('Profile'),
+      return SafeArea(
+        child: Scaffold(
           backgroundColor: AppColors.background,
-        ),
-        body: Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
+          body: Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
         ),
       );
     }

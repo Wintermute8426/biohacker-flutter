@@ -768,9 +768,11 @@ class _ResearchScreenState extends State<ResearchScreen> {
               opacity: 0.25,
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
           // Header with dark background bar
           Container(
             color: AppColors.surface.withOpacity(0.3),
@@ -954,6 +956,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
             Expanded(child: _buildPepScoreMethodology()),
           ],
             ],
+            ),
           ),
           Positioned.fill(
             child: IgnorePointer(
