@@ -1062,7 +1062,6 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
       height: 350,
       padding: const EdgeInsets.all(16),
       decoration: WintermmuteStyles.cardDecoration.copyWith(
-        boxShadow: null,
         color: AppColors.surface.withOpacity(0.15),
         border: Border.all(color: AppColors.accent.withOpacity(0.3)),
         borderRadius: BorderRadius.circular(8),

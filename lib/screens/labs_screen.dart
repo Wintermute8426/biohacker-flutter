@@ -687,8 +687,6 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                   decoration: WintermmuteStyles.customCardDecoration(
                     borderColor: isOut ? AppColors.error : AppColors.primary,
                     backgroundColor: AppColors.surface.withOpacity(0.15),
-                    ),
-                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
