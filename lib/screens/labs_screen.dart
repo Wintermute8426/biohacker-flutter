@@ -310,30 +310,33 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                 ),
                 Expanded(
                   child: Stack(
-        children: [
-          TabBarView(
-            controller: _tabController,
-            children: [
-              // Tab 1: All Results
-              _buildAllResultsTab(),
-              // Tab 2: Out of Range
-              _buildOutOfRangeTab(),
-              // Tab 3: Recent
-              _buildRecentTab(),
-              // Tab 4: Upload
-              _buildUploadTab(),
-            ],
-          ),
-          // Scanlines overlay
-          Positioned.fill(
-            child: IgnorePointer(
-              child: CustomPaint(
-                painter: _ScanlinesPainter(),
-              ),
+                    children: [
+                      TabBarView(
+                        controller: _tabController,
+                        children: [
+                          // Tab 1: All Results
+                          _buildAllResultsTab(),
+                          // Tab 2: Out of Range
+                          _buildOutOfRangeTab(),
+                          // Tab 3: Recent
+                          _buildRecentTab(),
+                          // Tab 4: Upload
+                          _buildUploadTab(),
+                        ],
+                      ),
+                      // Scanlines overlay
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: CustomPaint(
+                            painter: _ScanlinesPainter(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
           ),
         ],
       ),

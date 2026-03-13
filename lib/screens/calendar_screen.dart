@@ -230,7 +230,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
           Expanded(
             child: upcomingDoses.when(
-        data: (doses) {
+              data: (doses) {
           // ISSUE 1 FIX: Log dose data to verify missed status is reflected
           print('[Calendar] ISSUE 1 DEBUG: Got ${doses.length} doses from provider');
           final missedCount = doses.where((d) => d.status == 'MISSED').length;
@@ -347,7 +347,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             ),
           ),
         ),
-            ),
+      ),
+          ),
+        ],
+      ),
           ),
         ],
       ),

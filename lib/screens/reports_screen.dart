@@ -255,115 +255,117 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                     Tab(text: '7'),
                   ],
                 ),
-                Expanded(child: ScanlinesOverlay(
-        child: _isLoading
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(color: AppColors.primary),
-                    const SizedBox(height: 16),
-                    Text(
-                      'ANALYZING DATA...',
-                      style: TextStyle(color: AppColors.textMid, letterSpacing: 2),
-                    ),
-                  ],
-                ),
-              )
-            : AnimatedOpacity(
-                opacity: _isLoading ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 300),
-                child: TabBarView(
-                controller: _tabController,
-                children: [
-                // Tab 1: Cycle-Lab Correlation (New Layout)
-                RefreshIndicator(
-                  onRefresh: _loadAllData,
-                  color: AppColors.primary,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _buildCycleLabCorrelationV2(),
-                    ],
-                  ),
-                ),
-                // Tab 2: Cycle Comparison (Peptide Summary Table)
-                RefreshIndicator(
-                  onRefresh: _loadAllData,
-                  color: AppColors.primary,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _buildCycleComparisonV2(),
-                    ],
-                  ),
-                ),
-                // Tab 3: Lab Trends (Biomarker chart with selectors)
-                RefreshIndicator(
-                  onRefresh: _loadAllData,
-                  color: AppColors.primary,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _buildLabTrendsV2(),
-                    ],
-                  ),
-                ),
-                // Tab 4: AI Insights
-                RefreshIndicator(
-                  onRefresh: _loadAllData,
-                  color: AppColors.primary,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _buildAIInsightsV2(),
-                    ],
-                  ),
-                ),
-                // Tab 5: Cycle Timeline (Gantt chart)
-                RefreshIndicator(
-                  onRefresh: _loadAllData,
-                  color: AppColors.primary,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _buildCycleTimelineV2(),
-                    ],
-                  ),
-                ),
-                // Tab 6: Body Composition
-                RefreshIndicator(
-                  onRefresh: _loadAllData,
-                  color: AppColors.primary,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _buildSectionHeader('💪 BODY COMPOSITION', 'Weight + Body Fat %'),
-                      const SizedBox(height: 12),
-                      _buildBodyComposition(),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-                // Tab 7: Effectiveness Summary
-                RefreshIndicator(
-                  onRefresh: _loadAllData,
-                  color: AppColors.primary,
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      _buildEffectivenessSummary(),
-                    ],
+                Expanded(
+                  child: ScanlinesOverlay(
+                    child: _isLoading
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CircularProgressIndicator(color: AppColors.primary),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'ANALYZING DATA...',
+                                  style: TextStyle(color: AppColors.textMid, letterSpacing: 2),
+                                ),
+                              ],
+                            ),
+                          )
+                        : AnimatedOpacity(
+                            opacity: _isLoading ? 0.0 : 1.0,
+                            duration: const Duration(milliseconds: 300),
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                // Tab 1: Cycle-Lab Correlation (New Layout)
+                                RefreshIndicator(
+                                  onRefresh: _loadAllData,
+                                  color: AppColors.primary,
+                                  child: ListView(
+                                    padding: const EdgeInsets.all(16),
+                                    children: [
+                                      _buildCycleLabCorrelationV2(),
+                                    ],
+                                  ),
+                                ),
+                                // Tab 2: Cycle Comparison (Peptide Summary Table)
+                                RefreshIndicator(
+                                  onRefresh: _loadAllData,
+                                  color: AppColors.primary,
+                                  child: ListView(
+                                    padding: const EdgeInsets.all(16),
+                                    children: [
+                                      _buildCycleComparisonV2(),
+                                    ],
+                                  ),
+                                ),
+                                // Tab 3: Lab Trends (Biomarker chart with selectors)
+                                RefreshIndicator(
+                                  onRefresh: _loadAllData,
+                                  color: AppColors.primary,
+                                  child: ListView(
+                                    padding: const EdgeInsets.all(16),
+                                    children: [
+                                      _buildLabTrendsV2(),
+                                    ],
+                                  ),
+                                ),
+                                // Tab 4: AI Insights
+                                RefreshIndicator(
+                                  onRefresh: _loadAllData,
+                                  color: AppColors.primary,
+                                  child: ListView(
+                                    padding: const EdgeInsets.all(16),
+                                    children: [
+                                      _buildAIInsightsV2(),
+                                    ],
+                                  ),
+                                ),
+                                // Tab 5: Cycle Timeline (Gantt chart)
+                                RefreshIndicator(
+                                  onRefresh: _loadAllData,
+                                  color: AppColors.primary,
+                                  child: ListView(
+                                    padding: const EdgeInsets.all(16),
+                                    children: [
+                                      _buildCycleTimelineV2(),
+                                    ],
+                                  ),
+                                ),
+                                // Tab 6: Body Composition
+                                RefreshIndicator(
+                                  onRefresh: _loadAllData,
+                                  color: AppColors.primary,
+                                  child: ListView(
+                                    padding: const EdgeInsets.all(16),
+                                    children: [
+                                      _buildSectionHeader('💪 BODY COMPOSITION', 'Weight + Body Fat %'),
+                                      const SizedBox(height: 12),
+                                      _buildBodyComposition(),
+                                      const SizedBox(height: 32),
+                                    ],
+                                  ),
+                                ),
+                                // Tab 7: Effectiveness Summary
+                                RefreshIndicator(
+                                  onRefresh: _loadAllData,
+                                  color: AppColors.primary,
+                                  child: ListView(
+                                    padding: const EdgeInsets.all(16),
+                                    children: [
+                                      _buildEffectivenessSummary(),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
