@@ -9,7 +9,7 @@ import '../widgets/cyberpunk_animations.dart';
 /// Removes navigation buttons, expands inline to show edit/complete/delete actions
 class ExpandableCycleCard extends StatefulWidget {
   final Cycle cycle;
-  final Future<Map<String, dynamic>> Function(int) loadCycleSummary;
+  final Future<Map<String, dynamic>> Function(String) loadCycleSummary;
   final VoidCallback onEdit;
   final VoidCallback onComplete;
   final VoidCallback onDelete;
