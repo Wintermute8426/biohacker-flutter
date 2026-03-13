@@ -149,20 +149,20 @@ class WintermmuteStyles {
 
   // Standard card: Matte dark background, subtle cyan border (Wintermute dashboard style)
   static BoxDecoration cardDecoration = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.15), // Slightly more opaque for matte look
+    color: AppColors.surface.withOpacity(0.2), // Slightly brighter
     border: Border.all(
-      color: colorCyan.withOpacity(0.1), // Ultra-subtle border (cyan is very bright)
-      width: 1,
+      color: colorCyan.withOpacity(0.35), // Brighter, more visible border
+      width: 2,
     ),
     borderRadius: BorderRadius.circular(4),
   );
 
   // Glowing card: Standard card with very subtle glow
   static BoxDecoration cardDecorationGlow = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.15),
+    color: AppColors.surface.withOpacity(0.2),
     border: Border.all(
-      color: colorCyan.withOpacity(0.1), // Ultra-subtle
-      width: 1,
+      color: colorCyan.withOpacity(0.35), // Brighter, more visible border
+      width: 2,
     ),
     borderRadius: BorderRadius.circular(4),
     boxShadow: [
@@ -176,40 +176,40 @@ class WintermmuteStyles {
 
   // Accent card: Green border (matte)
   static BoxDecoration cardDecorationAccent = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.15),
+    color: AppColors.surface.withOpacity(0.2),
     border: Border.all(
-      color: colorGreen.withOpacity(0.1), // Ultra-subtle
-      width: 1,
+      color: colorGreen.withOpacity(0.35), // Brighter, more visible border
+      width: 2,
     ),
     borderRadius: BorderRadius.circular(4),
   );
 
   // Orange card: For secondary sections (matte)
   static BoxDecoration cardDecorationOrange = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.15),
+    color: AppColors.surface.withOpacity(0.2),
     border: Border.all(
-      color: colorOrange.withOpacity(0.1), // Ultra-subtle
-      width: 1,
+      color: colorOrange.withOpacity(0.35), // Brighter, more visible border
+      width: 2,
     ),
     borderRadius: BorderRadius.circular(4),
   );
 
   // Magenta card: For tertiary sections (matte)
   static BoxDecoration cardDecorationMagenta = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.15),
+    color: AppColors.surface.withOpacity(0.2),
     border: Border.all(
-      color: colorMagenta.withOpacity(0.1), // Ultra-subtle
-      width: 1,
+      color: colorMagenta.withOpacity(0.35), // Brighter, more visible border
+      width: 2,
     ),
     borderRadius: BorderRadius.circular(4),
   );
 
   // BTC/Bitcoin card: For financial data (matte)
   static BoxDecoration cardDecorationBTC = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.15),
+    color: AppColors.surface.withOpacity(0.2),
     border: Border.all(
-      color: colorBTC.withOpacity(0.1), // Ultra-subtle
-      width: 1,
+      color: colorBTC.withOpacity(0.35), // Brighter, more visible border
+      width: 2,
     ),
     borderRadius: BorderRadius.circular(4),
   );
@@ -238,13 +238,13 @@ class WintermmuteStyles {
   static BoxDecoration customCardDecoration({
     required Color borderColor,
     Color backgroundColor = AppColors.surface,
-    double borderWidth = 1.0,
+    double borderWidth = 2.0,
     double borderRadius = 6.0,
   }) {
     return BoxDecoration(
       color: backgroundColor,
       border: Border.all(
-        color: borderColor.withOpacity(0.1), // Ultra-subtle for bright colors
+        color: borderColor.withOpacity(0.35), // Brighter, more visible border
         width: borderWidth,
       ),
       borderRadius: BorderRadius.circular(borderRadius),

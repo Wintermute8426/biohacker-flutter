@@ -213,9 +213,15 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             backgroundColor: Colors.transparent,
             appBar: AppBar(
         backgroundColor: AppColors.background,
-        title: Text(
-          'REPORTS v736e8bc',
-          style: WintermmuteStyles.titleStyle,
+        title: Row(
+          children: [
+            Icon(Icons.analytics, color: WintermmuteStyles.colorMagenta, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'REPORTS v736e8bc',
+              style: WintermmuteStyles.titleStyle,
+            ),
+          ],
         ),
         actions: [
           IconButton(

@@ -63,42 +63,42 @@ class CyberpunkFrame extends StatelessWidget {
           ),
         ),
 
-        // Corner rivets/screws (hardware decorations)
-        if (showHardware) ...[
-          _buildRivet(Alignment.topLeft),
-          _buildRivet(Alignment.topRight),
-          _buildRivet(Alignment.bottomLeft),
-          _buildRivet(Alignment.bottomRight),
-        ],
+        // Corner rivets/screws (hardware decorations) - REMOVED per user request
+        // if (showHardware) ...[
+        //   _buildRivet(Alignment.topLeft),
+        //   _buildRivet(Alignment.topRight),
+        //   _buildRivet(Alignment.bottomLeft),
+        //   _buildRivet(Alignment.bottomRight),
+        // ],
 
-        // Status LED indicator (top right, inside frame)
-        if (showStatusLed)
-          Positioned(
-            top: 10,
-            right: 10,
-            child: _buildStatusLed(statusLedActive, effectiveFrameColor),
-          ),
+        // Status LED indicator (top right, inside frame) - REMOVED per user request
+        // if (showStatusLed)
+        //   Positioned(
+        //     top: 10,
+        //     right: 10,
+        //     child: _buildStatusLed(statusLedActive, effectiveFrameColor),
+        //   ),
 
-        // Side panel LED indicators
-        if (showPanelIndicators) ...[
-          // Left side indicators
-          Positioned(
-            left: 4,
-            top: 30,
-            child: _buildPanelLED(Colors.green),
-          ),
-          Positioned(
-            left: 4,
-            top: 45,
-            child: _buildPanelLED(Colors.orange),
-          ),
-          // Right side indicators
-          Positioned(
-            right: 4,
-            top: 30,
-            child: _buildPanelLED(Colors.red),
-          ),
-        ],
+        // Side panel LED indicators - REMOVED per user request
+        // if (showPanelIndicators) ...[
+        //   // Left side indicators
+        //   Positioned(
+        //     left: 4,
+        //     top: 30,
+        //     child: _buildPanelLED(Colors.green),
+        //   ),
+        //   Positioned(
+        //     left: 4,
+        //     top: 45,
+        //     child: _buildPanelLED(Colors.orange),
+        //   ),
+        //   // Right side indicators
+        //   Positioned(
+        //     right: 4,
+        //     top: 30,
+        //     child: _buildPanelLED(Colors.red),
+        //   ),
+        // ],
       ],
     );
   }
@@ -212,117 +212,8 @@ class _HardwareFramePainter extends CustomPainter {
     );
     canvas.drawRect(rect, paint);
 
-    if (showHardware) {
-      // Top edge notches/cuts (hardware aesthetic)
-      final notchPaint = Paint()
-        ..color = frameColor
-        ..strokeWidth = strokeWidth
-        ..style = PaintingStyle.fill;
-
-      // Small rectangular notches on top edge
-      final notchWidth = 8.0;
-      final notchHeight = 4.0;
-
-      // Left notch
-      canvas.drawRect(
-        Rect.fromLTWH(size.width * 0.25 - notchWidth / 2, 0, notchWidth, notchHeight),
-        notchPaint,
-      );
-
-      // Right notch
-      canvas.drawRect(
-        Rect.fromLTWH(size.width * 0.75 - notchWidth / 2, 0, notchWidth, notchHeight),
-        notchPaint,
-      );
-
-      // Corner reinforcement lines (diagonal struts)
-      final strutPaint = Paint()
-        ..color = frameColor.withOpacity(0.5)
-        ..strokeWidth = strokeWidth * 0.5
-        ..style = PaintingStyle.stroke;
-
-      final strutLength = 12.0;
-
-      // Top-left corner strut
-      canvas.drawLine(
-        Offset(strokeWidth / 2 + 5, strokeWidth / 2),
-        Offset(strokeWidth / 2, strokeWidth / 2 + strutLength),
-        strutPaint,
-      );
-
-      // Top-right corner strut
-      canvas.drawLine(
-        Offset(size.width - strokeWidth / 2 - 5, strokeWidth / 2),
-        Offset(size.width - strokeWidth / 2, strokeWidth / 2 + strutLength),
-        strutPaint,
-      );
-
-      // Bottom-left corner strut
-      canvas.drawLine(
-        Offset(strokeWidth / 2 + 5, size.height - strokeWidth / 2),
-        Offset(strokeWidth / 2, size.height - strokeWidth / 2 - strutLength),
-        strutPaint,
-      );
-
-      // Bottom-right corner strut
-      canvas.drawLine(
-        Offset(size.width - strokeWidth / 2 - 5, size.height - strokeWidth / 2),
-        Offset(size.width - strokeWidth / 2, size.height - strokeWidth / 2 - strutLength),
-        strutPaint,
-      );
-
-      // Panel seam lines (vertical lines on sides)
-      final seamPaint = Paint()
-        ..color = frameColor.withOpacity(0.3)
-        ..strokeWidth = 1
-        ..style = PaintingStyle.stroke;
-
-      // Left side seam
-      canvas.drawLine(
-        Offset(strokeWidth + 2, size.height * 0.3),
-        Offset(strokeWidth + 2, size.height * 0.7),
-        seamPaint,
-      );
-
-      // Right side seam
-      canvas.drawLine(
-        Offset(size.width - strokeWidth - 2, size.height * 0.3),
-        Offset(size.width - strokeWidth - 2, size.height * 0.7),
-        seamPaint,
-      );
-    }
-
-    if (showPanelIndicators) {
-      // Port indicators (small rectangles on bottom edge)
-      final portPaint = Paint()
-        ..color = frameColor
-        ..style = PaintingStyle.fill;
-
-      final portWidth = 6.0;
-      final portHeight = 3.0;
-
-      // Bottom left port
-      canvas.drawRect(
-        Rect.fromLTWH(
-          size.width * 0.3 - portWidth / 2,
-          size.height - portHeight,
-          portWidth,
-          portHeight,
-        ),
-        portPaint,
-      );
-
-      // Bottom right port
-      canvas.drawRect(
-        Rect.fromLTWH(
-          size.width * 0.7 - portWidth / 2,
-          size.height - portHeight,
-          portWidth,
-          portHeight,
-        ),
-        portPaint,
-      );
-    }
+    // Hardware decorations REMOVED per user request (notches, struts, seams, ports)
+    // Clean rectangular border only
   }
 
   @override

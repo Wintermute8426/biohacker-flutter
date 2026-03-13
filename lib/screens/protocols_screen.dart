@@ -727,9 +727,15 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'PROTOCOLS v736e8bc',
-                  style: WintermmuteStyles.titleStyle,
+                Row(
+                  children: [
+                    Icon(Icons.list_alt, color: WintermmuteStyles.colorGreen, size: 28),
+                    const SizedBox(width: 12),
+                    Text(
+                      'PROTOCOLS v736e8bc',
+                      style: WintermmuteStyles.titleStyle,
+                    ),
+                  ],
                 ),
                 ElevatedButton(
                   onPressed: _showCreateProtocolModal,

@@ -777,9 +777,15 @@ class _ResearchScreenState extends State<ResearchScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'RESEARCH v736e8bc',
-                  style: WintermmuteStyles.titleStyle,
+                Row(
+                  children: [
+                    Icon(Icons.biotech, color: WintermmuteStyles.colorOrange, size: 28),
+                    const SizedBox(width: 12),
+                    Text(
+                      'RESEARCH v736e8bc',
+                      style: WintermmuteStyles.titleStyle,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 Row(
