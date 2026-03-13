@@ -529,8 +529,8 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: biomarker.changePercent! >= 0
-                            ? AppColors.accent.withOpacity(0.2)
-                            : AppColors.error.withOpacity(0.2),
+                            ? AppColors.accent.withOpacity(0.15)
+                            : AppColors.error.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(2),
                       ),
                       child: Text(
@@ -629,8 +629,8 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                                     padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                     decoration: BoxDecoration(
                                       color: biomarker.changePercent! >= 0
-                                          ? AppColors.accent.withOpacity(0.2)
-                                          : AppColors.error.withOpacity(0.2),
+                                          ? AppColors.accent.withOpacity(0.15)
+                                          : AppColors.error.withOpacity(0.15),
                                       borderRadius: BorderRadius.circular(2),
                                     ),
                                     child: Text(
@@ -934,13 +934,6 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                             : AppColors.border,
                       ),
                       borderRadius: BorderRadius.circular(4),
-                      boxShadow: data.maxSeverity > 5 ? [
-                        BoxShadow(
-                          color: AppColors.error.withOpacity(0.3),
-                          blurRadius: 4,
-                          spreadRadius: 1,
-                        ),
-                      ] : null,
                     ),
                     child: Center(
                       child: Text(
@@ -1061,7 +1054,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
       padding: const EdgeInsets.all(16),
       decoration: WintermmuteStyles.cardDecoration.copyWith(
         color: AppColors.surface.withOpacity(0.15),
-        border: Border.all(color: AppColors.accent.withOpacity(0.2)),
+        border: Border.all(color: AppColors.accent.withOpacity(0.15)),
         borderRadius: BorderRadius.circular(4),
         boxShadow: [], // Remove glow for matte look
       ),
@@ -1148,7 +1141,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             LineChartBarData(
               spots: trendData,
               isCurved: false,
-              color: AppColors.primary.withOpacity(0.6),
+              color: AppColors.primary.withOpacity(0.2),
               barWidth: 2,
               dotData: FlDotData(show: false),
               dashArray: [5, 5],
@@ -1463,7 +1456,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.surface,
-            side: BorderSide(color: AppColors.primary.withOpacity(0.5)),
+            side: BorderSide(color: AppColors.primary.withOpacity(0.2)),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
         ),
@@ -1993,8 +1986,8 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: changePercent >= 0
-                            ? AppColors.accent.withOpacity(0.2)
-                            : AppColors.error.withOpacity(0.2),
+                            ? AppColors.accent.withOpacity(0.15)
+                            : AppColors.error.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -2353,12 +2346,6 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                         decoration: BoxDecoration(
                           color: statusColor,
                           borderRadius: BorderRadius.circular(4),
-                          boxShadow: [
-                            BoxShadow(
-                              color: statusColor.withOpacity(0.5),
-                              blurRadius: 4,
-                            ),
-                          ],
                         ),
                       ),
                     ),
@@ -2532,7 +2519,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: ratingColor.withOpacity(0.2),
+                          color: ratingColor.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -3055,13 +3042,6 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
       builder: (context, child) {
         return Container(
           decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(_pulseAnimation.value),
-                blurRadius: 8,
-                spreadRadius: 2,
-              ),
-            ],
           ),
           child: child,
         );

@@ -367,7 +367,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
             child: LinearProgressIndicator(
               value: overall / 100,
               minHeight: 6,
-              backgroundColor: AppColors.surface.withOpacity(0.5),
+              backgroundColor: AppColors.surface.withOpacity(0.15),
               valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
             ),
           ),
