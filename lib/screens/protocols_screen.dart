@@ -5,7 +5,6 @@ import '../services/protocol_templates_database.dart';
 import '../services/cycles_database.dart';
 import '../data/peptides.dart';
 import '../widgets/scanline_overlay.dart';
-import '../widgets/cyberpunk_frame.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 
@@ -504,11 +503,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       onTap: () => _showStackDetail(stack),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        child: CyberpunkFrame(
-          padding: const EdgeInsets.all(12),
-          showStatusLed: true,
-          statusLedActive: true,
-          child: Column(
+        decoration: WintermmuteStyles.cardDecoration,
+        padding: const EdgeInsets.all(16),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -579,7 +576,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               ],
             ),
           ],
-          ),
         ),
       ),
     );
@@ -590,11 +586,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       onTap: () => _showProtocolDetail(protocol),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        child: CyberpunkFrame(
-          padding: const EdgeInsets.all(12),
-          showStatusLed: protocol.usageCount > 0,
-          statusLedActive: true,
-          child: Column(
+        decoration: WintermmuteStyles.cardDecoration,
+        padding: const EdgeInsets.all(16),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -699,7 +693,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               ],
             ),
           ],
-          ),
         ),
       ),
     );
