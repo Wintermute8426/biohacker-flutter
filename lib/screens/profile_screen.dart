@@ -275,9 +275,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
+    return SafeArea(
+      child: Stack(
         children: [
           // City background layer
           const Positioned.fill(
@@ -328,6 +327,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ],
           ),
         ],
+      ),
       ),
     );
   }

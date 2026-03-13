@@ -1088,7 +1088,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
               opacity: 0.25,
             ),
           ),
-          Column(
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
           // Header with dark background bar
@@ -1220,6 +1222,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                       ),
           ),
             ],
+          ),
           ),
           Positioned.fill(
             child: IgnorePointer(

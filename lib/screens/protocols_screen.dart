@@ -719,7 +719,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               opacity: 0.25,
             ),
           ),
-          Column(
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Column(
             children: [
               // Header with dark background bar
               Container(
@@ -807,6 +809,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 ),
               ),
             ],
+          ),
           ),
           Positioned.fill(
             child: IgnorePointer(

@@ -115,9 +115,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         ? ref.watch(userLabResultsProvider(userId))
         : const AsyncValue.data([]);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
+    return SafeArea(
+      child: Stack(
         children: [
           // City background layer
           const Positioned.fill(
@@ -353,6 +352,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
       ),
           ),
         ],
+      ),
       ),
     );
   }

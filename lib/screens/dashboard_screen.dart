@@ -278,7 +278,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               opacity: 0.25,
             ),
           ),
-          _isLoading
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: _isLoading
               ? Center(
                   child: CircularProgressIndicator(color: AppColors.primary),
                 )
@@ -308,12 +310,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                         ),
                         Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
-                        const SizedBox(height: 20),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                        const SizedBox(height: 20),
 
                         // TODAY'S DOSES SECTION
                         _buildTodaysDosesSection(),
@@ -333,6 +335,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                   ),
                 ),
+          ),
           // Scanlines overlay
           Positioned.fill(
             child: IgnorePointer(
