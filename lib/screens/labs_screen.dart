@@ -522,13 +522,17 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isOut ? AppColors.error.withOpacity(0.1) : AppColors.primary.withOpacity(0.1),
+                    color: isOut ? AppColors.error.withOpacity(0.1) : AppColors.surface.withOpacity(0.15),
+                    border: Border.all(
+                      color: isOut ? AppColors.error.withOpacity(0.2) : AppColors.primary.withOpacity(0.2),
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(2),
                   ),
                   child: Text(
                     '${entry.key}: $displayValue${isOut ? ' [HIGH]' : ''}',
                     style: TextStyle(
-                      color: isOut ? AppColors.error : AppColors.accent,
+                      color: isOut ? AppColors.error : AppColors.textMid,
                       fontSize: 10,
                     ),
                   ),
