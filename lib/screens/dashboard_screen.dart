@@ -293,12 +293,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Header
-                        Text(
-                          'DAILY ACTIONS',
-                          style: WintermmuteStyles.headerStyle.copyWith(
-                            fontSize: 18,
-                            letterSpacing: 2,
-                          ),
+                        Row(
+                          children: [
+                            Icon(Icons.dashboard, color: WintermmuteStyles.colorCyan, size: 28),
+                            const SizedBox(width: 12),
+                            Text(
+                              'DAILY ACTIONS',
+                              style: WintermmuteStyles.headerStyle.copyWith(
+                                fontSize: 18,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 20),
 

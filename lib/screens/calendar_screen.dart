@@ -139,9 +139,15 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text(
-          'DOSE CALENDAR',
-          style: WintermmuteStyles.titleStyle.copyWith(fontSize: 18),
+        title: Row(
+          children: [
+            Icon(Icons.calendar_month, color: WintermmuteStyles.colorCyan, size: 28),
+            const SizedBox(width: 12),
+            Text(
+              'DOSE CALENDAR',
+              style: WintermmuteStyles.titleStyle.copyWith(fontSize: 18),
+            ),
+          ],
         ),
         centerTitle: false,
         backgroundColor: AppColors.background,

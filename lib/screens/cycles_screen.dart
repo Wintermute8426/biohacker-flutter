@@ -1096,9 +1096,15 @@ class _CyclesScreenState extends State<CyclesScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'CYCLES',
-                  style: WintermmuteStyles.titleStyle,
+                Row(
+                  children: [
+                    Icon(Icons.autorenew, color: WintermmuteStyles.colorGreen, size: 32),
+                    const SizedBox(width: 12),
+                    Text(
+                      'CYCLES',
+                      style: WintermmuteStyles.titleStyle,
+                    ),
+                  ],
                 ),
                 Row(
                   children: [

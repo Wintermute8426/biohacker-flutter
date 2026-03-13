@@ -92,12 +92,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-              
-              // Logo
-              Text(
-                '🧊 BIOHACKER',
-                style: WintermmuteStyles.titleStyle.copyWith(fontSize: 32),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+
+              // Logo - Enhanced BH Monogram
+              Column(
+                children: [
+                  Image.asset(
+                    'assets/icon/app_icon.png',
+                    width: 140,
+                    height: 140,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'BIOHACKER',
+                    style: WintermmuteStyles.titleStyle.copyWith(fontSize: 32),
+                  ),
+                ],
               ),
               const SizedBox(height: 40),
 
