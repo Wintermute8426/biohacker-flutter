@@ -151,7 +151,7 @@ class WintermmuteStyles {
   static BoxDecoration cardDecoration = BoxDecoration(
     color: AppColors.surface.withOpacity(0.15), // Slightly more opaque for matte look
     border: Border.all(
-      color: colorCyan.withOpacity(0.2), // More subtle border
+      color: colorCyan.withOpacity(0.1), // Ultra-subtle border (cyan is very bright)
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
@@ -161,14 +161,14 @@ class WintermmuteStyles {
   static BoxDecoration cardDecorationGlow = BoxDecoration(
     color: AppColors.surface.withOpacity(0.15),
     border: Border.all(
-      color: colorCyan.withOpacity(0.25), // Reduced opacity
+      color: colorCyan.withOpacity(0.1), // Ultra-subtle
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
     boxShadow: [
       BoxShadow(
-        color: colorCyan.withOpacity(0.08), // Much more subtle glow
-        blurRadius: 6,
+        color: colorCyan.withOpacity(0.05), // Barely visible glow
+        blurRadius: 4,
         spreadRadius: 0,
       ),
     ],
@@ -178,7 +178,7 @@ class WintermmuteStyles {
   static BoxDecoration cardDecorationAccent = BoxDecoration(
     color: AppColors.surface.withOpacity(0.15),
     border: Border.all(
-      color: colorGreen.withOpacity(0.2),
+      color: colorGreen.withOpacity(0.1), // Ultra-subtle
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
@@ -188,7 +188,7 @@ class WintermmuteStyles {
   static BoxDecoration cardDecorationOrange = BoxDecoration(
     color: AppColors.surface.withOpacity(0.15),
     border: Border.all(
-      color: colorOrange.withOpacity(0.2),
+      color: colorOrange.withOpacity(0.1), // Ultra-subtle
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
@@ -198,7 +198,7 @@ class WintermmuteStyles {
   static BoxDecoration cardDecorationMagenta = BoxDecoration(
     color: AppColors.surface.withOpacity(0.15),
     border: Border.all(
-      color: colorMagenta.withOpacity(0.2),
+      color: colorMagenta.withOpacity(0.1), // Ultra-subtle
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
@@ -208,7 +208,7 @@ class WintermmuteStyles {
   static BoxDecoration cardDecorationBTC = BoxDecoration(
     color: AppColors.surface.withOpacity(0.15),
     border: Border.all(
-      color: colorBTC.withOpacity(0.2),
+      color: colorBTC.withOpacity(0.1), // Ultra-subtle
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
@@ -244,7 +244,7 @@ class WintermmuteStyles {
     return BoxDecoration(
       color: backgroundColor,
       border: Border.all(
-        color: borderColor.withOpacity(0.2),
+        color: borderColor.withOpacity(0.1), // Ultra-subtle for bright colors
         width: borderWidth,
       ),
       borderRadius: BorderRadius.circular(borderRadius),
