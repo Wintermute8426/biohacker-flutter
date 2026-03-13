@@ -760,7 +760,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'RESEARCH',
+                  'RESEARCH v736e8bc',
                   style: WintermmuteStyles.titleStyle,
                 ),
                 const SizedBox(height: 12),

@@ -194,7 +194,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
       appBar: AppBar(
         backgroundColor: AppColors.background,
         title: Text(
-          'REPORTS',
+          'REPORTS v736e8bc',
           style: WintermmuteStyles.titleStyle,
         ),
         actions: [

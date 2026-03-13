@@ -728,7 +728,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'PROTOCOLS',
+                  'PROTOCOLS v736e8bc',
                   style: WintermmuteStyles.titleStyle,
                 ),
                 ElevatedButton(
