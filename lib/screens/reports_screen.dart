@@ -360,11 +360,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             Container(
               margin: const EdgeInsets.symmetric(vertical: 16),
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                borderRadius: BorderRadius.circular(4),
-              ),
+              decoration: WintermmuteStyles.cardDecoration,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -399,11 +395,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
               ),
               const SizedBox(height: 12),
               Container(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                  borderRadius: BorderRadius.circular(4),
-                ),
+                decoration: WintermmuteStyles.cardDecoration,
                 child: Column(
                   children: labContext.activeCycles.map((cycle) {
                     return Padding(
@@ -448,11 +440,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(color: AppColors.border),
-                  borderRadius: BorderRadius.circular(4),
-                ),
+                decoration: WintermmuteStyles.cardDecoration,
                 child: Text(
                   'No active cycles during this period',
                   style: TextStyle(color: AppColors.textMid, fontSize: 12),
@@ -714,18 +702,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
     return Container(
       height: 300,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
+      decoration: WintermmuteStyles.cardDecoration,
       child: Column(
         children: [
           // Legend
@@ -865,18 +842,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
   Widget _buildSideEffectsHeatmap() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.error.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.error.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
+      decoration: WintermmuteStyles.cardDecoration,
       child: Column(
         children: [
           // Month navigation
@@ -1095,8 +1061,9 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
     return Container(
       height: 350,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
+      decoration: WintermmuteStyles.cardDecoration.copyWith(
+        boxShadow: null,
+        color: AppColors.surface.withOpacity(0.15),
         border: Border.all(color: AppColors.accent.withOpacity(0.3)),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
@@ -2865,18 +2832,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
     return Container(
       height: 300,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
+      decoration: WintermmuteStyles.cardDecoration,
       child: Column(
         children: [
           // Legend

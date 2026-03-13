@@ -605,11 +605,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
               if (lab.notes != null && lab.notes!.isNotEmpty) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+                  decoration: WintermmuteStyles.cardDecoration,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -636,11 +632,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
               // All biomarkers header
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                  borderRadius: BorderRadius.circular(4),
-                ),
+                decoration: WintermmuteStyles.cardDecoration,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -692,10 +684,9 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    border: Border.all(
-                      color: isOut ? AppColors.error.withOpacity(0.3) : AppColors.primary.withOpacity(0.3),
+                  decoration: WintermmuteStyles.customCardDecoration(
+                    borderColor: isOut ? AppColors.error : AppColors.primary,
+                    backgroundColor: AppColors.surface.withOpacity(0.15),
                     ),
                     borderRadius: BorderRadius.circular(4),
                   ),

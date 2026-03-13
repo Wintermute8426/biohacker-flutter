@@ -91,17 +91,15 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
 
     return GestureDetector(
       onTap: _toggleExpand,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+      child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        child: Container(
-          decoration: WintermmuteStyles.cardDecoration, // Matte style
-          child: CyberpunkFrame(
-            padding: const EdgeInsets.all(16),
-            showStatusLed: true,
-            statusLedActive: daysRemaining > 0,
-            frameColor: _isExpanded ? AppColors.accent : AppColors.primary,
-            child: Column(
+        decoration: WintermmuteStyles.cardDecoration, // Matte style
+        child: CyberpunkFrame(
+          padding: const EdgeInsets.all(16),
+          showStatusLed: true,
+          statusLedActive: daysRemaining > 0,
+          frameColor: _isExpanded ? AppColors.accent : AppColors.primary,
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header with cyberpunk decorations
