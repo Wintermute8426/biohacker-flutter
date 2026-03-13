@@ -436,7 +436,6 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
             ),
           ),
         ),
-      ),
     );
   }
 
