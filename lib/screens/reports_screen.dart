@@ -581,10 +581,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             collapsedIconColor: AppColors.primary,
             children: [
               Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.primary.withOpacity(0.2)),
-                  borderRadius: BorderRadius.circular(4),
-                ),
+                decoration: WintermmuteStyles.cardDecoration,
                 child: Column(
                   children: biomarkers
                       .map((biomarker) => Column(
@@ -1221,18 +1218,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.secondary.withOpacity(0.1),
-                blurRadius: 10,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
+          decoration: WintermmuteStyles.cardDecoration,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1307,18 +1293,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
     return Container(
       height: 300,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.accent.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accent.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
+      decoration: WintermmuteStyles.cardDecoration,
       child: BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceAround,
@@ -1619,11 +1594,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
 
         // Table
         Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-            borderRadius: BorderRadius.circular(4),
-          ),
+          decoration: WintermmuteStyles.cardDecoration,
           child: Column(
             children: [
               // Header row
@@ -2158,11 +2129,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                borderRadius: BorderRadius.circular(4),
-              ),
+              decoration: WintermmuteStyles.cardDecoration,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
