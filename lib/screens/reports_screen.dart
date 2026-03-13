@@ -1412,18 +1412,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.1),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
+            decoration: WintermmuteStyles.cardDecoration,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1838,11 +1827,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           Container(
             height: 250,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-              borderRadius: BorderRadius.circular(4),
-            ),
+            decoration: WintermmuteStyles.cardDecoration,
             child: LineChart(
               LineChartData(
                 gridData: FlGridData(
@@ -1982,11 +1967,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                borderRadius: BorderRadius.circular(4),
-              ),
+              decoration: WintermmuteStyles.cardDecoration,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -2538,11 +2519,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: ratingColor.withOpacity(0.3)),
-                borderRadius: BorderRadius.circular(4),
-              ),
+              decoration: WintermmuteStyles.cardDecoration,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -2599,11 +2576,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
         // Recommendations
         Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-            borderRadius: BorderRadius.circular(4),
-          ),
+          decoration: WintermmuteStyles.cardDecoration,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -2990,18 +2963,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 12),
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.1),
-                blurRadius: 10,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
+          decoration: WintermmuteStyles.cardDecoration,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -3047,11 +3009,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
   Widget _buildStatCard(String label, String value, Color color) {
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border.all(color: color.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(4),
-      ),
+      decoration: WintermmuteStyles.cardDecoration,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -3072,11 +3030,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
   Widget _buildEmptyState(String message) {
     return Container(
       padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(8),
-      ),
+      decoration: WintermmuteStyles.cardDecoration,
       child: Center(
         child: Text(
           message,

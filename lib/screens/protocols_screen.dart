@@ -517,7 +517,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 color: AppColors.accent,
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                decoration: TextDecoration.none,
               ),
             ),
             const SizedBox(height: 6),
@@ -526,7 +525,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               style: TextStyle(
                 color: AppColors.primary,
                 fontSize: 11,
-                decoration: TextDecoration.none,
               ),
             ),
             const SizedBox(height: 8),
@@ -611,7 +609,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           color: AppColors.primary,
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.none,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -620,7 +617,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         style: TextStyle(
                           color: AppColors.textMid,
                           fontSize: 11,
-                          decoration: TextDecoration.none,
                         ),
                       ),
                     ],
