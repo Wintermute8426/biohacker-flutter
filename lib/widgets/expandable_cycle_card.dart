@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/cycles_database.dart';
-import '../widgets/cyberpunk_frame.dart';
-import '../widgets/cyberpunk_animations.dart';
 
 /// Expandable cycle card with inline expansion (Wintermute dashboard style)
 /// Removes navigation buttons, expands inline to show edit/complete/delete actions
@@ -89,59 +87,34 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
             .clamp(0.0, 1.0)
         : 0.0;
 
-    return GestureDetector(
-      onTap: _toggleExpand,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        decoration: WintermmuteStyles.cardDecoration, // Matte style
-        child: CyberpunkFrame(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: WintermmuteStyles.cardDecoration, // Matte background
+      child: GestureDetector(
+        onTap: _toggleExpand,
+        child: Padding(
           padding: const EdgeInsets.all(16),
-          showStatusLed: true,
-          statusLedActive: daysRemaining > 0,
-          frameColor: _isExpanded ? AppColors.accent : AppColors.primary,
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with cyberpunk decorations
+                // Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Row(
-                        children: [
-                          // Corner bracket decoration
-                          CyberpunkCorners(
-                            size: 12,
-                            color: AppColors.primary.withOpacity(0.5),
-                            strokeWidth: 1.5,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: GlitchText(
-                              text: widget.cycle.peptideName.toUpperCase(),
-                              style: TextStyle(
-                                color: AppColors.primary,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'monospace',
-                                letterSpacing: 1.5,
-                              ),
-                              enabled: true,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        widget.cycle.peptideName.toUpperCase(),
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'monospace',
+                          letterSpacing: 1.5,
+                        ),
                       ),
                     ),
                     Row(
                       children: [
-                        StatusIndicators(
-                          colors: widget.cycle.isActive
-                              ? [AppColors.accent, AppColors.primary]
-                              : [AppColors.textDim],
-                          size: 5,
-                          spacing: 6,
-                        ),
-                        const SizedBox(width: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -463,6 +436,7 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
             ),
           ),
         ),
+      ),
     );
   }
 
