@@ -435,8 +435,8 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: _isUploading ? AppColors.textMid : AppColors.primary,
-                  width: 2,
+                  color: _isUploading ? AppColors.textMid : AppColors.primary.withOpacity(0.3), // Matte style
+                  width: 1,
                 ),
                 borderRadius: BorderRadius.circular(4),
               ),

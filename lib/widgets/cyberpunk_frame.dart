@@ -37,10 +37,11 @@ class CyberpunkFrame extends StatelessWidget {
         // Subtle matte glow effect (Wintermute dashboard style)
         Container(
           decoration: BoxDecoration(
+            color: AppColors.surface.withOpacity(0.05), // Dark matte background like dashboard
             boxShadow: [
               BoxShadow(
-                color: effectiveGlowColor.withOpacity(0.15), // Reduced for matte look
-                blurRadius: 8, // Reduced for subtle glow
+                color: effectiveGlowColor.withOpacity(0.05), // Much more subtle glow
+                blurRadius: 4, // Reduced blur
                 spreadRadius: 0, // No spread for cleaner look
               ),
             ],
@@ -197,7 +198,7 @@ class _HardwareFramePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = frameColor
+      ..color = frameColor.withOpacity(0.2) // Matte Wintermute style - subtle border
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.square;

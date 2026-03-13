@@ -1060,15 +1060,9 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
       padding: const EdgeInsets.all(16),
       decoration: WintermmuteStyles.cardDecoration.copyWith(
         color: AppColors.surface.withOpacity(0.15),
-        border: Border.all(color: AppColors.accent.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accent.withOpacity(0.1),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
+        border: Border.all(color: AppColors.accent.withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: [], // Remove glow for matte look
       ),
       child: LineChart(
         LineChartData(
@@ -2037,10 +2031,10 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.2) : AppColors.surface,
+          color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surface.withOpacity(0.05),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: isSelected ? 2 : 1,
+            color: isSelected ? AppColors.primary.withOpacity(0.3) : AppColors.border.withOpacity(0.2),
+            width: 1,
           ),
           borderRadius: BorderRadius.circular(4),
         ),

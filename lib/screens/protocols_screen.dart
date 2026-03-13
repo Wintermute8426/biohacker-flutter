@@ -534,6 +534,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 color: AppColors.textDim,
                 fontSize: 11,
                 fontStyle: FontStyle.italic,
+                decoration: TextDecoration.none,
               ),
             ),
             const SizedBox(height: 10),
@@ -562,13 +563,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   child: ElevatedButton(
                     onPressed: () => _showStackDetail(stack),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
+                      backgroundColor: AppColors.accent.withOpacity(0.5), // More subtle green
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
                     ),
                     child: Text(
                       'START',
                       style: TextStyle(
-                        color: AppColors.background,
+                        color: AppColors.textLight,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -648,6 +649,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   color: AppColors.textDim,
                   fontSize: 11,
                   fontStyle: FontStyle.italic,
+                  decoration: TextDecoration.none,
                 ),
               ),
             ],
@@ -677,13 +679,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   child: ElevatedButton(
                     onPressed: () => _showStartFromProtocolModal(protocol),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
+                      backgroundColor: AppColors.accent.withOpacity(0.5), // More subtle green
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
                     ),
                     child: Text(
                       'START',
                       style: TextStyle(
-                        color: AppColors.background,
+                        color: AppColors.textLight,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
