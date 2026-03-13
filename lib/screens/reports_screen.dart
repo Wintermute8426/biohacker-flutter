@@ -212,7 +212,18 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           Scaffold(
             backgroundColor: Colors.transparent,
             appBar: AppBar(
-        backgroundColor: AppColors.background,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface.withOpacity(0.3),
+            border: Border(
+              bottom: BorderSide(
+                color: AppColors.primary.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
         title: Row(
           children: [
             Icon(Icons.analytics, color: WintermmuteStyles.colorMagenta, size: 28),

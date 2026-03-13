@@ -139,18 +139,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface.withOpacity(0.3),
+            border: Border(
+              bottom: BorderSide(
+                color: AppColors.primary.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+          ),
+        ),
         title: Row(
           children: [
             Icon(Icons.calendar_month, color: WintermmuteStyles.colorCyan, size: 28),
             const SizedBox(width: 12),
             Text(
               'DOSE CALENDAR',
-              style: WintermmuteStyles.titleStyle.copyWith(fontSize: 18),
+              style: WintermmuteStyles.titleStyle,
             ),
           ],
         ),
         centerTitle: false,
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           // View toggle button - switches between week and month view

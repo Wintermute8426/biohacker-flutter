@@ -278,14 +278,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface.withOpacity(0.3),
+            border: Border(
+              bottom: BorderSide(
+                color: AppColors.primary.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+          ),
+        ),
         title: Row(
           children: [
             Icon(Icons.person, color: WintermmuteStyles.colorOrange, size: 28),
             const SizedBox(width: 12),
-            const Text('PROFILE'),
+            Text('PROFILE', style: WintermmuteStyles.titleStyle),
           ],
         ),
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),

@@ -277,7 +277,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
         backgroundColor: AppColors.background,
         title: Row(
           children: [
-            Icon(Icons.science, color: WintermmuteStyles.colorCyan, size: 28),
+            Icon(Icons.science, color: WintermmuteStyles.colorOrange, size: 28),
             const SizedBox(width: 12),
             Text(
               'LABS',

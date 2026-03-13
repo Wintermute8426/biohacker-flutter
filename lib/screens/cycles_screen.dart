@@ -1091,14 +1091,16 @@ class _CyclesScreenState extends State<CyclesScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
+          // Header with dark background bar
+          Container(
+            color: AppColors.surface.withOpacity(0.3),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.autorenew, color: WintermmuteStyles.colorGreen, size: 32),
+                    Icon(Icons.autorenew, color: WintermmuteStyles.colorGreen, size: 28),
                     const SizedBox(width: 12),
                     Text(
                       'CYCLES',
@@ -1144,6 +1146,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
               ],
             ),
           ),
+          Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
 
           Expanded(
             child: _isLoading

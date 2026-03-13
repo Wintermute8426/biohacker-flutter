@@ -719,24 +719,25 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               opacity: 0.25,
             ),
           ),
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+          Column(
+            children: [
+              // Header with dark background bar
+              Container(
+                color: AppColors.surface.withOpacity(0.3),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.list_alt, color: WintermmuteStyles.colorGreen, size: 28),
-                    const SizedBox(width: 12),
-                    Text(
-                      'PROTOCOLS',
-                      style: WintermmuteStyles.titleStyle,
+                    Row(
+                      children: [
+                        Icon(Icons.list_alt, color: WintermmuteStyles.colorGreen, size: 28),
+                        const SizedBox(width: 12),
+                        Text(
+                          'PROTOCOLS',
+                          style: WintermmuteStyles.titleStyle,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
                 ElevatedButton(
                   onPressed: _showCreateProtocolModal,
                   style: ElevatedButton.styleFrom(
@@ -748,10 +749,18 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                     'NEW',
                     style: TextStyle(color: AppColors.background, fontSize: 11, fontWeight: FontWeight.bold),
                   ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 24),
+              ),
+              Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
             if (isLoading)
               Center(
                 child: CircularProgressIndicator(
@@ -790,9 +799,12 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                     ),
                     const SizedBox(height: 12),
                     ...communityProtocols.map((protocol) => _buildProtocolCard(protocol)),
-                  ],
-                ],
+                      ],
+                    ],
+                  ),
+                ),
               ),
+            ),
           ],
         ),
       ),

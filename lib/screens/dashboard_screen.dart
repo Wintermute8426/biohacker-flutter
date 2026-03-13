@@ -288,25 +288,32 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   backgroundColor: AppColors.surface,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header
-                        Row(
-                          children: [
-                            Icon(Icons.dashboard, color: WintermmuteStyles.colorCyan, size: 28),
-                            const SizedBox(width: 12),
-                            Text(
-                              'DAILY ACTIONS',
-                              style: WintermmuteStyles.headerStyle.copyWith(
-                                fontSize: 18,
-                                letterSpacing: 2,
+                        // Header with dark background bar
+                        Container(
+                          color: AppColors.surface.withOpacity(0.3),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          child: Row(
+                            children: [
+                              Icon(Icons.dashboard, color: WintermmuteStyles.colorCyan, size: 28),
+                              const SizedBox(width: 12),
+                              Text(
+                                'DAILY ACTIONS',
+                                style: WintermmuteStyles.titleStyle,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                        Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
                         const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
 
                         // TODAY'S DOSES SECTION
                         _buildTodaysDosesSection(),
@@ -319,6 +326,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         // QUICK ACTIONS SECTION
                         _buildQuickActionsSection(),
                         const SizedBox(height: 32),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
