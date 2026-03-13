@@ -498,7 +498,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                     Text(
                       '${lab.extractedData.length} markers',
                       style: TextStyle(
-                        color: AppColors.accent,
+                        color: AppColors.textMid,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
@@ -522,7 +522,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isOut ? AppColors.error.withOpacity(0.1) : AppColors.surface.withOpacity(0.15),
+                    color: AppColors.surface.withOpacity(0.15),
                     border: Border.all(
                       color: isOut ? AppColors.error.withOpacity(0.2) : AppColors.primary.withOpacity(0.2),
                       width: 1,
@@ -625,7 +625,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                       const SizedBox(height: 4),
                       Text(
                         lab.notes!,
-                        style: TextStyle(color: AppColors.accent, fontSize: 12),
+                        style: TextStyle(color: AppColors.textMid, fontSize: 12),
                       ),
                     ],
                   ),
@@ -655,13 +655,17 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.accent.withOpacity(0.2),
+                            color: AppColors.surface.withOpacity(0.15),
+                            border: Border.all(
+                              color: AppColors.accent.withOpacity(0.2),
+                              width: 1,
+                            ),
                             borderRadius: BorderRadius.circular(2),
                           ),
                           child: Text(
                             '${lab.extractedData.length} markers',
                             style: TextStyle(
-                              color: AppColors.accent,
+                              color: AppColors.textMid,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -728,15 +732,19 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: isOut 
-                                ? AppColors.error.withOpacity(0.2)
-                                : AppColors.accent.withOpacity(0.2),
+                              color: AppColors.surface.withOpacity(0.15),
+                              border: Border.all(
+                                color: isOut
+                                  ? AppColors.error.withOpacity(0.2)
+                                  : AppColors.accent.withOpacity(0.2),
+                                width: 1,
+                              ),
                               borderRadius: BorderRadius.circular(3),
                             ),
                             child: Text(
                               isOut ? 'OUT OF\nRANGE' : status,
                               style: TextStyle(
-                                color: isOut ? AppColors.error : AppColors.accent,
+                                color: isOut ? AppColors.error : AppColors.textMid,
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -754,7 +762,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                           Text(
                             displayValue,
                             style: TextStyle(
-                              color: AppColors.accent,
+                              color: AppColors.textMid,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),

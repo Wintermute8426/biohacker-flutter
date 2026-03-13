@@ -424,7 +424,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             Text(
               'PEPTIDES IN STACK',
               style: TextStyle(
-                color: AppColors.accent,
+                color: AppColors.textMid,
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,
@@ -514,7 +514,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             Text(
               stack['name'] as String,
               style: TextStyle(
-                color: AppColors.accent,
+                color: AppColors.textMid,
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
@@ -563,7 +563,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   child: ElevatedButton(
                     onPressed: () => _showStackDetail(stack),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent.withOpacity(0.5), // More subtle green
+                      backgroundColor: AppColors.surface.withOpacity(0.15), // Matte style
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
                     ),
                     child: Text(
@@ -627,13 +627,17 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withOpacity(0.2),
+                      color: AppColors.surface.withOpacity(0.15),
+                      border: Border.all(
+                        color: AppColors.primary.withOpacity(0.2),
+                        width: 1,
+                      ),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
                       'Used ${protocol.usageCount}x',
                       style: TextStyle(
-                        color: AppColors.accent,
+                        color: AppColors.textMid,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -679,7 +683,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   child: ElevatedButton(
                     onPressed: () => _showStartFromProtocolModal(protocol),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent.withOpacity(0.5), // More subtle green
+                      backgroundColor: AppColors.surface.withOpacity(0.15), // Matte style
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
                     ),
                     child: Text(

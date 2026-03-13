@@ -418,7 +418,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                           ),
                           Text(
                             '${cycle.dose.toStringAsFixed(0)}mg',
-                            style: TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: AppColors.textMid, fontSize: 12, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -575,8 +575,8 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             ),
             childrenPadding: EdgeInsets.zero,
             tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            backgroundColor: AppColors.surface.withOpacity(0.5),
-            collapsedBackgroundColor: AppColors.surface.withOpacity(0.5),
+            backgroundColor: AppColors.surface.withOpacity(0.15),
+            collapsedBackgroundColor: AppColors.surface.withOpacity(0.15),
             iconColor: AppColors.primary,
             collapsedIconColor: AppColors.primary,
             children: [
@@ -618,7 +618,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                                 Text(
                                   '${biomarker.currentValue?.toStringAsFixed(1) ?? 'N/A'} ${biomarker.unit ?? ''}',
                                   style: TextStyle(
-                                    color: AppColors.accent,
+                                    color: AppColors.textMid,
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -929,8 +929,8 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                     decoration: BoxDecoration(
                       color: _getSeverityColor(data.maxSeverity),
                       border: Border.all(
-                        color: data.maxSeverity > 0 
-                            ? AppColors.error.withOpacity(0.5)
+                        color: data.maxSeverity > 0
+                            ? AppColors.primary.withOpacity(0.2)
                             : AppColors.border,
                       ),
                       borderRadius: BorderRadius.circular(4),
@@ -1039,11 +1039,12 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
   }
 
   Color _getSeverityColor(int severity) {
-    if (severity == 0) return AppColors.surface;
-    if (severity <= 3) return AppColors.accent.withOpacity(0.3);
-    if (severity <= 6) return Colors.orange.withOpacity(0.5);
-    if (severity <= 8) return AppColors.error.withOpacity(0.6);
-    return AppColors.error.withOpacity(0.8);
+    // Matte dashboard style - all colors use 0.15 opacity for consistency
+    if (severity == 0) return AppColors.surface.withOpacity(0.15);
+    if (severity <= 3) return AppColors.surface.withOpacity(0.15);
+    if (severity <= 6) return AppColors.surface.withOpacity(0.15);
+    if (severity <= 8) return AppColors.surface.withOpacity(0.15);
+    return AppColors.surface.withOpacity(0.15);
   }
 
   // C. Weight Trends Chart (ENHANCED with dual axis + trend line)
@@ -1622,8 +1623,8 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                 return Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isHighlight ? AppColors.surface.withOpacity(0.7) : AppColors.surface,
-                    border: Border(bottom: BorderSide(color: AppColors.border.withOpacity(0.3))),
+                    color: AppColors.surface.withOpacity(0.15),
+                    border: Border(bottom: BorderSide(color: AppColors.border.withOpacity(0.2))),
                   ),
                   child: Row(
                     children: [
@@ -1646,7 +1647,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                         flex: 1,
                         child: Text(
                           '${metric['completedCycles']}',
-                          style: TextStyle(color: AppColors.accent, fontSize: 10, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: AppColors.textMid, fontSize: 10, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -1674,7 +1675,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                         flex: 2,
                         child: Text(
                           '${metric['totalDoses']}',
-                          style: TextStyle(color: AppColors.accent, fontSize: 10),
+                          style: TextStyle(color: AppColors.textMid, fontSize: 10),
                           textAlign: TextAlign.right,
                         ),
                       ),
@@ -1980,7 +1981,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                       Text(
                         '${current.toStringAsFixed(1)} ${_getUnitForMarker(marker)}',
                         style: TextStyle(
-                          color: AppColors.accent,
+                          color: AppColors.textMid,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -2031,9 +2032,9 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surface.withOpacity(0.05),
+          color: AppColors.surface.withOpacity(0.15),
           border: Border.all(
-            color: isSelected ? AppColors.primary.withOpacity(0.3) : AppColors.border.withOpacity(0.2),
+            color: isSelected ? AppColors.primary.withOpacity(0.2) : AppColors.border.withOpacity(0.2),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(4),
@@ -2555,7 +2556,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                       ),
                       Text(
                         '${cycle.dosesLogged} doses',
-                        style: TextStyle(color: AppColors.accent, fontSize: 11),
+                        style: TextStyle(color: AppColors.textMid, fontSize: 11),
                       ),
                     ],
                   ),
@@ -2697,7 +2698,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
             '✅ Repeat ${sorted.first.cycleName}: Highest rated protocol (${sorted.first.rating}/10)',
-            style: TextStyle(color: AppColors.accent, fontSize: 11, height: 1.6),
+            style: TextStyle(color: AppColors.textMid, fontSize: 11, height: 1.6),
           ),
         ),
       );
@@ -2710,7 +2711,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           padding: const EdgeInsets.only(bottom: 8),
           child: Text(
             '💪 Excellent consistency: Maintain current dosing strategy',
-            style: TextStyle(color: AppColors.accent, fontSize: 11, height: 1.6),
+            style: TextStyle(color: AppColors.textMid, fontSize: 11, height: 1.6),
           ),
         ),
       );
