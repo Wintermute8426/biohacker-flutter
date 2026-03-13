@@ -171,25 +171,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             selectedItemColor: AppColors.primary,
             unselectedItemColor: AppColors.textMid,
             type: BottomNavigationBarType.fixed,
-            items: const [
+            showUnselectedLabels: true,
+            items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home),
+                icon: Icon(
+                  Icons.dashboard,
+                  color: _selectedIndex == 0
+                      ? WintermmuteStyles.colorCyan
+                      : WintermmuteStyles.colorCyan.withOpacity(0.4),
+                ),
                 label: 'Dashboard',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.schedule),
+                icon: Icon(
+                  Icons.autorenew,
+                  color: _selectedIndex == 1
+                      ? WintermmuteStyles.colorGreen
+                      : WintermmuteStyles.colorGreen.withOpacity(0.4),
+                ),
                 label: 'Cycles',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.science),
+                icon: Icon(
+                  Icons.science,
+                  color: _selectedIndex == 2
+                      ? WintermmuteStyles.colorOrange
+                      : WintermmuteStyles.colorOrange.withOpacity(0.4),
+                ),
                 label: 'Labs',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.analytics),
+                icon: Icon(
+                  Icons.analytics,
+                  color: _selectedIndex == 3
+                      ? WintermmuteStyles.colorMagenta
+                      : WintermmuteStyles.colorMagenta.withOpacity(0.4),
+                ),
                 label: 'Reports',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_month),
+                icon: Icon(
+                  Icons.calendar_month,
+                  color: _selectedIndex == 4
+                      ? WintermmuteStyles.colorCyan
+                      : WintermmuteStyles.colorCyan.withOpacity(0.4),
+                ),
                 label: 'Calendar',
               ),
             ],
