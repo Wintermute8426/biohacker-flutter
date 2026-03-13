@@ -167,62 +167,68 @@ class WintermmuteStyles {
   static const Color colorMagenta = Color(0xFFFF00FF);
   static const Color colorBTC = Color(0xFFF7931A);
 
-  // Standard card: Dark background, cyan border
+  // Standard card: Matte dark background, subtle cyan border (Wintermute dashboard style)
   static BoxDecoration cardDecoration = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.05),
+    color: AppColors.surface.withOpacity(0.15), // Slightly more opaque for matte look
     border: Border.all(
-      color: colorCyan.withOpacity(0.25),
+      color: colorCyan.withOpacity(0.2), // More subtle border
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
   );
 
-  // Glowing card: Standard card with subtle glow
+  // Glowing card: Standard card with very subtle glow
   static BoxDecoration cardDecorationGlow = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.05),
+    color: AppColors.surface.withOpacity(0.15),
     border: Border.all(
-      color: colorCyan.withOpacity(0.35),
-      width: 1.5,
+      color: colorCyan.withOpacity(0.25), // Reduced opacity
+      width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
-    boxShadow: cardGlowShadow,
+    boxShadow: [
+      BoxShadow(
+        color: colorCyan.withOpacity(0.08), // Much more subtle glow
+        blurRadius: 6,
+        spreadRadius: 0,
+      ),
+    ],
   );
 
-  // Accent card: Green border
+  // Accent card: Green border (matte)
   static BoxDecoration cardDecorationAccent = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.05),
+    color: AppColors.surface.withOpacity(0.15),
     border: Border.all(
-      color: colorGreen.withOpacity(0.25),
+      color: colorGreen.withOpacity(0.2),
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
   );
 
-  // Orange card: For secondary sections
+  // Orange card: For secondary sections (matte)
   static BoxDecoration cardDecorationOrange = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.05),
+    color: AppColors.surface.withOpacity(0.15),
     border: Border.all(
-      color: colorOrange.withOpacity(0.25),
+      color: colorOrange.withOpacity(0.2),
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
   );
 
-  // Magenta card: For tertiary sections
+  // Magenta card: For tertiary sections (matte)
   static BoxDecoration cardDecorationMagenta = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.05),
+    color: AppColors.surface.withOpacity(0.15),
     border: Border.all(
-      color: colorMagenta.withOpacity(0.25),
+      color: colorMagenta.withOpacity(0.2),
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),
   );
 
-  // BTC/Bitcoin card: For financial data
+  // BTC/Bitcoin card: For financial data (matte)
   static BoxDecoration cardDecorationBTC = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.05),
+    color: AppColors.surface.withOpacity(0.15),
     border: Border.all(
-      color: colorBTC.withOpacity(0.25),
+      color: colorBTC.withOpacity(0.2),
       width: 1,
     ),
     borderRadius: BorderRadius.circular(4),

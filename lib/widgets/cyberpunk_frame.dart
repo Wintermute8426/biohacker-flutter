@@ -34,14 +34,14 @@ class CyberpunkFrame extends StatelessWidget {
 
     return Stack(
       children: [
-        // Enhanced glow effect (vibrant like dashboard cards)
+        // Subtle matte glow effect (Wintermute dashboard style)
         Container(
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: effectiveGlowColor.withOpacity(0.4), // Increased for visibility
-                blurRadius: 12, // Increased for better glow
-                spreadRadius: 2, // Added to extend glow outward
+                color: effectiveGlowColor.withOpacity(0.15), // Reduced for matte look
+                blurRadius: 8, // Reduced for subtle glow
+                spreadRadius: 0, // No spread for cleaner look
               ),
             ],
           ),
@@ -107,31 +107,26 @@ class CyberpunkFrame extends StatelessWidget {
     return Align(
       alignment: alignment,
       child: Container(
-        width: 12, // Increased from 8 for better visibility
-        height: 12,
+        width: 10, // Reduced for cleaner look
+        height: 10,
         margin: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: RadialGradient(
             colors: [
-              effectiveFrameColor,
-              effectiveFrameColor.withOpacity(0.3),
+              effectiveFrameColor.withOpacity(0.6),
+              effectiveFrameColor.withOpacity(0.2),
             ],
           ),
           border: Border.all(
-            color: effectiveFrameColor,
-            width: 2, // Increased from 1.5
+            color: effectiveFrameColor.withOpacity(0.5), // Subtle border
+            width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: effectiveFrameColor.withOpacity(0.6), // Enhanced glow
-              blurRadius: 6, // Increased from 2
-              spreadRadius: 1, // Added for better visibility
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 2,
-              offset: const Offset(1, 1),
+              color: effectiveFrameColor.withOpacity(0.2), // Subtle glow
+              blurRadius: 3,
+              spreadRadius: 0,
             ),
           ],
         ),
@@ -141,21 +136,21 @@ class CyberpunkFrame extends StatelessWidget {
 
   Widget _buildStatusLed(bool active, Color color) {
     return Container(
-      width: 10, // Increased from 8 for better visibility
-      height: 10,
+      width: 8,
+      height: 8,
       decoration: BoxDecoration(
-        color: active ? color : AppColors.textDim,
+        color: active ? color.withOpacity(0.8) : AppColors.textDim,
         shape: BoxShape.circle,
         border: Border.all(
-          color: active ? color : AppColors.textDim,
-          width: 1.5, // Increased border width
+          color: active ? color.withOpacity(0.6) : AppColors.textDim,
+          width: 1,
         ),
         boxShadow: active
             ? [
                 BoxShadow(
-                  color: color.withOpacity(0.8), // Increased from 0.6
-                  blurRadius: 8, // Increased from 6
-                  spreadRadius: 2, // Increased from 1
+                  color: color.withOpacity(0.4), // Subtle glow
+                  blurRadius: 4,
+                  spreadRadius: 0,
                 ),
               ]
             : null,

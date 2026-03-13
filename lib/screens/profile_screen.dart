@@ -323,20 +323,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // ID Card Container
+          // ID Card Container (matte Wintermute style)
           Container(
             decoration: BoxDecoration(
-              color: AppColors.background,
+              color: AppColors.surface.withOpacity(0.15), // Matte dark background
               border: Border.all(
-                color: AppColors.primary,
-                width: 2,
+                color: AppColors.primary.withOpacity(0.25), // Subtle border
+                width: 1,
               ),
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
-                  blurRadius: 20,
-                  spreadRadius: 2,
+                  color: AppColors.primary.withOpacity(0.08), // Subtle glow
+                  blurRadius: 6,
+                  spreadRadius: 0,
                 ),
               ],
             ),
@@ -711,9 +711,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.3),
-        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
+        color: AppColors.surface.withOpacity(0.15), // Matte background
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)), // Subtle border
         borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.05), // Very subtle glow
+            blurRadius: 4,
+            spreadRadius: 0,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -829,8 +836,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.3),
-        border: Border.all(color: AppColors.textDim.withOpacity(0.3)),
+        color: AppColors.surface.withOpacity(0.15), // Matte background
+        border: Border.all(color: AppColors.textDim.withOpacity(0.2)), // Subtle border
         borderRadius: BorderRadius.circular(4),
       ),
       child: Column(

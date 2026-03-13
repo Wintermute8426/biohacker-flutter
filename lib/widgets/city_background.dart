@@ -100,14 +100,14 @@ class _CityBackgroundPainter extends CustomPainter {
   }
 
   void _drawDistantBuildings(Canvas canvas, Size size) {
-    final baseHeight = size.height * 0.7;
+    final baseHeight = size.height; // Changed from 0.7 to 1.0 (full height)
     final buildingCount = 15;
 
     for (int i = 0; i < buildingCount; i++) {
       _random.nextDouble(); // Consume random for consistency
       final x = (i / buildingCount) * size.width;
       final width = size.width / buildingCount + _random.nextDouble() * 20;
-      final height = 80 + _random.nextDouble() * 120;
+      final height = 120 + _random.nextDouble() * 180; // Increased height range
 
       final rect = Rect.fromLTWH(x, baseHeight - height, width, height);
 
@@ -129,14 +129,14 @@ class _CityBackgroundPainter extends CustomPainter {
   }
 
   void _drawMidgroundBuildings(Canvas canvas, Size size) {
-    final baseHeight = size.height * 0.8;
+    final baseHeight = size.height; // Changed from 0.8 to 1.0 (full height)
     final buildingCount = 10;
 
     for (int i = 0; i < buildingCount; i++) {
       _random.nextDouble(); // Consume random for consistency
       final x = (i / buildingCount) * size.width;
       final width = size.width / buildingCount + _random.nextDouble() * 30;
-      final height = 120 + _random.nextDouble() * 180;
+      final height = 180 + _random.nextDouble() * 280; // Increased height range
 
       final rect = Rect.fromLTWH(x, baseHeight - height, width, height);
 
@@ -163,14 +163,14 @@ class _CityBackgroundPainter extends CustomPainter {
   }
 
   void _drawForegroundBuildings(Canvas canvas, Size size) {
-    final baseHeight = size.height * 0.9;
+    final baseHeight = size.height; // Changed from 0.9 to 1.0 (full height)
     final buildingCount = 6;
 
     for (int i = 0; i < buildingCount; i++) {
       _random.nextDouble(); // Consume random for consistency
       final x = (i / buildingCount) * size.width;
       final width = size.width / buildingCount + _random.nextDouble() * 40;
-      final height = 180 + _random.nextDouble() * 250;
+      final height = 280 + _random.nextDouble() * 380; // Increased height range
 
       final rect = Rect.fromLTWH(x, baseHeight - height, width, height);
 
@@ -258,13 +258,14 @@ class _CityBackgroundPainter extends CustomPainter {
   }
 
   void _drawFog(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0, size.height * 0.6, size.width, size.height * 0.4);
+    // Adjust fog to cover lower portion with full-height buildings
+    final rect = Rect.fromLTWH(0, size.height * 0.7, size.width, size.height * 0.3);
     final gradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
         const Color(0xFF1A1A3F).withOpacity(0),
-        const Color(0xFF1A1A3F).withOpacity(opacity * 0.3),
+        const Color(0xFF1A1A3F).withOpacity(opacity * 0.2),
       ],
     );
 
