@@ -782,7 +782,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     Icon(Icons.biotech, color: WintermmuteStyles.colorOrange, size: 28),
                     const SizedBox(width: 12),
                     Text(
-                      'RESEARCH v736e8bc',
+                      'RESEARCH',
                       style: WintermmuteStyles.titleStyle,
                     ),
                   ],

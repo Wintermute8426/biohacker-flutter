@@ -218,7 +218,7 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             Icon(Icons.analytics, color: WintermmuteStyles.colorMagenta, size: 28),
             const SizedBox(width: 12),
             Text(
-              'REPORTS v736e8bc',
+              'REPORTS',
               style: WintermmuteStyles.titleStyle,
             ),
           ],

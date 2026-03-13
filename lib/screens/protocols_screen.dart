@@ -732,7 +732,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                     Icon(Icons.list_alt, color: WintermmuteStyles.colorGreen, size: 28),
                     const SizedBox(width: 12),
                     Text(
-                      'PROTOCOLS v736e8bc',
+                      'PROTOCOLS',
                       style: WintermmuteStyles.titleStyle,
                     ),
                   ],

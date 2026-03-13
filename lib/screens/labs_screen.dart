@@ -280,7 +280,7 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
             Icon(Icons.science, color: WintermmuteStyles.colorCyan, size: 28),
             const SizedBox(width: 12),
             Text(
-              'LABS v736e8bc',
+              'LABS',
               style: WintermmuteStyles.titleStyle,
             ),
           ],
