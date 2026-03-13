@@ -6,6 +6,8 @@ import '../theme/colors.dart';
 import '../services/reports_service.dart';
 import '../theme/wintermute_styles.dart';
 import '../theme/wintermute_background.dart';
+import '../widgets/city_background.dart';
+import '../widgets/cyberpunk_rain.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -188,10 +190,28 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
 
   @override
   Widget build(BuildContext context) {
-    return WintermmuteBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-      appBar: AppBar(
+    return SafeArea(
+      child: Stack(
+        children: [
+          // City background layer
+          const Positioned.fill(
+            child: CityBackground(
+              enabled: true,
+              animateLights: true,
+              opacity: 0.3,
+            ),
+          ),
+          // Rain effect layer
+          const Positioned.fill(
+            child: CyberpunkRain(
+              enabled: true,
+              particleCount: 40,
+              opacity: 0.25,
+            ),
+          ),
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
         backgroundColor: AppColors.background,
         title: Text(
           'REPORTS v736e8bc',
@@ -330,6 +350,8 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             ),
           ),
         ),
+      ),
+        ],
       ),
     );
   }

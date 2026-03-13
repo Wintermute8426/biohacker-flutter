@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../data/peptide_library.dart';
+import '../widgets/city_background.dart';
+import '../widgets/cyberpunk_rain.dart';
 
 class ResearchScreen extends StatefulWidget {
   const ResearchScreen({Key? key}) : super(key: key);
@@ -750,6 +752,22 @@ class _ResearchScreenState extends State<ResearchScreen> {
     return SafeArea(
       child: Stack(
         children: [
+          // City background layer
+          const Positioned.fill(
+            child: CityBackground(
+              enabled: true,
+              animateLights: true,
+              opacity: 0.3,
+            ),
+          ),
+          // Rain effect layer
+          const Positioned.fill(
+            child: CyberpunkRain(
+              enabled: true,
+              particleCount: 40,
+              opacity: 0.25,
+            ),
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

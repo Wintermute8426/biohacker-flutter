@@ -11,6 +11,8 @@ import '../models/lab_result.dart';
 import '../services/labs_database.dart';
 import '../services/bloodwork_service.dart';
 import '../services/android_file_picker.dart';
+import '../widgets/city_background.dart';
+import '../widgets/cyberpunk_rain.dart';
 
 class LabsScreen extends StatefulWidget {
   const LabsScreen({Key? key}) : super(key: key);
@@ -250,9 +252,28 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
+    return SafeArea(
+      child: Stack(
+        children: [
+          // City background layer
+          const Positioned.fill(
+            child: CityBackground(
+              enabled: true,
+              animateLights: true,
+              opacity: 0.3,
+            ),
+          ),
+          // Rain effect layer
+          const Positioned.fill(
+            child: CyberpunkRain(
+              enabled: true,
+              particleCount: 40,
+              opacity: 0.25,
+            ),
+          ),
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
         backgroundColor: AppColors.background,
         title: Text(
           'LABS v736e8bc',
@@ -298,6 +319,9 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                 painter: _ScanlinesPainter(),
               ),
             ),
+          ),
+        ],
+      ),
           ),
         ],
       ),
