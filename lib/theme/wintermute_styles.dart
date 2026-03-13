@@ -93,45 +93,30 @@ class WintermmuteStyles {
 
   // ==================== BOX SHADOWS (GLOW EFFECTS) ====================
 
-  // Cyan glow for buttons/inputs (ENHANCED)
+  // Cyan glow for buttons/inputs (MATTE)
   static List<BoxShadow> cyanGlowShadow = [
     BoxShadow(
-      color: colorCyan.withOpacity(0.6),
-      blurRadius: 20,
-      spreadRadius: 3,
-    ),
-    BoxShadow(
-      color: colorCyan.withOpacity(0.3),
-      blurRadius: 8,
-      spreadRadius: 1,
+      color: colorCyan.withOpacity(0.15),
+      blurRadius: 6,
+      spreadRadius: 0,
     ),
   ];
 
-  // Green glow for accent elements (ENHANCED)
+  // Green glow for accent elements (MATTE)
   static List<BoxShadow> greenGlowShadow = [
     BoxShadow(
-      color: colorGreen.withOpacity(0.6),
-      blurRadius: 20,
-      spreadRadius: 3,
-    ),
-    BoxShadow(
-      color: colorGreen.withOpacity(0.3),
-      blurRadius: 8,
-      spreadRadius: 1,
+      color: colorGreen.withOpacity(0.15),
+      blurRadius: 6,
+      spreadRadius: 0,
     ),
   ];
 
-  // Red glow for errors/warnings (ENHANCED)
+  // Red glow for errors/warnings (MATTE)
   static List<BoxShadow> redGlowShadow = [
     BoxShadow(
-      color: Color(0xFFFF0040).withOpacity(0.6),
-      blurRadius: 20,
-      spreadRadius: 3,
-    ),
-    BoxShadow(
-      color: Color(0xFFFF0040).withOpacity(0.3),
-      blurRadius: 8,
-      spreadRadius: 1,
+      color: Color(0xFFFF0040).withOpacity(0.15),
+      blurRadius: 6,
+      spreadRadius: 0,
     ),
   ];
 
@@ -144,17 +129,12 @@ class WintermmuteStyles {
     ),
   ];
 
-  // Intense glow for active/focused elements
+  // Intense glow for active/focused elements (MATTE)
   static List<BoxShadow> intenseCyanGlow = [
     BoxShadow(
-      color: colorCyan.withOpacity(0.8),
-      blurRadius: 24,
-      spreadRadius: 4,
-    ),
-    BoxShadow(
-      color: colorCyan.withOpacity(0.4),
-      blurRadius: 12,
-      spreadRadius: 2,
+      color: colorCyan.withOpacity(0.2),
+      blurRadius: 8,
+      spreadRadius: 0,
     ),
   ];
 
@@ -264,7 +244,7 @@ class WintermmuteStyles {
     return BoxDecoration(
       color: backgroundColor,
       border: Border.all(
-        color: borderColor.withOpacity(0.3),
+        color: borderColor.withOpacity(0.2),
         width: borderWidth,
       ),
       borderRadius: BorderRadius.circular(borderRadius),
