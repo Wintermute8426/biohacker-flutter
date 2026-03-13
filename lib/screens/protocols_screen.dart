@@ -738,17 +738,17 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         ),
                       ],
                     ),
-                ElevatedButton(
-                  onPressed: _showCreateProtocolModal,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-                  ),
-                  child: Text(
-                    'NEW',
-                    style: TextStyle(color: AppColors.background, fontSize: 11, fontWeight: FontWeight.bold),
-                  ),
+                    ElevatedButton(
+                      onPressed: _showCreateProtocolModal,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+                      ),
+                      child: Text(
+                        'NEW',
+                        style: TextStyle(color: AppColors.background, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 ),
@@ -761,53 +761,53 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-            if (isLoading)
-              Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                ),
-              )
-            else
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Biohacker Protocols (Stacks)
-                  Text(
-                    'BIOHACKER PROTOCOL STACKS',
-                    style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
+                      if (isLoading)
+                        Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          ),
+                        )
+                      else
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Biohacker Protocols (Stacks)
+                            Text(
+                              'BIOHACKER PROTOCOL STACKS',
+                              style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
+                            ),
+                            const SizedBox(height: 12),
+                            ...getBiohackerProtocols().map((stack) => _buildStackCard(stack)),
+                            const SizedBox(height: 24),
+
+                            // My Protocols
+                            if (myProtocols.isNotEmpty) ...[
+                              Text(
+                                'MY PROTOCOLS',
+                                style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12, color: AppColors.accent),
+                              ),
+                              const SizedBox(height: 12),
+                              ...myProtocols.map((protocol) => _buildProtocolCard(protocol)),
+                              const SizedBox(height: 24),
+                            ],
+
+                            // Community Protocols
+                            if (communityProtocols.isNotEmpty) ...[
+                              Text(
+                                'COMMUNITY PROTOCOLS',
+                                style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
+                              ),
+                              const SizedBox(height: 12),
+                              ...communityProtocols.map((protocol) => _buildProtocolCard(protocol)),
+                            ],
+                          ],
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  ...getBiohackerProtocols().map((stack) => _buildStackCard(stack)),
-                  const SizedBox(height: 24),
-
-                  // My Protocols
-                  if (myProtocols.isNotEmpty) ...[
-                    Text(
-                      'MY PROTOCOLS',
-                      style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12, color: AppColors.accent),
-                    ),
-                    const SizedBox(height: 12),
-                    ...myProtocols.map((protocol) => _buildProtocolCard(protocol)),
-                    const SizedBox(height: 24),
-                  ],
-
-                  // Community Protocols
-                  if (communityProtocols.isNotEmpty) ...[
-                    Text(
-                      'COMMUNITY PROTOCOLS',
-                      style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
-                    ),
-                    const SizedBox(height: 12),
-                    ...communityProtocols.map((protocol) => _buildProtocolCard(protocol)),
-                  ],
-                ],
+                ),
               ),
             ],
           ),
-        ),
-      ],
-        ),
-      ),
           Positioned.fill(
             child: IgnorePointer(
               child: CustomPaint(
