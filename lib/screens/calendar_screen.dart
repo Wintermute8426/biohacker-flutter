@@ -138,106 +138,98 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           // Main scaffold content
           Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
+      body: Column(
+        children: [
+          // Header with dark background bar
+          Container(
             color: AppColors.surface.withOpacity(0.3),
-            border: Border(
-              bottom: BorderSide(
-                color: AppColors.primary.withOpacity(0.3),
-                width: 1,
-              ),
-            ),
-          ),
-        ),
-        title: Row(
-          children: [
-            Icon(Icons.calendar_month, color: WintermmuteStyles.colorCyan, size: 28),
-            const SizedBox(width: 12),
-            Text(
-              'DOSE CALENDAR',
-              style: WintermmuteStyles.titleStyle,
-            ),
-          ],
-        ),
-        centerTitle: false,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          // View toggle button - switches between week and month view
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: AppColors.accent.withOpacity(0.2),
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: IconButton(
-              icon: Icon(_showMonthView ? Icons.view_week : Icons.calendar_month),
-              onPressed: () {
-                print('[Calendar] ISSUE 2 FIX: Toggle button pressed. Current: $_showMonthView');
-                setState(() {
-                  _showMonthView = !_showMonthView;
-                  print('[Calendar] ISSUE 2 FIX: New value: $_showMonthView');
-                });
-                // Show feedback that view changed
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      _showMonthView ? 'Switched to Month View' : 'Switched to Week View',
-                      style: WintermmuteStyles.bodyStyle,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_month, color: WintermmuteStyles.colorCyan, size: 28),
+                const SizedBox(width: 12),
+                Text(
+                  'DOSE CALENDAR',
+                  style: WintermmuteStyles.titleStyle,
+                ),
+                const Spacer(),
+                // View toggle button - switches between week and month view
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.accent.withOpacity(0.2),
+                      width: 2,
                     ),
-                    backgroundColor: AppColors.accent,
-                    duration: const Duration(milliseconds: 800),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                );
-                print('[Calendar] ISSUE 2 FIX: setState complete, SnackBar shown');
-              },
-              color: AppColors.accent,
-              tooltip: _showMonthView ? 'Switch to Week View' : 'Switch to Month View',
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.today),
-            onPressed: _goToToday,
-            color: AppColors.primary,
-          ),
-          // SYNC FIX: Aggressive refresh button with immediate provider refetch
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: AppColors.primary.withOpacity(0.2),
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-                print('[Calendar] SYNC FIX: Manual refresh triggered');
-                ref.refresh(upcomingDosesProvider);
-                ref.refresh(doseSchedulesProvider);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Calendar refreshed',
-                      style: WintermmuteStyles.bodyStyle,
+                  child: IconButton(
+                    icon: Icon(_showMonthView ? Icons.view_week : Icons.calendar_month),
+                    onPressed: () {
+                      print('[Calendar] ISSUE 2 FIX: Toggle button pressed. Current: $_showMonthView');
+                      setState(() {
+                        _showMonthView = !_showMonthView;
+                        print('[Calendar] ISSUE 2 FIX: New value: $_showMonthView');
+                      });
+                      // Show feedback that view changed
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            _showMonthView ? 'Switched to Month View' : 'Switched to Week View',
+                            style: WintermmuteStyles.bodyStyle,
+                          ),
+                          backgroundColor: AppColors.accent,
+                          duration: const Duration(milliseconds: 800),
+                        ),
+                      );
+                      print('[Calendar] ISSUE 2 FIX: setState complete, SnackBar shown');
+                    },
+                    color: AppColors.accent,
+                    tooltip: _showMonthView ? 'Switch to Week View' : 'Switch to Month View',
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.today),
+                  onPressed: _goToToday,
+                  color: AppColors.primary,
+                ),
+                // SYNC FIX: Aggressive refresh button with immediate provider refetch
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.2),
+                      width: 2,
                     ),
-                    backgroundColor: AppColors.primary,
-                    duration: const Duration(milliseconds: 800),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                );
-              },
-              color: AppColors.primary,
-              tooltip: 'Refresh calendar',
+                  child: IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: () {
+                      print('[Calendar] SYNC FIX: Manual refresh triggered');
+                      ref.refresh(upcomingDosesProvider);
+                      ref.refresh(doseSchedulesProvider);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Calendar refreshed',
+                            style: WintermmuteStyles.bodyStyle,
+                          ),
+                          backgroundColor: AppColors.primary,
+                          duration: const Duration(milliseconds: 800),
+                        ),
+                      );
+                    },
+                    color: AppColors.primary,
+                    tooltip: 'Refresh calendar',
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-      body: upcomingDoses.when(
+          Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
+          Expanded(
+            child: upcomingDoses.when(
         data: (doses) {
           // ISSUE 1 FIX: Log dose data to verify missed status is reflected
           print('[Calendar] ISSUE 1 DEBUG: Got ${doses.length} doses from provider');
@@ -355,7 +347,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             ),
           ),
         ),
-      ),
+            ),
           ),
         ],
       ),

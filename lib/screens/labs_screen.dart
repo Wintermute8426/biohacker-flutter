@@ -273,37 +273,43 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
           ),
           Scaffold(
             backgroundColor: Colors.transparent,
-            appBar: AppBar(
-        backgroundColor: AppColors.background,
-        title: Row(
-          children: [
-            Icon(Icons.science, color: WintermmuteStyles.colorOrange, size: 28),
-            const SizedBox(width: 12),
-            Text(
-              'LABS',
-              style: WintermmuteStyles.titleStyle,
-            ),
-          ],
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorColor: AppColors.primary,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textMid,
-          labelStyle: WintermmuteStyles.tabLabelStyle,
-          unselectedLabelStyle: WintermmuteStyles.tabLabelStyle.copyWith(
-            color: AppColors.textMid,
-          ),
-          tabs: const [
-            Tab(text: 'ALL RESULTS'),
-            Tab(text: 'OUT OF RANGE'),
-            Tab(text: 'RECENT'),
-            Tab(text: 'UPLOAD'),
-          ],
-        ),
-      ),
-      body: Stack(
+            body: Column(
+              children: [
+                // Header with dark background bar
+                Container(
+                  color: AppColors.surface.withOpacity(0.3),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Icon(Icons.science, color: WintermmuteStyles.colorOrange, size: 28),
+                      const SizedBox(width: 12),
+                      Text(
+                        'LABS',
+                        style: WintermmuteStyles.titleStyle,
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
+                TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  indicatorColor: AppColors.primary,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.textMid,
+                  labelStyle: WintermmuteStyles.tabLabelStyle,
+                  unselectedLabelStyle: WintermmuteStyles.tabLabelStyle.copyWith(
+                    color: AppColors.textMid,
+                  ),
+                  tabs: const [
+                    Tab(text: 'ALL RESULTS'),
+                    Tab(text: 'OUT OF RANGE'),
+                    Tab(text: 'RECENT'),
+                    Tab(text: 'UPLOAD'),
+                  ],
+                ),
+                Expanded(
+                  child: Stack(
         children: [
           TabBarView(
             controller: _tabController,
@@ -836,6 +842,10 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
               }).toList(),
 
               const SizedBox(height: 24),
+            ],
+          ),
+                ),
+              ),
             ],
           ),
         ),

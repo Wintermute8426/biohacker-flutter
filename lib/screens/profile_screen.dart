@@ -277,38 +277,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface.withOpacity(0.3),
-            border: Border(
-              bottom: BorderSide(
-                color: AppColors.primary.withOpacity(0.3),
-                width: 1,
-              ),
-            ),
-          ),
-        ),
-        title: Row(
-          children: [
-            Icon(Icons.person, color: WintermmuteStyles.colorOrange, size: 28),
-            const SizedBox(width: 12),
-            Text('PROFILE', style: WintermmuteStyles.titleStyle),
-          ],
-        ),
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          if (!_isEditMode)
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => setState(() => _isEditMode = true),
-            ),
-        ],
-      ),
       body: Stack(
         children: [
           // City background layer
@@ -327,7 +295,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               opacity: 0.25,
             ),
           ),
-          _isEditMode ? _buildForm() : _buildIDCard(),
+          Column(
+            children: [
+              // Header with dark background bar
+              Container(
+                color: AppColors.surface.withOpacity(0.3),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.pop(context),
+                      color: AppColors.textLight,
+                    ),
+                    Icon(Icons.person, color: WintermmuteStyles.colorOrange, size: 28),
+                    const SizedBox(width: 12),
+                    Text('PROFILE', style: WintermmuteStyles.titleStyle),
+                    const Spacer(),
+                    if (!_isEditMode)
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => setState(() => _isEditMode = true),
+                        color: AppColors.textLight,
+                      ),
+                  ],
+                ),
+              ),
+              Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
+              Expanded(
+                child: _isEditMode ? _buildForm() : _buildIDCard(),
+              ),
+            ],
+          ),
         ],
       ),
     );

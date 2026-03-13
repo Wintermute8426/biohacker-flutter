@@ -211,58 +211,51 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
           ),
           Scaffold(
             backgroundColor: Colors.transparent,
-            appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface.withOpacity(0.3),
-            border: Border(
-              bottom: BorderSide(
-                color: AppColors.primary.withOpacity(0.3),
-                width: 1,
-              ),
-            ),
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        title: Row(
-          children: [
-            Icon(Icons.analytics, color: WintermmuteStyles.colorMagenta, size: 28),
-            const SizedBox(width: 12),
-            Text(
-              'REPORTS',
-              style: WintermmuteStyles.titleStyle,
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadAllData,
-            color: AppColors.primary,
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          indicatorColor: AppColors.primary,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textMid,
-          labelStyle: WintermmuteStyles.tabLabelStyle,
-          unselectedLabelStyle: WintermmuteStyles.tabLabelStyle.copyWith(
-            color: AppColors.textMid,
-          ),
-          tabs: const [
-            Tab(text: '1'),
-            Tab(text: '2'),
-            Tab(text: '3'),
-            Tab(text: '4'),
-            Tab(text: '5'),
-            Tab(text: '6'),
-            Tab(text: '7'),
-          ],
-        ),
-      ),
-      body: ScanlinesOverlay(
+            body: Column(
+              children: [
+                // Header with dark background bar
+                Container(
+                  color: AppColors.surface.withOpacity(0.3),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Icon(Icons.analytics, color: WintermmuteStyles.colorMagenta, size: 28),
+                      const SizedBox(width: 12),
+                      Text(
+                        'REPORTS',
+                        style: WintermmuteStyles.titleStyle,
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: _loadAllData,
+                        color: AppColors.primary,
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
+                TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  indicatorColor: AppColors.primary,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.textMid,
+                  labelStyle: WintermmuteStyles.tabLabelStyle,
+                  unselectedLabelStyle: WintermmuteStyles.tabLabelStyle.copyWith(
+                    color: AppColors.textMid,
+                  ),
+                  tabs: const [
+                    Tab(text: '1'),
+                    Tab(text: '2'),
+                    Tab(text: '3'),
+                    Tab(text: '4'),
+                    Tab(text: '5'),
+                    Tab(text: '6'),
+                    Tab(text: '7'),
+                  ],
+                ),
+                Expanded(child: ScanlinesOverlay(
         child: _isLoading
             ? Center(
                 child: Column(
@@ -367,8 +360,10 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             ),
           ),
         ),
-      ),
-        ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
