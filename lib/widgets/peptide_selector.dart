@@ -163,7 +163,7 @@ class _PeptideSelectorState extends State<PeptideSelector> {
                     decoration: BoxDecoration(
                       color: isSelected ? AppColors.primary.withOpacity(0.15) : Colors.transparent,
                       border: Border(
-                        bottom: BorderSide(color: AppColors.border.withOpacity(0.3)),
+                        bottom: BorderSide(color: AppColors.border.withOpacity(0.2)),
                       ),
                     ),
                     child: Row(

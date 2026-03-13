@@ -290,8 +290,8 @@ class _EffectivenessCard extends StatelessWidget {
                       height: 6,
                       width: width.clamp(10, 180),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.3),
-                        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
+                        color: AppColors.primary.withOpacity(0.15),
+                        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),

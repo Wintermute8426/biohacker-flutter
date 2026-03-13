@@ -24,15 +24,15 @@ class WintermmuteDialog extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           border: Border.all(
-            color: AppColors.primary.withOpacity(0.4),
+            color: AppColors.primary.withOpacity(0.2),
             width: 1,
           ),
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.2),
-              blurRadius: 20,
-              spreadRadius: 2,
+              color: AppColors.primary.withOpacity(0.15),
+              blurRadius: 6,
+              spreadRadius: 0,
             ),
           ],
         ),
@@ -113,8 +113,8 @@ class WintermmuteDialog extends StatelessWidget {
           boxShadow: isPrimary
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 8,
+                    color: AppColors.primary.withOpacity(0.15),
+                    blurRadius: 6,
                     spreadRadius: 0,
                   ),
                 ]

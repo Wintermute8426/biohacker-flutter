@@ -430,7 +430,7 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
     return Container(
       height: chartHeight + 30,
       decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.5),
+        color: AppColors.surface.withOpacity(0.15),
         border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(3),
       ),

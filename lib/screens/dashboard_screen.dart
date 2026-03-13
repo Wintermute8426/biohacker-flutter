@@ -538,8 +538,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         borderRadius: BorderRadius.circular(4),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.5),
-                            blurRadius: 8,
+                            color: AppColors.primary.withOpacity(0.1),
+                            blurRadius: 6,
                           ),
                         ],
                       ),
@@ -616,8 +616,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           borderRadius: BorderRadius.circular(4),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF00FFFF).withOpacity(0.5),
-                              blurRadius: 8,
+                              color: const Color(0xFF00FFFF).withOpacity(0.15),
+                              blurRadius: 6,
                             ),
                           ],
                         ),
@@ -865,7 +865,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(
-          color: progressColor.withOpacity(0.5),
+          color: progressColor.withOpacity(0.2),
           width: 2,
         ),
         borderRadius: BorderRadius.circular(8),
@@ -911,8 +911,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     borderRadius: BorderRadius.circular(4),
                     boxShadow: [
                       BoxShadow(
-                        color: progressColor.withOpacity(0.5),
-                        blurRadius: 8,
+                        color: progressColor.withOpacity(0.15),
+                        blurRadius: 6,
                       ),
                     ],
                   ),
@@ -1035,7 +1035,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           border: Border.all(
-            color: color.withOpacity(0.5),
+            color: color.withOpacity(0.2),
             width: 2,
           ),
           borderRadius: BorderRadius.circular(8),
@@ -1049,9 +1049,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.2),
-              blurRadius: 8,
-              spreadRadius: 1,
+              color: color.withOpacity(0.15),
+              blurRadius: 6,
+              spreadRadius: 0,
             ),
           ],
         ),

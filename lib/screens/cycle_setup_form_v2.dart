@@ -453,7 +453,7 @@ class _CycleSetupFormV2State extends State<CycleSetupFormV2> {
                           width: 20,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: AppColors.accent.withOpacity(0.6),
+                            color: AppColors.accent.withOpacity(0.15),
                             border: Border.all(color: AppColors.accent, width: 1),
                             borderRadius: BorderRadius.circular(3),
                           ),
@@ -472,7 +472,7 @@ class _CycleSetupFormV2State extends State<CycleSetupFormV2> {
                               Container(
                                 width: (_concentrationMl! / 1.0) * (MediaQuery.of(context).size.width - 120),
                                 decoration: BoxDecoration(
-                                  color: AppColors.accent.withOpacity(0.5),
+                                  color: AppColors.accent.withOpacity(0.15),
                                   borderRadius: const BorderRadius.only(topRight: Radius.circular(6), bottomRight: Radius.circular(6)),
                                 ),
                               ),

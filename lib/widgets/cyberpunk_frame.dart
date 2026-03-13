@@ -115,7 +115,7 @@ class CyberpunkFrame extends StatelessWidget {
           shape: BoxShape.circle,
           gradient: RadialGradient(
             colors: [
-              effectiveFrameColor.withOpacity(0.6),
+              effectiveFrameColor.withOpacity(0.15),
               effectiveFrameColor.withOpacity(0.2),
             ],
           ),
@@ -172,9 +172,9 @@ class CyberpunkFrame extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.7), // Increased from 0.5
+            color: color.withOpacity(0.15), // Increased from 0.5
             blurRadius: 4, // Increased from 3
-            spreadRadius: 1, // Added for better glow
+            spreadRadius: 0, // Added for better glow
           ),
         ],
       ),
@@ -424,8 +424,8 @@ class _PulsingGlowState extends State<PulsingGlow> with SingleTickerProviderStat
             boxShadow: [
               BoxShadow(
                 color: effectiveColor.withOpacity(_animation.value),
-                blurRadius: 16,
-                spreadRadius: 2,
+                blurRadius: 8,
+                spreadRadius: 0,
               ),
             ],
           ),

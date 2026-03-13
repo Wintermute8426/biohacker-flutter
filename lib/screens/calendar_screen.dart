@@ -152,7 +152,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               border: Border.all(
-                color: AppColors.accent.withOpacity(0.5),
+                color: AppColors.accent.withOpacity(0.2),
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(8),
@@ -192,7 +192,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             margin: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               border: Border.all(
-                color: AppColors.primary.withOpacity(0.5),
+                color: AppColors.primary.withOpacity(0.2),
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(8),
@@ -639,7 +639,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             debugPrint('🔴   isPast=$isPast, isFuture=$isFuture, isToday=$isToday');
             if (missed > 0) {
               // Bright red for explicitly missed doses
-              cellColor = AppColors.error.withOpacity(0.5);
+              cellColor = AppColors.error.withOpacity(0.15);
               debugPrint('🔴   → Cell color: RED (missed=$missed doses)');
             } else if (isPast && dayDoses.isNotEmpty) {
               // Green for past scheduled doses (assumed taken unless missed)
@@ -872,7 +872,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             debugPrint('🔴   isPast=$isPast, isFuture=$isFuture, isToday=$isToday');
             if (missed > 0) {
               // Bright red for explicitly missed doses - more visible in month view
-              cellColor = AppColors.error.withOpacity(0.4);
+              cellColor = AppColors.error.withOpacity(0.15);
               debugPrint('🔴   → Cell color: RED (missed=$missed doses)');
             } else if (isPast && dayDoses.isNotEmpty) {
               // Green for past scheduled doses (assumed taken unless missed)

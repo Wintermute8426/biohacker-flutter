@@ -146,7 +146,7 @@ class _SideEffectsModalState extends ConsumerState<SideEffectsModal> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.accent.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.accent.withOpacity(0.2)),
                   borderRadius: BorderRadius.circular(8),
                   color: AppColors.background,
                 ),
@@ -201,7 +201,7 @@ class _SideEffectsModalState extends ConsumerState<SideEffectsModal> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withOpacity(0.2),
+                      color: AppColors.accent.withOpacity(0.15),
                       border: Border.all(color: AppColors.accent),
                       borderRadius: BorderRadius.circular(8),
                     ),

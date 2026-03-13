@@ -126,8 +126,8 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
                                 : AppColors.textDim.withOpacity(0.15),
                             border: Border.all(
                               color: widget.cycle.isActive
-                                  ? AppColors.accent.withOpacity(0.3)
-                                  : AppColors.textDim.withOpacity(0.3),
+                                  ? AppColors.accent.withOpacity(0.2)
+                                  : AppColors.textDim.withOpacity(0.2),
                             ),
                             borderRadius: BorderRadius.circular(3),
                           ),
@@ -359,7 +359,7 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
                                   ),
                                 ),
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: AppColors.primary.withOpacity(0.5)),
+                                  side: BorderSide(color: AppColors.primary.withOpacity(0.2)),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(3),
                                   ),
@@ -408,7 +408,7 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
                               ),
                             ),
                             style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: AppColors.error.withOpacity(0.5)),
+                              side: BorderSide(color: AppColors.error.withOpacity(0.2)),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(3),
                               ),
@@ -478,7 +478,7 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
             color: AppColors.primary,
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.3),
+                color: AppColors.primary.withOpacity(0.15),
                 blurRadius: 3,
               ),
             ],

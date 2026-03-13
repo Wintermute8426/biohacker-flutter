@@ -398,7 +398,7 @@ class _AboutScreenState extends State<AboutScreen> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.accent.withOpacity(0.5),
+                  color: AppColors.accent.withOpacity(0.1),
                   blurRadius: 3,
                 ),
               ],

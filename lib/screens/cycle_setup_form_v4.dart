@@ -727,7 +727,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                               height: 70,
                               width: ((_concentrationMl ?? 0) / 1.0) * (MediaQuery.of(context).size.width - 100),
                               decoration: BoxDecoration(
-                                color: AppColors.accent.withOpacity(0.4),
+                                color: AppColors.accent.withOpacity(0.15),
                                 borderRadius: const BorderRadius.only(
                                   topRight: Radius.circular(4),
                                   bottomRight: Radius.circular(4),

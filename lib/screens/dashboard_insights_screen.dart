@@ -318,8 +318,8 @@ class _DashboardInsightsScreenState extends ConsumerState<DashboardInsightsScree
       boxShadow: [
         BoxShadow(
           color: glowColor.withOpacity(0.1),
-          blurRadius: 20,
-          spreadRadius: 2,
+          blurRadius: 6,
+          spreadRadius: 0,
         ),
       ],
     );
@@ -446,12 +446,12 @@ class _DashboardInsightsScreenState extends ConsumerState<DashboardInsightsScree
   Widget _buildTimelineDay(DoseTimelineDay day) {
     final color = day.logged ? AppColors.accent : AppColors.surface;
     final borderColor = day.logged
-        ? AppColors.accent.withOpacity(0.5)
+        ? AppColors.accent.withOpacity(0.2)
         : AppColors.primary.withOpacity(0.2);
 
     return Container(
       decoration: BoxDecoration(
-        color: color.withOpacity(day.logged ? 0.3 : 1),
+        color: color.withOpacity(day.logged ? 0.15 : 1),
         border: Border.all(color: borderColor),
         borderRadius: BorderRadius.circular(2),
       ),

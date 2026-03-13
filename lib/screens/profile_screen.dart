@@ -421,9 +421,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withOpacity(0.5),
-                                blurRadius: 16,
-                                spreadRadius: 3,
+                                color: AppColors.primary.withOpacity(0.1),
+                                blurRadius: 4,
+                                spreadRadius: 0,
                               ),
                             ],
                           ),
@@ -452,9 +452,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.accent.withOpacity(0.5),
-                                    blurRadius: 8,
-                                    spreadRadius: 1,
+                                    color: AppColors.accent.withOpacity(0.1),
+                                    blurRadius: 6,
+                                    spreadRadius: 0,
                                   ),
                                 ],
                               ),
@@ -599,9 +599,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.accent,
+                                  color: AppColors.accent.withOpacity(0.1),
                                   blurRadius: 4,
-                                  spreadRadius: 1,
+                                  spreadRadius: 0,
                                 ),
                               ],
                             ),

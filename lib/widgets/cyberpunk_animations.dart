@@ -425,7 +425,7 @@ class _StatusIndicatorsState extends State<StatusIndicators>
                     BoxShadow(
                       color: color.withOpacity(opacity * 0.5),
                       blurRadius: 4,
-                      spreadRadius: 1,
+                      spreadRadius: 0,
                     ),
                   ],
                 ),
