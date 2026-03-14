@@ -774,15 +774,15 @@ class _ResearchScreenState extends State<ResearchScreen> {
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-          // Header using reusable widget
-          AppHeader(
+                // Header using reusable widget
+                AppHeader(
             icon: Icons.biotech,
             iconColor: WintermmuteStyles.colorOrange,
             title: 'RESEARCH',
-          ),
-          const SizedBox(height: 12),
-          // Tabs
-          Padding(
+                ),
+                const SizedBox(height: 12),
+                // Tabs
+                Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -798,11 +798,11 @@ class _ResearchScreenState extends State<ResearchScreen> {
                 ),
               ],
             ),
-          ),
+                ),
 
-          if (_tabIndex == 0) ...[
-            // Search bar
-            Padding(
+                if (_tabIndex == 0) ...[
+                  // Search bar
+                  Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
                 controller: _searchController,
@@ -818,11 +818,11 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
+                  ),
+                  const SizedBox(height: 12),
 
-            // Category filter
-            Padding(
+                  // Category filter
+                  Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -833,12 +833,12 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
+                  ),
+                  const SizedBox(height: 16),
 
-            // Peptide list
-            Expanded(
-              child: _displayedPeptides.isEmpty
+                  // Peptide list
+                  Expanded(
+                    child: _displayedPeptides.isEmpty
                   ? Center(
                       child: Text(
                         'No peptides found',
@@ -939,14 +939,14 @@ class _ResearchScreenState extends State<ResearchScreen> {
                           ),
                         );
                       },
-                    ),
-            ),
-          ] else if (_tabIndex == 1) ...[
-            Expanded(child: _buildQualityGuide()),
-          ] else if (_tabIndex == 2) ...[
-            Expanded(child: _buildPepScoreMethodology()),
-          ],
-            ],
+                      ),
+                  ),
+                ] else if (_tabIndex == 1) ...[
+                  Expanded(child: _buildQualityGuide()),
+                ] else if (_tabIndex == 2) ...[
+                  Expanded(child: _buildPepScoreMethodology()),
+                ],
+              ],
             ),
           ),
           Positioned.fill(

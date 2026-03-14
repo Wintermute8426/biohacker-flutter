@@ -1094,8 +1094,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-          // Header using reusable widget
-          AppHeader(
+                // Header using reusable widget
+                AppHeader(
             icon: Icons.autorenew,
             iconColor: WintermmuteStyles.colorGreen,
             title: 'CYCLES',
@@ -1134,10 +1134,10 @@ class _CyclesScreenState extends State<CyclesScreen> {
                 ),
               ],
             ),
-          ),
+                ),
 
-          Expanded(
-            child: _isLoading
+                Expanded(
+                  child: _isLoading
                 ? Center(
                     child: CircularProgressIndicator(
                       color: AppColors.primary,
@@ -1206,8 +1206,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           */
                         },
                       ),
-              ),
-            ],
+                ),
+              ],
             ),
           ),
           Positioned.fill(

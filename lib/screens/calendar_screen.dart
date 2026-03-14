@@ -137,11 +137,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           ),
           // Main scaffold content
           Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Column(
-        children: [
-          // Header using reusable widget
-          AppHeader(
+            backgroundColor: Colors.transparent,
+            body: Column(
+              children: [
+                // Header using reusable widget
+                AppHeader(
             icon: Icons.calendar_month,
             iconColor: WintermmuteStyles.colorCyan,
             title: 'DOSE CALENDAR',
@@ -222,8 +222,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               ],
             ),
           ),
-          Expanded(
-            child: upcomingDoses.when(
+                Expanded(
+                  child: upcomingDoses.when(
               data: (doses) {
           // ISSUE 1 FIX: Log dose data to verify missed status is reflected
           print('[Calendar] ISSUE 1 DEBUG: Got ${doses.length} doses from provider');
@@ -341,10 +341,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             ),
           ),
         ),
-      ),
-          ),
-        ],
-      ),
+                ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
