@@ -800,6 +800,12 @@ class _ResearchScreenState extends State<ResearchScreen> {
             ),
                 ),
 
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                 if (_tabIndex == 0) ...[
                   // Search bar
                   Padding(
@@ -946,14 +952,20 @@ class _ResearchScreenState extends State<ResearchScreen> {
                 ] else if (_tabIndex == 2) ...[
                   Expanded(child: _buildPepScoreMethodology()),
                 ],
+                        ],
+                      ),
+                      // Scanlines overlay
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: CustomPaint(
+                            painter: _ScanlinesPainter(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
-            ),
-          ),
-          Positioned.fill(
-            child: IgnorePointer(
-              child: CustomPaint(
-                painter: _ScanlinesPainter(),
-              ),
             ),
           ),
         ],

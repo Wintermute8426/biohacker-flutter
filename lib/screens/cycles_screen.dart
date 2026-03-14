@@ -1137,7 +1137,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
                 ),
 
                 Expanded(
-                  child: _isLoading
+                  child: Stack(
+                    children: [
+                      _isLoading
                 ? Center(
                     child: CircularProgressIndicator(
                       color: AppColors.primary,
@@ -1206,15 +1208,18 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           */
                         },
                       ),
+                      // Scanlines overlay
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: CustomPaint(
+                            painter: _ScanlinesPainter(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
-          ),
-          Positioned.fill(
-            child: IgnorePointer(
-              child: CustomPaint(
-                painter: _ScanlinesPainter(),
-              ),
             ),
           ),
         ],

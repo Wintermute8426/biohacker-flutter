@@ -223,7 +223,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             ),
           ),
                 Expanded(
-                  child: upcomingDoses.when(
+                  child: Stack(
+                    children: [
+                      upcomingDoses.when(
               data: (doses) {
           // ISSUE 1 FIX: Log dose data to verify missed status is reflected
           print('[Calendar] ISSUE 1 DEBUG: Got ${doses.length} doses from provider');
@@ -341,7 +343,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             ),
           ),
         ),
-                ),
+                      ),
+                      // Scanlines overlay
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: CustomPaint(
+                            painter: _ScanlinesPainter(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -1317,4 +1329,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
       },
     );
   }
+}
+
+class _ScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.07)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

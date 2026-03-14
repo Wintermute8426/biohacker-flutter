@@ -281,58 +281,68 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
           Scaffold(
             backgroundColor: Colors.transparent,
-            body: _isLoading
-              ? Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadData,
-                  color: AppColors.primary,
-                  backgroundColor: AppColors.surface,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header using reusable widget
-                        AppHeader(
-                          icon: Icons.dashboard,
-                          iconColor: WintermmuteStyles.colorCyan,
-                          title: 'DAILY ACTIONS',
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                        const SizedBox(height: 20),
+            body: Column(
+              children: [
+                // Header using reusable widget
+                AppHeader(
+                  icon: Icons.dashboard,
+                  iconColor: WintermmuteStyles.colorCyan,
+                  title: 'DAILY ACTIONS',
+                ),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      _isLoading
+                          ? Center(
+                              child: CircularProgressIndicator(color: AppColors.primary),
+                            )
+                          : RefreshIndicator(
+                              onRefresh: _loadData,
+                              color: AppColors.primary,
+                              backgroundColor: AppColors.surface,
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.all(0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(height: 20),
 
-                        // TODAY'S DOSES SECTION
-                        _buildTodaysDosesSection(),
-                        const SizedBox(height: 32),
+                                          // TODAY'S DOSES SECTION
+                                          _buildTodaysDosesSection(),
+                                          const SizedBox(height: 32),
 
-                        // CYCLE PROGRESS SECTION
-                        _buildCycleProgressSection(),
-                        const SizedBox(height: 32),
+                                          // CYCLE PROGRESS SECTION
+                                          _buildCycleProgressSection(),
+                                          const SizedBox(height: 32),
 
-                        // QUICK ACTIONS SECTION
-                        _buildQuickActionsSection(),
-                        const SizedBox(height: 32),
-                            ],
+                                          // QUICK ACTIONS SECTION
+                                          _buildQuickActionsSection(),
+                                          const SizedBox(height: 32),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                      // Scanlines overlay
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: CustomPaint(
+                            painter: _ScanlinesPainter(),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-          ),
-          // Scanlines overlay
-          Positioned.fill(
-            child: IgnorePointer(
-              child: CustomPaint(
-                painter: _ScanlinesPainter(),
-              ),
+              ],
             ),
           ),
         ],

@@ -744,7 +744,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               ),
               // Content
               Expanded(
-                child: SingleChildScrollView(
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -792,17 +794,20 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         ),
                     ],
                   ),
+                    ),
+                    // Scanlines overlay
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: CustomPaint(
+                          painter: _ScanlinesPainter(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          ),
-          Positioned.fill(
-            child: IgnorePointer(
-              child: CustomPaint(
-                painter: _ScanlinesPainter(),
-              ),
-            ),
           ),
         ],
       ),
