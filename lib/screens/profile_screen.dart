@@ -293,34 +293,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               opacity: 0.25,
             ),
           ),
-          Column(
-            children: [
-              // Header using reusable widget
-              AppHeader(
-                icon: Icons.person,
-                iconColor: WintermmuteStyles.colorOrange,
-                title: 'PROFILE',
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.pop(context),
-                      color: AppColors.textLight,
-                    ),
-                    if (!_isEditMode)
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Column(
+              children: [
+                // Header using reusable widget
+                AppHeader(
+                  icon: Icons.person,
+                  iconColor: WintermmuteStyles.colorOrange,
+                  title: 'PROFILE',
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => setState(() => _isEditMode = true),
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () => Navigator.pop(context),
                         color: AppColors.textLight,
                       ),
-                  ],
+                      if (!_isEditMode)
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () => setState(() => _isEditMode = true),
+                          color: AppColors.textLight,
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: _isEditMode ? _buildForm() : _buildIDCard(),
-              ),
-            ],
+                Expanded(
+                  child: _isEditMode ? _buildForm() : _buildIDCard(),
+                ),
+              ],
+            ),
           ),
         ],
       ),
