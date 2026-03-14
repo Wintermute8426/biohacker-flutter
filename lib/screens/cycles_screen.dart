@@ -1092,8 +1092,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
           Scaffold(
             backgroundColor: Colors.transparent,
             body: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
           // Header using reusable widget
           AppHeader(
             icon: Icons.autorenew,
@@ -1126,15 +1126,13 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   icon: const Icon(Icons.add),
                   label: const Text('NEW'),
                   style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
 
@@ -1208,9 +1206,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           */
                         },
                       ),
-          ),
+              ),
             ],
-          ),
+            ),
           ),
           Positioned.fill(
             child: IgnorePointer(
