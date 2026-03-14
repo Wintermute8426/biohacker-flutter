@@ -13,6 +13,7 @@ import '../services/bloodwork_service.dart';
 import '../services/android_file_picker.dart';
 import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
+import '../widgets/app_header.dart';
 
 class LabsScreen extends StatefulWidget {
   const LabsScreen({Key? key}) : super(key: key);
@@ -275,22 +276,12 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
             backgroundColor: Colors.transparent,
             body: Column(
               children: [
-                // Header with dark background bar
-                Container(
-                  color: AppColors.surface.withOpacity(0.3),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Icon(Icons.science, color: WintermmuteStyles.colorOrange, size: 28),
-                      const SizedBox(width: 12),
-                      Text(
-                        'LABS',
-                        style: WintermmuteStyles.titleStyle,
-                      ),
-                    ],
-                  ),
+                // Header using reusable widget
+                AppHeader(
+                  icon: Icons.science,
+                  iconColor: WintermmuteStyles.colorOrange,
+                  title: 'LABS',
                 ),
-                Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
                 TabBar(
                   controller: _tabController,
                   isScrollable: true,

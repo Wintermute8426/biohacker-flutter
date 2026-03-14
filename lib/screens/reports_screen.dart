@@ -8,6 +8,7 @@ import '../theme/wintermute_styles.dart';
 import '../theme/wintermute_background.dart';
 import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
+import '../widgets/app_header.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -213,28 +214,17 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
             backgroundColor: Colors.transparent,
             body: Column(
               children: [
-                // Header with dark background bar
-                Container(
-                  color: AppColors.surface.withOpacity(0.3),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Icon(Icons.analytics, color: WintermmuteStyles.colorMagenta, size: 28),
-                      const SizedBox(width: 12),
-                      Text(
-                        'REPORTS',
-                        style: WintermmuteStyles.titleStyle,
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.refresh),
-                        onPressed: _loadAllData,
-                        color: AppColors.primary,
-                      ),
-                    ],
+                // Header using reusable widget
+                AppHeader(
+                  icon: Icons.analytics,
+                  iconColor: WintermmuteStyles.colorMagenta,
+                  title: 'REPORTS',
+                  trailing: IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _loadAllData,
+                    color: AppColors.primary,
                   ),
                 ),
-                Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
                 TabBar(
                   controller: _tabController,
                   isScrollable: true,

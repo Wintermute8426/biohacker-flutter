@@ -10,6 +10,7 @@ import '../services/labs_database.dart';
 import '../widgets/side_effects_modal.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
+import '../widgets/app_header.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -139,19 +140,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
       backgroundColor: Colors.transparent,
       body: Column(
         children: [
-          // Header with dark background bar
-          Container(
-            color: AppColors.surface.withOpacity(0.3),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
+          // Header using reusable widget
+          AppHeader(
+            icon: Icons.calendar_month,
+            iconColor: WintermmuteStyles.colorCyan,
+            title: 'DOSE CALENDAR',
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.calendar_month, color: WintermmuteStyles.colorCyan, size: 28),
-                const SizedBox(width: 12),
-                Text(
-                  'DOSE CALENDAR',
-                  style: WintermmuteStyles.titleStyle,
-                ),
-                const Spacer(),
                 // View toggle button - switches between week and month view
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -226,7 +222,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               ],
             ),
           ),
-          Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
           Expanded(
             child: upcomingDoses.when(
               data: (doses) {

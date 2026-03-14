@@ -20,6 +20,7 @@ import '../widgets/cyberpunk_frame.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/expandable_cycle_card.dart';
+import '../widgets/app_header.dart';
 
 class CyclesScreen extends StatefulWidget {
   const CyclesScreen({Key? key}) : super(key: key);
@@ -1093,50 +1094,38 @@ class _CyclesScreenState extends State<CyclesScreen> {
             body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-          // Header with dark background bar
-          Container(
-            color: AppColors.surface.withOpacity(0.3),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Header using reusable widget
+          AppHeader(
+            icon: Icons.autorenew,
+            iconColor: WintermmuteStyles.colorGreen,
+            title: 'CYCLES',
+            trailing: Row(
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.autorenew, color: WintermmuteStyles.colorGreen, size: 28),
-                    const SizedBox(width: 12),
-                    Text(
-                      'CYCLES',
-                      style: WintermmuteStyles.titleStyle,
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProtocolsScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.bookmark),
-                      label: const Text('PROTOCOLS'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: BorderSide(color: AppColors.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProtocolsScreen(),
                       ),
+                    );
+                  },
+                  icon: const Icon(Icons.bookmark),
+                  label: const Text('PROTOCOLS'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton.icon(
-                      onPressed: _showNewUnifiedCycleSetup,
-                      icon: const Icon(Icons.add),
-                      label: const Text('NEW'),
-                      style: ElevatedButton.styleFrom(
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  onPressed: _showNewUnifiedCycleSetup,
+                  icon: const Icon(Icons.add),
+                  label: const Text('NEW'),
+                  style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
@@ -1145,10 +1134,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-          Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
 
           Expanded(
             child: _isLoading

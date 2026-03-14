@@ -7,6 +7,7 @@ import '../data/peptides.dart';
 import '../widgets/scanline_overlay.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
+import '../widgets/app_header.dart';
 
 class ProtocolsScreen extends StatefulWidget {
   const ProtocolsScreen({Key? key}) : super(key: key);
@@ -723,39 +724,24 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             backgroundColor: Colors.transparent,
             body: Column(
             children: [
-              // Header with dark background bar
-              Container(
-                color: AppColors.surface.withOpacity(0.3),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.list_alt, color: WintermmuteStyles.colorGreen, size: 28),
-                        const SizedBox(width: 12),
-                        Text(
-                          'PROTOCOLS',
-                          style: WintermmuteStyles.titleStyle,
-                        ),
-                      ],
-                    ),
-                    ElevatedButton(
-                      onPressed: _showCreateProtocolModal,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accent,
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-                      ),
-                      child: Text(
-                        'NEW',
-                        style: TextStyle(color: AppColors.background, fontSize: 11, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
+              // Header using reusable widget
+              AppHeader(
+                icon: Icons.list_alt,
+                iconColor: WintermmuteStyles.colorGreen,
+                title: 'PROTOCOLS',
+                trailing: ElevatedButton(
+                  onPressed: _showCreateProtocolModal,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+                  ),
+                  child: Text(
+                    'NEW',
+                    style: TextStyle(color: AppColors.background, fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
-              Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
               // Content
               Expanded(
                 child: SingleChildScrollView(

@@ -4,6 +4,7 @@ import '../theme/wintermute_styles.dart';
 import '../data/peptide_library.dart';
 import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
+import '../widgets/app_header.dart';
 
 class ResearchScreen extends StatefulWidget {
   const ResearchScreen({Key? key}) : super(key: key);
@@ -773,22 +774,12 @@ class _ResearchScreenState extends State<ResearchScreen> {
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-          // Header with dark background bar
-          Container(
-            color: AppColors.surface.withOpacity(0.3),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Icon(Icons.biotech, color: WintermmuteStyles.colorOrange, size: 28),
-                const SizedBox(width: 12),
-                Text(
-                  'RESEARCH',
-                  style: WintermmuteStyles.titleStyle,
-                ),
-              ],
-            ),
+          // Header using reusable widget
+          AppHeader(
+            icon: Icons.biotech,
+            iconColor: WintermmuteStyles.colorOrange,
+            title: 'RESEARCH',
           ),
-          Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
           const SizedBox(height: 12),
           // Tabs
           Padding(

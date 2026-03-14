@@ -13,6 +13,7 @@ import '../widgets/weight_log_modal.dart';
 import '../widgets/cyberpunk_frame.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
+import '../widgets/app_header.dart';
 import 'labs_screen.dart';
 import 'research_screen.dart';
 import '../main.dart' show authProviderProvider;
@@ -294,22 +295,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header with dark background bar
-                        Container(
-                          color: AppColors.surface.withOpacity(0.3),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          child: Row(
-                            children: [
-                              Icon(Icons.dashboard, color: WintermmuteStyles.colorCyan, size: 28),
-                              const SizedBox(width: 12),
-                              Text(
-                                'DAILY ACTIONS',
-                                style: WintermmuteStyles.titleStyle,
-                              ),
-                            ],
-                          ),
+                        // Header using reusable widget
+                        AppHeader(
+                          icon: Icons.dashboard,
+                          iconColor: WintermmuteStyles.colorCyan,
+                          title: 'DAILY ACTIONS',
                         ),
-                        Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Column(

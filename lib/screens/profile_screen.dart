@@ -9,6 +9,7 @@ import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
+import '../widgets/app_header.dart';
 import '../main.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -294,21 +295,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           Column(
             children: [
-              // Header with dark background bar
-              Container(
-                color: AppColors.surface.withOpacity(0.3),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
+              // Header using reusable widget
+              AppHeader(
+                icon: Icons.person,
+                iconColor: WintermmuteStyles.colorOrange,
+                title: 'PROFILE',
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () => Navigator.pop(context),
                       color: AppColors.textLight,
                     ),
-                    Icon(Icons.person, color: WintermmuteStyles.colorOrange, size: 28),
-                    const SizedBox(width: 12),
-                    Text('PROFILE', style: WintermmuteStyles.titleStyle),
-                    const Spacer(),
                     if (!_isEditMode)
                       IconButton(
                         icon: const Icon(Icons.edit),
@@ -318,7 +317,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ],
                 ),
               ),
-              Divider(color: AppColors.primary.withOpacity(0.3), thickness: 1, height: 1),
               Expanded(
                 child: _isEditMode ? _buildForm() : _buildIDCard(),
               ),
