@@ -22,7 +22,10 @@ jobs:
       
       - name: Verify Flutter installation
         run: flutter --version && flutter doctor -v
-      
+
+      - name: Flutter clean
+        run: flutter clean
+
       - name: Nuke cache completely
         run: |
           rm -rf ~/.pub-cache
