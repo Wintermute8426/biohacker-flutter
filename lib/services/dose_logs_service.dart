@@ -83,23 +83,25 @@ class DoseLogsService {
     DateTime? endDate,
   }) async {
     try {
-      print('[DEBUG SERVICE] Generating doses from schedule for $peptideName');
-      
+      if (kDebugMode) {
+        print('[DoseLogsService] Generating doses from schedule for $peptideName');
+      }
+
       final generatedDoses = <DoseLog>[];
       final end = endDate ?? startDate.add(const Duration(days: 365));
-      
+
       // Generate dose_logs for each scheduled day
       for (DateTime date = startDate; date.isBefore(end); date = date.add(const Duration(days: 1))) {
         final dayOfWeek = date.weekday % 7; // 0 = Sunday
-        
+
         if (daysOfWeek.contains(dayOfWeek)) {
           // Parse time (HH:MM format)
           final timeParts = scheduledTime.split(':');
           final hour = int.parse(timeParts[0]);
           final minute = int.parse(timeParts[1]);
-          
+
           final loggedAt = DateTime(date.year, date.month, date.day, hour, minute);
-          
+
           // Create dose_logs entry with SCHEDULED status
           final data = {
             'user_id': userId,
@@ -107,21 +109,24 @@ class DoseLogsService {
             'dose_amount': doseAmount,
             'logged_at': loggedAt.toIso8601String(),
           };
-          
+
           if (scheduleId.isNotEmpty) data['schedule_id'] = scheduleId;
-          
+
           final response = await _supabase.from('dose_logs').insert(data).select().single();
           generatedDoses.add(DoseLog.fromJson(response as Map<String, dynamic>));
-          
-          print('[DEBUG SERVICE] Generated dose for ${date.toIso8601String()}');
         }
       }
-      
-      print('[DEBUG SERVICE] Generated ${generatedDoses.length} dose logs');
+
+      if (kDebugMode) {
+        print('[DoseLogsService] Generated ${generatedDoses.length} dose logs');
+      }
       return generatedDoses;
-    } catch (e) {
-      print('[ERROR SERVICE] Failed to generate doses: $e');
-      return [];
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[DoseLogsService] Failed to generate doses: $e');
+        print('[DoseLogsService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
@@ -138,9 +143,12 @@ class DoseLogsService {
       return (response as List)
           .map((item) => DoseLog.fromJson(item as Map<String, dynamic>))
           .toList();
-    } catch (e) {
-      print('[ERROR] Failed to fetch dose logs: $e');
-      return [];
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[DoseLogsService] Failed to fetch dose logs: $e');
+        print('[DoseLogsService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
@@ -161,9 +169,12 @@ class DoseLogsService {
       return (response as List)
           .map((item) => DoseLog.fromJson(item as Map<String, dynamic>))
           .toList();
-    } catch (e) {
-      print('[ERROR] Failed to fetch dose logs for date: $e');
-      return [];
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[DoseLogsService] Failed to fetch dose logs for date: $e');
+        print('[DoseLogsService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
@@ -226,9 +237,12 @@ class DoseLogsService {
           .update({'status': 'COMPLETED'})
           .eq('id', doseLogId);
       return true;
-    } catch (e) {
-      print('[ERROR] Failed to mark dose as completed: $e');
-      return false;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[DoseLogsService] Failed to mark dose as completed: $e');
+        print('[DoseLogsService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
@@ -240,9 +254,12 @@ class DoseLogsService {
           .update({'symptoms': symptoms})
           .eq('id', doseLogId);
       return true;
-    } catch (e) {
-      print('[ERROR] Failed to add symptoms: $e');
-      return false;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[DoseLogsService] Failed to add symptoms: $e');
+        print('[DoseLogsService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
@@ -251,9 +268,12 @@ class DoseLogsService {
     try {
       await _supabase.from('dose_logs').delete().eq('id', logId);
       return true;
-    } catch (e) {
-      print('[ERROR] Failed to delete dose log: $e');
-      return false;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[DoseLogsService] Failed to delete dose log: $e');
+        print('[DoseLogsService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 }

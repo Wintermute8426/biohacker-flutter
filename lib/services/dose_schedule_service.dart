@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dose_logs_service.dart' show currentUserIdProvider;
@@ -112,7 +113,9 @@ class DoseScheduleService {
           .map((item) => DoseSchedule.fromJson(item))
           .toList();
     } catch (e) {
-      print('Error fetching dose schedules: $e');
+      if (kDebugMode) {
+        print('[DoseScheduleService] Error fetching dose schedules: $e');
+      }
       return [];
     }
   }
@@ -131,11 +134,10 @@ class DoseScheduleService {
     String? notes,
   }) async {
     try {
-      print('[DEBUG SERVICE] Creating schedule for $peptideName');
-      print('[DEBUG SERVICE] User: $userId, Cycle: $cycleId');
-      print('[DEBUG SERVICE] Dose: ${doseAmount}mg, Route: $route, Time: $scheduledTime');
-      print('[DEBUG SERVICE] Days: $daysOfWeek, Start: ${startDate.toString()}');
-      
+      if (kDebugMode) {
+        print('[DoseScheduleService] Creating schedule for $peptideName');
+      }
+
       final data = {
         'user_id': userId,
         'cycle_id': cycleId,
@@ -149,23 +151,25 @@ class DoseScheduleService {
         'is_active': true,
         'notes': notes,
       };
-      
-      print('[DEBUG SERVICE] Insert data: $data');
-      
+
       final response = await _supabase
           .from('dose_schedules')
           .insert(data)
           .select()
           .single();
 
-      print('[DEBUG SERVICE] Insert successful, response: $response');
+      if (kDebugMode) {
+        print('[DoseScheduleService] Schedule created successfully');
+      }
       return DoseSchedule.fromJson(response);
     } catch (e, stackTrace) {
       final errorMsg = 'Supabase Error: ${e.toString()}';
-      print('[ERROR SERVICE] Error creating dose schedule: $errorMsg');
-      print('[ERROR SERVICE] Exception type: ${e.runtimeType}');
-      print('[ERROR SERVICE] Stack trace: $stackTrace');
-      
+      print('[DoseScheduleService] Error creating dose schedule: $errorMsg');
+      if (kDebugMode) {
+        print('[DoseScheduleService] Exception type: ${e.runtimeType}');
+        print('[DoseScheduleService] Stack trace: $stackTrace');
+      }
+
       // Throw the error so caller can see it
       throw Exception(errorMsg);
     }
@@ -185,13 +189,6 @@ class DoseScheduleService {
       final startDate = now.subtract(Duration(days: 30));
       final endDate = now.add(Duration(days: daysAhead));
 
-      // ISSUE 1 DEBUG: Log the query parameters
-      print('[ISSUE1 DEBUG] ========================================');
-      print('[ISSUE1 DEBUG] QUERY PARAMETERS:');
-      print('[ISSUE1 DEBUG]   user_id: $userId');
-      print('[ISSUE1 DEBUG]   startDate: ${startDate.toIso8601String()}');
-      print('[ISSUE1 DEBUG]   endDate: ${endDate.toIso8601String()}');
-
       final doseLogs = await _supabase
           .from('dose_logs')
           .select()
@@ -199,42 +196,15 @@ class DoseScheduleService {
           .gte('logged_at', startDate.toIso8601String())
           .lte('logged_at', endDate.toIso8601String());
 
-      print('[ISSUE1 DEBUG] QUERY RESULTS:');
-      print('[ISSUE1 DEBUG]   Fetched ${(doseLogs as List).length} total dose_logs');
-
       // Create a map of dose_logs by cycle_id + logged_at date for quick lookup
       final doseLogMap = <String, Map<String, dynamic>>{};
-      int missedCount = 0;
-      int scheduledCount = 0;
-      int completedCount = 0;
 
       for (final log in doseLogs as List) {
         final cycleId = log['cycle_id'] as String? ?? '';
-        final doseAmount = log['dose_amount'] as num? ?? 0;
-        final status = log['status'] as String? ?? 'SCHEDULED';
         final loggedAt = DateTime.parse(log['logged_at'] as String);
         final logDateKey = '${cycleId}_${loggedAt.year}-${loggedAt.month.toString().padLeft(2, '0')}-${loggedAt.day.toString().padLeft(2, '0')}';
-
-        // Count statuses
-        if (status == 'MISSED') missedCount++;
-        if (status == 'SCHEDULED') scheduledCount++;
-        if (status == 'COMPLETED') completedCount++;
-
-        print('[ISSUE1 DEBUG]   Log: $logDateKey');
-        print('[ISSUE1 DEBUG]     - amount: ${doseAmount}mg');
-        print('[ISSUE1 DEBUG]     - status: $status');
-        print('[ISSUE1 DEBUG]     - logged_at: ${loggedAt.toIso8601String()}');
-        print('[ISSUE1 DEBUG]     - cycle_id: $cycleId');
-
         doseLogMap[logDateKey] = log as Map<String, dynamic>;
       }
-
-      print('[ISSUE1 DEBUG] STATUS SUMMARY:');
-      print('[ISSUE1 DEBUG]   MISSED: $missedCount');
-      print('[ISSUE1 DEBUG]   SCHEDULED: $scheduledCount');
-      print('[ISSUE1 DEBUG]   COMPLETED: $completedCount');
-      print('[ISSUE1 DEBUG] Built doseLogMap with ${doseLogMap.length} entries');
-      print('[ISSUE1 DEBUG] ========================================');
 
       for (final schedule in schedules) {
         // Generate dose instances for past 30 days + next 30 days (60 days total)
@@ -263,16 +233,6 @@ class DoseScheduleService {
             // Use dose_log's dose_amount if available (varies by phase), otherwise use schedule default
             final doseAmount = (doseLog?['dose_amount'] as num?)?.toDouble() ?? schedule.doseAmount;
 
-            // ISSUE 1 DEBUG: Log the lookup process
-            print('[ISSUE1 DEBUG] Generating instance for date: ${date.year}-${date.month}-${date.day}');
-            print('[ISSUE1 DEBUG]   Lookup key: $logDateKey');
-            print('[ISSUE1 DEBUG]   Found in map: ${doseLog != null}');
-            if (doseLog != null) {
-              print('[ISSUE1 DEBUG]   ✓ Dose found: ${doseAmount}mg, status=$status, id=$doseLogId');
-            } else {
-              print('[ISSUE1 DEBUG]   ✗ No dose_log, defaulting to SCHEDULED with ${schedule.doseAmount}mg');
-            }
-
             instances.add(DoseInstance(
               date: date,
               time: schedule.scheduledTime,
@@ -299,7 +259,9 @@ class DoseScheduleService {
 
       return instances;
     } catch (e) {
-      print('Error getting upcoming doses: $e');
+      if (kDebugMode) {
+        print('[DoseScheduleService] Error getting upcoming doses: $e');
+      }
       return [];
     }
   }
@@ -317,8 +279,6 @@ class DoseScheduleService {
       final start = weekStart ?? _getWeekStart(DateTime.now());
       final end = start.add(const Duration(days: 7));
 
-      print('[SERVICE] Fetching week doses: ${start.toString().split(' ')[0]} to ${end.toString().split(' ')[0]}');
-
       // Fetch dose_logs for the week (indexed query, should be <100ms)
       var query = _supabase
           .from('dose_logs')
@@ -332,8 +292,6 @@ class DoseScheduleService {
       }
 
       final doseLogs = await query.order('logged_at', ascending: true);
-
-      print('[SERVICE] Fetched ${(doseLogs as List).length} dose_logs for week');
 
       // Build map for quick lookup
       final doseLogMap = <String, Map<String, dynamic>>{};
@@ -395,7 +353,9 @@ class DoseScheduleService {
 
       return instances;
     } catch (e) {
-      print('[SERVICE ERROR] Error getting week doses: $e');
+      if (kDebugMode) {
+        print('[DoseScheduleService] Error getting week doses: $e');
+      }
       return [];
     }
   }
@@ -431,7 +391,9 @@ class DoseScheduleService {
 
       return DoseSchedule.fromJson(response);
     } catch (e) {
-      print('Error updating dose schedule: $e');
+      if (kDebugMode) {
+        print('[DoseScheduleService] Error updating dose schedule: $e');
+      }
       return null;
     }
   }
@@ -441,10 +403,14 @@ class DoseScheduleService {
     try {
       // For now, just log it with a skip flag
       // In the future, add a dose_skips table
-      print('Skipped dose for $scheduleId on $date');
+      if (kDebugMode) {
+        print('[DoseScheduleService] Skipped dose for $scheduleId on $date');
+      }
       return true;
     } catch (e) {
-      print('Error skipping dose: $e');
+      if (kDebugMode) {
+        print('[DoseScheduleService] Error skipping dose: $e');
+      }
       return false;
     }
   }

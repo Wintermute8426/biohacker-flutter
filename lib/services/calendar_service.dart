@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CalendarEvent {
@@ -349,17 +350,28 @@ class CalendarService {
       }
 
       return events;
-    } catch (e) {
-      print('Error fetching calendar events: $e');
-      return {};
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[CalendarService] Error fetching calendar events: $e');
+        print('[CalendarService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
   // Get week events for a specific week (7 days starting from date)
   Future<Map<DateTime, CalendarEvent>> getWeekEvents(DateTime startDate) async {
-    final endDate = startDate.add(const Duration(days: 6));
-    
-    // Use the same logic as getMonthEvents but for a week
-    return getMonthEvents(startDate.year, startDate.month);
+    try {
+      final endDate = startDate.add(const Duration(days: 6));
+
+      // Use the same logic as getMonthEvents but for a week
+      return getMonthEvents(startDate.year, startDate.month);
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[CalendarService] Error fetching week events: $e');
+        print('[CalendarService] Stack trace: $stackTrace');
+      }
+      rethrow;
+    }
   }
 }

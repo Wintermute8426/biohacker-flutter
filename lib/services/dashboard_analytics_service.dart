@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:math';
@@ -98,12 +99,16 @@ class DashboardAnalyticsService {
       // Check for cached snapshot (not expired)
       final cached = await _getCachedSnapshot(userId);
       if (cached != null) {
-        print('[Dashboard] Using cached data');
+        if (kDebugMode) {
+          print('[DashboardAnalyticsService] Using cached data');
+        }
         return cached;
       }
 
       // Generate fresh data
-      print('[Dashboard] Generating fresh data');
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Generating fresh data');
+      }
       final data = await _generateDashboardData(userId);
 
       // Cache it
@@ -111,7 +116,7 @@ class DashboardAnalyticsService {
 
       return data;
     } catch (e) {
-      print('[Dashboard] Error: $e');
+      print('[DashboardAnalyticsService] Error: $e');
       rethrow;
     }
   }
@@ -132,7 +137,9 @@ class DashboardAnalyticsService {
 
       return _parseCachedSnapshot(response);
     } catch (e) {
-      print('[Dashboard] Cache lookup failed: $e');
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Cache lookup failed: $e');
+      }
       return null;
     }
   }
@@ -238,7 +245,9 @@ class DashboardAnalyticsService {
         percentage: percentage,
       );
     } catch (e) {
-      print('[Dashboard] Compliance calculation failed: $e');
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Compliance calculation failed: $e');
+      }
       return ComplianceData(dosesLogged: 0, dosesScheduled: 0, percentage: 0);
     }
   }
@@ -297,7 +306,9 @@ class DashboardAnalyticsService {
         cyclesUsed: 1,
       );
     } catch (e) {
-      print('[Dashboard] Top peptide calculation failed: $e');
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Top peptide calculation failed: $e');
+      }
       return null;
     }
   }
@@ -360,7 +371,9 @@ class DashboardAnalyticsService {
 
       return timeline;
     } catch (e) {
-      print('[Dashboard] Timeline build failed: $e');
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Timeline build failed: $e');
+      }
       return [];
     }
   }
@@ -406,7 +419,9 @@ class DashboardAnalyticsService {
 
       return heatmap;
     } catch (e) {
-      print('[Dashboard] Side effects heatmap failed: $e');
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Side effects heatmap failed: $e');
+      }
       return {};
     }
   }
@@ -466,7 +481,9 @@ class DashboardAnalyticsService {
 
       return correlations.take(3).toList();
     } catch (e) {
-      print('[Dashboard] Lab correlations failed: $e');
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Lab correlations failed: $e');
+      }
       return [];
     }
   }
@@ -539,7 +556,9 @@ class DashboardAnalyticsService {
         leastCostEffectivePeptide: null,
       );
     } catch (e) {
-      print('[Dashboard] Cost efficiency calculation failed: $e');
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Cost efficiency calculation failed: $e');
+      }
       return null;
     }
   }
@@ -581,7 +600,9 @@ class DashboardAnalyticsService {
         'expires_at': DateTime.now().add(const Duration(hours: 24)).toIso8601String(),
       });
     } catch (e) {
-      print('[Dashboard] Failed to cache snapshot: $e');
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Failed to cache snapshot: $e');
+      }
     }
   }
 
