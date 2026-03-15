@@ -38,6 +38,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
+  bool _isLoggingOut = false;
+
   void _showHamburgerMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -97,17 +99,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
+            leading: _isLoggingOut
+              ? SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation(AppColors.error),
+                  ),
+                )
+              : const Icon(Icons.logout),
+            title: Text(_isLoggingOut ? 'Logging out...' : 'Logout'),
             textColor: AppColors.error,
             iconColor: AppColors.error,
+            enabled: !_isLoggingOut,
             onTap: () async {
+              if (_isLoggingOut) return;
+
+              setState(() => _isLoggingOut = true);
               Navigator.pop(context);
+
               // Logout logic with error handling
               try {
                 await Supabase.instance.client.auth.signOut();
               } catch (e) {
                 if (mounted) {
+                  setState(() => _isLoggingOut = false);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Failed to logout: ${e.toString()}'),

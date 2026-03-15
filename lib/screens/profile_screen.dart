@@ -10,6 +10,7 @@ import '../theme/wintermute_styles.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
+import '../utils/user_feedback.dart';
 import '../main.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -178,21 +179,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (newPhotoUrl != null) {
         setState(() {
           _photoUrl = newPhotoUrl;
-          _successMessage = 'Profile photo updated successfully';
         });
 
-        // Clear success message after 3 seconds
-        Future.delayed(const Duration(seconds: 3), () {
-          if (mounted) {
-            setState(() => _successMessage = null);
-          }
-        });
+        if (mounted) {
+          UserFeedback.showSuccess(context, 'Profile photo updated successfully');
+        }
       }
     } catch (e) {
       print('[ProfileScreen] Error uploading photo: $e');
-      setState(() {
-        _errorMessage = 'Failed to upload photo: ${e.toString()}';
-      });
+      if (mounted) {
+        UserFeedback.showError(
+          context,
+          UserFeedback.getFriendlyErrorMessage(e),
+        );
+      }
     } finally {
       setState(() => _isUploadingPhoto = false);
     }
@@ -232,32 +232,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
       setState(() {
         _isSaving = false;
-        _successMessage = 'Profile saved successfully';
         _isEditMode = false; // Switch to ID card view after save
       });
 
-      // Clear success message after 3 seconds
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() => _successMessage = null);
-        }
-      });
+      if (mounted) {
+        UserFeedback.showSuccess(context, 'Profile saved successfully');
+      }
     } catch (e) {
       print('[ProfileScreen] Error saving profile: $e');
-      
-      String errorMsg;
-      if (e.toString().contains('duplicate')) {
-        errorMsg = 'Username already taken';
-      } else if (e.toString().contains('column') && e.toString().contains('does not exist')) {
-        errorMsg = 'Database error: Missing columns';
-      } else {
-        errorMsg = 'Could not save profile';
-      }
-      
+
       setState(() {
         _isSaving = false;
-        _errorMessage = errorMsg;
       });
+
+      if (mounted) {
+        UserFeedback.showError(
+          context,
+          UserFeedback.getFriendlyErrorMessage(e),
+        );
+      }
     }
   }
 
@@ -657,9 +650,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      ref.read(authProviderProvider).signOut();
-                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    onPressed: () async {
+                      final confirmed = await UserFeedback.showConfirmDialog(
+                        context: context,
+                        title: 'Sign Out',
+                        message: 'Are you sure you want to sign out?',
+                        confirmText: 'SIGN OUT',
+                        isDangerous: true,
+                      );
+
+                      if (confirmed && context.mounted) {
+                        try {
+                          await ref.read(authProviderProvider).signOut();
+                          if (context.mounted) {
+                            Navigator.of(context).popUntil((route) => route.isFirst);
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            UserFeedback.showError(
+                              context,
+                              'Failed to sign out - please try again',
+                            );
+                          }
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.error,

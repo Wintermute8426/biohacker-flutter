@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'user_profile_service.dart';
@@ -69,17 +70,22 @@ class OnboardingService {
       }
 
       return response['onboarding_completed'] ?? false;
-    } catch (e) {
-      print('[OnboardingService] Error checking onboarding status: $e');
-      return false;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[OnboardingService] Error checking onboarding status: $e');
+        print('[OnboardingService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
   /// Save onboarding data to database
   Future<bool> completeOnboarding(String userId, OnboardingData data) async {
     try {
-      print('[OnboardingService] Starting onboarding completion for user: $userId');
-      print('[OnboardingService] Data: ${data.toJson()}');
+      if (kDebugMode) {
+        print('[OnboardingService] Starting onboarding completion for user: $userId');
+        print('[OnboardingService] Data: ${data.toJson()}');
+      }
 
       // Step 1: Check if profile exists
       final existingProfile = await _supabase
@@ -89,7 +95,9 @@ class OnboardingService {
           .maybeSingle();
 
       if (existingProfile == null) {
-        print('[OnboardingService] No profile found, creating new one...');
+        if (kDebugMode) {
+          print('[OnboardingService] No profile found, creating new one...');
+        }
         // Create profile first
         await _supabase.from('user_profiles').insert({
           'id': userId,
@@ -103,7 +111,9 @@ class OnboardingService {
           'onboarding_completed_at': DateTime.now().toIso8601String(),
         });
       } else {
-        print('[OnboardingService] Profile exists, updating...');
+        if (kDebugMode) {
+          print('[OnboardingService] Profile exists, updating...');
+        }
         // Update existing profile
         await _supabase.from('user_profiles').update({
           'experience_level': data.experienceLevel,
@@ -124,7 +134,9 @@ class OnboardingService {
           .maybeSingle();
 
       if (existingPrefs == null) {
-        print('[OnboardingService] Creating notification preferences...');
+        if (kDebugMode) {
+          print('[OnboardingService] Creating notification preferences...');
+        }
         await _supabase.from('notification_preferences').insert({
           'user_id': userId,
           'dose_reminders_enabled': data.doseRemindersEnabled,
@@ -135,7 +147,9 @@ class OnboardingService {
           'weekly_progress_enabled': data.weeklyProgressEnabled,
         });
       } else {
-        print('[OnboardingService] Updating notification preferences...');
+        if (kDebugMode) {
+          print('[OnboardingService] Updating notification preferences...');
+        }
         await _supabase.from('notification_preferences').update({
           'dose_reminders_enabled': data.doseRemindersEnabled,
           'dose_reminder_minutes': data.doseReminderMinutes,
@@ -146,25 +160,34 @@ class OnboardingService {
         }).eq('user_id', userId);
       }
 
-      print('[OnboardingService] ✅ Onboarding completed successfully!');
+      if (kDebugMode) {
+        print('[OnboardingService] ✅ Onboarding completed successfully!');
+      }
       return true;
     } catch (e, stackTrace) {
-      print('[OnboardingService] ❌ Error completing onboarding: $e');
-      print('[OnboardingService] Stack trace: $stackTrace');
-      return false;
+      if (kDebugMode) {
+        print('[OnboardingService] ❌ Error completing onboarding: $e');
+        print('[OnboardingService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
   /// Skip onboarding (save defaults)
   Future<bool> skipOnboarding(String userId) async {
     try {
-      print('[OnboardingService] Skipping onboarding for user: $userId');
+      if (kDebugMode) {
+        print('[OnboardingService] Skipping onboarding for user: $userId');
+      }
 
       final defaultData = OnboardingData();
       return await completeOnboarding(userId, defaultData);
-    } catch (e) {
-      print('[OnboardingService] Error skipping onboarding: $e');
-      return false;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[OnboardingService] Error skipping onboarding: $e');
+        print('[OnboardingService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 }

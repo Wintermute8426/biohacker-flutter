@@ -115,8 +115,11 @@ class DashboardAnalyticsService {
       await _cacheSnapshot(userId, data);
 
       return data;
-    } catch (e) {
-      print('[DashboardAnalyticsService] Error: $e');
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Error: $e');
+        print('[DashboardAnalyticsService] Stack trace: $stackTrace');
+      }
       rethrow;
     }
   }
@@ -506,7 +509,11 @@ class DashboardAnalyticsService {
           .map((cycle) => cycle['peptide_name'] as String)
           .toSet()
           .toList();
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Failed to get active peptides: $e');
+        print('[DashboardAnalyticsService] Stack trace: $stackTrace');
+      }
       return [];
     }
   }
@@ -648,13 +655,21 @@ class DashboardAnalyticsService {
 
   /// Force refresh (clear cache)
   Future<DashboardData> forceRefresh(String userId) async {
-    // Delete old snapshots
-    await _supabase
-        .from('dashboard_snapshots')
-        .delete()
-        .eq('user_id', userId);
+    try {
+      // Delete old snapshots
+      await _supabase
+          .from('dashboard_snapshots')
+          .delete()
+          .eq('user_id', userId);
 
-    return getDashboardData(userId);
+      return getDashboardData(userId);
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[DashboardAnalyticsService] Force refresh failed: $e');
+        print('[DashboardAnalyticsService] Stack trace: $stackTrace');
+      }
+      rethrow;
+    }
   }
 }
 

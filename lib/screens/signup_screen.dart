@@ -6,6 +6,7 @@ import '../theme/wintermute_styles.dart';
 import '../theme/wintermute_background.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
+import '../utils/user_feedback.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -35,33 +36,42 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   Future<void> _handleSignUp() async {
     setState(() => _error = null);
 
-    if (_firstNameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
+    // Validate all fields are filled
+    if (_firstNameController.text.trim().isEmpty ||
+        _emailController.text.trim().isEmpty ||
         _passwordController.text.isEmpty ||
         _confirmPasswordController.text.isEmpty) {
       setState(() => _error = 'Please fill in all fields');
       return;
     }
 
+    // Validate email format with regex
+    final email = _emailController.text.trim();
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      setState(() => _error = 'Please enter a valid email address');
+      return;
+    }
+
+    // Validate passwords match
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() => _error = 'Passwords do not match');
       return;
     }
 
-    // Strengthen password validation
+    // Strengthen password validation - minimum 8 characters
     final password = _passwordController.text;
     if (password.length < 8) {
       setState(() => _error = 'Password must be at least 8 characters');
       return;
     }
 
-    // Check for uppercase
+    // Check for uppercase letter
     if (!password.contains(RegExp(r'[A-Z]'))) {
       setState(() => _error = 'Password must contain at least one uppercase letter');
       return;
     }
 
-    // Check for lowercase
+    // Check for lowercase letter
     if (!password.contains(RegExp(r'[a-z]'))) {
       setState(() => _error = 'Password must contain at least one lowercase letter');
       return;
@@ -81,13 +91,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created! Check your email to verify.')),
+        UserFeedback.showSuccess(
+          context,
+          'Account created successfully! Check your email to verify.',
         );
         Navigator.pop(context);
       }
     } catch (e) {
-      setState(() => _error = e.toString());
+      final friendlyMessage = UserFeedback.getFriendlyErrorMessage(e);
+      setState(() => _error = friendlyMessage);
     }
   }
 
@@ -99,9 +111,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     try {
       await ref.read(authProviderProvider).signInWithGoogle();
+      // Success is handled by navigation in main.dart via auth state change
     } catch (e) {
+      final friendlyMessage = UserFeedback.getFriendlyErrorMessage(e);
       setState(() {
-        _error = 'Google sign-in failed. Please try again.';
+        _error = friendlyMessage;
         _isGoogleLoading = false;
       });
     }

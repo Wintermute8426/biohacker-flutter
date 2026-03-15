@@ -141,7 +141,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             body: Column(
               children: [
                 // Header using reusable widget
-                AppHeader(
+                const AppHeader(
                   icon: Icons.calendar_month,
                   iconColor: WintermmuteStyles.colorCyan,
                   title: 'DOSE CALENDAR',
@@ -268,8 +268,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           ),
         ),
                       ),
-                      // Scanlines overlay
-                      Positioned.fill(
+                      // Scanlines overlay - use const for performance
+                      const Positioned.fill(
                         child: IgnorePointer(
                           child: CustomPaint(
                             painter: _ScanlinesPainter(),
@@ -494,7 +494,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
     return Column(
       children: [
-        // Day headers
+        // Day headers - optimize with const and caching
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -503,6 +503,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             childAspectRatio: 1.0,
           ),
           itemCount: 7,
+          addAutomaticKeepAlives: false, // Optimize: Don't keep children alive
+          addRepaintBoundaries: false, // Optimize: Reduce repaint boundaries for simple cells
           itemBuilder: (context, index) {
             return Center(
               child: Text(
@@ -517,7 +519,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         ),
         const SizedBox(height: 8),
 
-        // Date cells
+        // Date cells - optimize with keys and performance flags
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -528,6 +530,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             crossAxisSpacing: 4,
           ),
           itemCount: 7,
+          addAutomaticKeepAlives: false, // Optimize: Reduce memory overhead
+          addRepaintBoundaries: true, // Keep repaint boundaries for interactive cells
           itemBuilder: (context, index) {
             final date = _weekStart.add(Duration(days: index));
             debugPrint('🔴 [WEEK CELL] Building cell for date: ${date.year}-${date.month}-${date.day}');
@@ -726,7 +730,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
     return Column(
       children: [
-        // Day headers
+        // Day headers - optimize with const
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -735,6 +739,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             childAspectRatio: 1.0,
           ),
           itemCount: 7,
+          addAutomaticKeepAlives: false, // Optimize: Reduce memory overhead
+          addRepaintBoundaries: false, // Optimize: Reduce repaint boundaries for simple cells
           itemBuilder: (context, index) {
             return Center(
               child: Text(
@@ -750,7 +756,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         ),
         const SizedBox(height: 4),
 
-        // Date cells with padding
+        // Date cells with padding - optimize with performance flags
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -761,6 +767,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             crossAxisSpacing: 2,
           ),
           itemCount: rows * 7,
+          addAutomaticKeepAlives: false, // Optimize: Reduce memory overhead
+          addRepaintBoundaries: true, // Keep repaint boundaries for interactive cells
           itemBuilder: (context, index) {
             // Skip padding cells
             if (index < paddingDays || index >= paddingDays + daysInMonth) {
@@ -1256,6 +1264,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 }
 
 class _ScanlinesPainter extends CustomPainter {
+  const _ScanlinesPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()

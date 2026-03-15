@@ -81,6 +81,45 @@ class _CycleSetupFormV3State extends State<CycleSetupFormV3> {
       return;
     }
 
+    // Validate positive values
+    if (_totalPeptideMg! <= 0 || _concentrationMg! <= 0 || _concentrationMl! <= 0) {
+      setState(() {
+        _bacRequired = null;
+        _totalVolume = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All values must be greater than 0'),
+          backgroundColor: Color(0xFFFF0040),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Validate reasonable ranges
+    if (_totalPeptideMg! > 1000) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vial size seems unusually high (>1000mg)'),
+          backgroundColor: Color(0xFFFF0040),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (_concentrationMl! > 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Draw volume seems unusually high (>10ml)'),
+          backgroundColor: Color(0xFFFF0040),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     final mgPerMl = _concentrationMg! / _concentrationMl!;
     final totalVol = _totalPeptideMg! / mgPerMl;
     final bac = totalVol;
@@ -231,6 +270,7 @@ class _CycleSetupFormV3State extends State<CycleSetupFormV3> {
   }
 
   void _submit() {
+    // Validate required fields
     if (_selectedPeptide == null ||
         _totalPeptideMg == null ||
         _desiredDosageMg == null ||
@@ -242,6 +282,80 @@ class _CycleSetupFormV3State extends State<CycleSetupFormV3> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill in all required fields'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    // Validate all numeric values are positive
+    if (_totalPeptideMg! <= 0 || _desiredDosageMg! <= 0 ||
+        _concentrationMg! <= 0 || _concentrationMl! <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All dose amounts must be greater than 0'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    // Validate cycle duration
+    if (_cycleDurationDays! <= 0 || _cycleDurationDays! > 365) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cycle duration must be between 1 and 365 days'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    // Validate phase values if provided
+    if (_rampUpStartDose != null && _rampUpStartDose! < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ramp up start dose cannot be negative'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    if (_rampUpIncrementPerDay != null && _rampUpIncrementPerDay! < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ramp up increment cannot be negative'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    if (_rampUpDays != null && _rampUpDays! <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ramp up duration must be at least 1 day'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    if (_rampDownDecrementPerDay != null && _rampDownDecrementPerDay! < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ramp down decrement cannot be negative'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    if (_rampDownDays != null && _rampDownDays! <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ramp down duration must be at least 1 day'),
           backgroundColor: Color(0xFFFF0040),
         ),
       );

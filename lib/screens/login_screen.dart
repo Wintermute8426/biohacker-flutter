@@ -6,6 +6,7 @@ import '../theme/wintermute_styles.dart';
 import '../theme/wintermute_background.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
+import '../utils/user_feedback.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -42,8 +43,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _emailController.text,
         _passwordController.text,
       );
+      // Success is handled by navigation in main.dart via auth state change
     } catch (e) {
-      setState(() => _error = e.toString());
+      final friendlyMessage = UserFeedback.getFriendlyErrorMessage(e);
+      setState(() => _error = friendlyMessage);
     }
   }
 
@@ -55,9 +58,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       await ref.read(authProviderProvider).signInWithGoogle();
+      // Success is handled by navigation in main.dart via auth state change
     } catch (e) {
+      final friendlyMessage = UserFeedback.getFriendlyErrorMessage(e);
       setState(() {
-        _error = 'Google sign-in failed. Please try again.';
+        _error = friendlyMessage;
         _isGoogleLoading = false;
       });
     }

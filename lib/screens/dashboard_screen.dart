@@ -38,6 +38,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // Track locally marked missed doses to update UI immediately
   final Set<String> _locallyMarkedMissed = {};
 
+  // Cache for expensive computations to avoid rebuilds
+  final Map<String, double> _cycleProgressCache = {};
+  final Map<String, int> _currentDayCache = {};
+  final Map<String, int> _totalDaysCache = {};
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +71,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
       // Get active cycles
       _activeCycles = await cycleDb.getActiveCycles();
+
+      // Clear caches when data is reloaded
+      _cycleProgressCache.clear();
+      _currentDayCache.clear();
+      _totalDaysCache.clear();
 
       if (mounted) {
         setState(() => _isLoading = false);
@@ -238,24 +248,48 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
+  // Optimized: Cache expensive date calculations to avoid rebuilds
   double _calculateCycleProgress(Cycle cycle) {
+    if (_cycleProgressCache.containsKey(cycle.id)) {
+      return _cycleProgressCache[cycle.id]!;
+    }
+
     final now = DateTime.now();
     final totalDays = cycle.endDate.difference(cycle.startDate).inDays;
     final currentDay = now.difference(cycle.startDate).inDays + 1;
 
-    if (currentDay <= 0) return 0.0;
-    if (currentDay >= totalDays) return 1.0;
+    double progress;
+    if (currentDay <= 0) {
+      progress = 0.0;
+    } else if (currentDay >= totalDays) {
+      progress = 1.0;
+    } else {
+      progress = currentDay / totalDays;
+    }
 
-    return currentDay / totalDays;
+    _cycleProgressCache[cycle.id] = progress;
+    return progress;
   }
 
   int _getCurrentDay(Cycle cycle) {
+    if (_currentDayCache.containsKey(cycle.id)) {
+      return _currentDayCache[cycle.id]!;
+    }
+
     final now = DateTime.now();
-    return now.difference(cycle.startDate).inDays + 1;
+    final currentDay = now.difference(cycle.startDate).inDays + 1;
+    _currentDayCache[cycle.id] = currentDay;
+    return currentDay;
   }
 
   int _getTotalDays(Cycle cycle) {
-    return cycle.endDate.difference(cycle.startDate).inDays;
+    if (_totalDaysCache.containsKey(cycle.id)) {
+      return _totalDaysCache[cycle.id]!;
+    }
+
+    final totalDays = cycle.endDate.difference(cycle.startDate).inDays;
+    _totalDaysCache[cycle.id] = totalDays;
+    return totalDays;
   }
 
   @override
@@ -284,7 +318,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             body: Column(
               children: [
                 // Header using reusable widget
-                AppHeader(
+                const AppHeader(
                   icon: Icons.dashboard,
                   iconColor: WintermmuteStyles.colorCyan,
                   title: 'DAILY ACTIONS',
@@ -331,8 +365,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 ),
                               ),
                             ),
-                      // Scanlines overlay
-                      Positioned.fill(
+                      // Scanlines overlay - use const for performance
+                      const Positioned.fill(
                         child: IgnorePointer(
                           child: CustomPaint(
                             painter: _ScanlinesPainter(),
@@ -425,8 +459,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildDosesList() {
-    return Column(
-      children: _todaysDoses.map((dose) => _buildDoseCard(dose)).toList(),
+    // Optimize: Use ListView.builder instead of mapping entire list at once
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _todaysDoses.length,
+      itemBuilder: (context, index) => _buildDoseCard(_todaysDoses[index]),
     );
   }
 
@@ -805,6 +843,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.trending_up,
@@ -827,8 +866,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         if (_activeCycles.isEmpty)
           _buildNoCyclesState()
         else
-          Column(
-            children: _activeCycles.map((cycle) => _buildCycleProgressCard(cycle)).toList(),
+          // Optimize: Use ListView.builder for better performance with large lists
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _activeCycles.length,
+            itemBuilder: (context, index) => _buildCycleProgressCard(_activeCycles[index]),
           ),
       ],
     );
@@ -1100,6 +1143,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 }
 
 class _ScanlinesPainter extends CustomPainter {
+  const _ScanlinesPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()

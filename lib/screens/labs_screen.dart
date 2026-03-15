@@ -14,6 +14,7 @@ import '../services/android_file_picker.dart';
 import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/app_header.dart';
+import '../widgets/common/empty_state.dart';
 
 class LabsScreen extends StatefulWidget {
   const LabsScreen({Key? key}) : super(key: key);
@@ -27,6 +28,7 @@ class _LabsScreenState extends State<LabsScreen> {
   late String _userId;
   List<LabResult> _labResults = [];
   bool _isUploading = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -39,10 +41,16 @@ class _LabsScreenState extends State<LabsScreen> {
     try {
       final results = await _labsDb.getUserLabResults(_userId);
       if (mounted) {
-        setState(() => _labResults = results);
+        setState(() {
+          _labResults = results;
+          _isLoading = false;
+        });
       }
     } catch (e) {
       print('Error loading labs: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -298,6 +306,12 @@ class _LabsScreenState extends State<LabsScreen> {
   }
 
   Widget _buildAllResultsView() {
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -377,11 +391,10 @@ class _LabsScreenState extends State<LabsScreen> {
 
         if (_labResults.isEmpty) ...[
           const SizedBox(height: 40),
-          Center(
-            child: Text(
-              'NO LAB RESULTS YET',
-              style: TextStyle(color: AppColors.textMid, letterSpacing: 1),
-            ),
+          const EmptyState(
+            icon: Icons.science,
+            title: 'No lab results yet',
+            message: 'Upload your first lab report to start tracking biomarkers',
           ),
         ] else ...[
           const SizedBox(height: 24),

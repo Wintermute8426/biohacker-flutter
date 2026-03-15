@@ -8,6 +8,7 @@ import '../widgets/scanline_overlay.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
+import '../widgets/common/empty_state.dart';
 
 class ProtocolsScreen extends StatefulWidget {
   const ProtocolsScreen({Key? key}) : super(key: key);
@@ -764,25 +765,41 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                             const SizedBox(height: 24),
 
                             // My Protocols
-                            if (myProtocols.isNotEmpty) ...[
-                              Text(
-                                'MY PROTOCOLS',
-                                style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12, color: AppColors.accent),
-                              ),
-                              const SizedBox(height: 12),
+                            Text(
+                              'MY PROTOCOLS',
+                              style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12, color: AppColors.accent),
+                            ),
+                            const SizedBox(height: 12),
+                            if (myProtocols.isEmpty)
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20),
+                                child: EmptyState(
+                                  icon: Icons.add_circle_outline,
+                                  title: 'No custom protocols',
+                                  message: 'Create your own protocol templates',
+                                ),
+                              )
+                            else
                               ...myProtocols.map((protocol) => _buildProtocolCard(protocol)),
-                              const SizedBox(height: 24),
-                            ],
+                            const SizedBox(height: 24),
 
                             // Community Protocols
-                            if (communityProtocols.isNotEmpty) ...[
-                              Text(
-                                'COMMUNITY PROTOCOLS',
-                                style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
-                              ),
-                              const SizedBox(height: 12),
+                            Text(
+                              'COMMUNITY PROTOCOLS',
+                              style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
+                            ),
+                            const SizedBox(height: 12),
+                            if (communityProtocols.isEmpty)
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20),
+                                child: EmptyState(
+                                  icon: Icons.people_outline,
+                                  title: 'No community protocols',
+                                  message: 'Check back later for shared protocols',
+                                ),
+                              )
+                            else
                               ...communityProtocols.map((protocol) => _buildProtocolCard(protocol)),
-                            ],
                           ],
                         ),
                     ],

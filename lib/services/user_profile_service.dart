@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -196,9 +197,12 @@ class UserProfileService {
       }
 
       return UserProfile.fromJson(response);
-    } catch (e) {
-      print('Error fetching user profile: $e');
-      return null;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[UserProfileService] Error fetching user profile: $e');
+        print('[UserProfileService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
@@ -219,9 +223,12 @@ class UserProfileService {
           .single();
 
       return UserProfile.fromJson(response);
-    } catch (e) {
-      print('Error creating user profile: $e');
-      return null;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[UserProfileService] Error creating user profile: $e');
+        print('[UserProfileService] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
@@ -282,10 +289,12 @@ class UserProfileService {
         }
       }
 
-      print('[UserProfile] ========================================');
-      print('[UserProfile] Updating profile for user: $userId');
-      print('[UserProfile] Updates: $updates');
-      print('[UserProfile] ========================================');
+      if (kDebugMode) {
+        print('[UserProfile] ========================================');
+        print('[UserProfile] Updating profile for user: $userId');
+        print('[UserProfile] Updates: $updates');
+        print('[UserProfile] ========================================');
+      }
 
       final response = await _supabase
           .from('user_profiles')
@@ -293,42 +302,50 @@ class UserProfileService {
           .eq('id', userId)
           .select();
 
-      print('[UserProfile] Update response: $response');
+      if (kDebugMode) {
+        print('[UserProfile] Update response: $response');
+      }
 
       if (response.isEmpty) {
-        print('[UserProfile] ⚠️  WARNING: Empty response from update.');
-        print('[UserProfile] This usually means:');
-        print('[UserProfile]   1. User profile does not exist (creating new one...)');
-        print('[UserProfile]   2. RLS policy is blocking the UPDATE');
-        print('[UserProfile]   3. Database columns do not exist (run migration!)');
-        
+        if (kDebugMode) {
+          print('[UserProfile] ⚠️  WARNING: Empty response from update.');
+          print('[UserProfile] This usually means:');
+          print('[UserProfile]   1. User profile does not exist (creating new one...)');
+          print('[UserProfile]   2. RLS policy is blocking the UPDATE');
+          print('[UserProfile]   3. Database columns do not exist (run migration!)');
+        }
+
         // Try to create if doesn't exist
         return await createUserProfile(userId);
       }
 
       final profile = UserProfile.fromJson(response.first);
-      print('[UserProfile] ✅ Successfully updated profile');
-      print('[UserProfile] Profile data: ${profile.toJson()}');
+      if (kDebugMode) {
+        print('[UserProfile] ✅ Successfully updated profile');
+        print('[UserProfile] Profile data: ${profile.toJson()}');
+      }
       return profile;
     } catch (e, stackTrace) {
-      print('[UserProfile] ❌ ERROR updating user profile');
-      print('[UserProfile] Error type: ${e.runtimeType}');
-      print('[UserProfile] Error message: $e');
-      print('[UserProfile] Stack trace:');
-      print(stackTrace);
-      
-      // Check for specific error types
-      if (e.toString().contains('column') && e.toString().contains('does not exist')) {
-        print('[UserProfile] 🚨 DATABASE SCHEMA MISMATCH!');
-        print('[UserProfile] Run DATABASE_MIGRATION_IMPERIAL.sql in Supabase SQL Editor');
-      } else if (e.toString().contains('duplicate key')) {
-        print('[UserProfile] 🚨 DUPLICATE USERNAME!');
-        print('[UserProfile] Username already exists. Choose a different one.');
-      } else if (e.toString().contains('violates check constraint')) {
-        print('[UserProfile] 🚨 VALIDATION FAILED!');
-        print('[UserProfile] Data does not meet database constraints.');
+      if (kDebugMode) {
+        print('[UserProfile] ❌ ERROR updating user profile');
+        print('[UserProfile] Error type: ${e.runtimeType}');
+        print('[UserProfile] Error message: $e');
+        print('[UserProfile] Stack trace:');
+        print(stackTrace);
+
+        // Check for specific error types
+        if (e.toString().contains('column') && e.toString().contains('does not exist')) {
+          print('[UserProfile] 🚨 DATABASE SCHEMA MISMATCH!');
+          print('[UserProfile] Run DATABASE_MIGRATION_IMPERIAL.sql in Supabase SQL Editor');
+        } else if (e.toString().contains('duplicate key')) {
+          print('[UserProfile] 🚨 DUPLICATE USERNAME!');
+          print('[UserProfile] Username already exists. Choose a different one.');
+        } else if (e.toString().contains('violates check constraint')) {
+          print('[UserProfile] 🚨 VALIDATION FAILED!');
+          print('[UserProfile] Data does not meet database constraints.');
+        }
       }
-      
+
       rethrow; // Let caller handle the error
     }
   }
@@ -363,8 +380,11 @@ class UserProfileService {
       }
 
       return '$weightKg kg (logged $timeAgo)';
-    } catch (e) {
-      print('Error fetching latest weight: $e');
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[UserProfileService] Error fetching latest weight: $e');
+        print('[UserProfileService] Stack trace: $stackTrace');
+      }
       return 'Error loading weight';
     }
   }
@@ -386,10 +406,13 @@ class UserProfileService {
             'quiet_hours_start': '22:00',
             'quiet_hours_end': '08:00',
           });
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Ignore duplicate key errors (already exists)
       if (!e.toString().contains('duplicate key')) {
-        print('Error initializing notification preferences: $e');
+        if (kDebugMode) {
+          print('[UserProfileService] Error initializing notification preferences: $e');
+          print('[UserProfileService] Stack trace: $stackTrace');
+        }
       }
     }
   }

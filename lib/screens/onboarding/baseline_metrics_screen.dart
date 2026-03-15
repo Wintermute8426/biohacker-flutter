@@ -47,7 +47,7 @@ class _BaselineMetricsScreenState extends State<BaselineMetricsScreen> {
   }
 
   void _continue() {
-    // Weight is required
+    // Validate weight is not empty
     if (_weightController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -61,12 +61,27 @@ class _BaselineMetricsScreenState extends State<BaselineMetricsScreen> {
       return;
     }
 
-    final weight = double.tryParse(_weightController.text);
+    // Validate weight is a valid positive number
+    final weight = double.tryParse(_weightController.text.trim());
     if (weight == null || weight <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Please enter a valid weight',
+            'Weight must be a positive number',
+            style: WintermmuteStyles.bodyStyle,
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    // Validate weight is in reasonable range (50-500 lbs)
+    if (weight < 50 || weight > 500) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Weight should be between 50 and 500 lbs',
             style: WintermmuteStyles.bodyStyle,
           ),
           backgroundColor: AppColors.error,
@@ -78,12 +93,39 @@ class _BaselineMetricsScreenState extends State<BaselineMetricsScreen> {
     // Body fat is optional but validate if provided
     double? bodyFat;
     if (_bodyFatController.text.trim().isNotEmpty) {
-      bodyFat = double.tryParse(_bodyFatController.text);
-      if (bodyFat == null || bodyFat < 0 || bodyFat > 50) {
+      bodyFat = double.tryParse(_bodyFatController.text.trim());
+      if (bodyFat == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Body fat % should be between 0-50',
+              'Body fat % must be a valid number',
+              style: WintermmuteStyles.bodyStyle,
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+
+      if (bodyFat < 0 || bodyFat > 100) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Body fat % must be between 0 and 100',
+              style: WintermmuteStyles.bodyStyle,
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+
+      // Warn if body fat seems unrealistic (typically 3-50%)
+      if (bodyFat < 3 || bodyFat > 50) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Body fat % seems unusual. Typical range is 3-50%',
               style: WintermmuteStyles.bodyStyle,
             ),
             backgroundColor: AppColors.error,
@@ -93,24 +135,132 @@ class _BaselineMetricsScreenState extends State<BaselineMetricsScreen> {
       }
     }
 
-    // Build labs JSON if any values provided
+    // Build labs JSON if any values provided, with validation
     Map<String, dynamic>? labs;
-    if (_testosteroneController.text.isNotEmpty ||
-        _igf1Controller.text.isNotEmpty ||
-        _hghController.text.isNotEmpty ||
-        _cortisolController.text.isNotEmpty) {
+    if (_testosteroneController.text.trim().isNotEmpty ||
+        _igf1Controller.text.trim().isNotEmpty ||
+        _hghController.text.trim().isNotEmpty ||
+        _cortisolController.text.trim().isNotEmpty) {
       labs = {};
-      if (_testosteroneController.text.isNotEmpty) {
-        labs['testosterone'] = double.tryParse(_testosteroneController.text);
+
+      // Validate testosterone (typical range: 300-1000 ng/dL)
+      if (_testosteroneController.text.trim().isNotEmpty) {
+        final testosterone = double.tryParse(_testosteroneController.text.trim());
+        if (testosterone == null || testosterone < 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Testosterone must be a positive number',
+                style: WintermmuteStyles.bodyStyle,
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
+        if (testosterone > 5000) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Testosterone value seems unusually high',
+                style: WintermmuteStyles.bodyStyle,
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
+        labs['testosterone'] = testosterone;
       }
-      if (_igf1Controller.text.isNotEmpty) {
-        labs['igf1'] = double.tryParse(_igf1Controller.text);
+
+      // Validate IGF-1 (typical range: 100-400 ng/mL)
+      if (_igf1Controller.text.trim().isNotEmpty) {
+        final igf1 = double.tryParse(_igf1Controller.text.trim());
+        if (igf1 == null || igf1 < 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'IGF-1 must be a positive number',
+                style: WintermmuteStyles.bodyStyle,
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
+        if (igf1 > 2000) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'IGF-1 value seems unusually high',
+                style: WintermmuteStyles.bodyStyle,
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
+        labs['igf1'] = igf1;
       }
-      if (_hghController.text.isNotEmpty) {
-        labs['hgh'] = double.tryParse(_hghController.text);
+
+      // Validate HGH (typical range: 0-10 ng/mL)
+      if (_hghController.text.trim().isNotEmpty) {
+        final hgh = double.tryParse(_hghController.text.trim());
+        if (hgh == null || hgh < 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'HGH must be a positive number',
+                style: WintermmuteStyles.bodyStyle,
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
+        if (hgh > 100) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'HGH value seems unusually high',
+                style: WintermmuteStyles.bodyStyle,
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
+        labs['hgh'] = hgh;
       }
-      if (_cortisolController.text.isNotEmpty) {
-        labs['cortisol'] = double.tryParse(_cortisolController.text);
+
+      // Validate Cortisol (typical range: 5-25 μg/dL)
+      if (_cortisolController.text.trim().isNotEmpty) {
+        final cortisol = double.tryParse(_cortisolController.text.trim());
+        if (cortisol == null || cortisol < 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Cortisol must be a positive number',
+                style: WintermmuteStyles.bodyStyle,
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
+        if (cortisol > 100) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Cortisol value seems unusually high',
+                style: WintermmuteStyles.bodyStyle,
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
+        labs['cortisol'] = cortisol;
       }
     }
 

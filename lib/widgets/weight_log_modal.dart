@@ -31,7 +31,8 @@ class _WeightLogModalState extends ConsumerState<WeightLogModal> {
   }
 
   Future<void> _saveWeight() async {
-    if (_weightController.text.isEmpty) {
+    // Validate weight is not empty
+    if (_weightController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -44,12 +45,13 @@ class _WeightLogModalState extends ConsumerState<WeightLogModal> {
       return;
     }
 
-    final weight = double.tryParse(_weightController.text);
+    // Validate weight is a valid positive number
+    final weight = double.tryParse(_weightController.text.trim());
     if (weight == null || weight <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Please enter a valid weight',
+            'Weight must be a positive number',
             style: WintermmuteStyles.bodyStyle,
           ),
           backgroundColor: AppColors.error,
@@ -58,21 +60,53 @@ class _WeightLogModalState extends ConsumerState<WeightLogModal> {
       return;
     }
 
-    final bodyFat = _bodyFatController.text.isNotEmpty
-        ? double.tryParse(_bodyFatController.text)
-        : null;
-
-    if (bodyFat != null && (bodyFat < 0 || bodyFat > 100)) {
+    // Validate weight is in reasonable range (50-500 lbs)
+    if (weight < 50 || weight > 500) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Body fat % must be between 0 and 100',
+            'Weight should be between 50 and 500 lbs',
             style: WintermmuteStyles.bodyStyle,
           ),
           backgroundColor: AppColors.error,
         ),
       );
       return;
+    }
+
+    // Validate body fat percentage if provided
+    final bodyFat = _bodyFatController.text.trim().isNotEmpty
+        ? double.tryParse(_bodyFatController.text.trim())
+        : null;
+
+    if (bodyFat != null) {
+      // Check if it's a valid number
+      if (bodyFat < 0 || bodyFat > 100) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Body fat % must be between 0 and 100',
+              style: WintermmuteStyles.bodyStyle,
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+
+      // Warn if body fat seems unrealistic (typically 3-50%)
+      if (bodyFat < 3 || bodyFat > 50) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Body fat % seems unusual. Typical range is 3-50%',
+              style: WintermmuteStyles.bodyStyle,
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
     }
 
     setState(() => _isSaving = true);

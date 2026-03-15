@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
@@ -24,41 +25,56 @@ class LabsDatabase {
   /// Get all lab results for user
   Future<List<LabResult>> getUserLabResults(String userId) async {
     try {
-      print('DEBUG (LabsDatabase): getUserLabResults START for userId: $userId');
-      
+      if (kDebugMode) {
+        print('[LabsDatabase] getUserLabResults START for userId: $userId');
+      }
+
       // Wrap query with timeout
       final queryFuture = supabase
           .from('labs_results')
           .select()
           .eq('user_id', userId)
           .order('upload_date', ascending: false);
-      
+
       final response = await queryFuture.timeout(
         const Duration(seconds: 10),
         onTimeout: () {
-          print('DEBUG (LabsDatabase): Query TIMEOUT after 10 seconds');
+          if (kDebugMode) {
+            print('[LabsDatabase] Query TIMEOUT after 10 seconds');
+          }
           throw TimeoutException('Lab results query timed out');
         },
       );
 
-      print('DEBUG (LabsDatabase): Query succeeded. Response: $response');
+      if (kDebugMode) {
+        print('[LabsDatabase] Query succeeded. Response: $response');
+      }
       if (response.isEmpty) {
-        print('DEBUG (LabsDatabase): Response is empty, returning []');
+        if (kDebugMode) {
+          print('[LabsDatabase] Response is empty, returning []');
+        }
         return [];
       }
-      
+
       final results = (response as List)
           .map((json) => LabResult.fromJson(json))
           .toList();
-      print('DEBUG (LabsDatabase): Mapped ${results.length} results');
+      if (kDebugMode) {
+        print('[LabsDatabase] Mapped ${results.length} results');
+      }
       return results;
-    } on TimeoutException catch (e) {
-      print('DEBUG (LabsDatabase): TIMEOUT: $e');
-      return [];
+    } on TimeoutException catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[LabsDatabase] TIMEOUT: $e');
+        print('[LabsDatabase] Stack trace: $stackTrace');
+      }
+      rethrow;
     } catch (e, stackTrace) {
-      print('DEBUG (LabsDatabase): Error: $e');
-      print('DEBUG (LabsDatabase): StackTrace: $stackTrace');
-      return []; // Return empty list instead of throwing
+      if (kDebugMode) {
+        print('[LabsDatabase] Error: $e');
+        print('[LabsDatabase] Stack trace: $stackTrace');
+      }
+      rethrow;
     }
   }
 
@@ -136,7 +152,11 @@ class LabsDatabase {
           .single();
 
       return LabResult.fromJson(response);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[LabsDatabase] Failed to get latest lab result: $e');
+        print('[LabsDatabase] Stack trace: $stackTrace');
+      }
       return null;
     }
   }

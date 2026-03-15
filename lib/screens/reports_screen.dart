@@ -9,6 +9,7 @@ import '../theme/wintermute_background.dart';
 import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/app_header.dart';
+import '../widgets/common/empty_state.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -3031,15 +3032,11 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
   }
 
   Widget _buildEmptyState(String message) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: WintermmuteStyles.cardDecoration,
-      child: Center(
-        child: Text(
-          message,
-          style: TextStyle(color: AppColors.textMid),
-          textAlign: TextAlign.center,
-        ),
+    return Center(
+      child: EmptyState(
+        icon: Icons.analytics,
+        title: 'No data available',
+        message: message,
       ),
     );
   }

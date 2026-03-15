@@ -105,6 +105,7 @@ class _DoseScheduleFormState extends ConsumerState<DoseScheduleForm> {
   }
 
   void _save() {
+    // Validate required fields
     if (!_isValid()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required fields')),
@@ -112,9 +113,34 @@ class _DoseScheduleFormState extends ConsumerState<DoseScheduleForm> {
       return;
     }
 
+    // Validate dose amount is positive
+    final doseAmount = double.tryParse(_doseController.text);
+    if (doseAmount == null || doseAmount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dose amount must be greater than 0')),
+      );
+      return;
+    }
+
+    // Validate reasonable dose range
+    if (doseAmount > 1000) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dose amount seems unusually high (>1000mg)')),
+      );
+      return;
+    }
+
+    // Validate date range if end date is provided
+    if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('End date cannot be before start date')),
+      );
+      return;
+    }
+
     final data = {
       'peptideName': widget.peptideName,
-      'doseAmount': double.parse(_doseController.text),
+      'doseAmount': doseAmount,
       'route': _route,
       'scheduledTime': _timeController.text,
       'daysOfWeek': _selectedDays,
@@ -122,7 +148,7 @@ class _DoseScheduleFormState extends ConsumerState<DoseScheduleForm> {
       'endDate': _endDate,
       'notes': _notes,
     };
-    
+
     print('[DEBUG FORM] Saving schedule data: $data');
     Navigator.pop(context, data);
   }

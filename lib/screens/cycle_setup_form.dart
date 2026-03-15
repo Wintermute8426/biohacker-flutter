@@ -85,12 +85,51 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       return;
     }
 
+    // Validate positive values
+    if (_totalPeptideMg! <= 0 || _concentrationMg! <= 0 || _concentrationMl! <= 0) {
+      setState(() {
+        _bacRequired = null;
+        _totalVolume = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All values must be greater than 0'),
+          backgroundColor: Color(0xFFFF0040),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Validate reasonable ranges
+    if (_totalPeptideMg! > 1000) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vial size seems unusually high (>1000mg)'),
+          backgroundColor: Color(0xFFFF0040),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (_concentrationMl! > 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Draw volume seems unusually high (>10ml)'),
+          backgroundColor: Color(0xFFFF0040),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     // Calculate total volume needed
     // Total peptide / desired mg per ml = total volume
     // e.g., 10mg / (1mg per 0.1ml) = 10mg / 10mg per ml = 1ml total
     final mgPerMl = _concentrationMg! / _concentrationMl!;
     final totalVol = _totalPeptideMg! / mgPerMl;
-    
+
     // BAC needed = total volume (peptide volume is negligible)
     final bac = totalVol;
 
@@ -176,6 +215,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
   }
 
   void _submit() {
+    // Validate required fields
     if (_selectedPeptide == null ||
         _totalPeptideMg == null ||
         _desiredDosageMg == null ||
@@ -186,6 +226,100 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill in all required fields'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    // Validate all numeric values are positive
+    if (_totalPeptideMg! <= 0 || _desiredDosageMg! <= 0 ||
+        _concentrationMg! <= 0 || _concentrationMl! <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All dose amounts must be greater than 0'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    // Validate phase values if provided
+    if (_rampUpStartDose != null && _rampUpStartDose! < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ramp up start dose cannot be negative'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    if (_rampUpIncrementPerDay != null && _rampUpIncrementPerDay! < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ramp up increment cannot be negative'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    if (_rampUpDurationDays != null && _rampUpDurationDays! <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ramp up duration must be at least 1 day'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    if (_plateauDose != null && _plateauDose! < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Plateau dose cannot be negative'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    if (_plateauDurationDays != null && _plateauDurationDays! <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Plateau duration must be at least 1 day'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    if (_rampDownDecrementPerDay != null && _rampDownDecrementPerDay! < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ramp down decrement cannot be negative'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    if (_rampDownDurationDays != null && _rampDownDurationDays! <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ramp down duration must be at least 1 day'),
+          backgroundColor: Color(0xFFFF0040),
+        ),
+      );
+      return;
+    }
+
+    // Validate date range
+    if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('End date cannot be before start date'),
           backgroundColor: Color(0xFFFF0040),
         ),
       );

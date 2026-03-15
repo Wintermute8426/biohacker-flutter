@@ -21,6 +21,7 @@ import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/expandable_cycle_card.dart';
 import '../widgets/app_header.dart';
+import '../widgets/common/empty_state.dart';
 
 class CyclesScreen extends StatefulWidget {
   const CyclesScreen({Key? key}) : super(key: key);
@@ -1099,7 +1100,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
             body: Column(
               children: [
                 // Header using reusable widget
-                AppHeader(
+                const AppHeader(
                   icon: Icons.autorenew,
                   iconColor: WintermmuteStyles.colorGreen,
                   title: 'CYCLES',
@@ -1115,43 +1116,15 @@ class _CyclesScreenState extends State<CyclesScreen> {
                     ),
                   )
                 : savedCycles.isEmpty
-                    ? SingleChildScrollView(
-                        padding: const EdgeInsets.all(16),
+                    ? const SingleChildScrollView(
+                        padding: EdgeInsets.all(16),
                         child: Column(
                           children: [
-                            const SizedBox(height: 40),
-                            CyberpunkFrame(
-                              padding: const EdgeInsets.all(32),
-                              showStatusLed: false,
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.event_available,
-                                    color: AppColors.primary,
-                                    size: 48,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'No cycles',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          color: AppColors.textMid,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Create your first cycle to get started',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(
-                                          color: AppColors.textDim,
-                                        ),
-                                  ),
-                                ],
-                              ),
+                            SizedBox(height: 80),
+                            EmptyState(
+                              icon: Icons.autorenew,
+                              title: 'No cycles yet',
+                              message: 'Create your first cycle to start tracking peptide protocols',
                             ),
                           ],
                         ),
@@ -1159,11 +1132,15 @@ class _CyclesScreenState extends State<CyclesScreen> {
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),
                         itemCount: savedCycles.length,
+                        addAutomaticKeepAlives: true, // Keep expanded state
+                        addRepaintBoundaries: true, // Optimize repaints
                         itemBuilder: (context, index) {
                           final cycle = savedCycles[index];
 
                           // Use new expandable cycle card (matte Wintermute style)
+                          // Add key for better rebuild performance
                           return ExpandableCycleCard(
+                            key: ValueKey(cycle.id),
                             cycle: cycle,
                             loadCycleSummary: _loadCycleSummary,
                             onEdit: () => _showEditCycle(cycle),
@@ -1177,8 +1154,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           */
                         },
                       ),
-                      // Scanlines overlay
-                      Positioned.fill(
+                      // Scanlines overlay - use const for performance
+                      const Positioned.fill(
                         child: IgnorePointer(
                           child: CustomPaint(
                             painter: _ScanlinesPainter(),
@@ -1533,6 +1510,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
 }
 
 class _ScanlinesPainter extends CustomPainter {
+  const _ScanlinesPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()

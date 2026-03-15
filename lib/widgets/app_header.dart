@@ -55,6 +55,7 @@ class AppHeader extends StatelessWidget {
                 : MainAxisAlignment.start,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(icon, color: iconColor, size: 28),
                   const SizedBox(width: 12),
