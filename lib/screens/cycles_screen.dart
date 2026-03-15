@@ -1091,48 +1091,18 @@ class _CyclesScreenState extends State<CyclesScreen> {
           ),
           Scaffold(
             backgroundColor: Colors.transparent,
+            floatingActionButton: FloatingActionButton(
+              onPressed: _showNewUnifiedCycleSetup,
+              backgroundColor: AppColors.primary,
+              child: const Icon(Icons.add),
+            ),
             body: Column(
               children: [
                 // Header using reusable widget
                 AppHeader(
-            icon: Icons.autorenew,
-            iconColor: WintermmuteStyles.colorGreen,
-            title: 'CYCLES',
-            trailing: Row(
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProtocolsScreen(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.bookmark),
-                  label: const Text('PROTOCOLS'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: BorderSide(color: AppColors.primary),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: _showNewUnifiedCycleSetup,
-                  icon: const Icon(Icons.add),
-                  label: const Text('NEW'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                  icon: Icons.autorenew,
+                  iconColor: WintermmuteStyles.colorGreen,
+                  title: 'CYCLES',
                 ),
 
                 Expanded(

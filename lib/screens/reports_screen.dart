@@ -219,11 +219,6 @@ Side Effects Logged: ${_sideEffectsHeatmap.length} events
                   icon: Icons.analytics,
                   iconColor: WintermmuteStyles.colorMagenta,
                   title: 'REPORTS',
-                  trailing: IconButton(
-                    icon: const Icon(Icons.refresh),
-                    onPressed: _loadAllData,
-                    color: AppColors.primary,
-                  ),
                 ),
                 TabBar(
                   controller: _tabController,

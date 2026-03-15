@@ -302,22 +302,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   icon: Icons.person,
                   iconColor: WintermmuteStyles.colorOrange,
                   title: 'PROFILE',
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: () => Navigator.pop(context),
-                        color: AppColors.textLight,
-                      ),
-                      if (!_isEditMode)
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => setState(() => _isEditMode = true),
-                          color: AppColors.textLight,
-                        ),
-                    ],
-                  ),
                 ),
                 Expanded(
                   child: Stack(

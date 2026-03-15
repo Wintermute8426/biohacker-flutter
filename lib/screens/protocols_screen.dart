@@ -722,6 +722,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
           ),
           Scaffold(
             backgroundColor: Colors.transparent,
+            floatingActionButton: FloatingActionButton(
+              onPressed: _showCreateProtocolModal,
+              backgroundColor: AppColors.accent,
+              child: const Icon(Icons.add),
+            ),
             body: Column(
             children: [
               // Header using reusable widget
@@ -729,18 +734,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 icon: Icons.list_alt,
                 iconColor: WintermmuteStyles.colorGreen,
                 title: 'PROTOCOLS',
-                trailing: ElevatedButton(
-                  onPressed: _showCreateProtocolModal,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-                  ),
-                  child: Text(
-                    'NEW',
-                    style: TextStyle(color: AppColors.background, fontSize: 11, fontWeight: FontWeight.bold),
-                  ),
-                ),
               ),
               // Content
               Expanded(

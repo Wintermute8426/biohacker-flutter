@@ -22,25 +22,17 @@ class LabsScreen extends StatefulWidget {
   State<LabsScreen> createState() => _LabsScreenState();
 }
 
-class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
+class _LabsScreenState extends State<LabsScreen> {
   final LabsDatabase _labsDb = LabsDatabase();
   late String _userId;
   List<LabResult> _labResults = [];
   bool _isUploading = false;
-  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _userId = Supabase.instance.client.auth.currentUser?.id ?? '';
-    _tabController = TabController(length: 4, vsync: this);
     _loadLabResultsBackground();
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadLabResultsBackground() async {
@@ -282,39 +274,10 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
                   iconColor: WintermmuteStyles.colorOrange,
                   title: 'LABS',
                 ),
-                TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  indicatorColor: AppColors.primary,
-                  labelColor: AppColors.primary,
-                  unselectedLabelColor: AppColors.textMid,
-                  labelStyle: WintermmuteStyles.tabLabelStyle,
-                  unselectedLabelStyle: WintermmuteStyles.tabLabelStyle.copyWith(
-                    color: AppColors.textMid,
-                  ),
-                  tabs: const [
-                    Tab(text: 'ALL RESULTS'),
-                    Tab(text: 'OUT OF RANGE'),
-                    Tab(text: 'RECENT'),
-                    Tab(text: 'UPLOAD'),
-                  ],
-                ),
                 Expanded(
                   child: Stack(
                     children: [
-                      TabBarView(
-                        controller: _tabController,
-                        children: [
-                          // Tab 1: All Results
-                          _buildAllResultsTab(),
-                          // Tab 2: Out of Range
-                          _buildOutOfRangeTab(),
-                          // Tab 3: Recent
-                          _buildRecentTab(),
-                          // Tab 4: Upload
-                          _buildUploadTab(),
-                        ],
-                      ),
+                      _buildAllResultsView(),
                       // Scanlines overlay
                       Positioned.fill(
                         child: IgnorePointer(
@@ -334,173 +297,109 @@ class _LabsScreenState extends State<LabsScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildAllResultsTab() {
-    if (_labResults.isEmpty) {
-      return Center(
-        child: Text(
-          'NO LAB RESULTS',
-          style: TextStyle(color: AppColors.textMid, letterSpacing: 1),
-        ),
-      );
-    }
-
+  Widget _buildAllResultsView() {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text(
-          '${_labResults.length} test dates • ${_getTotalMarkerCount()} total markers',
-          style: TextStyle(
-            color: AppColors.textMid,
-            fontSize: 11,
-            letterSpacing: 0.5,
+        // Upload section at top
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+            borderRadius: BorderRadius.circular(8),
+            color: AppColors.surface.withOpacity(0.15),
           ),
-        ),
-        const SizedBox(height: 16),
-        ..._labResults.map((lab) => _buildLabResultCard(lab)).toList(),
-      ],
-    );
-  }
-
-  Widget _buildOutOfRangeTab() {
-    final outOfRange = _labResults.where((lab) {
-      // Count biomarkers that are out of range (simplified)
-      int count = 0;
-      lab.extractedData.forEach((key, value) {
-        if (_isOutOfRange(key, value)) {
-          count++;
-        }
-      });
-      return count > 0;
-    }).toList();
-
-    if (outOfRange.isEmpty) {
-      return Center(
-        child: Text(
-          'NO OUT OF RANGE MARKERS',
-          style: TextStyle(color: AppColors.accent, letterSpacing: 1),
-        ),
-      );
-    }
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Text(
-          '${outOfRange.length} tests with out-of-range markers',
-          style: TextStyle(
-            color: AppColors.textMid,
-            fontSize: 11,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...outOfRange.map((lab) => _buildLabResultCard(lab)).toList(),
-      ],
-    );
-  }
-
-  Widget _buildRecentTab() {
-    final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
-    final recent = _labResults.where((lab) => lab.uploadDate.isAfter(thirtyDaysAgo)).toList();
-
-    if (recent.isEmpty) {
-      return Center(
-        child: Text(
-          'NO RECENT LABS (30 DAYS)',
-          style: TextStyle(color: AppColors.textMid, letterSpacing: 1),
-        ),
-      );
-    }
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Text(
-          '${recent.length} labs from last 30 days',
-          style: TextStyle(
-            color: AppColors.textMid,
-            fontSize: 11,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...recent.map((lab) => _buildLabResultCard(lab)).toList(),
-      ],
-    );
-  }
-
-  Widget _buildUploadTab() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.upload_file, size: 48, color: AppColors.primary),
-          const SizedBox(height: 16),
-          Text(
-            'UPLOAD LAB REPORT',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              'Take a photo or upload an image of your lab report. Results will be extracted automatically.',
-              style: TextStyle(
-                color: AppColors.textMid,
-                fontSize: 12,
-                height: 1.6,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 32),
-          GestureDetector(
-            onTap: _isUploading ? null : _handleUpload,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: _isUploading ? AppColors.textMid : AppColors.primary.withOpacity(0.2), // Matte style
-                  width: 1,
+          child: Column(
+            children: [
+              Icon(Icons.upload_file, size: 40, color: AppColors.primary),
+              const SizedBox(height: 12),
+              Text(
+                'UPLOAD LAB REPORT',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
                 ),
-                borderRadius: BorderRadius.circular(4),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (_isUploading) ...[
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(AppColors.primary),
-                      ),
+              const SizedBox(height: 8),
+              Text(
+                'Take a photo or upload an image of your lab report',
+                style: TextStyle(
+                  color: AppColors.textMid,
+                  fontSize: 11,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: _isUploading ? null : _handleUpload,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: _isUploading ? AppColors.textMid : AppColors.primary.withOpacity(0.2),
+                      width: 1,
                     ),
-                    const SizedBox(width: 8),
-                  ],
-                  Text(
-                    _isUploading ? 'UPLOADING...' : '📤 UPLOAD NOW',
-                    style: TextStyle(
-                      color: _isUploading ? AppColors.textMid : AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                ],
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_isUploading) ...[
+                        SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        _isUploading ? 'UPLOADING...' : '📤 UPLOAD NOW',
+                        style: TextStyle(
+                          color: _isUploading ? AppColors.textMid : AppColors.primary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
+            ],
+          ),
+        ),
+
+        if (_labResults.isEmpty) ...[
+          const SizedBox(height: 40),
+          Center(
+            child: Text(
+              'NO LAB RESULTS YET',
+              style: TextStyle(color: AppColors.textMid, letterSpacing: 1),
             ),
           ),
+        ] else ...[
+          const SizedBox(height: 24),
+          Text(
+            '${_labResults.length} test dates • ${_getTotalMarkerCount()} total markers',
+            style: TextStyle(
+              color: AppColors.textMid,
+              fontSize: 11,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ..._labResults.map((lab) => _buildLabResultCard(lab)).toList(),
         ],
-      ),
+      ],
     );
   }
+
 
   Widget _buildLabResultCard(LabResult lab) {
     return GestureDetector(

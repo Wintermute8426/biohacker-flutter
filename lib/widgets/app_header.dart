@@ -47,7 +47,7 @@ class AppHeader extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          color: Colors.orange.withOpacity(0.8),  // DEBUG: Bright orange to verify build
+          color: AppColors.surface.withOpacity(0.3),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             mainAxisAlignment: trailing != null
