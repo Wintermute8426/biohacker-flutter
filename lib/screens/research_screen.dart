@@ -5,6 +5,7 @@ import '../data/peptide_library.dart';
 import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/app_header.dart';
+import '../widgets/full_screen_modal.dart';
 
 class ResearchScreen extends StatefulWidget {
   const ResearchScreen({Key? key}) : super(key: key);
@@ -57,43 +58,15 @@ class _ResearchScreenState extends State<ResearchScreen> {
   }
 
   void _showPeptideDetails(PeptideInfo peptide) {
-    showModalBottomSheet(
+    FullScreenModal.show(
       context: context,
-      backgroundColor: AppColors.surface,
-      isScrollControlled: true,
-      builder: (context) => SingleChildScrollView(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 120,
-        ),
+      title: peptide.name,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  peptide.name.toUpperCase(),
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  color: AppColors.textMid,
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
 
             // Category badge
             Container(

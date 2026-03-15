@@ -4,6 +4,7 @@ import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/dose_schedule_service.dart';
 import '../services/side_effects_database.dart';
+import 'full_screen_modal.dart';
 
 class SideEffectsModal extends ConsumerStatefulWidget {
   final DoseInstance dose;
@@ -106,44 +107,13 @@ class _SideEffectsModalState extends ConsumerState<SideEffectsModal> {
 
   @override
   Widget build(BuildContext context) {
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.7,
-      minChildSize: 0.5,
-      maxChildSize: 0.9,
-      builder: (context, scrollController) {
-        return Container(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: ListView(
-            controller: scrollController,
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.textMid,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Title
-              Text(
-                'Log Side Effects',
-                style: WintermmuteStyles.titleStyle,
-              ),
-              const SizedBox(height: 8),
-
-              // Peptide info
-              Container(
+    return FullScreenModal(
+      title: 'Log Side Effects',
+      child: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          // Peptide info
+          Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   border: Border.all(color: AppColors.accent.withOpacity(0.2)),
@@ -335,9 +305,7 @@ class _SideEffectsModalState extends ConsumerState<SideEffectsModal> {
                 ],
               ),
             ],
-          ),
-        );
-      },
+      ),
     );
   }
 }

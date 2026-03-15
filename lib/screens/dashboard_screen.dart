@@ -14,6 +14,7 @@ import '../widgets/cyberpunk_frame.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
+import '../widgets/full_screen_modal.dart';
 import 'labs_screen.dart';
 import 'research_screen.dart';
 import '../main.dart' show authProviderProvider;
@@ -208,42 +209,38 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   void _showSideEffectsModal(DoseInstance dose) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => SideEffectsModal(
-        dose: dose,
-        onSaved: _loadData,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => SideEffectsModal(
+          dose: dose,
+          onSaved: _loadData,
+        ),
       ),
     );
   }
 
   void _showWeightLogModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => WeightLogModal(
-        onSaved: () {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Weight logged successfully',
-                  style: WintermmuteStyles.bodyStyle,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => WeightLogModal(
+          onSaved: () {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Weight logged successfully',
+                    style: WintermmuteStyles.bodyStyle,
+                  ),
+                  backgroundColor: AppColors.accent,
                 ),
-                backgroundColor: AppColors.accent,
-              ),
-            );
-          }
-        },
+              );
+            }
+          },
+        ),
       ),
     );
   }

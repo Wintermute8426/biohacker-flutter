@@ -15,6 +15,7 @@ import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/app_header.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/full_screen_modal.dart';
 
 class LabsScreen extends StatefulWidget {
   const LabsScreen({Key? key}) : super(key: key);
@@ -499,53 +500,12 @@ class _LabsScreenState extends State<LabsScreen> {
   }
 
   void _showLabDetail(LabResult lab) {
-    showModalBottomSheet(
+    FullScreenModal.show(
       context: context,
-      backgroundColor: AppColors.background,
-      isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        expand: false,
-        builder: (context, scrollController) => Container(
-          color: AppColors.background,
-          child: ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.all(16),
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'LAB REPORT',
-                        style: TextStyle(
-                          color: AppColors.textMid,
-                          fontSize: 11,
-                          letterSpacing: 1,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        DateFormat('MMMM d, yyyy').format(lab.uploadDate),
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    color: AppColors.primary,
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+      title: 'Lab Report - ${DateFormat('MMM d, yyyy').format(lab.uploadDate)}',
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
 
               // Lab metadata
               if (lab.notes != null && lab.notes!.isNotEmpty) ...[
@@ -749,8 +709,6 @@ class _LabsScreenState extends State<LabsScreen> {
 
               const SizedBox(height: 24),
             ],
-          ),
-        ),
       ),
     );
   }

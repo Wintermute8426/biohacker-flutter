@@ -11,6 +11,7 @@ import '../widgets/side_effects_modal.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
+import '../widgets/full_screen_modal.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -985,55 +986,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     DateTime date,
     List<DoseInstance> dayDoses,
   ) {
-    showModalBottomSheet(
+    FullScreenModal.show(
       context: context,
-      backgroundColor: AppColors.surface,
-      isScrollControlled: true,
-      builder: (context) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.5,
-          minChildSize: 0.3,
-          maxChildSize: 0.9,
-          builder: (context, scrollController) {
-            return Container(
-              color: AppColors.surface,
-              child: ListView(
-                controller: scrollController,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: Container(
-                            width: 40,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: AppColors.textMid,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          DateFormat('EEEE, MMM dd, yyyy').format(date),
-                          style: WintermmuteStyles.titleStyle,
-                        ),
-                      ],
-                    ),
-                  ),
-                  ...dayDoses.map((dose) {
-                    return _buildDoseListItem(context, dose);
-                  }),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            );
-          },
-        );
-      },
+      title: DateFormat('EEEE, MMM dd, yyyy').format(date),
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          ...dayDoses.map((dose) {
+            return _buildDoseListItem(context, dose);
+          }),
+          const SizedBox(height: 32),
+        ],
+      ),
     );
   }
 
