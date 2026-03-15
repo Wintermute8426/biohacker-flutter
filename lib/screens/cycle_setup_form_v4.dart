@@ -585,6 +585,8 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               helperText: '5-500mg recommended',
               errorText: _fieldErrors['vialSize'],
               errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+              filled: true,
+              fillColor: AppColors.surface.withOpacity(0.95),
               border: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: _fieldErrors['vialSize'] != null ? AppColors.error : AppColors.textMid,
@@ -610,6 +612,8 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               helperText: '0.1-10mg recommended',
               errorText: _fieldErrors['desiredDose'],
               errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+              filled: true,
+              fillColor: AppColors.surface.withOpacity(0.95),
               border: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: _fieldErrors['desiredDose'] != null ? AppColors.error : AppColors.textMid,
@@ -637,6 +641,8 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               helperText: '0.05-1.0ml recommended',
               errorText: _fieldErrors['draw'],
               errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+              filled: true,
+              fillColor: AppColors.surface.withOpacity(0.95),
               border: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: _fieldErrors['draw'] != null ? AppColors.error : AppColors.textMid,
@@ -660,6 +666,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
+                color: AppColors.surface.withOpacity(0.95),
                 border: Border.all(color: AppColors.primary),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -783,6 +790,8 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             decoration: InputDecoration(
               labelText: 'INJECTION ROUTE',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+              filled: true,
+              fillColor: AppColors.surface.withOpacity(0.95),
               border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
@@ -802,6 +811,8 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             decoration: InputDecoration(
               labelText: 'FREQUENCY',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+              filled: true,
+              fillColor: AppColors.surface.withOpacity(0.95),
               border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
@@ -831,6 +842,8 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               helperText: '1-52 weeks recommended',
               errorText: _fieldErrors['cycleDuration'],
               errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+              filled: true,
+              fillColor: AppColors.surface.withOpacity(0.95),
               border: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: _fieldErrors['cycleDuration'] != null ? AppColors.error : AppColors.textMid,
@@ -851,6 +864,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
+                color: AppColors.surface.withOpacity(0.95),
                 border: Border.all(color: AppColors.accent, width: 0.5),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -952,7 +966,11 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
           if (_phases.isEmpty)
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(border: Border.all(color: AppColors.textMid, width: 1), borderRadius: BorderRadius.circular(4)),
+              decoration: BoxDecoration(
+                color: AppColors.surface.withOpacity(0.95),
+                border: Border.all(color: AppColors.textMid, width: 1),
+                borderRadius: BorderRadius.circular(4),
+              ),
               child: Center(child: Text('No phases added. Click above to add one.', style: TextStyle(color: AppColors.textMid, fontSize: 12))),
             )
           else
@@ -1015,6 +1033,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
+                color: AppColors.surface.withOpacity(0.95),
                 border: Border.all(color: AppColors.error, width: 0.5),
                 borderRadius: BorderRadius.circular(4),
               ),
@@ -1148,6 +1167,7 @@ class _PhaseCardState extends State<PhaseCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.95),
         border: Border.all(color: AppColors.primary, width: 1),
         borderRadius: BorderRadius.circular(4),
       ),
@@ -1170,7 +1190,7 @@ class _PhaseCardState extends State<PhaseCard> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: AppColors.surface.withOpacity(0.95),
               border: Border.all(color: AppColors.textMid, width: 0.5),
               borderRadius: BorderRadius.circular(4),
             ),
@@ -1195,6 +1215,8 @@ class _PhaseCardState extends State<PhaseCard> {
                 labelText: 'DURATION (days)',
                 labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
                 hintText: '7',
+                filled: true,
+                fillColor: AppColors.surface.withOpacity(0.95),
                 border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               ),
@@ -1223,7 +1245,7 @@ class _PhaseCardState extends State<PhaseCard> {
                       decoration: BoxDecoration(
                         border: Border.all(color: AppColors.textMid),
                         borderRadius: BorderRadius.circular(4),
-                        color: AppColors.surface,
+                        color: AppColors.surface.withOpacity(0.95),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1243,6 +1265,8 @@ class _PhaseCardState extends State<PhaseCard> {
                         labelText: 'Dosage (mg)',
                         labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
                         hintText: '50',
+                        filled: true,
+                        fillColor: AppColors.surface.withOpacity(0.95),
                         border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       ),
@@ -1258,6 +1282,8 @@ class _PhaseCardState extends State<PhaseCard> {
                   decoration: InputDecoration(
                     labelText: 'Frequency',
                     labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
+                    filled: true,
+                    fillColor: AppColors.surface.withOpacity(0.95),
                     border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                   ),
@@ -1281,6 +1307,8 @@ class _PhaseCardState extends State<PhaseCard> {
               labelText: 'Notes (optional)',
               labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
               hintText: 'e.g., slowly increase...',
+              filled: true,
+              fillColor: AppColors.surface.withOpacity(0.95),
               border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             ),

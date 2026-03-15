@@ -141,11 +141,28 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             backgroundColor: Colors.transparent,
             body: Column(
               children: [
-                // Header using reusable widget
-                const AppHeader(
+                // Header using reusable widget with view toggle
+                AppHeader(
                   icon: Icons.calendar_month,
                   iconColor: WintermmuteStyles.colorCyan,
                   title: 'DOSE CALENDAR',
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          _showMonthView ? Icons.view_week : Icons.calendar_view_month,
+                          color: AppColors.primary,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _showMonthView = !_showMonthView;
+                          });
+                        },
+                        tooltip: _showMonthView ? 'Week View' : 'Month View',
+                      ),
+                    ],
+                  ),
                 ),
                 Expanded(
                   child: Stack(
