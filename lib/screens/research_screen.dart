@@ -772,7 +772,6 @@ class _ResearchScreenState extends State<ResearchScreen> {
           Scaffold(
             backgroundColor: Colors.transparent,
             body: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header using reusable widget
                 AppHeader(

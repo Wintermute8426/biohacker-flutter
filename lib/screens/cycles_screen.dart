@@ -1092,7 +1092,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
           Scaffold(
             backgroundColor: Colors.transparent,
             body: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header using reusable widget
                 AppHeader(
