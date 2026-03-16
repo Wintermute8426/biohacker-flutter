@@ -172,9 +172,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
       // Load all stats in parallel
       final results = await Future.wait([
-        cyclesDb.getUserCycles(userId),
+        cyclesDb.getUserCycles(),
         labsDb.getUserLabResults(userId),
-        doseLogsDb.getUserDoseLogs(userId),
+        doseLogsDb.getAllDoseLogs(),
       ]);
 
       setState(() {
