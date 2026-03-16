@@ -72,6 +72,7 @@ class FullScreenModal extends StatelessWidget {
               fontSize: 16,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,
+              decoration: TextDecoration.none,
             ),
           ),
           IconButton(
