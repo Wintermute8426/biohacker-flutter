@@ -224,6 +224,11 @@ class _LabsScreenState extends State<LabsScreen> {
           extractedData: extractedBiomarkers,
         );
 
+        // Save to database
+        print('[Labs] Saving lab result to database...');
+        await _labsDb.saveLabResult(labResult);
+        print('[Labs] Lab result saved successfully');
+
         if (mounted) {
           setState(() {
             _labResults.insert(0, labResult);
