@@ -857,6 +857,42 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                   ),
                                 ),
                               ),
+
+                            // Biometric scan overlay (if photo exists)
+                            if (_profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty)
+                              Positioned(
+                                top: 2,
+                                left: 2,
+                                child: Icon(
+                                  Icons.fingerprint,
+                                  color: crtOrange.withOpacity(0.4),
+                                  size: 14,
+                                ),
+                              ),
+
+                            // BIO classification tag
+                            Positioned(
+                              top: 2,
+                              right: 2,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.8),
+                                  border: Border.all(color: crtOrange.withOpacity(0.6), width: 1),
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                                child: Text(
+                                  'BIO',
+                                  style: TextStyle(
+                                    color: crtOrange,
+                                    fontSize: 6,
+                                    fontFamily: 'monospace',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+
                             // Camera button for photo upload
                             Positioned(
                               bottom: 2,
@@ -908,7 +944,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     borderRadius: BorderRadius.circular(2),
                                   ),
                                   child: Text(
-                                    'BIOHACKER ID',
+                                    'CITIZEN ID',
                                     style: TextStyle(
                                       color: crtOrange,  // Orange instead of cyan
                                       fontSize: 10,
@@ -954,6 +990,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 fontFamily: 'monospace',
                               ),
                               overflow: TextOverflow.ellipsis,
+                            ),
+
+                            const SizedBox(height: 6),
+
+                            // Security clearance
+                            Row(
+                              children: [
+                                Icon(Icons.security, color: crtOrange, size: 10),
+                                SizedBox(width: 4),
+                                Text(
+                                  'CLEARANCE: DELTA-4',
+                                  style: TextStyle(
+                                    color: crtOrange.withOpacity(0.8),
+                                    fontSize: 8,
+                                    fontFamily: 'monospace',
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
                             ),
 
                             const SizedBox(height: 6),
@@ -1036,6 +1091,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 ),
                               ],
                             ),
+
+                            const SizedBox(height: 3),
+
+                            // Issue date
+                            Row(
+                              children: [
+                                Text(
+                                  'ISSUED: ',
+                                  style: TextStyle(
+                                    color: crtOrange.withOpacity(0.6),
+                                    fontSize: 8,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                                Text(
+                                  '2026.03.16',
+                                  style: TextStyle(
+                                    color: crtOrange,
+                                    fontSize: 8,
+                                    fontFamily: 'monospace',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -1059,6 +1139,56 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       borderRadius: const BorderRadius.only(topRight: Radius.circular(8)),
                     ),
+                  ),
+                ),
+
+                // Government authority badge (top-left)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: crtOrange, width: 1),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.shield, color: crtOrange, size: 10),
+                        SizedBox(width: 3),
+                        Text(
+                          'AUTHORIZED',
+                          style: TextStyle(
+                            color: crtOrange,
+                            fontSize: 7,
+                            fontFamily: 'monospace',
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Barcode at bottom
+                Positioned(
+                  bottom: 4,
+                  left: 116,
+                  right: 8,
+                  child: Row(
+                    children: [
+                      // Barcode icon
+                      Icon(Icons.qr_code_2, color: crtOrange.withOpacity(0.6), size: 16),
+                      SizedBox(width: 8),
+                      // Barcode lines
+                      Expanded(
+                        child: CustomPaint(
+                          size: Size(double.infinity, 12),
+                          painter: BarcodePainter(color: crtOrange),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -2396,6 +2526,38 @@ class HeavyScanlinesPainter extends CustomPainter {
         Offset(i, size.height),
         verticalPaint,
       );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class BarcodePainter extends CustomPainter {
+  final Color color;
+
+  BarcodePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.6)
+      ..strokeWidth = 1.0;
+
+    // Draw random-width barcode lines
+    double x = 0;
+    final random = [2.0, 1.0, 3.0, 1.0, 2.0, 1.0, 4.0, 2.0, 1.0, 3.0, 1.0, 2.0];
+    int index = 0;
+
+    while (x < size.width && index < random.length) {
+      final width = random[index % random.length];
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        paint,
+      );
+      x += width + 1;
+      index++;
     }
   }
 
