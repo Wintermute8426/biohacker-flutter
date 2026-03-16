@@ -78,6 +78,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildHamburgerMenu(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    final userEmail = user?.email;
+
     return Stack(
       children: [
         // City background
@@ -92,7 +95,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         SafeArea(
           child: Column(
             children: [
-              // Header with app branding
+              // Header with app branding and profile pic
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -105,51 +108,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primary,
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.3),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                          ),
-                        ],
-                      ),
+                    // Profile picture
+                    CircleAvatar(
+                      radius: 32,
+                      backgroundColor: AppColors.primary.withOpacity(0.2),
                       child: Icon(
                         Icons.account_circle,
                         color: AppColors.primary,
-                        size: 32,
+                        size: 48,
                       ),
+                      // TODO: Replace with actual profile image when available
                     ),
                     const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'BIOHACKER',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                            fontFamily: 'monospace',
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'BIOHACKER',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                              fontFamily: 'monospace',
+                            ),
                           ),
-                        ),
-                        Text(
-                          'User Menu',
-                          style: TextStyle(
-                            color: AppColors.textMid,
-                            fontSize: 12,
-                            fontFamily: 'monospace',
+                          Text(
+                            userEmail ?? 'User Profile',
+                            style: TextStyle(
+                              color: AppColors.textMid,
+                              fontSize: 12,
+                              fontFamily: 'monospace',
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

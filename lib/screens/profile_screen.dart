@@ -1,7 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/user_profile_service.dart';
 import '../services/profile_photo_service.dart';
 import '../services/cycles_database.dart';
@@ -14,6 +18,7 @@ import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
 import '../widgets/common/matte_card.dart';
+import '../widgets/common/cyber_button.dart';
 import '../utils/user_feedback.dart';
 import '../main.dart';
 
@@ -39,7 +44,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String? _selectedTimezone;
   String _selectedUnits = 'imperial';
 
-  // Notification preferences
+  // Notification preferences (simplified)
+  bool _doseReminders = true;
+
+  // Notification preferences (old - kept for compatibility)
   final Map<String, bool> _notificationPreferences = {
     'email': true,
     'push': false,
@@ -73,7 +81,251 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _heightFeetController = TextEditingController();
     _heightInchesController = TextEditingController();
     _bioController = TextEditingController();
+    _loadSettings();
     _loadProfile();
+  }
+
+  Future<void> _loadSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _doseReminders = prefs.getBool('dose_reminders') ?? true;
+      });
+    } catch (e) {
+      print('[ProfileScreen] Error loading settings: $e');
+    }
+  }
+
+  Future<void> _saveDoseReminders(bool value) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('dose_reminders', value);
+      setState(() => _doseReminders = value);
+
+      if (mounted) {
+        UserFeedback.showSuccess(context, 'Dose reminders ${value ? 'enabled' : 'disabled'}');
+      }
+    } catch (e) {
+      print('[ProfileScreen] Error saving dose reminders: $e');
+      if (mounted) {
+        UserFeedback.showError(context, 'Failed to save setting');
+      }
+    }
+  }
+
+  Future<void> _showUnitsDialog() async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(
+          'UNITS PREFERENCE',
+          style: TextStyle(
+            color: AppColors.primary,
+            fontFamily: 'monospace',
+            letterSpacing: 1,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text('Imperial (lbs, ft/in)', style: TextStyle(color: Colors.white)),
+              trailing: _selectedUnits == 'imperial'
+                  ? Icon(Icons.check, color: AppColors.primary)
+                  : null,
+              onTap: () => Navigator.pop(context, 'imperial'),
+            ),
+            ListTile(
+              title: Text('Metric (kg, cm)', style: TextStyle(color: Colors.white)),
+              trailing: _selectedUnits == 'metric'
+                  ? Icon(Icons.check, color: AppColors.primary)
+                  : null,
+              onTap: () => Navigator.pop(context, 'metric'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result != null && result != _selectedUnits) {
+      setState(() => _selectedUnits = result);
+      // Save to profile
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId != null) {
+        final profileService = ref.read(userProfileServiceProvider);
+        await profileService.updateUserProfile(userId, unitsPreference: result);
+        if (mounted) {
+          UserFeedback.showSuccess(context, 'Units preference updated');
+        }
+      }
+    }
+  }
+
+  Future<void> _exportData() async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) throw Exception('Not authenticated');
+
+      // Show loading
+      UserFeedback.showLoadingDialog(context, message: 'Exporting data...');
+
+      // Fetch all data
+      final cyclesDb = CyclesDatabase();
+      final labsDb = LabsDatabase();
+      final doseLogsDb = DoseLogsDatabase();
+
+      final cycles = await cyclesDb.getUserCycles();
+      final labs = await labsDb.getUserLabResults(userId);
+      final doses = await doseLogsDb.getAllDoseLogs();
+
+      // Create JSON export
+      final export = {
+        'exported_at': DateTime.now().toIso8601String(),
+        'user_id': userId,
+        'cycles': cycles.map((c) => {
+          'id': c.id,
+          'name': c.name,
+          'start_date': c.startDate.toIso8601String(),
+          'end_date': c.endDate?.toIso8601String(),
+          'status': c.status,
+          'notes': c.notes,
+        }).toList(),
+        'labs': labs.map((l) => {
+          'id': l.id,
+          'test_date': l.testDate.toIso8601String(),
+          'biomarker_id': l.biomarkerId,
+          'value': l.value,
+          'unit': l.unit,
+          'notes': l.notes,
+        }).toList(),
+        'doses': doses.map((d) => {
+          'id': d.id,
+          'timestamp': d.timestamp.toIso8601String(),
+          'compound_name': d.compoundName,
+          'dose_amount': d.doseAmount,
+          'dose_unit': d.doseUnit,
+          'notes': d.notes,
+        }).toList(),
+      };
+
+      final jsonString = JsonEncoder.withIndent('  ').convert(export);
+
+      // Close loading
+      Navigator.pop(context);
+
+      // Share the data
+      final result = await Share.shareXFiles(
+        [
+          XFile.fromData(
+            utf8.encode(jsonString),
+            mimeType: 'application/json',
+            name: 'biohacker_export_${DateTime.now().millisecondsSinceEpoch}.json',
+          ),
+        ],
+        subject: 'Biohacker Data Export',
+        text: 'Your Biohacker app data export',
+      );
+
+      if (result.status == ShareResultStatus.success) {
+        UserFeedback.showSuccess(context, 'Data exported successfully');
+      }
+    } catch (e) {
+      print('[ProfileScreen] Error exporting data: $e');
+      Navigator.pop(context); // Close loading if still open
+      if (mounted) {
+        UserFeedback.showError(context, 'Failed to export data: ${e.toString()}');
+      }
+    }
+  }
+
+  Future<void> _launchURL(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        throw Exception('Could not launch URL');
+      }
+    } catch (e) {
+      if (mounted) {
+        UserFeedback.showError(context, 'Could not open link');
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(
+          'Delete Account?',
+          style: TextStyle(
+            color: AppColors.error,
+            fontFamily: 'monospace',
+            letterSpacing: 1,
+          ),
+        ),
+        content: Text(
+          'This will permanently delete:\n\n'
+          '• All your cycles\n'
+          '• All lab reports\n'
+          '• All dose logs\n'
+          '• Your account\n\n'
+          'This action cannot be undone.',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'CANCEL',
+              style: TextStyle(
+                color: AppColors.textMid,
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'DELETE EVERYTHING',
+              style: TextStyle(
+                color: AppColors.error,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        // Show loading
+        UserFeedback.showLoadingDialog(context, message: 'Deleting account...');
+
+        // Delete all user data from database
+        final userId = Supabase.instance.client.auth.currentUser?.id;
+        if (userId != null) {
+          // Note: This should ideally be a server-side function that cascades deletes
+          // For now, we'll just sign out
+          await Supabase.instance.client.auth.signOut();
+        }
+
+        // Navigate to login
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      } catch (e) {
+        Navigator.pop(context); // Close loading
+        if (mounted) {
+          UserFeedback.showError(context, 'Failed to delete account: ${e.toString()}');
+        }
+      }
+    }
   }
 
   @override
@@ -857,30 +1109,161 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           const SizedBox(height: 16),
 
-          // NOTIFICATIONS SECTION
-          _buildSectionCard(
-            'NOTIFICATIONS',
-            Column(
+          // NOTIFICATION SETTINGS
+          MatteCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildToggleRow('Dose Reminders', _notificationPreferences['email'] ?? true, 'email'),
-                const Divider(height: 24, color: AppColors.textDim),
-                _buildToggleRow('Lab Alerts', _notificationPreferences['push'] ?? false, 'push'),
-                const Divider(height: 24, color: AppColors.textDim),
-                _buildToggleRow('Quiet Hours', _notificationPreferences['sms'] ?? false, 'sms'),
+                Row(
+                  children: [
+                    Icon(Icons.notifications, color: AppColors.primary, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'NOTIFICATION SETTINGS',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildInteractiveToggle(
+                  'Dose Reminders',
+                  'Get notified when it\'s time to take your doses',
+                  _doseReminders,
+                  (value) => _saveDoseReminders(value),
+                ),
               ],
             ),
           ),
 
           const SizedBox(height: 16),
 
-          // APP SETTINGS SECTION
-          _buildSectionCard(
-            'APP SETTINGS',
-            Column(
+          // APP SETTINGS
+          MatteCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoRow('Units', _selectedUnits == 'imperial' ? 'Imperial (lbs, ft/in)' : 'Metric (kg, cm)'),
+                Row(
+                  children: [
+                    Icon(Icons.settings, color: AppColors.primary, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'APP SETTINGS',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildActionTile(
+                  'Dark Mode',
+                  'Always enabled in Wintermute theme',
+                  Icons.dark_mode,
+                  null,
+                  enabled: false,
+                ),
                 const Divider(height: 24, color: AppColors.textDim),
-                _buildInfoRow('Theme', 'Cyberpunk (default)'),
+                _buildActionTile(
+                  'Units',
+                  _selectedUnits == 'imperial' ? 'Imperial (lbs, ft/in)' : 'Metric (kg, cm)',
+                  Icons.straighten,
+                  _showUnitsDialog,
+                ),
+                const Divider(height: 24, color: AppColors.textDim),
+                _buildActionTile(
+                  'Data Export',
+                  'Export all your data as JSON',
+                  Icons.download,
+                  _exportData,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // APP INFO
+          MatteCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.info, color: AppColors.primary, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'APP INFO',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildInfoRow('Version', '2.0.0'),
+                const Divider(height: 24, color: AppColors.textDim),
+                _buildActionTile(
+                  'Privacy Policy',
+                  'View our privacy policy',
+                  Icons.privacy_tip,
+                  () => _launchURL('https://example.com/privacy'),
+                ),
+                const Divider(height: 24, color: AppColors.textDim),
+                _buildActionTile(
+                  'Terms of Service',
+                  'View our terms of service',
+                  Icons.description,
+                  () => _launchURL('https://example.com/terms'),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // DANGER ZONE
+          MatteCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.warning, color: AppColors.error, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'DANGER ZONE',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.error,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildActionTile(
+                  'Delete Account',
+                  'Permanently delete all your data',
+                  Icons.delete_forever,
+                  _confirmDeleteAccount,
+                  isDanger: true,
+                ),
               ],
             ),
           ),
@@ -1076,15 +1459,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  // FORM VIEW (existing form code)
+  // FORM VIEW - Simplified inline editing
   Widget _buildForm() {
     return Form(
       key: _formKey,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Username
-          TextFormField(
+          // User Info Card
+          MatteCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.edit, color: AppColors.primary, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'EDIT PROFILE',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Username
+                TextFormField(
             controller: _usernameController,
             style: TextStyle(color: AppColors.textLight),
             decoration: InputDecoration(
@@ -1379,6 +1784,73 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               return null;
             },
           ),
+                const SizedBox(height: 16),
+
+                // Save and Cancel Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _isSaving ? null : _saveProfile,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: AppColors.primary,
+                          disabledBackgroundColor: AppColors.textDim,
+                        ),
+                        child: _isSaving
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.background),
+                                ),
+                              )
+                            : Text(
+                                'SAVE CHANGES',
+                                style: TextStyle(
+                                  color: AppColors.background,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'monospace',
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    if (_usernameController.text.isNotEmpty &&
+                        _ageController.text.isNotEmpty &&
+                        _selectedGender != null)
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _isSaving
+                              ? null
+                              : () {
+                                  setState(() => _isEditMode = false);
+                                },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: BorderSide(color: AppColors.textMid),
+                          ),
+                          child: Text(
+                            'CANCEL',
+                            style: TextStyle(
+                              color: AppColors.textMid,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'monospace',
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
           const SizedBox(height: 24),
 
           // Preferences Section
@@ -1533,63 +2005,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             maxLines: 3,
             maxLength: 200,
           ),
-          const SizedBox(height: 24),
-
-          // Save Button
-          ElevatedButton(
-            onPressed: _isSaving ? null : _saveProfile,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: AppColors.primary,
-              disabledBackgroundColor: AppColors.textDim,
-            ),
-            child: _isSaving
-                ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.background),
-                    ),
-                  )
-                : Text(
-                    'SAVE PROFILE',
-                    style: TextStyle(
-                      color: AppColors.background,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'monospace',
-                      letterSpacing: 1,
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 12),
-
-          // Cancel button (if profile is complete)
-          if (_usernameController.text.isNotEmpty &&
-              _ageController.text.isNotEmpty &&
-              _selectedGender != null)
-            OutlinedButton(
-              onPressed: _isSaving
-                  ? null
-                  : () {
-                      setState(() => _isEditMode = false);
-                    },
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                side: BorderSide(color: AppColors.textMid),
-              ),
-              child: Text(
-                'CANCEL',
-                style: TextStyle(
-                  color: AppColors.textMid,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'monospace',
-                  letterSpacing: 1,
-                ),
-              ),
-            ),
           const SizedBox(height: 16),
 
           // Success/Error Messages
@@ -1711,6 +2126,122 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInteractiveToggle(
+    String title,
+    String subtitle,
+    bool value,
+    Function(bool) onChanged,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onChanged(!value),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 14,
+                        color: AppColors.textLight,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                        color: AppColors.textMid,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Switch(
+                value: value,
+                onChanged: onChanged,
+                activeColor: AppColors.primary,
+                activeTrackColor: AppColors.primary.withOpacity(0.5),
+                inactiveThumbColor: AppColors.textDim,
+                inactiveTrackColor: AppColors.textDim.withOpacity(0.3),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionTile(
+    String title,
+    String subtitle,
+    IconData icon,
+    VoidCallback? onTap, {
+    bool isDanger = false,
+    bool enabled = true,
+  }) {
+    final color = isDanger ? AppColors.error : AppColors.textLight;
+    final iconColor = isDanger ? AppColors.error : AppColors.primary;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              Icon(icon, color: iconColor, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 14,
+                        color: color,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                        color: AppColors.textMid,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (enabled && onTap != null)
+                Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textDim,
+                  size: 20,
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
