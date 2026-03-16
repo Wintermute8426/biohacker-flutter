@@ -610,128 +610,117 @@ class _LabsScreenState extends State<LabsScreen> {
                 final status = entry.value is Map
                   ? (entry.value['status']?.toString() ?? 'NORMAL')
                   : 'NORMAL';
-                final category = _getBiomarkerCategory(entry.key);
                 final hint = _getBiomarkerHint(entry.key);
                 final icon = _getBiomarkerIcon(entry.key);
+                final statusColor = _getStatusColor(status);
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: MatteCard(
-                    borderColor: isOut ? AppColors.error : AppColors.primary,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Icon + Name row with Status badge
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border(
+                        left: BorderSide(
+                          color: statusColor,
+                          width: 4,
+                        ),
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        // Left side: Icon + Name + Description
+                        Expanded(
+                          child: Row(
                             children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    icon,
-                                    color: AppColors.primary,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _beautifyBiomarkerName(entry.key),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.primary,
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                ],
+                              Icon(
+                                icon,
+                                color: statusColor,
+                                size: 20,
                               ),
-                              // Status badge
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: isOut
-                                    ? AppColors.error.withOpacity(0.15)
-                                    : AppColors.surface.withOpacity(0.15),
-                                  border: Border.all(
-                                    color: isOut
-                                      ? AppColors.error.withOpacity(0.3)
-                                      : AppColors.accent.withOpacity(0.2),
-                                    width: 1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      _beautifyBiomarkerName(entry.key),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                    ),
+                                    if (hint.isNotEmpty) ...[
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        hint,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textMid,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
-                                child: Text(
-                                  isOut ? 'HIGH' : status,
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Right side: Value + Unit + Status
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                Text(
+                                  displayValue,
                                   style: TextStyle(
-                                    color: isOut ? AppColors.error : AppColors.textMid,
-                                    fontSize: 10,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
+                                    color: statusColor,
                                     decoration: TextDecoration.none,
                                   ),
                                 ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _getUnitForBiomarker(entry.key),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textMid,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            // Status badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: statusColor.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(3),
                               ),
-                            ],
-                          ),
-                          // Description (hint)
-                          if (hint.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              hint,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textMid,
-                                fontStyle: FontStyle.italic,
-                                decoration: TextDecoration.none,
+                              child: Text(
+                                status.toUpperCase(),
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: statusColor,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.none,
+                                ),
                               ),
                             ),
                           ],
-                          const SizedBox(height: 12),
-                          // Value + Unit row
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              Text(
-                                displayValue,
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                _getUnitForBiomarker(entry.key),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.textMid,
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          // Category badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              category,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w500,
-                                decoration: TextDecoration.none,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -927,9 +916,9 @@ class _LabsScreenState extends State<LabsScreen> {
       final val = value['value'];
       if (val is num) numValue = val.toDouble();
     }
-    
+
     if (numValue == null) return false;
-    
+
     final ranges = {
       'testosterone': (300.0, 900.0),
       'igf1': (100.0, 300.0),
@@ -938,6 +927,23 @@ class _LabsScreenState extends State<LabsScreen> {
     final range = ranges[biomarker.toLowerCase()];
     if (range == null) return false;
     return numValue < range.$1 || numValue > range.$2;
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toUpperCase()) {
+      case 'NORMAL':
+      case 'OPTIMAL':
+        return const Color(0xFF10b981); // Green
+      case 'BORDERLINE':
+      case 'SUBOPTIMAL':
+        return const Color(0xFFFF6B00); // Orange
+      case 'HIGH':
+      case 'LOW':
+      case 'OUT OF RANGE':
+        return const Color(0xFFFF0040); // Red
+      default:
+        return AppColors.primary; // Cyan fallback
+    }
   }
 }
 
