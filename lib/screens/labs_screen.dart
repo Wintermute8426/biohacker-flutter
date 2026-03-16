@@ -258,6 +258,62 @@ class _LabsScreenState extends State<LabsScreen> {
     }
   }
 
+  Future<void> _deleteLabResult(LabResult lab) async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Delete Lab Report?', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'This will permanently delete this lab report and all its biomarkers.',
+          style: TextStyle(color: AppColors.textMid),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('CANCEL', style: TextStyle(color: AppColors.textMid)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('DELETE', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      // Delete from database
+      await _labsDb.deleteLabResult(lab.id);
+
+      // Remove from local state
+      if (mounted) {
+        setState(() {
+          _labResults.removeWhere((l) => l.id == lab.id);
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lab report deleted'),
+            backgroundColor: AppColors.accent,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error deleting lab result: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting report: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -453,6 +509,16 @@ class _LabsScreenState extends State<LabsScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
+                    // DELETE BUTTON
+                    IconButton(
+                      icon: Icon(Icons.delete_outline, size: 18),
+                      color: AppColors.error.withOpacity(0.7),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      onPressed: () => _deleteLabResult(lab),
+                      tooltip: 'Delete report',
+                    ),
+                    const SizedBox(width: 4),
                     Icon(Icons.chevron_right, color: AppColors.primary, size: 18),
                   ],
                 ),
