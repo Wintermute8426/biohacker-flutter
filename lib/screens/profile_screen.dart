@@ -473,6 +473,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           _healthGoalsFromOnboarding = profile.healthGoals;
 
+          // Populate goals from database if not already set in SharedPreferences
+          if (_goalsController.text.isEmpty && profile.healthGoals.isNotEmpty) {
+            _goalsController.text = profile.healthGoals.join(', ');
+            // Save to SharedPreferences for future loads
+            prefs.setString('user_goals', _goalsController.text);
+          }
+
           // If profile is incomplete, show form
           _isEditMode = profile.username == null ||
                          profile.age == null ||

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/user_profile_service.dart';
@@ -83,10 +84,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     try {
       final service = ref.read(userProfileServiceProvider);
-      
+
       // First, check if profile exists - if not, create it
       var profile = await service.getUserProfile(userId);
-      
+
       if (profile == null) {
         print('[Onboarding] Profile not found, creating...');
         profile = await service.createUserProfile(userId);
@@ -109,6 +110,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (updated == null) {
         throw Exception('Failed to save profile');
       }
+
+      // Save goals to SharedPreferences for profile screen
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_goals', _selectedGoals.join(', '));
 
       // Initialize notification preferences
       await service.initializeNotificationPreferences(userId);
