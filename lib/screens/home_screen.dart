@@ -77,6 +77,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  String _getInitials(String? email) {
+    if (email == null || email.isEmpty) return '?';
+    final parts = email.split('@');
+    if (parts.isEmpty) return '?';
+    final name = parts[0];
+    if (name.length >= 2) {
+      return '${name[0]}${name[1]}'.toUpperCase();
+    }
+    return name[0].toUpperCase();
+  }
+
   Widget _buildHamburgerMenu(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
     final userEmail = user?.email;
@@ -108,16 +119,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 child: Row(
                   children: [
-                    // Profile picture
+                    // Profile picture with initials
                     CircleAvatar(
-                      radius: 32,
-                      backgroundColor: AppColors.primary.withOpacity(0.2),
-                      child: Icon(
-                        Icons.account_circle,
-                        color: AppColors.primary,
-                        size: 48,
+                      radius: 28,
+                      backgroundColor: AppColors.primary.withOpacity(0.15),
+                      child: Text(
+                        _getInitials(userEmail),
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'monospace',
+                        ),
                       ),
-                      // TODO: Replace with actual profile image when available
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -128,14 +142,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             'BIOHACKER',
                             style: TextStyle(
                               color: AppColors.primary,
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 2,
                               fontFamily: 'monospace',
                             ),
                           ),
+                          const SizedBox(height: 2),
                           Text(
-                            userEmail ?? 'User Profile',
+                            userEmail ?? 'Loading...',
                             style: TextStyle(
                               color: AppColors.textMid,
                               fontSize: 12,

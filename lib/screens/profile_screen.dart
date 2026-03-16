@@ -670,322 +670,367 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  // CYBERPUNK ID CARD VIEW
+  String _getInitials(String? name) {
+    if (name == null || name.isEmpty) return '?';
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
+  }
+
+  // CYBERPUNK ID CARD VIEW - Blade Runner Style
   Widget _buildIDCard() {
     final user = Supabase.instance.client.auth.currentUser;
+    final userId = user?.id ?? '';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // ID Card Container (matte Wintermute style)
+          // BLADE RUNNER STYLE ID CARD - Compact horizontal layout
           Container(
+            height: 140,
+            margin: const EdgeInsets.only(bottom: 24),
             decoration: BoxDecoration(
-              color: AppColors.surface.withOpacity(0.15), // Matte dark background
-              border: Border.all(
-                color: AppColors.primary.withOpacity(0.25), // Subtle border
-                width: 1,
-              ),
+              color: AppColors.surface.withOpacity(0.9),
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppColors.primary.withOpacity(0.3),
+                width: 2,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.08), // Subtle glow
-                  blurRadius: 6,
-                  spreadRadius: 0,
+                  color: AppColors.primary.withOpacity(0.2),
+                  blurRadius: 20,
+                  spreadRadius: 2,
                 ),
               ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Stack(
               children: [
-                // Header: USERNAME + ID Number
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(6),
-                      topRight: Radius.circular(6),
+                // Scanlines overlay
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: CustomPaint(
+                      painter: _IDCardScanlinesPainter(),
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+
+                // ID card content - horizontal layout
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
                     children: [
-                      Text(
-                        'BIOHACKER ID',
-                        style: TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 10,
-                          letterSpacing: 2,
-                          color: AppColors.textMid,
+                      // Left: Profile photo/avatar
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.5),
+                            width: 2,
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            // Avatar or photo
+                            Center(
+                              child: _photoUrl != null && _photoUrl!.isNotEmpty
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(2),
+                                      child: Image.network(
+                                        _photoUrl!,
+                                        width: 96,
+                                        height: 96,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Text(
+                                            _getInitials(_usernameController.text),
+                                            style: TextStyle(
+                                              color: AppColors.primary,
+                                              fontSize: 36,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'monospace',
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : Text(
+                                      _getInitials(_usernameController.text),
+                                      style: TextStyle(
+                                        color: AppColors.primary,
+                                        fontSize: 36,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                            ),
+                            // Camera button for photo upload
+                            Positioned(
+                              bottom: 2,
+                              right: 2,
+                              child: GestureDetector(
+                                onTap: _isUploadingPhoto ? null : _uploadProfilePhoto,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                  child: _isUploadingPhoto
+                                      ? SizedBox(
+                                          width: 12,
+                                          height: 12,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 1.5,
+                                            color: AppColors.background,
+                                          ),
+                                        )
+                                      : Icon(
+                                          Icons.camera_alt,
+                                          color: AppColors.background,
+                                          size: 12,
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _usernameController.text.toUpperCase(),
-                        style: TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      Text(
-                        'ID: ${Supabase.instance.client.auth.currentUser?.id.substring(0, 8).toUpperCase() ?? 'UNKNOWN'}',
-                        style: TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 10,
-                          color: AppColors.textDim,
+
+                      const SizedBox(width: 16),
+
+                      // Right: ID info (compact, horizontal layout)
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // ID header bar
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                  child: Text(
+                                    'BIOHACKER ID',
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 2,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                // Holographic shimmer icon
+                                Icon(
+                                  Icons.verified,
+                                  color: AppColors.primary.withOpacity(0.5),
+                                  size: 16,
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            // Name
+                            Text(
+                              _usernameController.text.toUpperCase(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'monospace',
+                                letterSpacing: 1,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+
+                            const SizedBox(height: 4),
+
+                            // Email (compact)
+                            Text(
+                              user?.email ?? '',
+                              style: TextStyle(
+                                color: AppColors.textMid,
+                                fontSize: 11,
+                                fontFamily: 'monospace',
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            // ID number (generated from user ID)
+                            Row(
+                              children: [
+                                Text(
+                                  'ID: ',
+                                  style: TextStyle(
+                                    color: AppColors.textMid,
+                                    fontSize: 10,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                                Text(
+                                  userId.length >= 8 ? userId.substring(0, 8).toUpperCase() : userId.toUpperCase(),
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'monospace',
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // Scanline effect (decorative)
-                Container(
-                  height: 2,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.transparent,
-                        AppColors.accent,
-                        Colors.transparent,
-                      ],
+                // Holographic corner accent
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        colors: [
+                          AppColors.primary.withOpacity(0.3),
+                          Colors.transparent,
+                        ],
+                      ),
+                      borderRadius: const BorderRadius.only(topRight: Radius.circular(8)),
                     ),
                   ),
                 ),
+              ],
+            ),
+          ),
 
-                // Profile Photo Section
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Center(
-                    child: Stack(
-                      children: [
-                        // Profile photo with cyan glow
-                        Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.primary,
-                              width: 3,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.1),
-                                blurRadius: 4,
-                                spreadRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child: _photoUrl != null && _photoUrl!.isNotEmpty
-                                ? Image.network(
-                                    _photoUrl!,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return _buildDefaultAvatar();
-                                    },
-                                  )
-                                : _buildDefaultAvatar(),
-                          ),
-                        ),
-                        // Edit button
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: GestureDetector(
-                            onTap: _isUploadingPhoto ? null : _uploadProfilePhoto,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppColors.accent,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.accent.withOpacity(0.1),
-                                    blurRadius: 6,
-                                    spreadRadius: 0,
-                                  ),
-                                ],
-                              ),
-                              child: _isUploadingPhoto
-                                  ? SizedBox(
-                                      width: 16,
-                                      height: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppColors.background,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.camera_alt,
-                                      color: AppColors.background,
-                                      size: 16,
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+          // Stats section below ID card
+          MatteCard(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Bio
+                  if (_bioController.text.isNotEmpty) ...[
+                    _buildStatRow('BIO', _bioController.text),
+                    const Divider(height: 24),
+                  ],
 
-                // Stats Grid
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  // Core Stats
+                  Row(
                     children: [
-                      // Bio
-                      if (_bioController.text.isNotEmpty) ...[
-                        _buildStatRow('BIO', _bioController.text),
-                        const Divider(height: 24),
-                      ],
-
-                      // Core Stats
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildStatBlock(
-                              'AGE',
-                              _ageController.text,
-                              Icons.calendar_today,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildStatBlock(
-                              'GENDER',
-                              _formatGender(_selectedGender),
-                              Icons.person,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildStatBlock(
-                              'HEIGHT',
-                              _heightDisplay,
-                              Icons.straighten,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildStatBlock(
-                              'WEIGHT',
-                              _latestWeight ?? 'N/A',
-                              Icons.monitor_weight,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      _buildStatBlock(
-                        'TIMEZONE',
-                        _selectedTimezone?.split('/').last ?? 'Not set',
-                        Icons.access_time,
-                      ),
-
-                      // Health Goals
-                      if (_healthGoalsFromOnboarding.isNotEmpty) ...[
-                        const SizedBox(height: 16),
-                        const Divider(),
-                        const SizedBox(height: 16),
-                        Text(
-                          'OBJECTIVES',
-                          style: TextStyle(
-                            fontFamily: 'monospace',
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textMid,
-                            letterSpacing: 1,
-                          ),
+                      Expanded(
+                        child: _buildStatBlock(
+                          'AGE',
+                          _ageController.text,
+                          Icons.calendar_today,
                         ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: _healthGoalsFromOnboarding.map((goal) {
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: AppColors.accent,
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                _capitalizeGoal(goal).toUpperCase(),
-                                style: TextStyle(
-                                  fontFamily: 'monospace',
-                                  fontSize: 10,
-                                  color: AppColors.accent,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatBlock(
+                          'GENDER',
+                          _formatGender(_selectedGender),
+                          Icons.person,
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatBlock(
+                          'HEIGHT',
+                          _heightDisplay,
+                          Icons.straighten,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatBlock(
+                          'WEIGHT',
+                          _latestWeight ?? 'N/A',
+                          Icons.monitor_weight,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildStatBlock(
+                    'TIMEZONE',
+                    _selectedTimezone?.split('/').last ?? 'Not set',
+                    Icons.access_time,
+                  ),
 
-                      // Footer: Status indicator
-                      const SizedBox(height: 16),
-                      const Divider(),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
+                  // Health Goals
+                  if (_healthGoalsFromOnboarding.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 16),
+                    Text(
+                      'OBJECTIVES',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textMid,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _healthGoalsFromOnboarding.map((goal) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border.all(
                               color: AppColors.accent,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.accent.withOpacity(0.1),
-                                  blurRadius: 4,
-                                  spreadRadius: 0,
-                                ),
-                              ],
+                              width: 1,
                             ),
+                            borderRadius: BorderRadius.circular(4),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'ACTIVE',
+                          child: Text(
+                            _capitalizeGoal(goal).toUpperCase(),
                             style: TextStyle(
                               fontFamily: 'monospace',
                               fontSize: 10,
                               color: AppColors.accent,
-                              letterSpacing: 1,
+                              letterSpacing: 0.5,
                             ),
                           ),
-                          const Spacer(),
-                          Text(
-                            'BIOHACKER V2',
-                            style: TextStyle(
-                              fontFamily: 'monospace',
-                              fontSize: 9,
-                              color: AppColors.textDim,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
 
@@ -2265,6 +2310,22 @@ class _ScanlinesPainter extends CustomPainter {
       ..strokeWidth = 1;
 
     for (double y = 0; y < size.height; y += 3) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _IDCardScanlinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = AppColors.primary.withOpacity(0.05)
+      ..strokeWidth = 1;
+
+    for (double y = 0; y < size.height; y += 2) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
   }
