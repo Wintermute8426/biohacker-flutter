@@ -71,9 +71,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String? _profilePhotoPath;
 
   // Stats
-  int _cycleCount = 0;
-  int _labReportCount = 0;
-  int _doseLogCount = 0;
 
   @override
   void initState() {
@@ -500,9 +497,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         print('[ProfileScreen] Weight loading error: $e');
       }
 
-      // Load stats in parallel
-      await _loadStats(userId);
-
       setState(() {
         _isLoading = false;
       });
@@ -516,29 +510,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  Future<void> _loadStats(String userId) async {
-    try {
-      final cyclesDb = CyclesDatabase();
-      final labsDb = LabsDatabase();
-      final doseLogsDb = DoseLogsDatabase();
-
-      // Load all stats in parallel
-      final results = await Future.wait([
-        cyclesDb.getUserCycles(),
-        labsDb.getUserLabResults(userId),
-        doseLogsDb.getAllDoseLogs(),
-      ]);
-
-      setState(() {
-        _cycleCount = results[0].length;
-        _labReportCount = results[1].length;
-        _doseLogCount = results[2].length;
-      });
-    } catch (e) {
-      print('[ProfileScreen] Error loading stats: $e');
-      // Don't show error to user, just log it
-    }
-  }
 
   void _updateHeightDisplay() {
     final feet = _heightFeetController.text;
@@ -1134,77 +1105,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
 
           const SizedBox(height: 24),
-
-          // STATS SECTION
-          MatteCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.analytics, color: AppColors.primary, size: 16),
-                    const SizedBox(width: 8),
-                    Text(
-                      'ACTIVITY STATS',
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatCard(
-                        label: 'CYCLES',
-                        value: _cycleCount.toString(),
-                        icon: Icons.autorenew,
-                        color: WintermmuteStyles.colorGreen,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildStatCard(
-                        label: 'LAB REPORTS',
-                        value: _labReportCount.toString(),
-                        icon: Icons.science,
-                        color: WintermmuteStyles.colorOrange,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatCard(
-                        label: 'TOTAL DOSES',
-                        value: _doseLogCount.toString(),
-                        icon: Icons.medical_services,
-                        color: WintermmuteStyles.colorMagenta,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildStatCard(
-                        label: 'APP VERSION',
-                        value: '2.0',
-                        icon: Icons.info_outline,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
 
           // GOALS CARD - Separate, editable
           MatteCard(
@@ -2296,60 +2196,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildStatCard({
-    required String label,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 14, color: color),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 9,
-                    color: color,
-                    letterSpacing: 0.5,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontFamily: 'monospace',
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: color,
-              height: 1,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildInteractiveToggle(
     String title,
