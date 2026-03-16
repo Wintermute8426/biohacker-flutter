@@ -775,6 +775,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final user = Supabase.instance.client.auth.currentUser;
     final userId = user?.id ?? '';
 
+    // CRT orange colors
+    final Color crtOrange = Color(0xFFFF9800); // Amber CRT orange
+    final Color crtGlow = Color(0xFFFF6600);   // Darker orange for glow
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -784,28 +788,50 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             height: 140,
             margin: const EdgeInsets.only(bottom: 24),
             decoration: BoxDecoration(
-              color: AppColors.surface.withOpacity(0.9),
+              color: Colors.black,  // Pure black background like CRT
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: AppColors.primary.withOpacity(0.3),
+                color: crtOrange.withOpacity(0.5),
                 width: 2,
               ),
               boxShadow: [
+                // Heavy CRT glow
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.2),
-                  blurRadius: 20,
-                  spreadRadius: 2,
+                  color: crtOrange.withOpacity(0.4),
+                  blurRadius: 30,
+                  spreadRadius: 5,
+                ),
+                BoxShadow(
+                  color: crtGlow.withOpacity(0.3),
+                  blurRadius: 50,
+                  spreadRadius: 10,
                 ),
               ],
             ),
             child: Stack(
               children: [
-                // Scanlines overlay
+                // HEAVY scanlines overlay
                 Positioned.fill(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: CustomPaint(
-                      painter: _IDCardScanlinesPainter(),
+                      painter: HeavyScanlinesPainter(color: crtOrange),
+                    ),
+                  ),
+                ),
+
+                // CRT flicker/glow overlay
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: Alignment.center,
+                        radius: 1.2,
+                        colors: [
+                          crtOrange.withOpacity(0.05),
+                          Colors.transparent,
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -820,10 +846,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         width: 100,
                         height: 100,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: Colors.black,
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
-                            color: AppColors.primary.withOpacity(0.5),
+                            color: crtOrange.withOpacity(0.7),  // Orange border
                             width: 2,
                           ),
                           image: _profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty
@@ -841,7 +867,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 child: Text(
                                   _getInitials(_usernameController.text),
                                   style: TextStyle(
-                                    color: AppColors.primary,
+                                    color: crtOrange,
                                     fontSize: 36,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'monospace',
@@ -857,7 +883,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 child: Container(
                                   padding: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary,
+                                    color: crtOrange,
                                     borderRadius: BorderRadius.circular(2),
                                   ),
                                   child: _isUploadingPhoto
@@ -866,12 +892,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                           height: 12,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 1.5,
-                                            color: AppColors.background,
+                                            color: Colors.black,
                                           ),
                                         )
                                       : Icon(
                                           Icons.camera_alt,
-                                          color: AppColors.background,
+                                          color: Colors.black,
                                           size: 12,
                                         ),
                                 ),
@@ -895,13 +921,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withOpacity(0.2),
+                                    color: crtOrange.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(2),
                                   ),
                                   child: Text(
                                     'BIOHACKER ID',
                                     style: TextStyle(
-                                      color: AppColors.primary,
+                                      color: crtOrange,  // Orange instead of cyan
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 2,
@@ -913,7 +939,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 // Holographic shimmer icon
                                 Icon(
                                   Icons.verified,
-                                  color: AppColors.primary.withOpacity(0.5),
+                                  color: crtOrange.withOpacity(0.5),
                                   size: 16,
                                 ),
                               ],
@@ -925,7 +951,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             Text(
                               _usernameController.text.toUpperCase(),
                               style: TextStyle(
-                                color: Colors.white,
+                                color: crtOrange,  // Orange
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'monospace',
@@ -940,7 +966,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             Text(
                               user?.email ?? '',
                               style: TextStyle(
-                                color: AppColors.textMid,
+                                color: crtOrange.withOpacity(0.7),  // Orange with transparency
                                 fontSize: 11,
                                 fontFamily: 'monospace',
                               ),
@@ -954,12 +980,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               children: [
                                 // Age
                                 if (_ageController.text.isNotEmpty) ...[
-                                  Icon(Icons.cake, color: AppColors.textMid, size: 10),
+                                  Icon(Icons.cake, color: crtOrange.withOpacity(0.7), size: 10),
                                   SizedBox(width: 3),
                                   Text(
                                     '${_ageController.text}y',
                                     style: TextStyle(
-                                      color: AppColors.textMid,
+                                      color: crtOrange.withOpacity(0.7),
                                       fontSize: 10,
                                       fontFamily: 'monospace',
                                     ),
@@ -969,12 +995,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                                 // Height
                                 if (_heightDisplay != 'Not set') ...[
-                                  Icon(Icons.height, color: AppColors.textMid, size: 10),
+                                  Icon(Icons.height, color: crtOrange.withOpacity(0.7), size: 10),
                                   SizedBox(width: 3),
                                   Text(
                                     _heightDisplay,
                                     style: TextStyle(
-                                      color: AppColors.textMid,
+                                      color: crtOrange.withOpacity(0.7),
                                       fontSize: 10,
                                       fontFamily: 'monospace',
                                     ),
@@ -986,14 +1012,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 if (_selectedGender != null) ...[
                                   Icon(
                                     _selectedGender == 'male' ? Icons.male : (_selectedGender == 'female' ? Icons.female : Icons.transgender),
-                                    color: AppColors.textMid,
+                                    color: crtOrange.withOpacity(0.7),
                                     size: 10,
                                   ),
                                   SizedBox(width: 3),
                                   Text(
                                     _formatGender(_selectedGender),
                                     style: TextStyle(
-                                      color: AppColors.textMid,
+                                      color: crtOrange.withOpacity(0.7),
                                       fontSize: 10,
                                       fontFamily: 'monospace',
                                     ),
@@ -1010,7 +1036,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 Text(
                                   'ID: ',
                                   style: TextStyle(
-                                    color: AppColors.textMid,
+                                    color: crtOrange.withOpacity(0.7),
                                     fontSize: 10,
                                     fontFamily: 'monospace',
                                   ),
@@ -1018,7 +1044,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 Text(
                                   userId.length >= 8 ? userId.substring(0, 8).toUpperCase() : userId.toUpperCase(),
                                   style: TextStyle(
-                                    color: AppColors.primary,
+                                    color: crtOrange,
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'monospace',
@@ -1044,7 +1070,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     decoration: BoxDecoration(
                       gradient: RadialGradient(
                         colors: [
-                          AppColors.primary.withOpacity(0.3),
+                          crtOrange.withOpacity(0.4),
                           Colors.transparent,
                         ],
                       ),
@@ -2349,6 +2375,44 @@ class _IDCardScanlinesPainter extends CustomPainter {
 
     for (double y = 0; y < size.height; y += 2) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class HeavyScanlinesPainter extends CustomPainter {
+  final Color color;
+
+  HeavyScanlinesPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.15)  // Heavier opacity
+      ..strokeWidth = 2.0;  // Thicker lines
+
+    // Draw horizontal scanlines every 3 pixels (dense)
+    for (double i = 0; i < size.height; i += 3) {
+      canvas.drawLine(
+        Offset(0, i),
+        Offset(size.width, i),
+        paint,
+      );
+    }
+
+    // Add vertical scanlines for CRT effect (light)
+    final verticalPaint = Paint()
+      ..color = color.withOpacity(0.05)
+      ..strokeWidth = 1.0;
+
+    for (double i = 0; i < size.width; i += 2) {
+      canvas.drawLine(
+        Offset(i, 0),
+        Offset(i, size.height),
+        verticalPaint,
+      );
     }
   }
 
