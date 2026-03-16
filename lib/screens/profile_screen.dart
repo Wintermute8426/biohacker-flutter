@@ -932,7 +932,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             // ID header bar
                             Row(
@@ -964,14 +964,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ],
                             ),
 
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 6),
 
                             // Name
                             Text(
                               _usernameController.text.toUpperCase(),
                               style: TextStyle(
                                 color: crtOrange,  // Orange
-                                fontSize: 16,
+                                fontSize: 15,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'monospace',
                                 letterSpacing: 1,
@@ -979,39 +979,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
 
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 3),
 
                             // Email (compact)
                             Text(
                               user?.email ?? '',
                               style: TextStyle(
                                 color: crtOrange.withOpacity(0.7),  // Orange with transparency
-                                fontSize: 11,
+                                fontSize: 9,
                                 fontFamily: 'monospace',
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
 
-                            const SizedBox(height: 6),
-
-                            // Security clearance
-                            Row(
-                              children: [
-                                Icon(Icons.security, color: crtOrange, size: 10),
-                                SizedBox(width: 4),
-                                Text(
-                                  'CLEARANCE: DELTA-4',
-                                  style: TextStyle(
-                                    color: crtOrange.withOpacity(0.8),
-                                    fontSize: 8,
-                                    fontFamily: 'monospace',
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
 
                             // Demographics row
                             Row(
@@ -1024,11 +1005,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     '${_ageController.text}y',
                                     style: TextStyle(
                                       color: crtOrange.withOpacity(0.7),
-                                      fontSize: 10,
+                                      fontSize: 9,
                                       fontFamily: 'monospace',
                                     ),
                                   ),
-                                  SizedBox(width: 10),
+                                  SizedBox(width: 8),
                                 ],
 
                                 // Height
@@ -1039,11 +1020,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     _heightDisplay,
                                     style: TextStyle(
                                       color: crtOrange.withOpacity(0.7),
-                                      fontSize: 10,
+                                      fontSize: 9,
                                       fontFamily: 'monospace',
                                     ),
                                   ),
-                                  SizedBox(width: 10),
+                                  SizedBox(width: 8),
                                 ],
 
                                 // Gender
@@ -1058,7 +1039,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     _formatGender(_selectedGender),
                                     style: TextStyle(
                                       color: crtOrange.withOpacity(0.7),
-                                      fontSize: 10,
+                                      fontSize: 9,
                                       fontFamily: 'monospace',
                                     ),
                                   ),
@@ -1066,53 +1047,78 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ],
                             ),
 
-                            const SizedBox(height: 6),
+                            const Spacer(),
 
-                            // ID number (generated from user ID)
-                            Row(
+                            // Bottom section: Clearance, ID, and issue date
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'ID: ',
-                                  style: TextStyle(
-                                    color: crtOrange.withOpacity(0.7),
-                                    fontSize: 10,
-                                    fontFamily: 'monospace',
-                                  ),
+                                // Security clearance
+                                Row(
+                                  children: [
+                                    Icon(Icons.security, color: crtOrange, size: 10),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'CLEARANCE: DELTA-4',
+                                      style: TextStyle(
+                                        color: crtOrange.withOpacity(0.8),
+                                        fontSize: 8,
+                                        fontFamily: 'monospace',
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  userId.length >= 8 ? userId.substring(0, 8).toUpperCase() : userId.toUpperCase(),
-                                  style: TextStyle(
-                                    color: crtOrange,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'monospace',
-                                    letterSpacing: 1,
-                                  ),
-                                ),
-                              ],
-                            ),
 
-                            const SizedBox(height: 3),
+                                const SizedBox(height: 3),
 
-                            // Issue date
-                            Row(
-                              children: [
-                                Text(
-                                  'ISSUED: ',
-                                  style: TextStyle(
-                                    color: crtOrange.withOpacity(0.6),
-                                    fontSize: 8,
-                                    fontFamily: 'monospace',
-                                  ),
+                                // ID number (generated from user ID)
+                                Row(
+                                  children: [
+                                    Text(
+                                      'ID: ',
+                                      style: TextStyle(
+                                        color: crtOrange.withOpacity(0.7),
+                                        fontSize: 9,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                    Text(
+                                      userId.length >= 8 ? userId.substring(0, 8).toUpperCase() : userId.toUpperCase(),
+                                      style: TextStyle(
+                                        color: crtOrange,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'monospace',
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  '2026.03.16',
-                                  style: TextStyle(
-                                    color: crtOrange,
-                                    fontSize: 8,
-                                    fontFamily: 'monospace',
-                                    fontWeight: FontWeight.bold,
-                                  ),
+
+                                const SizedBox(height: 2),
+
+                                // Issue date
+                                Row(
+                                  children: [
+                                    Text(
+                                      'ISSUED: ',
+                                      style: TextStyle(
+                                        color: crtOrange.withOpacity(0.6),
+                                        fontSize: 8,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                    Text(
+                                      '2026.03.16',
+                                      style: TextStyle(
+                                        color: crtOrange,
+                                        fontSize: 8,
+                                        fontFamily: 'monospace',
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),

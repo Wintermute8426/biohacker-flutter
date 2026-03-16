@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -43,7 +44,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   bool _isLoggingOut = false;
   String _userName = '';
-  String? _profilePhotoUrl;
+  String? _profilePhotoPath;
 
   @override
   void initState() {
@@ -66,9 +67,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _loadProfilePhoto() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      setState(() {
-        _profilePhotoUrl = prefs.getString('profile_photo_url');
-      });
+      if (mounted) {
+        setState(() {
+          _profilePhotoPath = prefs.getString('profile_photo_path');
+        });
+      }
     } catch (e) {
       print('[HomeScreen] Error loading profile photo: $e');
     }
@@ -153,10 +156,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     CircleAvatar(
                       radius: 28,
                       backgroundColor: AppColors.primary.withOpacity(0.15),
-                      backgroundImage: _profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty
-                        ? NetworkImage(_profilePhotoUrl!) as ImageProvider
+                      backgroundImage: _profilePhotoPath != null &&
+                                      _profilePhotoPath!.isNotEmpty &&
+                                      File(_profilePhotoPath!).existsSync()
+                        ? FileImage(File(_profilePhotoPath!)) as ImageProvider
                         : null,
-                      child: _profilePhotoUrl == null || _profilePhotoUrl!.isEmpty
+                      child: _profilePhotoPath == null ||
+                              _profilePhotoPath!.isEmpty ||
+                              !File(_profilePhotoPath!).existsSync()
                         ? Text(
                             _getInitials(_userName),
                             style: TextStyle(
@@ -213,7 +220,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     context,
                     MaterialPageRoute(builder: (context) => const ProfileScreen()),
                   );
-                  // Reload profile photo after returning from profile screen
+                  // Reload both name and photo after returning from profile screen
+                  _loadUserName();
                   _loadProfilePhoto();
                 },
               ),
