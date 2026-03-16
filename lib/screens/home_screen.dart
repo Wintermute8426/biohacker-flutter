@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -43,11 +44,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   bool _isLoggingOut = false;
   String _userName = '';
+  String? _profilePhotoPath;
 
   @override
   void initState() {
     super.initState();
     _loadUserName();
+    _loadProfilePhoto();
   }
 
   Future<void> _loadUserName() async {
@@ -58,6 +61,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       });
     } catch (e) {
       print('[HomeScreen] Error loading user name: $e');
+    }
+  }
+
+  Future<void> _loadProfilePhoto() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _profilePhotoPath = prefs.getString('profile_photo_path');
+      });
+    } catch (e) {
+      print('[HomeScreen] Error loading profile photo: $e');
     }
   }
 
@@ -140,15 +154,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     CircleAvatar(
                       radius: 28,
                       backgroundColor: AppColors.primary.withOpacity(0.15),
-                      child: Text(
-                        _getInitials(_userName),
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
+                      backgroundImage: _profilePhotoPath != null && File(_profilePhotoPath!).existsSync()
+                        ? FileImage(File(_profilePhotoPath!))
+                        : null,
+                      child: _profilePhotoPath == null || !File(_profilePhotoPath!).existsSync()
+                        ? Text(
+                            _getInitials(_userName),
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'monospace',
+                            ),
+                          )
+                        : null,
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -189,12 +208,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 icon: Icons.person,
                 iconColor: AppColors.primary,
                 label: 'Profile & Settings',
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(context);
-                  Navigator.push(
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const ProfileScreen()),
                   );
+                  // Reload profile photo after returning from profile screen
+                  _loadProfilePhoto();
                 },
               ),
               _buildMenuItem(

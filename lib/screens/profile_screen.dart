@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -67,7 +68,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String? _errorMessage;
   String? _latestWeight;
   String _heightDisplay = 'Not set';
-  String? _photoUrl;
+  String? _profilePhotoPath;
 
   // Stats
   int _cycleCount = 0;
@@ -449,6 +450,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final profile = await profileService.getUserProfile(userId);
 
       if (profile != null) {
+        // Load profile photo path from SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        final photoPath = prefs.getString('profile_photo_path');
+
         setState(() {
           _usernameController.text = profile.username ?? '';
           _ageController.text = profile.age?.toString() ?? '';
@@ -459,7 +464,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _selectedTimezone = profile.timezone;
           _selectedUnits = profile.unitsPreference ?? 'imperial';
           _heightDisplay = profile.heightFormatted;
-          _photoUrl = profile.photoUrl;
+          _profilePhotoPath = photoPath;
 
           if (profile.notificationPreferences != null) {
             profile.notificationPreferences!.forEach((key, value) {
@@ -553,15 +558,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     setState(() => _isUploadingPhoto = true);
 
     try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) throw Exception('Not authenticated');
+      final picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
 
-      final photoService = ProfilePhotoService();
-      final newPhotoUrl = await photoService.pickAndUploadPhoto(userId, oldPhotoUrl: _photoUrl);
+      if (image != null) {
+        // Save photo path to SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('profile_photo_path', image.path);
 
-      if (newPhotoUrl != null) {
         setState(() {
-          _photoUrl = newPhotoUrl;
+          _profilePhotoPath = image.path;
         });
 
         if (mounted) {
@@ -825,11 +836,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           children: [
                             // Avatar or photo
                             Center(
-                              child: _photoUrl != null && _photoUrl!.isNotEmpty
+                              child: _profilePhotoPath != null && _profilePhotoPath!.isNotEmpty && File(_profilePhotoPath!).existsSync()
                                   ? ClipRRect(
                                       borderRadius: BorderRadius.circular(2),
-                                      child: Image.network(
-                                        _photoUrl!,
+                                      child: Image.file(
+                                        File(_profilePhotoPath!),
                                         width: 96,
                                         height: 96,
                                         fit: BoxFit.cover,
