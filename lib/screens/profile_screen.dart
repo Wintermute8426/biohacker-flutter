@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -67,7 +68,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String? _errorMessage;
   String? _latestWeight;
   String _heightDisplay = 'Not set';
-  String? _profilePhotoUrl;
+  String? _profilePhotoPath;
 
   // Stats
 
@@ -446,9 +447,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final profile = await profileService.getUserProfile(userId);
 
       if (profile != null) {
-        // Load profile photo URL from SharedPreferences
+        // Load profile photo path from SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        final photoUrl = prefs.getString('profile_photo_url');
+        final photoPath = prefs.getString('profile_photo_path');
 
         setState(() {
           _usernameController.text = profile.username ?? '';
@@ -460,7 +461,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _selectedTimezone = profile.timezone;
           _selectedUnits = profile.unitsPreference ?? 'imperial';
           _heightDisplay = profile.heightFormatted;
-          _profilePhotoUrl = photoUrl;
+          _profilePhotoPath = photoPath;
 
           if (profile.notificationPreferences != null) {
             profile.notificationPreferences!.forEach((key, value) {
@@ -544,30 +545,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
 
       if (image != null) {
-        // Read image bytes
-        final bytes = await image.readAsBytes();
-
-        // Get user ID
-        final userId = Supabase.instance.client.auth.currentUser?.id;
-        if (userId == null) throw Exception('Not authenticated');
-
-        // Upload to Supabase Storage
-        final fileName = '${userId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        await Supabase.instance.client.storage
-            .from('profile-photos')
-            .uploadBinary(fileName, bytes);
-
-        // Get public URL
-        final photoUrl = Supabase.instance.client.storage
-            .from('profile-photos')
-            .getPublicUrl(fileName);
-
-        // Save URL to SharedPreferences
+        // Save local file path to SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('profile_photo_url', photoUrl);
+        await prefs.setString('profile_photo_path', image.path);
 
         setState(() {
-          _profilePhotoUrl = photoUrl;
+          _profilePhotoPath = image.path;
         });
 
         if (mounted) {
