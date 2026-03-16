@@ -4,12 +4,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/user_profile_service.dart';
 import '../services/profile_photo_service.dart';
+import '../services/cycles_database.dart';
+import '../services/labs_database.dart';
+import '../services/dose_logs_database.dart';
 import '../providers/auth_provider.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
+import '../widgets/common/matte_card.dart';
 import '../utils/user_feedback.dart';
 import '../main.dart';
 
@@ -55,6 +59,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String? _latestWeight;
   String _heightDisplay = 'Not set';
   String? _photoUrl;
+
+  // Stats
+  int _cycleCount = 0;
+  int _labReportCount = 0;
+  int _doseLogCount = 0;
 
   @override
   void initState() {
@@ -116,8 +125,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _healthGoalsFromOnboarding = profile.healthGoals;
 
           // If profile is incomplete, show form
-          _isEditMode = profile.username == null || 
-                         profile.age == null || 
+          _isEditMode = profile.username == null ||
+                         profile.age == null ||
                          profile.gender == null;
         });
       } else {
@@ -139,6 +148,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         print('[ProfileScreen] Weight loading error: $e');
       }
 
+      // Load stats in parallel
+      await _loadStats(userId);
+
       setState(() {
         _isLoading = false;
       });
@@ -149,6 +161,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         _isLoading = false;
         _isEditMode = true;
       });
+    }
+  }
+
+  Future<void> _loadStats(String userId) async {
+    try {
+      final cyclesDb = CyclesDatabase();
+      final labsDb = LabsDatabase();
+      final doseLogsDb = DoseLogsDatabase();
+
+      // Load all stats in parallel
+      final results = await Future.wait([
+        cyclesDb.getUserCycles(userId),
+        labsDb.getUserLabResults(userId),
+        doseLogsDb.getUserDoseLogs(userId),
+      ]);
+
+      setState(() {
+        _cycleCount = results[0].length;
+        _labReportCount = results[1].length;
+        _doseLogCount = results[2].length;
+      });
+    } catch (e) {
+      print('[ProfileScreen] Error loading stats: $e');
+      // Don't show error to user, just log it
     }
   }
 
@@ -308,6 +344,59 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                         ),
                       ),
+                      // Edit button (floating)
+                      if (!_isEditMode)
+                        Positioned(
+                          top: 16,
+                          right: 16,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                setState(() => _isEditMode = true);
+                              },
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.edit,
+                                      color: AppColors.background,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'EDIT',
+                                      style: TextStyle(
+                                        fontFamily: 'monospace',
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.background,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -639,6 +728,77 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
 
           const SizedBox(height: 24),
+
+          // STATS SECTION
+          MatteCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.analytics, color: AppColors.primary, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'ACTIVITY STATS',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard(
+                        label: 'CYCLES',
+                        value: _cycleCount.toString(),
+                        icon: Icons.autorenew,
+                        color: WintermmuteStyles.colorGreen,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStatCard(
+                        label: 'LAB REPORTS',
+                        value: _labReportCount.toString(),
+                        icon: Icons.science,
+                        color: WintermmuteStyles.colorOrange,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard(
+                        label: 'TOTAL DOSES',
+                        value: _doseLogCount.toString(),
+                        icon: Icons.medical_services,
+                        color: WintermmuteStyles.colorMagenta,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStatCard(
+                        label: 'APP VERSION',
+                        value: '2.0',
+                        icon: Icons.info_outline,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
 
           // ACCOUNT SECTION
           _buildSectionCard(
@@ -1393,14 +1553,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   )
                 : Text(
-                    'Save Profile',
+                    'SAVE PROFILE',
                     style: TextStyle(
                       color: AppColors.background,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'monospace',
+                      letterSpacing: 1,
                     ),
                   ),
           ),
+          const SizedBox(height: 12),
+
+          // Cancel button (if profile is complete)
+          if (_usernameController.text.isNotEmpty &&
+              _ageController.text.isNotEmpty &&
+              _selectedGender != null)
+            OutlinedButton(
+              onPressed: _isSaving
+                  ? null
+                  : () {
+                      setState(() => _isEditMode = false);
+                    },
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                side: BorderSide(color: AppColors.textMid),
+              ),
+              child: Text(
+                'CANCEL',
+                style: TextStyle(
+                  color: AppColors.textMid,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
           const SizedBox(height: 16),
 
           // Success/Error Messages
@@ -1467,6 +1656,61 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           size: 48,
           color: AppColors.primary,
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 14, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 9,
+                    color: color,
+                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: color,
+              height: 1,
+            ),
+          ),
+        ],
       ),
     );
   }

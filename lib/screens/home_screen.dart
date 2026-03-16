@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/user_profile_service.dart';
+import '../widgets/city_background.dart';
+import '../widgets/cyberpunk_rain.dart';
 import 'onboarding_screen.dart';
 import 'dashboard_screen.dart';
 import 'cycles_screen.dart';
@@ -41,101 +43,313 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _isLoggingOut = false;
 
   void _showHamburgerMenu(BuildContext context) {
-    showModalBottomSheet(
+    showGeneralDialog(
       context: context,
-      backgroundColor: AppColors.surface,
-      builder: (context) => _buildHamburgerMenu(context),
+      barrierDismissible: true,
+      barrierLabel: 'Menu',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOut,
+          )),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.75,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                ),
+                child: _buildHamburgerMenu(context),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildHamburgerMenu(BuildContext context) {
-    return Container(
-      color: AppColors.surface,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Profile & Settings'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.book),
-            title: const Text('Research'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ResearchScreen()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text('About'),
-            onTap: () {
-              Navigator.pop(context);
-              // Show about dialog
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: AppColors.surface,
-                  title: Text('Biohacker', style: TextStyle(color: AppColors.primary)),
-                  content: Text('Version 1.0.0\n\nPeptide tracking & optimization', style: TextStyle(color: AppColors.textMid)),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text('Close', style: TextStyle(color: AppColors.primary)),
+    return Stack(
+      children: [
+        // City background
+        Positioned.fill(
+          child: CityBackground(enabled: true, opacity: 0.2),
+        ),
+        // Rain effect
+        Positioned.fill(
+          child: CyberpunkRain(enabled: true, opacity: 0.15),
+        ),
+        // Content
+        SafeArea(
+          child: Column(
+            children: [
+              // Header with app branding
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: AppColors.primary.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.3),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.account_circle,
+                        color: AppColors.primary,
+                        size: 32,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'BIOHACKER',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                        Text(
+                          'User Menu',
+                          style: TextStyle(
+                            color: AppColors.textMid,
+                            fontSize: 12,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              );
-            },
-          ),
-          ListTile(
-            leading: _isLoggingOut
-              ? SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation(AppColors.error),
-                  ),
-                )
-              : const Icon(Icons.logout),
-            title: Text(_isLoggingOut ? 'Logging out...' : 'Logout'),
-            textColor: AppColors.error,
-            iconColor: AppColors.error,
-            enabled: !_isLoggingOut,
-            onTap: () async {
-              if (_isLoggingOut) return;
-
-              setState(() => _isLoggingOut = true);
-              Navigator.pop(context);
-
-              // Logout logic with error handling
-              try {
-                await Supabase.instance.client.auth.signOut();
-              } catch (e) {
-                if (mounted) {
-                  setState(() => _isLoggingOut = false);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to logout: ${e.toString()}'),
-                      backgroundColor: AppColors.error,
+              ),
+              const SizedBox(height: 16),
+              // Menu items
+              _buildMenuItem(
+                context,
+                icon: Icons.person,
+                iconColor: AppColors.primary,
+                label: 'Profile & Settings',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  );
+                },
+              ),
+              _buildMenuItem(
+                context,
+                icon: Icons.science,
+                iconColor: WintermmuteStyles.colorOrange,
+                label: 'Research',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ResearchScreen()),
+                  );
+                },
+              ),
+              _buildMenuItem(
+                context,
+                icon: Icons.info,
+                iconColor: WintermmuteStyles.colorMagenta,
+                label: 'About',
+                onTap: () {
+                  Navigator.pop(context);
+                  // Show about dialog
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: AppColors.surface,
+                      title: Text(
+                        'BIOHACKER',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontFamily: 'monospace',
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      content: Text(
+                        'Version 2.0.0\n\nPeptide tracking & optimization platform\n\nPowered by Wintermute cyberpunk aesthetics',
+                        style: TextStyle(
+                          color: AppColors.textMid,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            'CLOSE',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontFamily: 'monospace',
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
-                }
-              }
-            },
+                },
+              ),
+              const Spacer(),
+              // Divider before logout
+              Divider(
+                color: AppColors.error.withOpacity(0.3),
+                thickness: 1,
+              ),
+              // Logout button
+              _buildMenuItem(
+                context,
+                icon: _isLoggingOut ? null : Icons.logout,
+                iconColor: AppColors.error,
+                label: _isLoggingOut ? 'Logging out...' : 'Logout',
+                isLoading: _isLoggingOut,
+                isDanger: true,
+                enabled: !_isLoggingOut,
+                onTap: () async {
+                  if (_isLoggingOut) return;
+
+                  setState(() => _isLoggingOut = true);
+                  Navigator.pop(context);
+
+                  // Logout logic with error handling
+                  try {
+                    await Supabase.instance.client.auth.signOut();
+                  } catch (e) {
+                    if (mounted) {
+                      setState(() => _isLoggingOut = false);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to logout: ${e.toString()}'),
+                          backgroundColor: AppColors.error,
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              // Footer
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'BIOHACKER V2 • 2026',
+                  style: TextStyle(
+                    color: AppColors.textDim,
+                    fontSize: 10,
+                    fontFamily: 'monospace',
+                    letterSpacing: 1,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuItem(
+    BuildContext context, {
+    IconData? icon,
+    required Color iconColor,
+    required String label,
+    required VoidCallback onTap,
+    bool isLoading = false,
+    bool isDanger = false,
+    bool enabled = true,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isDanger
+                    ? AppColors.error.withOpacity(0.3)
+                    : AppColors.primary.withOpacity(0.15),
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+              color: AppColors.surface.withOpacity(0.1),
+            ),
+            child: Row(
+              children: [
+                if (isLoading)
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(iconColor),
+                    ),
+                  )
+                else if (icon != null)
+                  Icon(icon, color: iconColor, size: 24),
+                const SizedBox(width: 16),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isDanger ? AppColors.error : Colors.white,
+                    fontSize: 15,
+                    fontFamily: 'monospace',
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const Spacer(),
+                if (!isLoading)
+                  Icon(
+                    Icons.chevron_right,
+                    color: isDanger
+                        ? AppColors.error.withOpacity(0.5)
+                        : AppColors.textDim,
+                    size: 20,
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
