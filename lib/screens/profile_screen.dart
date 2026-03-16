@@ -835,9 +835,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             color: crtOrange.withOpacity(0.7),  // Orange border
                             width: 2,
                           ),
-                          image: _profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty
+                          image: _profilePhotoPath != null && _profilePhotoPath!.isNotEmpty
                             ? DecorationImage(
-                                image: NetworkImage(_profilePhotoUrl!),
+                                image: FileImage(File(_profilePhotoPath!)),
                                 fit: BoxFit.cover,
                               )
                             : null,
@@ -845,7 +845,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         child: Stack(
                           children: [
                             // Avatar (show only if no photo)
-                            if (_profilePhotoUrl == null || _profilePhotoUrl!.isEmpty)
+                            if (_profilePhotoPath == null || _profilePhotoPath!.isEmpty)
                               Center(
                                 child: Text(
                                   _getInitials(_usernameController.text),
@@ -859,7 +859,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
 
                             // Biometric scan overlay (if photo exists)
-                            if (_profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty)
+                            if (_profilePhotoPath != null && _profilePhotoPath!.isNotEmpty)
                               Positioned(
                                 top: 2,
                                 left: 2,
