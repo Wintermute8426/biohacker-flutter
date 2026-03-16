@@ -4,6 +4,8 @@ import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../data/peptides.dart';
 import '../widgets/peptide_selector.dart';
+import '../widgets/common/matte_card.dart';
+import '../widgets/common/cyber_button.dart';
 
 class CycleSetupFormV4 extends StatefulWidget {
   final String? defaultPeptideName;
@@ -538,13 +540,13 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   @override
   Widget build(BuildContext context) {
     final cycleDays = _cycleDurationWeeks != null ? _cycleDurationWeeks! * 7 : 0;
-    
+
     return SingleChildScrollView(
       padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        left: 16,
+        right: 16,
+        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,7 +556,13 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
           const SizedBox(height: 24),
 
           // ===== PEPTIDE =====
-          Text('PEPTIDE', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+          Row(
+            children: [
+              Icon(Icons.medication, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              Text('PEPTIDE SELECTION', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+            ],
+          ),
           const SizedBox(height: 12),
           PeptideSelector(
             initialValue: _selectedPeptide,
@@ -569,95 +577,113 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               padding: const EdgeInsets.only(top: 4),
               child: Text(_fieldErrors['peptide']!, style: TextStyle(color: AppColors.error, fontSize: 10)),
             ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
 
           // ===== RECONSTITUTION =====
-          Text('RECONSTITUTION', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _totalPeptideController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: TextStyle(color: AppColors.primary),
-            decoration: InputDecoration(
-              labelText: 'VIAL SIZE (mg)',
-              labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              hintText: 'e.g., 10',
-              helperText: '5-500mg recommended',
-              errorText: _fieldErrors['vialSize'],
-              errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: _fieldErrors['vialSize'] != null ? AppColors.error : AppColors.textMid,
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            onChanged: (value) {
-              _totalPeptideMg = double.tryParse(value);
-              _validateVialSize();
-              _calculateReconstition();
-            },
+          Row(
+            children: [
+              Icon(Icons.water_drop, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              Text('RECONSTITUTION', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+            ],
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _desiredDosageController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: TextStyle(color: AppColors.primary),
-            decoration: InputDecoration(
-              labelText: 'DESIRED DOSAGE PER INJECTION (mg)',
-              labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              hintText: 'e.g., 1',
-              helperText: '0.1-10mg recommended',
-              errorText: _fieldErrors['desiredDose'],
-              errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: _fieldErrors['desiredDose'] != null ? AppColors.error : AppColors.textMid,
+          MatteCard(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _totalPeptideController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: TextStyle(color: AppColors.primary),
+                  decoration: InputDecoration(
+                    labelText: 'VIAL SIZE (mg)',
+                    labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+                    hintText: 'e.g., 10',
+                    helperText: '5-500mg recommended',
+                    prefixIcon: Icon(Icons.science, color: AppColors.primary, size: 18),
+                    errorText: _fieldErrors['vialSize'],
+                    errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: _fieldErrors['vialSize'] != null ? AppColors.error : AppColors.textMid,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (value) {
+                    _totalPeptideMg = double.tryParse(value);
+                    _validateVialSize();
+                    _calculateReconstition();
+                  },
                 ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            onChanged: (value) {
-              _desiredDosageMg = double.tryParse(value);
-              _validateDesiredDose();
-              if (_totalPeptideMg != null && _concentrationMl != null && _desiredDosageMg != null) {
-                _calculateReconstition();
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _concentrationMlController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: TextStyle(color: AppColors.primary),
-            decoration: InputDecoration(
-              labelText: 'DRAW PER INJECTION (ml)',
-              labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              hintText: '0.1',
-              helperText: '0.05-1.0ml recommended',
-              errorText: _fieldErrors['draw'],
-              errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: _fieldErrors['draw'] != null ? AppColors.error : AppColors.textMid,
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _desiredDosageController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: TextStyle(color: AppColors.primary),
+                  decoration: InputDecoration(
+                    labelText: 'DESIRED DOSAGE PER INJECTION (mg)',
+                    labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+                    hintText: 'e.g., 1',
+                    helperText: '0.1-10mg recommended',
+                    suffixIcon: Icon(Icons.science, color: AppColors.accent, size: 18),
+                    errorText: _fieldErrors['desiredDose'],
+                    errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: _fieldErrors['desiredDose'] != null ? AppColors.error : AppColors.textMid,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (value) {
+                    _desiredDosageMg = double.tryParse(value);
+                    _validateDesiredDose();
+                    if (_totalPeptideMg != null && _concentrationMl != null && _desiredDosageMg != null) {
+                      _calculateReconstition();
+                    }
+                  },
                 ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _concentrationMlController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: TextStyle(color: AppColors.primary),
+                  decoration: InputDecoration(
+                    labelText: 'DRAW PER INJECTION (ml)',
+                    labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+                    hintText: '0.1',
+                    helperText: '0.05-1.0ml recommended',
+                    suffixIcon: Icon(Icons.water_drop, color: AppColors.accent, size: 18),
+                    errorText: _fieldErrors['draw'],
+                    errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: _fieldErrors['draw'] != null ? AppColors.error : AppColors.textMid,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (value) {
+                    _concentrationMl = double.tryParse(value);
+                    _validateDraw();
+                    // Recalculate BAC with proper formula
+                    if (_concentrationMl != null && _totalPeptideMg != null && _desiredDosageMg != null) {
+                      _calculateReconstition();
+                    }
+                  },
+                ),
+              ],
             ),
-            onChanged: (value) {
-              _concentrationMl = double.tryParse(value);
-              _validateDraw();
-              // Recalculate BAC with proper formula
-              if (_concentrationMl != null && _totalPeptideMg != null && _desiredDosageMg != null) {
-                _calculateReconstition();
-              }
-            },
           ),
 
           // Reconstitution summary with syringe visual
@@ -780,10 +806,18 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             ),
           ],
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
 
           // ===== ROUTE =====
-          Text('ROUTE', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+          Row(
+            children: [
+              Icon(Icons.straighten, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              Text('ROUTE', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+            ],
+          ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _selectedRoute,
@@ -801,10 +835,18 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             onChanged: (value) => setState(() => _selectedRoute = value),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
 
           // ===== FREQUENCY =====
-          Text('INJECTION FREQUENCY', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+          Row(
+            children: [
+              Icon(Icons.event_repeat, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              Text('INJECTION FREQUENCY', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+            ],
+          ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _injectionFrequency,
@@ -825,10 +867,18 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             },
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
 
           // ===== CYCLE DURATION (IN WEEKS) =====
-          Text('CYCLE DURATION', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+          Row(
+            children: [
+              Icon(Icons.timeline, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              Text('CYCLE DURATION', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+            ],
+          ),
           const SizedBox(height: 12),
           
           TextField(
@@ -895,6 +945,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               const SizedBox(height: 12),
               ListTile(
                 contentPadding: EdgeInsets.zero,
+                leading: Icon(Icons.calendar_today, color: AppColors.primary, size: 18),
                 title: Text('START DATE', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
                 trailing: Text(DateFormat('MMM d').format(_startDate!), style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                 onTap: () async {
@@ -910,13 +961,22 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             ],
           ],
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
 
           // ===== INJECTION TIME (MOVED HERE) =====
-          Text('INJECTION TIME', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+          Row(
+            children: [
+              Icon(Icons.schedule, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              Text('INJECTION TIME', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+            ],
+          ),
           const SizedBox(height: 12),
           ListTile(
             contentPadding: EdgeInsets.zero,
+            leading: Icon(Icons.access_time, color: AppColors.primary, size: 18),
             title: Text('TIME', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
             trailing: Text(_scheduledTime ?? '08:00', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
             onTap: () async {
@@ -927,10 +987,18 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             },
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
 
           // ===== DOSING PHASES (LIKE WEB APP) =====
-          Text('CREATE MULTI-PHASE DOSING (OPTIONAL)', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+          Row(
+            children: [
+              Icon(Icons.auto_graph, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              Text('MULTI-PHASE DOSING (OPTIONAL)', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+            ],
+          ),
           const SizedBox(height: 12),
 
           // Quick add buttons
@@ -1008,23 +1076,13 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
 
           const SizedBox(height: 24),
 
-          SizedBox(
-            width: double.infinity,
-            height: 44,
-            child: ElevatedButton(
-              onPressed: _isFormValid() ? _submit : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isFormValid() ? AppColors.primary : AppColors.textMid.withOpacity(0.3),
-              ),
-              child: Text(
-                _isFormValid() ? 'CREATE CYCLE' : 'Complete form to create',
-                style: TextStyle(
-                  color: _isFormValid() ? AppColors.background : AppColors.textMid,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
-                ),
-              ),
-            ),
+          CyberButton(
+            text: _isFormValid() ? 'CREATE CYCLE' : 'Complete form to create',
+            icon: Icons.check_circle,
+            onPressed: _isFormValid() ? _submit : null,
+            style: CyberButtonStyle.primary,
+            fullWidth: true,
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           ),
           
           // Show validation summary if form invalid
