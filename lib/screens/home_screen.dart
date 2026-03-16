@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/user_profile_service.dart';
@@ -41,6 +42,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   bool _isLoggingOut = false;
+  String _userName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _userName = prefs.getString('user_name') ?? '';
+      });
+    } catch (e) {
+      print('[HomeScreen] Error loading user name: $e');
+    }
+  }
 
   void _showHamburgerMenu(BuildContext context) {
     showGeneralDialog(
@@ -77,15 +96,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  String _getInitials(String? email) {
-    if (email == null || email.isEmpty) return '?';
-    final parts = email.split('@');
-    if (parts.isEmpty) return '?';
-    final name = parts[0];
-    if (name.length >= 2) {
-      return '${name[0]}${name[1]}'.toUpperCase();
+  String _getInitials(String? name) {
+    if (name == null || name.isEmpty) return '?';
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return name[0].toUpperCase();
+    return parts[0][0].toUpperCase();
   }
 
   Widget _buildHamburgerMenu(BuildContext context) {
@@ -124,7 +141,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       radius: 28,
                       backgroundColor: AppColors.primary.withOpacity(0.15),
                       child: Text(
-                        _getInitials(userEmail),
+                        _getInitials(_userName),
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 20,

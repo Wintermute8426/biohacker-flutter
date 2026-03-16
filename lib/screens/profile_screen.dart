@@ -38,6 +38,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   late TextEditingController _heightFeetController;
   late TextEditingController _heightInchesController;
   late TextEditingController _bioController;
+  late TextEditingController _goalsController;
 
   // Dropdown values
   String? _selectedGender;
@@ -81,6 +82,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _heightFeetController = TextEditingController();
     _heightInchesController = TextEditingController();
     _bioController = TextEditingController();
+    _goalsController = TextEditingController();
     _loadSettings();
     _loadProfile();
   }
@@ -90,6 +92,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final prefs = await SharedPreferences.getInstance();
       setState(() {
         _doseReminders = prefs.getBool('dose_reminders') ?? true;
+        _goalsController.text = prefs.getString('user_goals') ?? '';
       });
     } catch (e) {
       print('[ProfileScreen] Error loading settings: $e');
@@ -111,6 +114,87 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         UserFeedback.showError(context, 'Failed to save setting');
       }
     }
+  }
+
+  Future<void> _editGoals() async {
+    final controller = TextEditingController(text: _goalsController.text);
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(
+          'EDIT GOALS',
+          style: TextStyle(
+            color: AppColors.primary,
+            fontFamily: 'monospace',
+            letterSpacing: 1,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          style: TextStyle(color: AppColors.textLight),
+          decoration: InputDecoration(
+            hintText: 'Enter your goals...',
+            hintStyle: TextStyle(color: AppColors.textDim),
+            border: OutlineInputBorder(
+              borderSide: BorderSide(color: AppColors.primary),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: AppColors.textDim),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: AppColors.primary, width: 2),
+            ),
+          ),
+          maxLines: 3,
+          maxLength: 200,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'CANCEL',
+              style: TextStyle(
+                color: AppColors.textMid,
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: Text(
+              'SAVE',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_goals', result);
+        setState(() {
+          _goalsController.text = result;
+        });
+        if (mounted) {
+          UserFeedback.showSuccess(context, 'Goals updated');
+        }
+      } catch (e) {
+        print('[ProfileScreen] Error saving goals: $e');
+        if (mounted) {
+          UserFeedback.showError(context, 'Failed to save goals');
+        }
+      }
+    }
+
+    controller.dispose();
   }
 
   Future<void> _showUnitsDialog() async {
@@ -345,6 +429,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _heightFeetController.dispose();
     _heightInchesController.dispose();
     _bioController.dispose();
+    _goalsController.dispose();
     super.dispose();
   }
 
@@ -870,7 +955,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
 
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 6),
+
+                            // Demographics row
+                            Row(
+                              children: [
+                                // Age
+                                if (_ageController.text.isNotEmpty) ...[
+                                  Icon(Icons.cake, color: AppColors.textMid, size: 10),
+                                  SizedBox(width: 3),
+                                  Text(
+                                    '${_ageController.text}y',
+                                    style: TextStyle(
+                                      color: AppColors.textMid,
+                                      fontSize: 10,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                ],
+
+                                // Height
+                                if (_heightDisplay != 'Not set') ...[
+                                  Icon(Icons.height, color: AppColors.textMid, size: 10),
+                                  SizedBox(width: 3),
+                                  Text(
+                                    _heightDisplay,
+                                    style: TextStyle(
+                                      color: AppColors.textMid,
+                                      fontSize: 10,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                ],
+
+                                // Gender
+                                if (_selectedGender != null) ...[
+                                  Icon(
+                                    _selectedGender == 'male' ? Icons.male : (_selectedGender == 'female' ? Icons.female : Icons.transgender),
+                                    color: AppColors.textMid,
+                                    size: 10,
+                                  ),
+                                  SizedBox(width: 3),
+                                  Text(
+                                    _formatGender(_selectedGender),
+                                    style: TextStyle(
+                                      color: AppColors.textMid,
+                                      fontSize: 10,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+
+                            const SizedBox(height: 6),
 
                             // ID number (generated from user ID)
                             Row(
@@ -977,58 +1117,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  _buildStatBlock(
-                    'TIMEZONE',
-                    _selectedTimezone?.split('/').last ?? 'Not set',
-                    Icons.access_time,
-                  ),
-
-                  // Health Goals
-                  if (_healthGoalsFromOnboarding.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 16),
-                    Text(
-                      'OBJECTIVES',
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textMid,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _healthGoalsFromOnboarding.map((goal) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: AppColors.accent,
-                              width: 1,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            _capitalizeGoal(goal).toUpperCase(),
-                            style: TextStyle(
-                              fontFamily: 'monospace',
-                              fontSize: 10,
-                              color: AppColors.accent,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -1100,6 +1188,65 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                   ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // GOALS CARD - Separate, editable
+          MatteCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.flag, color: AppColors.primary, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'GOALS',
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _editGoals,
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.edit,
+                            size: 16,
+                            color: AppColors.primary.withOpacity(0.7),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  _goalsController.text.isEmpty ? 'No goals set - tap edit to add your goals' : _goalsController.text,
+                  style: TextStyle(
+                    color: _goalsController.text.isEmpty ? AppColors.textDim : AppColors.textMid,
+                    fontSize: 13,
+                    fontFamily: 'monospace',
+                    fontStyle: _goalsController.text.isEmpty ? FontStyle.italic : FontStyle.normal,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -1224,6 +1371,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   'Dark Mode',
                   'Always enabled in Wintermute theme',
                   Icons.dark_mode,
+                  null,
+                  enabled: false,
+                ),
+                const Divider(height: 24, color: AppColors.textDim),
+                _buildActionTile(
+                  'Timezone',
+                  _selectedTimezone?.split('/').last ?? 'Not set',
+                  Icons.access_time,
                   null,
                   enabled: false,
                 ),
