@@ -149,17 +149,28 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        icon: Icon(
-                          _showMonthView ? Icons.view_week : Icons.calendar_view_month,
-                          color: AppColors.primary,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.5),
+                            width: 2,
+                          ),
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _showMonthView = !_showMonthView;
-                          });
-                        },
-                        tooltip: _showMonthView ? 'Week View' : 'Month View',
+                        child: IconButton(
+                          icon: Icon(
+                            _showMonthView ? Icons.view_week : Icons.calendar_view_month,
+                            size: 26,
+                          ),
+                          color: AppColors.primary,
+                          onPressed: () {
+                            setState(() {
+                              _showMonthView = !_showMonthView;
+                            });
+                          },
+                          tooltip: _showMonthView ? 'Week View' : 'Month View',
+                        ),
                       ),
                     ],
                   ),
@@ -459,45 +470,80 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         children: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(
-                _selectedCycleId == null ? 'All Cycles' : 'Selected',
-                style: WintermmuteStyles.bodyStyle.copyWith(
-                  color: _selectedCycleId == null
-                      ? AppColors.primary
-                      : AppColors.background,
-                ),
-              ),
-              onSelected: (selected) {
+            child: GestureDetector(
+              onTap: () {
                 setState(() {
                   _selectedCycleId = null;
                 });
               },
-              selected: _selectedCycleId == null,
-              backgroundColor: AppColors.surface,
-              selectedColor: AppColors.primary,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _selectedCycleId == null
+                      ? AppColors.primary
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: _selectedCycleId == null
+                        ? AppColors.primary
+                        : AppColors.primary.withOpacity(0.3),
+                    width: _selectedCycleId == null ? 2 : 1,
+                  ),
+                ),
+                child: Text(
+                  'ALL CYCLES',
+                  style: TextStyle(
+                    color: _selectedCycleId == null
+                        ? Colors.black
+                        : AppColors.primary,
+                    fontSize: 13,
+                    fontWeight: _selectedCycleId == null
+                        ? FontWeight.bold
+                        : FontWeight.w500,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
             ),
           ),
           ...cycles.entries.map((entry) {
+            final isSelected = _selectedCycleId == entry.key;
             return Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: FilterChip(
-                label: Text(
-                  entry.value,
-                  style: WintermmuteStyles.bodyStyle.copyWith(
-                    color: _selectedCycleId == entry.key
-                        ? AppColors.background
-                        : AppColors.textMid,
-                  ),
-                ),
-                onSelected: (selected) {
+              child: GestureDetector(
+                onTap: () {
                   setState(() {
-                    _selectedCycleId = selected ? entry.key : null;
+                    _selectedCycleId = isSelected ? null : entry.key;
                   });
                 },
-                selected: _selectedCycleId == entry.key,
-                backgroundColor: AppColors.surface,
-                selectedColor: AppColors.secondary,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.secondary
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.secondary
+                          : AppColors.primary.withOpacity(0.3),
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Text(
+                    entry.value.toUpperCase(),
+                    style: TextStyle(
+                      color: isSelected
+                          ? Colors.black
+                          : AppColors.primary,
+                      fontSize: 13,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
               ),
             );
           }),
