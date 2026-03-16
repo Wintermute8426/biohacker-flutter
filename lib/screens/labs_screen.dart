@@ -672,8 +672,10 @@ class _LabsScreenState extends State<LabsScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Individual biomarker cards with icons
-              ...lab.extractedData.entries.map((entry) {
+              // Individual biomarker cards with icons - SORTED BY PRIORITY
+              ...lab.extractedData.entries.toList()
+                ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
+                .map((entry) {
                 final isOut = _isOutOfRange(entry.key, entry.value);
                 final displayValue = entry.value is Map
                   ? (entry.value['value']?.toString() ?? 'N/A')
@@ -693,7 +695,7 @@ class _LabsScreenState extends State<LabsScreen> {
                       borderRadius: BorderRadius.circular(8),
                       border: Border(
                         left: BorderSide(
-                          color: statusColor,
+                          color: _getCategoryColor(entry.key),
                           width: 4,
                         ),
                       ),
@@ -707,7 +709,7 @@ class _LabsScreenState extends State<LabsScreen> {
                             children: [
                               Icon(
                                 icon,
-                                color: statusColor,
+                                color: _getCategoryColor(entry.key),
                                 size: 20,
                               ),
                               const SizedBox(width: 10),
@@ -901,49 +903,64 @@ class _LabsScreenState extends State<LabsScreen> {
 
   IconData _getBiomarkerIcon(String key) {
     final icons = {
-      // Hormones
+      // Hormones - fitness/health icons
       'testosterone': Icons.fitness_center,
       'free_testosterone': Icons.fitness_center,
       'estradiol': Icons.favorite,
+      'progesterone': Icons.favorite,
+      'dhea': Icons.energy_savings_leaf,
       'cortisol': Icons.psychology,
       'prolactin': Icons.health_and_safety,
 
-      // Thyroid
-      'tsh': Icons.favorite,
-      't3': Icons.favorite,
-      't4': Icons.favorite,
+      // Thyroid - heart/health icons
+      'tsh': Icons.monitor_heart,
+      't3': Icons.monitor_heart,
+      't4': Icons.monitor_heart,
 
-      // Growth factors
+      // Growth factors - trending/growth
       'igf1': Icons.trending_up,
       'hgh': Icons.trending_up,
 
-      // Inflammation
+      // Inflammation - fire
       'crp': Icons.local_fire_department,
+      'homocysteine': Icons.local_fire_department,
 
-      // Lipids (cholesterol)
+      // Lipids (cholesterol) - heart/water
       'hdl': Icons.favorite,
-      'ldl': Icons.favorite,
+      'ldl': Icons.warning,
       'total_cholesterol': Icons.favorite,
       'triglycerides': Icons.water_drop,
+      'apob': Icons.warning,
 
-      // Metabolic
+      // Metabolic - food/medication
       'glucose': Icons.local_dining,
       'insulin': Icons.medication,
       'hemoglobin_a1c': Icons.calendar_month,
+      'hba1c': Icons.calendar_month,
 
-      // Liver
+      // Liver - health/shield
       'alt': Icons.health_and_safety,
       'ast': Icons.health_and_safety,
+      'ggt': Icons.health_and_safety,
+
+      // Kidney - filter/health
+      'creatinine': Icons.filter_alt,
+      'bun': Icons.filter_alt,
 
       // Prostate
       'psa': Icons.health_and_safety,
 
-      // Blood count
+      // Blood count - blood type
+      'wbc': Icons.bloodtype,
+      'rbc': Icons.bloodtype,
       'basophils': Icons.bloodtype,
       'eosinophils': Icons.bloodtype,
+      'neutrophils': Icons.bloodtype,
+      'lymphocytes': Icons.bloodtype,
       'ferritin': Icons.bloodtype,
       'hematocrit': Icons.bloodtype,
       'hemoglobin': Icons.bloodtype,
+      'platelet_count': Icons.bloodtype,
     };
     return icons[key.toLowerCase()] ?? Icons.science;
   }
@@ -1015,6 +1032,94 @@ class _LabsScreenState extends State<LabsScreen> {
       default:
         return AppColors.primary; // Cyan fallback
     }
+  }
+
+  // Biomarker priority order (lower = more important, shown first)
+  int _getBiomarkerPriority(String key) {
+    const priorities = {
+      // Hormones (highest priority)
+      'testosterone': 10,
+      'free_testosterone': 11,
+      'estradiol': 12,
+      'progesterone': 13,
+      'dhea': 14,
+      'cortisol': 15,
+      'tsh': 16,
+      't3': 17,
+      't4': 18,
+      'prolactin': 19,
+
+      // Metabolic markers
+      'glucose': 30,
+      'insulin': 31,
+      'hba1c': 32,
+      'hemoglobin_a1c': 32,
+      'igf1': 33,
+
+      // Lipids
+      'total_cholesterol': 50,
+      'ldl': 51,
+      'hdl': 52,
+      'triglycerides': 53,
+      'apob': 54,
+
+      // Liver/kidney
+      'alt': 70,
+      'ast': 71,
+      'ggt': 72,
+      'creatinine': 73,
+      'bun': 74,
+
+      // Inflammation
+      'crp': 90,
+      'homocysteine': 91,
+
+      // CBC (lower priority)
+      'wbc': 200,
+      'rbc': 201,
+      'hemoglobin': 202,
+      'hematocrit': 203,
+      'platelet_count': 204,
+      'neutrophils': 205,
+      'lymphocytes': 206,
+      'basophils': 207,
+      'eosinophils': 208,
+      'ferritin': 209,
+    };
+
+    return priorities[key.toLowerCase()] ?? 999; // Unknown markers at end
+  }
+
+  // Get category color for biomarker
+  Color _getCategoryColor(String key) {
+    // Hormones - Purple/Magenta
+    if (['testosterone', 'free_testosterone', 'estradiol', 'progesterone', 'dhea',
+         'cortisol', 'tsh', 't3', 't4', 'prolactin'].contains(key.toLowerCase())) {
+      return const Color(0xFFB388FF); // Light purple
+    }
+
+    // Metabolic - Orange
+    if (['glucose', 'insulin', 'hba1c', 'hemoglobin_a1c', 'igf1'].contains(key.toLowerCase())) {
+      return const Color(0xFFFF9100); // Orange
+    }
+
+    // Lipids - Blue
+    if (['total_cholesterol', 'ldl', 'hdl', 'triglycerides', 'apob'].contains(key.toLowerCase())) {
+      return const Color(0xFF448AFF); // Blue
+    }
+
+    // Liver/Kidney - Green
+    if (['alt', 'ast', 'ggt', 'creatinine', 'bun'].contains(key.toLowerCase())) {
+      return const Color(0xFF69F0AE); // Green
+    }
+
+    // Inflammation - Red
+    if (['crp', 'homocysteine'].contains(key.toLowerCase())) {
+      return const Color(0xFFFF5252); // Red
+    }
+
+    // CBC - Cyan (default)
+    return AppColors.primary; // Cyan
   }
 }
 
