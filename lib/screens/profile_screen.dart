@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -68,7 +67,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String? _errorMessage;
   String? _latestWeight;
   String _heightDisplay = 'Not set';
-  String? _profilePhotoPath;
+  String? _profilePhotoUrl;
 
   // Stats
 
@@ -447,9 +446,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final profile = await profileService.getUserProfile(userId);
 
       if (profile != null) {
-        // Load profile photo path from SharedPreferences
+        // Load profile photo URL from SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        final photoPath = prefs.getString('profile_photo_path');
+        final photoUrl = prefs.getString('profile_photo_url');
 
         setState(() {
           _usernameController.text = profile.username ?? '';
@@ -461,7 +460,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _selectedTimezone = profile.timezone;
           _selectedUnits = profile.unitsPreference ?? 'imperial';
           _heightDisplay = profile.heightFormatted;
-          _profilePhotoPath = photoPath;
+          _profilePhotoUrl = photoUrl;
 
           if (profile.notificationPreferences != null) {
             profile.notificationPreferences!.forEach((key, value) {
@@ -545,12 +544,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
 
       if (image != null) {
-        // Save photo path to SharedPreferences
+        // Read image bytes
+        final bytes = await image.readAsBytes();
+
+        // Get user ID
+        final userId = Supabase.instance.client.auth.currentUser?.id;
+        if (userId == null) throw Exception('Not authenticated');
+
+        // Upload to Supabase Storage
+        final fileName = '${userId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        await Supabase.instance.client.storage
+            .from('profile-photos')
+            .uploadBinary(fileName, bytes);
+
+        // Get public URL
+        final photoUrl = Supabase.instance.client.storage
+            .from('profile-photos')
+            .getPublicUrl(fileName);
+
+        // Save URL to SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('profile_photo_path', image.path);
+        await prefs.setString('profile_photo_url', photoUrl);
 
         setState(() {
-          _profilePhotoPath = image.path;
+          _profilePhotoUrl = photoUrl;
         });
 
         if (mounted) {
@@ -809,42 +826,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             color: AppColors.primary.withOpacity(0.5),
                             width: 2,
                           ),
+                          image: _profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty
+                            ? DecorationImage(
+                                image: NetworkImage(_profilePhotoUrl!),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
                         ),
                         child: Stack(
                           children: [
-                            // Avatar or photo
-                            Center(
-                              child: _profilePhotoPath != null && _profilePhotoPath!.isNotEmpty && File(_profilePhotoPath!).existsSync()
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(2),
-                                      child: Image.file(
-                                        File(_profilePhotoPath!),
-                                        width: 96,
-                                        height: 96,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Text(
-                                            _getInitials(_usernameController.text),
-                                            style: TextStyle(
-                                              color: AppColors.primary,
-                                              fontSize: 36,
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'monospace',
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    )
-                                  : Text(
-                                      _getInitials(_usernameController.text),
-                                      style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontSize: 36,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'monospace',
-                                      ),
-                                    ),
-                            ),
+                            // Avatar (show only if no photo)
+                            if (_profilePhotoUrl == null || _profilePhotoUrl!.isEmpty)
+                              Center(
+                                child: Text(
+                                  _getInitials(_usernameController.text),
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              ),
                             // Camera button for photo upload
                             Positioned(
                               bottom: 2,
