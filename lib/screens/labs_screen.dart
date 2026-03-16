@@ -673,9 +673,9 @@ class _LabsScreenState extends State<LabsScreen> {
               const SizedBox(height: 16),
 
               // Individual biomarker cards with icons - SORTED BY PRIORITY
-              ...lab.extractedData.entries.toList()
+              ...(lab.extractedData.entries.toList()
                 ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
-                .map((entry) {
+              ).map((entry) {
                 final isOut = _isOutOfRange(entry.key, entry.value);
                 final displayValue = entry.value is Map
                   ? (entry.value['value']?.toString() ?? 'N/A')
