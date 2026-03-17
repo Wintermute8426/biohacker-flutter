@@ -651,7 +651,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
         left: 0,
         right: 0,
         top: 0,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 60,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -663,12 +663,6 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [Colors.black, const Color(0xFF1a0d00), Colors.black],
-              ),
-              border: Border(
-                bottom: BorderSide(
-                  color: const Color(0xFFFF9800).withOpacity(0.5),
-                  width: 2,
-                ),
               ),
             ),
             child: Row(

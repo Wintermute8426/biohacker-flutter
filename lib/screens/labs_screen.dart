@@ -586,12 +586,6 @@ class _LabsScreenState extends State<LabsScreen> {
               gradient: LinearGradient(
                 colors: [Colors.black, const Color(0xFF001a1a), Colors.black],
               ),
-              border: Border(
-                bottom: BorderSide(
-                  color: const Color(0xFF00FFFF).withOpacity(0.5),
-                  width: 2,
-                ),
-              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -930,7 +924,7 @@ class _LabsScreenState extends State<LabsScreen> {
             ),
           ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 60),
         ],
       ),
     );
@@ -939,32 +933,66 @@ class _LabsScreenState extends State<LabsScreen> {
 
   String _beautifyBiomarkerName(String key) {
     final names = {
+      // Hormones
       'testosterone': 'Testosterone',
       'free_testosterone': 'Free Testosterone',
       'estradiol': 'Estradiol',
-      'igf1': 'IGF-1',
-      'hgh': 'HGH',
-      'crp': 'CRP (High Sensitivity)',
-      'hdl': 'HDL Cholesterol',
-      'ldl': 'LDL Cholesterol',
-      'total_cholesterol': 'Total Cholesterol',
-      'triglycerides': 'Triglycerides',
-      'glucose': 'Glucose',
-      'insulin': 'Insulin',
+      'progesterone': 'Progesterone',
+      'dhea': 'DHEA',
       'cortisol': 'Cortisol',
-      'alt': 'ALT',
-      'ast': 'AST',
+      'prolactin': 'Prolactin',
+
+      // Thyroid
       'tsh': 'TSH',
       't3': 'T3',
       't4': 'T4',
-      'prolactin': 'Prolactin',
-      'psa': 'PSA',
+
+      // Growth factors
+      'igf1': 'IGF-1',
+      'hgh': 'HGH',
+
+      // Metabolic + Lipids
+      'vitamin_d': 'Vitamin D',
+      'hemoglobin_a1c': 'Hemoglobin A1C',
+      'hba1c': 'HbA1c',
+      'total_cholesterol': 'Total Cholesterol',
+      'ldl': 'LDL',
+      'hdl': 'HDL',
+      'triglycerides': 'Triglycerides',
+      'glucose': 'Glucose',
+      'insulin': 'Insulin',
+      'apob': 'ApoB',
+
+      // Liver (simplified)
+      'alt': 'ALT',
+      'ast': 'AST',
+      'ggt': 'GGT',
+
+      // Kidney (simplified)
+      'creatinine': 'Creatinine',
+      'bun': 'BUN',
+      'egfr': 'eGFR',
+
+      // Inflammation
+      'crp': 'CRP',
+      'esr': 'ESR',
+      'homocysteine': 'Homocysteine',
+
+      // CBC (simplified)
+      'wbc': 'WBC',
+      'rbc': 'RBC',
+      'hemoglobin': 'Hemoglobin',
+      'hematocrit': 'Hematocrit',
+      'platelets': 'Platelets',
+      'platelet_count': 'Platelets',
+      'neutrophils': 'Neutrophils',
+      'lymphocytes': 'Lymphocytes',
       'basophils': 'Basophils',
       'eosinophils': 'Eosinophils',
       'ferritin': 'Ferritin',
-      'hematocrit': 'Hematocrit',
-      'hemoglobin': 'Hemoglobin',
-      'hemoglobin_a1c': 'Hemoglobin A1C',
+
+      // Other
+      'psa': 'PSA',
     };
     return names[key.toLowerCase()] ?? key;
   }
@@ -1003,32 +1031,64 @@ class _LabsScreenState extends State<LabsScreen> {
 
   String _getBiomarkerHint(String key) {
     final hints = {
+      // Hormones
       'testosterone': 'Primary male sex hormone',
       'free_testosterone': 'Bioavailable testosterone',
       'estradiol': 'Primary female sex hormone',
       'cortisol': 'Stress hormone',
       'prolactin': 'Milk production hormone',
-      'tsh': 'Thyroid stimulating hormone',
+      'progesterone': 'Female sex hormone',
+      'dhea': 'Hormone precursor',
+
+      // Thyroid
+      'tsh': 'Thyroid function',
       't3': 'Active thyroid hormone',
       't4': 'Thyroid storage hormone',
+
+      // Metabolic + Lipids
+      'vitamin_d': 'Bone health & immunity',
+      'hemoglobin_a1c': '3-month glucose average',
+      'hba1c': '3-month glucose average',
+      'total_cholesterol': 'Overall cholesterol',
+      'ldl': 'Bad cholesterol',
+      'hdl': 'Good cholesterol',
+      'triglycerides': 'Fat in blood',
+      'glucose': 'Blood sugar',
+      'insulin': 'Blood sugar regulator',
       'igf1': 'Growth & recovery factor',
       'hgh': 'Human growth hormone',
-      'crp': 'Inflammation marker',
-      'hdl': 'Good cholesterol',
-      'ldl': 'LDL cholesterol',
-      'total_cholesterol': 'Total blood cholesterol',
-      'triglycerides': 'Blood fat storage',
-      'glucose': 'Blood sugar level',
-      'insulin': 'Blood sugar regulator',
-      'hemoglobin_a1c': '3-month glucose average',
+      'apob': 'Cardiovascular risk marker',
+
+      // Liver (simplified)
       'alt': 'Liver enzyme',
       'ast': 'Liver enzyme',
+      'ggt': 'Liver enzyme',
+
+      // Kidney (simplified)
+      'creatinine': 'Kidney function',
+      'bun': 'Kidney function',
+      'egfr': 'Kidney filtration rate',
+
+      // Inflammation
+      'crp': 'Inflammation marker',
+      'esr': 'Inflammation marker',
+      'homocysteine': 'Cardiovascular inflammation',
+
+      // CBC (simplified)
+      'wbc': 'White blood cells',
+      'rbc': 'Red blood cells',
+      'hemoglobin': 'Oxygen carrier',
+      'hematocrit': 'Blood volume %',
+      'platelets': 'Clotting cells',
+      'platelet_count': 'Clotting cells',
+      'neutrophils': 'Infection fighters',
+      'lymphocytes': 'Immune cells',
+      'basophils': 'Allergy cells',
+      'eosinophils': 'Parasite fighters',
+      'ferritin': 'Iron storage',
+
+      // Other
       'psa': 'Prostate marker',
-      'basophils': 'White blood cell type',
-      'eosinophils': 'White blood cell type',
-      'ferritin': 'Iron storage protein',
-      'hematocrit': 'Red blood cell % in blood',
-      'hemoglobin': 'Oxygen-carrying protein',
     };
     return hints[key.toLowerCase()] ?? '';
   }
@@ -1036,10 +1096,10 @@ class _LabsScreenState extends State<LabsScreen> {
   IconData _getBiomarkerIcon(String key) {
     final icons = {
       // Hormones - fitness/health icons
-      'testosterone': Icons.fitness_center,
-      'free_testosterone': Icons.fitness_center,
-      'estradiol': Icons.favorite,
-      'progesterone': Icons.favorite,
+      'testosterone': Icons.male,
+      'free_testosterone': Icons.male,
+      'estradiol': Icons.female,
+      'progesterone': Icons.female,
       'dhea': Icons.energy_savings_leaf,
       'cortisol': Icons.psychology,
       'prolactin': Icons.health_and_safety,
@@ -1055,69 +1115,113 @@ class _LabsScreenState extends State<LabsScreen> {
 
       // Inflammation - fire
       'crp': Icons.local_fire_department,
+      'esr': Icons.local_fire_department,
       'homocysteine': Icons.local_fire_department,
 
       // Lipids (cholesterol) - heart/water
-      'hdl': Icons.favorite,
-      'ldl': Icons.warning,
+      'vitamin_d': Icons.wb_sunny,
+      'hdl': Icons.trending_up,
+      'ldl': Icons.trending_down,
       'total_cholesterol': Icons.favorite,
       'triglycerides': Icons.water_drop,
       'apob': Icons.warning,
 
       // Metabolic - food/medication
-      'glucose': Icons.local_dining,
+      'glucose': Icons.energy_savings_leaf,
       'insulin': Icons.medication,
       'hemoglobin_a1c': Icons.calendar_month,
       'hba1c': Icons.calendar_month,
 
-      // Liver - health/shield
-      'alt': Icons.health_and_safety,
-      'ast': Icons.health_and_safety,
-      'ggt': Icons.health_and_safety,
+      // Liver - healing
+      'alt': Icons.healing,
+      'ast': Icons.healing,
+      'ggt': Icons.healing,
 
-      // Kidney - filter/health
-      'creatinine': Icons.filter_alt,
-      'bun': Icons.filter_alt,
+      // Kidney - filter/water
+      'creatinine': Icons.water,
+      'bun': Icons.water,
+      'egfr': Icons.filter_alt,
 
       // Prostate
       'psa': Icons.health_and_safety,
 
-      // Blood count - blood type
-      'wbc': Icons.bloodtype,
+      // Blood count - shield/blood type/waves
+      'wbc': Icons.shield,
       'rbc': Icons.bloodtype,
-      'basophils': Icons.bloodtype,
-      'eosinophils': Icons.bloodtype,
-      'neutrophils': Icons.bloodtype,
-      'lymphocytes': Icons.bloodtype,
+      'basophils': Icons.shield,
+      'eosinophils': Icons.shield,
+      'neutrophils': Icons.shield,
+      'lymphocytes': Icons.shield,
       'ferritin': Icons.bloodtype,
-      'hematocrit': Icons.bloodtype,
-      'hemoglobin': Icons.bloodtype,
-      'platelet_count': Icons.bloodtype,
+      'hematocrit': Icons.waves,
+      'hemoglobin': Icons.opacity,
+      'platelets': Icons.healing,
+      'platelet_count': Icons.healing,
     };
     return icons[key.toLowerCase()] ?? Icons.science;
   }
 
   String _getUnitForBiomarker(String key) {
     final units = {
+      // Hormones
       'testosterone': 'ng/dL',
       'free_testosterone': 'pg/mL',
       'estradiol': 'pg/mL',
-      'igf1': 'ng/mL',
-      'hgh': 'ng/mL',
-      'crp': 'mg/L',
-      'hdl': 'mg/dL',
-      'ldl': 'mg/dL',
-      'total_cholesterol': 'mg/dL',
-      'triglycerides': 'mg/dL',
-      'glucose': 'mg/dL',
-      'insulin': 'mIU/L',
+      'progesterone': 'ng/mL',
+      'dhea': 'µg/dL',
       'cortisol': 'µg/dL',
-      'alt': 'U/L',
-      'ast': 'U/L',
+      'prolactin': 'ng/mL',
+
+      // Thyroid
       'tsh': 'mIU/L',
       't3': 'pg/mL',
       't4': 'ng/dL',
-      'prolactin': 'ng/mL',
+
+      // Growth factors
+      'igf1': 'ng/mL',
+      'hgh': 'ng/mL',
+
+      // Metabolic + Lipids
+      'vitamin_d': 'ng/mL',
+      'hemoglobin_a1c': '%',
+      'hba1c': '%',
+      'total_cholesterol': 'mg/dL',
+      'ldl': 'mg/dL',
+      'hdl': 'mg/dL',
+      'triglycerides': 'mg/dL',
+      'glucose': 'mg/dL',
+      'insulin': 'mIU/L',
+      'apob': 'mg/dL',
+
+      // Liver
+      'alt': 'U/L',
+      'ast': 'U/L',
+      'ggt': 'U/L',
+
+      // Kidney
+      'creatinine': 'mg/dL',
+      'bun': 'mg/dL',
+      'egfr': 'mL/min',
+
+      // Inflammation
+      'crp': 'mg/L',
+      'esr': 'mm/hr',
+      'homocysteine': 'µmol/L',
+
+      // CBC
+      'wbc': 'K/µL',
+      'rbc': 'M/µL',
+      'hemoglobin': 'g/dL',
+      'hematocrit': '%',
+      'platelets': 'K/µL',
+      'platelet_count': 'K/µL',
+      'neutrophils': '%',
+      'lymphocytes': '%',
+      'basophils': '%',
+      'eosinophils': '%',
+      'ferritin': 'ng/mL',
+
+      // Other
       'psa': 'ng/mL',
     };
     return units[key.toLowerCase()] ?? '';
@@ -1173,44 +1277,46 @@ class _LabsScreenState extends State<LabsScreen> {
       'testosterone': 10,
       'free_testosterone': 11,
       'estradiol': 12,
-      'progesterone': 13,
-      'dhea': 14,
-      'cortisol': 15,
-      'tsh': 16,
-      't3': 17,
-      't4': 18,
+      'tsh': 13,
+      't3': 14,
+      't4': 15,
+      'progesterone': 16,
+      'dhea': 17,
+      'cortisol': 18,
       'prolactin': 19,
 
-      // Metabolic markers
-      'glucose': 30,
-      'insulin': 31,
-      'hba1c': 32,
-      'hemoglobin_a1c': 32,
-      'igf1': 33,
+      // Metabolic + Key Lipids (moved higher)
+      'hba1c': 20,
+      'hemoglobin_a1c': 20,
+      'vitamin_d': 21,
+      'total_cholesterol': 22,
+      'ldl': 23,
+      'hdl': 24,
+      'triglycerides': 25,
+      'glucose': 26,
+      'insulin': 27,
+      'igf1': 28,
+      'apob': 29,
 
-      // Lipids
-      'total_cholesterol': 50,
-      'ldl': 51,
-      'hdl': 52,
-      'triglycerides': 53,
-      'apob': 54,
-
-      // Liver/kidney
+      // Liver/Kidney
       'alt': 70,
       'ast': 71,
       'ggt': 72,
-      'creatinine': 73,
-      'bun': 74,
+      'creatinine': 75,
+      'bun': 76,
+      'egfr': 77,
 
       // Inflammation
       'crp': 90,
-      'homocysteine': 91,
+      'esr': 91,
+      'homocysteine': 92,
 
       // CBC (lower priority)
       'wbc': 200,
       'rbc': 201,
       'hemoglobin': 202,
       'hematocrit': 203,
+      'platelets': 204,
       'platelet_count': 204,
       'neutrophils': 205,
       'lymphocytes': 206,
