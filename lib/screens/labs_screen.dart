@@ -976,6 +976,13 @@ class _LabsScreenState extends State<LabsScreen> {
       'estimated_gfr': 'egfr',
       'c_reactive_protein': 'crp',
       'hs_crp': 'crp',
+      'apolipoprotein_b': 'apob',
+      'lipoprotein_a': 'lp_a',
+      'thyroxine': 't4',
+      'free_t4': 't4',
+      'dheas': 'dhea',
+      'dhea_sulfate': 'dhea',
+      'fasting_insulin': 'insulin_fasting',
     };
 
     return variations[normalized] ?? normalized;
@@ -1012,7 +1019,17 @@ class _LabsScreenState extends State<LabsScreen> {
       'triglycerides': 'Triglycerides',
       'glucose': 'Glucose',
       'insulin': 'Insulin',
+      'insulin_fasting': 'Insulin (Fasting)',
       'apob': 'ApoB',
+      'apolipoprotein_b': 'ApoB',
+      'lp_a': 'Lp(a)',
+      'lipoprotein_a': 'Lp(a)',
+      'vldl': 'VLDL',
+
+      // Minerals
+      'magnesium': 'Magnesium',
+      'zinc': 'Zinc',
+      'calcium': 'Calcium',
 
       // Liver
       'alt': 'ALT',
@@ -1100,12 +1117,12 @@ class _LabsScreenState extends State<LabsScreen> {
       'cortisol': 'Stress hormone',
       'prolactin': 'Milk production hormone',
       'progesterone': 'Female sex hormone',
-      'dhea': 'Hormone precursor',
+      'dhea': 'Adrenal hormone',
 
       // Thyroid
       'tsh': 'Thyroid function',
       't3': 'Active thyroid hormone',
-      't4': 'Thyroid storage hormone',
+      't4': 'Thyroid hormone',
 
       // Metabolic + Lipids
       'vitamin_d': 'Bone health & immunity',
@@ -1115,10 +1132,20 @@ class _LabsScreenState extends State<LabsScreen> {
       'hdl': 'Good cholesterol',
       'triglycerides': 'Fat in blood',
       'glucose': 'Blood sugar',
-      'insulin': 'Blood sugar regulator',
+      'insulin': 'Blood sugar regulation',
+      'insulin_fasting': 'Fasting insulin',
       'igf1': 'Growth & recovery factor',
       'hgh': 'Human growth hormone',
-      'apob': 'Cardiovascular risk marker',
+      'apob': 'Cholesterol particles',
+      'apolipoprotein_b': 'Cholesterol particles',
+      'lp_a': 'Cardiovascular risk',
+      'lipoprotein_a': 'Cardiovascular risk',
+      'vldl': 'Very low density lipid',
+
+      // Minerals
+      'magnesium': 'Muscle & nerve function',
+      'zinc': 'Immune & metabolism',
+      'calcium': 'Bone & muscle health',
 
       // Liver
       'alt': 'Liver enzyme',
@@ -1162,7 +1189,7 @@ class _LabsScreenState extends State<LabsScreen> {
       'free_testosterone': Icons.male,
       'estradiol': Icons.female,
       'progesterone': Icons.female,
-      'dhea': Icons.energy_savings_leaf,
+      'dhea': Icons.bolt,
       'cortisol': Icons.psychology,
       'prolactin': Icons.health_and_safety,
 
@@ -1186,12 +1213,22 @@ class _LabsScreenState extends State<LabsScreen> {
       'ldl': Icons.trending_down,
       'total_cholesterol': Icons.favorite,
       'triglycerides': Icons.water_drop,
-      'apob': Icons.warning,
+      'apob': Icons.biotech,
+      'apolipoprotein_b': Icons.biotech,
+      'lp_a': Icons.warning,
+      'lipoprotein_a': Icons.warning,
+      'vldl': Icons.water_drop,
 
       // Metabolic - food/medication
       'glucose': Icons.energy_savings_leaf,
-      'insulin': Icons.medication,
+      'insulin': Icons.water_drop,
+      'insulin_fasting': Icons.water_drop,
       'hba1c': Icons.calendar_month,
+
+      // Minerals
+      'magnesium': Icons.category,
+      'zinc': Icons.shield,
+      'calcium': Icons.bone,
 
       // Liver - healing
       'alt': Icons.healing,
@@ -1252,7 +1289,17 @@ class _LabsScreenState extends State<LabsScreen> {
       'triglycerides': 'mg/dL',
       'glucose': 'mg/dL',
       'insulin': 'mIU/L',
+      'insulin_fasting': 'mIU/L',
       'apob': 'mg/dL',
+      'apolipoprotein_b': 'mg/dL',
+      'lp_a': 'mg/dL',
+      'lipoprotein_a': 'mg/dL',
+      'vldl': 'mg/dL',
+
+      // Minerals
+      'magnesium': 'mg/dL',
+      'zinc': 'µg/dL',
+      'calcium': 'mg/dL',
 
       // Liver
       'alt': 'U/L',
@@ -1335,31 +1382,46 @@ class _LabsScreenState extends State<LabsScreen> {
     final normalizedKey = _normalizeBiomarkerKey(key);
 
     const priorities = {
-      // Hormones (10-19)
+      // Hormones - Core (10-14)
       'testosterone': 10,
       'free_testosterone': 11,
       'estradiol': 12,
       'tsh': 13,
       'progesterone': 14,
-      't3': 15,
-      't4': 16,
-      'dhea': 17,
-      'cortisol': 18,
-      'prolactin': 19,
 
       // Metabolic + Key Lipids (20-29) - HIGH PRIORITY
       'hba1c': 20,
-      'vitamin_d': 21,  // ← HIGH
-      'total_cholesterol': 22,  // ← HIGH
-      'ldl': 23,  // ← HIGH
-      'hdl': 24,  // ← HIGH
-      'triglycerides': 25,  // ← HIGH
+      'vitamin_d': 21,
+      'total_cholesterol': 22,
+      'ldl': 23,
+      'hdl': 24,
+      'triglycerides': 25,
       'glucose': 26,
-      'insulin': 27,
-      'igf1': 28,
 
-      // Rest of lipids (30-49)
-      'apob': 30,
+      // Hormones - Secondary (30-34) - MOVED UP
+      'dhea': 30,
+      't4': 31,
+      'cortisol': 32,
+      'insulin': 33,
+      'insulin_fasting': 33,
+
+      // Minerals (35-39) - MOVED UP
+      'magnesium': 35,
+      'zinc': 36,
+      'calcium': 37,
+
+      // Advanced Lipids (40-49) - MOVED UP
+      'apob': 40,
+      'lp_a': 41,
+      'apolipoprotein_b': 40,
+      'lipoprotein_a': 41,
+      'vldl': 42,
+
+      // Growth factors (50-59)
+      'igf1': 50,
+      'hgh': 51,
+      't3': 52,
+      'prolactin': 53,
 
       // Liver (70-79)
       'alt': 70,
@@ -1403,13 +1465,19 @@ class _LabsScreenState extends State<LabsScreen> {
     }
 
     // Metabolic - Orange
-    if (['glucose', 'insulin', 'hba1c', 'igf1'].contains(normalizedKey)) {
+    if (['glucose', 'insulin', 'insulin_fasting', 'hba1c', 'igf1'].contains(normalizedKey)) {
       return const Color(0xFFFF9100); // Orange
     }
 
     // Lipids - Blue (includes vitamin D)
-    if (['total_cholesterol', 'ldl', 'hdl', 'triglycerides', 'apob', 'vitamin_d'].contains(normalizedKey)) {
+    if (['total_cholesterol', 'ldl', 'hdl', 'triglycerides', 'apob', 'apolipoprotein_b',
+         'lp_a', 'lipoprotein_a', 'vldl', 'vitamin_d'].contains(normalizedKey)) {
       return const Color(0xFF448AFF); // Blue
+    }
+
+    // Minerals - Yellow/Gold
+    if (['magnesium', 'zinc', 'calcium'].contains(normalizedKey)) {
+      return const Color(0xFFFFD740); // Gold
     }
 
     // Liver/Kidney - Green
