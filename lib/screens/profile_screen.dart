@@ -771,6 +771,51 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return parts[0][0].toUpperCase();
   }
 
+  IconData _getGoalIcon(String goal) {
+    final goalLower = goal.toLowerCase();
+
+    // Match against common onboarding goals
+    if (goalLower.contains('weight') || goalLower.contains('lose') || goalLower.contains('lean')) {
+      return Icons.monitor_weight;
+    } else if (goalLower.contains('muscle') || goalLower.contains('gain') || goalLower.contains('build')) {
+      return Icons.fitness_center;
+    } else if (goalLower.contains('energy') || goalLower.contains('vitality')) {
+      return Icons.bolt;
+    } else if (goalLower.contains('sleep') || goalLower.contains('rest')) {
+      return Icons.bedtime;
+    } else if (goalLower.contains('recovery') || goalLower.contains('heal')) {
+      return Icons.healing;
+    } else if (goalLower.contains('performance') || goalLower.contains('athletic')) {
+      return Icons.speed;
+    } else if (goalLower.contains('longevity') || goalLower.contains('aging') || goalLower.contains('anti-aging')) {
+      return Icons.favorite;
+    } else if (goalLower.contains('cognitive') || goalLower.contains('mental') || goalLower.contains('focus')) {
+      return Icons.psychology;
+    } else if (goalLower.contains('mood') || goalLower.contains('stress')) {
+      return Icons.sentiment_satisfied;
+    } else {
+      return Icons.flag; // Default
+    }
+  }
+
+  Color _getGoalColor(String goal) {
+    final goalLower = goal.toLowerCase();
+
+    if (goalLower.contains('weight') || goalLower.contains('lose')) {
+      return Color(0xFF00FFFF); // Cyan
+    } else if (goalLower.contains('muscle') || goalLower.contains('gain')) {
+      return Color(0xFFFF6600); // Orange
+    } else if (goalLower.contains('energy')) {
+      return Color(0xFFFFFF00); // Yellow
+    } else if (goalLower.contains('recovery')) {
+      return Color(0xFF00FF99); // Mint
+    } else if (goalLower.contains('longevity')) {
+      return Color(0xFFFF00FF); // Magenta
+    } else {
+      return Color(0xFF00FF00); // Green default
+    }
+  }
+
   // CYBERPUNK ID CARD VIEW - Blade Runner Style
   Widget _buildIDCard() {
     final user = Supabase.instance.client.auth.currentUser;
@@ -1203,20 +1248,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           // GOALS CARD - Green CRT aesthetic
           Container(
-            height: 100,
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            height: 120,
+            margin: EdgeInsets.only(bottom: 24),
             decoration: BoxDecoration(
-              color: Colors.black,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.black,
+                  Color(0xFF001a00), // Dark green tint
+                  Colors.black,
+                ],
+              ),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: Color(0xFF00FF00).withOpacity(0.5),
+                color: Color(0xFF00FF00).withOpacity(0.6),
                 width: 2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Color(0xFF00FF00).withOpacity(0.3),
-                  blurRadius: 20,
-                  spreadRadius: 3,
+                  color: Color(0xFF00FF00).withOpacity(0.4),
+                  blurRadius: 25,
+                  spreadRadius: 4,
                 ),
               ],
             ),
@@ -1267,23 +1320,58 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                       SizedBox(height: 8),
 
-                      // Goals text
+                      // Goals text with icons
                       Expanded(
-                        child: SingleChildScrollView(
-                          child: Text(
-                            _goalsController.text.isEmpty
-                              ? '[ NO OBJECTIVES SET ]'
-                              : _goalsController.text.toUpperCase(),
-                            style: TextStyle(
-                              color: _goalsController.text.isEmpty
-                                ? Color(0xFF00FF00).withOpacity(0.4)
-                                : Color(0xFF00FF00).withOpacity(0.8),
-                              fontSize: 10,
-                              fontFamily: 'monospace',
-                              height: 1.3,
+                        child: _goalsController.text.isEmpty
+                          ? Center(
+                              child: Text(
+                                '[ NO OBJECTIVES SET ]',
+                                style: TextStyle(
+                                  color: Color(0xFF00FF00).withOpacity(0.4),
+                                  fontSize: 10,
+                                  fontFamily: 'monospace',
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            )
+                          : SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: _goalsController.text
+                                    .split('\n')
+                                    .where((line) => line.trim().isNotEmpty)
+                                    .map((goal) {
+                                      final icon = _getGoalIcon(goal);
+                                      final color = _getGoalColor(goal);
+
+                                      return Padding(
+                                        padding: EdgeInsets.only(bottom: 4),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(
+                                              icon,
+                                              color: color.withOpacity(0.8),
+                                              size: 12,
+                                            ),
+                                            SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                goal.toUpperCase(),
+                                                style: TextStyle(
+                                                  color: color.withOpacity(0.9),
+                                                  fontSize: 9,
+                                                  fontFamily: 'monospace',
+                                                  height: 1.3,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                              ),
                             ),
-                          ),
-                        ),
                       ),
                     ],
                   ),
