@@ -592,37 +592,54 @@ class _LabsScreenState extends State<LabsScreen> {
                   const Color(0xFF0A0A0A), // Match background to eliminate visible boundary
                 ],
               ),
+              border: Border.all(color: Colors.red, width: 2), // DEBUG RED
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.flash_on, color: const Color(0xFF00FFFF).withOpacity(0.7), size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      'BIOMETRIC ANALYSIS',
-                      style: TextStyle(
-                        color: const Color(0xFF00FFFF).withOpacity(0.7),
-                        fontSize: 9,
-                        fontFamily: 'monospace',
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.green, width: 2), // DEBUG GREEN
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.flash_on, color: const Color(0xFF00FFFF).withOpacity(0.7), size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        'BIOMETRIC ANALYSIS',
+                        style: TextStyle(
+                          color: const Color(0xFF00FFFF).withOpacity(0.7),
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  DateFormat('MMM d, yyyy').format(lab.uploadDate).toUpperCase(),
-                  style: TextStyle(
-                    color: const Color(0xFF00FFFF),
-                    fontSize: 18,
-                    fontFamily: 'monospace',
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.yellow, width: 2), // DEBUG YELLOW
+                  ),
+                  child: Text(
+                    DateFormat('MMM d, yyyy').format(lab.uploadDate).toUpperCase(),
+                    style: TextStyle(
+                      color: const Color(0xFF00FFFF),
+                      fontSize: 18,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
                   ),
                 ),
               ],
             ),
+          ),
+
+          // Debug line to see if there's a gap after header
+          Container(
+            height: 2,
+            color: Colors.blue, // DEBUG BLUE LINE
           ),
 
           const SizedBox(height: 24),
