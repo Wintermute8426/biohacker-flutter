@@ -589,7 +589,7 @@ class _LabsScreenState extends State<LabsScreen> {
                 colors: [
                   Colors.black.withOpacity(0.5),
                   const Color(0xFF001a1a),
-                  const Color(0xFF001a1a), // Solid color at bottom to avoid harsh line
+                  const Color(0xFF0A0A0A), // Match background to eliminate visible boundary
                 ],
               ),
             ),
