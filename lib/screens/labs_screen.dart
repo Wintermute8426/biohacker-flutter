@@ -581,7 +581,8 @@ class _LabsScreenState extends State<LabsScreen> {
         children: [
           // Header section with CRT styling
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
+            // Extended padding at bottom to cover the gap and prevent underline
+            padding: const EdgeInsets.fromLTRB(20, 40, 20, 44),  // 20 + 24 extra = 44
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -627,7 +628,8 @@ class _LabsScreenState extends State<LabsScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          // Remove the gap - the header container now has extended padding to cover this space
+          // const SizedBox(height: 24),
 
           // Lab metadata - SOURCE section with icon
           if (lab.notes != null && lab.notes!.isNotEmpty) ...[
