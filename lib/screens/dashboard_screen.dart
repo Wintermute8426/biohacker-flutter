@@ -323,13 +323,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   double calculateMLDraw(String peptideName, double doseMg) {
     final reconInfo = _reconstitutionData[peptideName];
     if (reconInfo == null) {
-      // Default: assume 5mg in 2mL
+      print('[Dashboard] WARNING: No recon data for $peptideName, using default 5mg/2mL');
       return (doseMg / 5.0) * 2.0;
     }
     final totalMg = reconInfo[0];
     final totalML = reconInfo[1];
     final concentration = totalMg / totalML; // mg/mL
-    return doseMg / concentration;
+    final mlDraw = doseMg / concentration;
+
+    print('[Dashboard] mL calc for $peptideName: ${doseMg}mg dose, ${totalMg}mg/${totalML}mL = ${concentration}mg/mL → ${mlDraw}mL');
+
+    return mlDraw;
   }
 
   @override
@@ -423,11 +427,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   Widget _buildActiveProtocolsCard() {
     return CRTCard(
-      title: 'ACTIVE EXPERIMENTS',
+      title: 'ACTIVE ENHANCEMENTS',
       subtitle: 'UNAUTHORIZED RESEARCH',
       color: CRTColor.amber,
       height: 240, // Taller
       trailing: Icon(Icons.science, color: Color(0xFFFF9800), size: 20),
+      rogueId: 'ROGUE-2',
       child: _activeCycles.isEmpty
           ? Center(
               child: Text(
@@ -529,6 +534,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       color: CRTColor.green,
       height: 240, // Taller
       trailing: Icon(Icons.schedule, color: Color(0xFF00FF00), size: 20),
+      rogueId: 'ROGUE-1',
       child: _todaysDoses.isEmpty
           ? Center(
               child: Text(

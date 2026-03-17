@@ -10,6 +10,7 @@ class CRTCard extends StatelessWidget {
   final double? height;
   final VoidCallback? onTap;
   final Widget? trailing;
+  final String? rogueId;
 
   const CRTCard({
     Key? key,
@@ -20,6 +21,7 @@ class CRTCard extends StatelessWidget {
     this.height,
     this.onTap,
     this.trailing,
+    this.rogueId,
   }) : super(key: key);
 
   Color get _getColor {
@@ -117,7 +119,7 @@ class CRTCard extends StatelessWidget {
             ),
 
             // All four resistance elements with better spacing
-            // Top-left: ROGUE-1 resistance callsign
+            // Top-left: ROGUE-X resistance callsign (customizable)
             Positioned(
               top: 10,
               left: 10,
@@ -134,7 +136,7 @@ class CRTCard extends StatelessWidget {
                     Icon(Icons.flash_on, color: _getColor.withOpacity(0.8), size: 10),
                     SizedBox(width: 4),
                     Text(
-                      'ROGUE-1',
+                      rogueId ?? 'ROGUE-1',
                       style: TextStyle(
                         color: _getColor.withOpacity(0.85),
                         fontSize: 8,
