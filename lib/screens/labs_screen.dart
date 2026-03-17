@@ -479,9 +479,12 @@ class _LabsScreenState extends State<LabsScreen> {
 
 
   Widget _buildLabResultCard(LabResult lab) {
+    final scanId = 'SCAN-${lab.uploadDate.millisecondsSinceEpoch.toString().substring(7)}';
+    
     return GestureDetector(
       onTap: () => _showLabDetail(lab),
       child: Container(
+        height: 180,  // Taller for BIOS scan aesthetic
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -499,7 +502,115 @@ class _LabsScreenState extends State<LabsScreen> {
             ),
           ],
         ),
-        child: Column(
+        child: Stack(
+          children: [
+            // Scanlines overlay
+            Positioned.fill(
+              child: CustomPaint(
+                painter: common.ScanlinesPainter(
+                  opacity: 0.05,
+                  spacing: 3.0,
+                ),
+              ),
+            ),
+            
+            // Top-left: SCAN ID badge
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Color(0xFF00FFFF).withOpacity(0.15),
+                  border: Border.all(color: Color(0xFF00FFFF).withOpacity(0.7), width: 1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.biotech, color: Color(0xFF00FFFF).withOpacity(0.8), size: 10),
+                    SizedBox(width: 4),
+                    Text(
+                      scanId,
+                      style: TextStyle(
+                        color: Color(0xFF00FFFF).withOpacity(0.85),
+                        fontSize: 8,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Top-right: ROGUE-3 callsign
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Color(0xFF00FFFF).withOpacity(0.8), width: 1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.flash_on, color: Color(0xFF00FFFF).withOpacity(0.8), size: 10),
+                    SizedBox(width: 3),
+                    Text(
+                      'ROGUE-3',
+                      style: TextStyle(
+                        color: Color(0xFF00FFFF).withOpacity(0.9),
+                        fontSize: 8,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Bottom-left: Timestamp
+            Positioned(
+              bottom: 8,
+              left: 8,
+              child: Text(
+                'ANALYZED: ${DateFormat('yyyy.MM.dd').format(lab.uploadDate)}',
+                style: TextStyle(
+                  color: Color(0xFF00FFFF).withOpacity(0.5),
+                  fontSize: 8,
+                  fontFamily: 'monospace',
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ),
+            
+            // Bottom-right: QR + Barcode
+            Positioned(
+              bottom: 6,
+              right: 8,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.qr_code_2, color: Color(0xFF00FFFF).withOpacity(0.4), size: 12),
+                  SizedBox(width: 4),
+                  CustomPaint(
+                    size: Size(30, 8),
+                    painter: BarcodePainter(color: Color(0xFF00FFFF)),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Main content
+            Padding(
+              padding: EdgeInsets.fromLTRB(8, 35, 8, 25),  // More space for corner badges
+              child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -588,13 +699,17 @@ class _LabsScreenState extends State<LabsScreen> {
                   color: AppColors.textMid,
                   fontSize: 10,
                   fontStyle: FontStyle.italic,
+                  decoration: TextDecoration.none,
                 ),
               ),
             ],
           ],
         ),
-      ),
-    );
+            ),  // Close Padding
+          ],  // Close Stack children
+        ),  // Close Stack
+      ),  // Close Container
+    );  // Close GestureDetector
   }
 
   void _showLabDetail(LabResult lab) {
@@ -1568,4 +1683,37 @@ class _ScanlinesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+// Barcode painter for cyberpunk aesthetic
+class BarcodePainter extends CustomPainter {
+  final Color color;
+
+  BarcodePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.6)
+      ..strokeWidth = 1.0;
+
+    // Draw random-width barcode lines
+    double x = 0;
+    final random = [2.0, 1.0, 3.0, 1.0, 2.0, 1.0, 4.0, 2.0, 1.0, 3.0, 1.0, 2.0];
+    int index = 0;
+
+    while (x < size.width && index < random.length) {
+      final width = random[index % random.length];
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        paint,
+      );
+      x += width;
+      index++;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
