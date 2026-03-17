@@ -622,7 +622,14 @@ class _LabsScreenState extends State<LabsScreen> {
                     fontFamily: 'monospace',
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
+                    decoration: TextDecoration.none,  // Explicitly no underline
                   ),
+                ),
+                // Nuclear option: overlay to cover any mysterious underline
+                Container(
+                  height: 4,
+                  margin: const EdgeInsets.only(top: 2),
+                  color: const Color(0xFF001a1a),  // Match header background
                 ),
               ],
             ),
