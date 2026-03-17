@@ -994,56 +994,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                             const SizedBox(height: 8),
 
-                            // Demographics row
-                            Row(
+                            // Demographics row - text labels instead of icons
+                            Wrap(
+                              spacing: 12,
                               children: [
                                 // Age
-                                if (_ageController.text.isNotEmpty) ...[
-                                  Icon(Icons.cake, color: crtOrange.withOpacity(0.7), size: 10),
-                                  SizedBox(width: 3),
-                                  Text(
-                                    '${_ageController.text}y',
-                                    style: TextStyle(
-                                      color: crtOrange.withOpacity(0.7),
-                                      fontSize: 9,
-                                      fontFamily: 'monospace',
-                                    ),
+                                Text(
+                                  'AGE: ${_ageController.text.isEmpty ? '--' : _ageController.text}',
+                                  style: TextStyle(
+                                    color: crtOrange.withOpacity(0.8),
+                                    fontSize: 9,
+                                    fontFamily: 'monospace',
                                   ),
-                                  SizedBox(width: 8),
-                                ],
+                                ),
 
                                 // Height
-                                if (_heightDisplay != 'Not set') ...[
-                                  Icon(Icons.height, color: crtOrange.withOpacity(0.7), size: 10),
-                                  SizedBox(width: 3),
-                                  Text(
-                                    _heightDisplay,
-                                    style: TextStyle(
-                                      color: crtOrange.withOpacity(0.7),
-                                      fontSize: 9,
-                                      fontFamily: 'monospace',
-                                    ),
+                                Text(
+                                  'HT: ${_heightDisplay == 'Not set' ? '--' : _heightDisplay}',
+                                  style: TextStyle(
+                                    color: crtOrange.withOpacity(0.8),
+                                    fontSize: 9,
+                                    fontFamily: 'monospace',
                                   ),
-                                  SizedBox(width: 8),
-                                ],
+                                ),
 
                                 // Gender
-                                if (_selectedGender != null) ...[
-                                  Icon(
-                                    _selectedGender == 'male' ? Icons.male : (_selectedGender == 'female' ? Icons.female : Icons.transgender),
-                                    color: crtOrange.withOpacity(0.7),
-                                    size: 10,
+                                Text(
+                                  'SEX: ${_selectedGender != null ? _formatGender(_selectedGender).toUpperCase() : '--'}',
+                                  style: TextStyle(
+                                    color: crtOrange.withOpacity(0.8),
+                                    fontSize: 9,
+                                    fontFamily: 'monospace',
                                   ),
-                                  SizedBox(width: 3),
-                                  Text(
-                                    _formatGender(_selectedGender),
-                                    style: TextStyle(
-                                      color: crtOrange.withOpacity(0.7),
-                                      fontSize: 9,
-                                      fontFamily: 'monospace',
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ],
                             ),
 
@@ -1148,10 +1131,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
 
-                // Government authority badge (top-left)
+                // Government authority badge (top-right)
                 Positioned(
                   top: 8,
-                  left: 8,
+                  right: 8,
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
@@ -1177,22 +1160,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
 
-                // Barcode at bottom
+                // Barcode at bottom-right
                 Positioned(
                   bottom: 4,
-                  left: 116,
                   right: 8,
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Barcode icon
-                      Icon(Icons.qr_code_2, color: crtOrange.withOpacity(0.6), size: 16),
-                      SizedBox(width: 8),
+                      // QR code icon
+                      Icon(Icons.qr_code_2, color: crtOrange.withOpacity(0.6), size: 14),
+                      SizedBox(width: 4),
                       // Barcode lines
-                      Expanded(
-                        child: CustomPaint(
-                          size: Size(double.infinity, 12),
-                          painter: BarcodePainter(color: crtOrange),
-                        ),
+                      CustomPaint(
+                        size: Size(40, 10),
+                        painter: BarcodePainter(color: crtOrange),
                       ),
                     ],
                   ),
@@ -1201,65 +1182,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
 
-          // Stats section below ID card
-          MatteCard(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Bio
-                  if (_bioController.text.isNotEmpty) ...[
-                    _buildStatRow('BIO', _bioController.text),
-                    const Divider(height: 24),
-                  ],
-
-                  // Core Stats
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatBlock(
-                          'AGE',
-                          _ageController.text,
-                          Icons.calendar_today,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatBlock(
-                          'GENDER',
-                          _formatGender(_selectedGender),
-                          Icons.person,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildStatBlock(
-                          'HEIGHT',
-                          _heightDisplay,
-                          Icons.straighten,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatBlock(
-                          'WEIGHT',
-                          _latestWeight ?? 'N/A',
-                          Icons.monitor_weight,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
 
           // GOALS CARD - Separate, editable
           MatteCard(
