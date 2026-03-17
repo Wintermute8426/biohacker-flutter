@@ -484,7 +484,7 @@ class _LabsScreenState extends State<LabsScreen> {
     return GestureDetector(
       onTap: () => _showLabDetail(lab),
       child: Container(
-        height: 210,  // Taller for cyberpunk lab testing aesthetic
+        height: 220,  // Taller for cyberpunk lab testing aesthetic with better spacing
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
