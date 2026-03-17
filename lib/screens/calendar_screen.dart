@@ -13,7 +13,7 @@ import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
 import '../widgets/full_screen_modal.dart';
 import '../widgets/dose_display.dart';
-import '../widgets/common/scanlines_painter.dart';
+import '../widgets/common/scanlines_painter.dart' as common;
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -1214,7 +1214,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           // Subtle scanlines
           Positioned.fill(
             child: CustomPaint(
-              painter: ScanlinesPainter(
+              painter: common.ScanlinesPainter(
                 opacity: 0.05,
                 spacing: 3.0,
               ),
