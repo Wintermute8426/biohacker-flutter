@@ -13,6 +13,7 @@ import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
 import '../widgets/full_screen_modal.dart';
 import '../widgets/dose_display.dart';
+import '../widgets/common/scanlines_painter.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -54,6 +55,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     final totalML = reconInfo[1];
     final concentration = totalMg / totalML; // mg/mL
     return doseMg / concentration;
+  }
+
+  // Get consistent color per peptide (same as dashboard)
+  Color getPeptideColor(String peptideName) {
+    final hash = peptideName.hashCode;
+    final colors = [
+      const Color(0xFF00FFFF), // Cyan
+      const Color(0xFF00FF00), // Green
+      const Color(0xFFFF9800), // Amber
+      const Color(0xFFFF00FF), // Magenta
+      const Color(0xFFFFFF00), // Yellow
+      const Color(0xFF00FF99), // Mint
+    ];
+    return colors[hash.abs() % colors.length];
   }
 
   @override
@@ -1071,151 +1086,410 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     );
   }
 
-  // Day detail bottom sheet
+  // Day detail modal with CRT resistance aesthetic
   void _showDayDetail(
     BuildContext context,
     DateTime date,
     List<DoseInstance> dayDoses,
   ) {
-    FullScreenModal.show(
+    showModalBottomSheet(
       context: context,
-      title: DateFormat('EEEE, MMM dd, yyyy').format(date),
-      child: ListView(
-        padding: const EdgeInsets.all(16),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+        ),
+        child: Column(
+          children: [
+            // CRT-styled header
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.black, const Color(0xFF001a00), Colors.black],
+                ),
+                border: Border(
+                  bottom: BorderSide(
+                    color: const Color(0xFF00FF00).withOpacity(0.5),
+                    width: 2,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DateFormat('EEEE').format(date).toUpperCase(),
+                        style: TextStyle(
+                          color: const Color(0xFF00FF00).withOpacity(0.6),
+                          fontSize: 11,
+                          fontFamily: 'monospace',
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      Text(
+                        DateFormat('MMM dd, yyyy').format(date).toUpperCase(),
+                        style: const TextStyle(
+                          color: Color(0xFF00FF00),
+                          fontSize: 16,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Icon(Icons.flash_on, color: const Color(0xFF00FF00).withOpacity(0.7), size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        'SOVEREIGN DOSING',
+                        style: TextStyle(
+                          color: const Color(0xFF00FF00).withOpacity(0.7),
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close, color: const Color(0xFF00FF00).withOpacity(0.8)),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            // Dose list
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                children: dayDoses.map((dose) => _buildDoseCard(context, dose)).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // CRT-styled dose card with resistance aesthetic
+  Widget _buildDoseCard(BuildContext context, DoseInstance dose) {
+    // Determine status for coloring
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final isPast = dose.date.isBefore(today);
+
+    final peptideColor = getPeptideColor(dose.peptideName);
+
+    final isCompleted = dose.status == 'COMPLETED';
+    final isMissed = dose.status == 'MISSED';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: peptideColor.withOpacity(0.7),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: peptideColor.withOpacity(0.3),
+            blurRadius: 15,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Stack(
         children: [
-          ...dayDoses.map((dose) {
-            return _buildDoseListItem(context, dose);
-          }),
-          const SizedBox(height: 32),
+          // Subtle scanlines
+          Positioned.fill(
+            child: CustomPaint(
+              painter: ScanlinesPainter(
+                opacity: 0.05,
+                spacing: 3.0,
+              ),
+            ),
+          ),
+
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header row: peptide name, time, route, dose display
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          dose.peptideName.toUpperCase(),
+                          style: TextStyle(
+                            color: peptideColor.withOpacity(0.9),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time,
+                              size: 12,
+                              color: peptideColor.withOpacity(0.6),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              dose.time,
+                              style: TextStyle(
+                                color: peptideColor.withOpacity(0.7),
+                                fontSize: 11,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Icon(
+                              Icons.medical_services,
+                              size: 12,
+                              color: peptideColor.withOpacity(0.6),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              dose.route.toUpperCase(),
+                              style: TextStyle(
+                                color: peptideColor.withOpacity(0.7),
+                                fontSize: 11,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // DoseDisplay widget on right
+                  DoseDisplay(
+                    doseMg: dose.doseAmount,
+                    peptideName: dose.peptideName,
+                    color: peptideColor,
+                    showLabel: false,
+                    showSyringe: true,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Status badge
+              if (isCompleted)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: peptideColor.withOpacity(0.6),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        size: 12,
+                        color: peptideColor.withOpacity(0.8),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'ADMINISTERED',
+                        style: TextStyle(
+                          color: peptideColor.withOpacity(0.8),
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else if (isMissed)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFFFF0040).withOpacity(0.6),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.cancel,
+                        size: 12,
+                        color: const Color(0xFFFF0040).withOpacity(0.8),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'MISSED',
+                        style: TextStyle(
+                          color: const Color(0xFFFF0040).withOpacity(0.8),
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else if (isPast)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFF00FF00).withOpacity(0.6),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check,
+                        size: 12,
+                        color: const Color(0xFF00FF00).withOpacity(0.8),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'ASSUMED TAKEN',
+                        style: TextStyle(
+                          color: const Color(0xFF00FF00).withOpacity(0.8),
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: peptideColor.withOpacity(0.6),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.schedule,
+                        size: 12,
+                        color: peptideColor.withOpacity(0.8),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'SCHEDULED',
+                        style: TextStyle(
+                          color: peptideColor.withOpacity(0.8),
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Action buttons (only for scheduled doses)
+              if (dose.status == 'SCHEDULED') ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildCRTButton(
+                        label: 'MARK MISSED',
+                        icon: Icons.cancel_outlined,
+                        color: const Color(0xFFFF0040),
+                        onPressed: () => _markAsMissed(context, dose),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildCRTButton(
+                        label: 'LOG EFFECTS',
+                        icon: Icons.note_add_outlined,
+                        color: peptideColor,
+                        onPressed: () => _showSideEffectsModal(context, dose),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDoseListItem(BuildContext context, DoseInstance dose) {
-    // NEW MODEL: Assume all past doses are taken unless explicitly marked as missed
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final isPast = dose.date.isBefore(today);
-
-    final statusColor = dose.status == 'COMPLETED'
-        ? const Color(0xFF39FF14)
-        : dose.status == 'MISSED'
-            ? AppColors.error
-            : isPast
-                ? const Color(0xFF39FF14) // Past scheduled = assumed taken (green)
-                : const Color(0xFF00FFFF); // Future scheduled = upcoming (cyan)
-
-    final displayStatus = dose.status == 'SCHEDULED' && isPast
-        ? 'ASSUMED TAKEN'
-        : dose.status;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: statusColor.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(8),
-        color: AppColors.background,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          dose.peptideName.toUpperCase(),
-                          style: WintermmuteStyles.bodyStyle,
-                        ),
-                        DoseDisplay(
-                          doseMg: dose.doseAmount,
-                          peptideName: dose.peptideName,
-                          color: statusColor,
-                          showLabel: false,
-                          showSyringe: true,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${dose.time} • ${dose.route}',
-                      style: WintermmuteStyles.smallStyle
-                          .copyWith(color: AppColors.textMid),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.2),
-                  border: Border.all(color: statusColor),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  displayStatus,
-                  style: WintermmuteStyles.smallStyle.copyWith(
-                    color: statusColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 9,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (dose.status == 'SCHEDULED') ...[
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _markAsMissed(context, dose),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.error,
-                      foregroundColor: AppColors.background,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(
-                      'MARK AS MISSED',
-                      style: WintermmuteStyles.bodyStyle.copyWith(
-                        color: AppColors.background,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _showSideEffectsModal(context, dose),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
-                      foregroundColor: AppColors.background,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(
-                      'LOG SIDE EFFECTS',
-                      style: WintermmuteStyles.bodyStyle.copyWith(
-                        color: AppColors.background,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+  // CRT-styled action button
+  Widget _buildCRTButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          border: Border.all(color: color.withOpacity(0.6), width: 2),
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: 1,
             ),
           ],
-        ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color.withOpacity(0.8), size: 16),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: color.withOpacity(0.85),
+                fontSize: 11,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
