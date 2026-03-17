@@ -575,7 +575,6 @@ class _LabsScreenState extends State<LabsScreen> {
   void _showLabDetail(LabResult lab) {
     FullScreenModal.show(
       context: context,
-      title: 'Lab Report - ${DateFormat('MMM d, yyyy').format(lab.uploadDate)}',
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
         children: [
@@ -622,14 +621,7 @@ class _LabsScreenState extends State<LabsScreen> {
                     fontFamily: 'monospace',
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1,
-                    decoration: TextDecoration.none,  // Explicitly no underline
                   ),
-                ),
-                // Nuclear option: overlay to cover any mysterious underline
-                Container(
-                  height: 4,
-                  margin: const EdgeInsets.only(top: 2),
-                  color: const Color(0xFF001a1a),  // Match header background
                 ),
               ],
             ),
@@ -689,7 +681,6 @@ class _LabsScreenState extends State<LabsScreen> {
                                 fontSize: 11,
                                 fontFamily: 'monospace',
                                 letterSpacing: 1,
-                                decoration: TextDecoration.none,
                               ),
                             ),
                           ],
@@ -868,8 +859,7 @@ class _LabsScreenState extends State<LabsScreen> {
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
                                             color: Colors.white,
-                                            decoration: TextDecoration.none,
-                                          ),
+                                                      ),
                                         ),
                                         if (hint.isNotEmpty) ...[
                                           const SizedBox(height: 2),
@@ -878,8 +868,7 @@ class _LabsScreenState extends State<LabsScreen> {
                                             style: TextStyle(
                                               fontSize: 11,
                                               color: AppColors.textMid,
-                                              decoration: TextDecoration.none,
-                                            ),
+                                                          ),
                                           ),
                                         ],
                                       ],
@@ -903,8 +892,7 @@ class _LabsScreenState extends State<LabsScreen> {
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         color: statusColor,
-                                        decoration: TextDecoration.none,
-                                      ),
+                                              ),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -912,8 +900,7 @@ class _LabsScreenState extends State<LabsScreen> {
                                       style: TextStyle(
                                         fontSize: 11,
                                         color: AppColors.textMid,
-                                        decoration: TextDecoration.none,
-                                      ),
+                                              ),
                                     ),
                                   ],
                                 ),
@@ -931,8 +918,7 @@ class _LabsScreenState extends State<LabsScreen> {
                                       fontSize: 9,
                                       color: statusColor,
                                       fontWeight: FontWeight.w600,
-                                      decoration: TextDecoration.none,
-                                    ),
+                                          ),
                                   ),
                                 ),
                               ],
