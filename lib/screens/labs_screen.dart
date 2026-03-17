@@ -776,10 +776,16 @@ class _LabsScreenState extends State<LabsScreen> {
           // Individual biomarker cards - SORTED BY PRIORITY
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: (lab.extractedData.entries.toList()
-                ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
-              ).map((entry) {
+            child: Builder(
+              builder: (context) {
+                // Debug logging
+                print('[LabsScreen] Biomarkers in report: ${lab.extractedData.keys.toList()}');
+                print('[LabsScreen] After normalization: ${lab.extractedData.keys.map(_normalizeBiomarkerKey).toList()}');
+
+                return Column(
+                  children: (lab.extractedData.entries.toList()
+                    ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
+                  ).map((entry) {
                 final isOut = _isOutOfRange(entry.key, entry.value);
                 final displayValue = entry.value is Map
                   ? (entry.value['value']?.toString() ?? 'N/A')
@@ -921,6 +927,8 @@ class _LabsScreenState extends State<LabsScreen> {
                   ),
                 );
               }).toList(),
+                );
+              },
             ),
           ),
 
@@ -931,7 +939,51 @@ class _LabsScreenState extends State<LabsScreen> {
   }
 
 
+  // Normalize biomarker keys to handle variations
+  String _normalizeBiomarkerKey(String key) {
+    final normalized = key.toLowerCase()
+      .replaceAll(' ', '_')
+      .replaceAll('-', '_')
+      .replaceAll('(', '')
+      .replaceAll(')', '')
+      .replaceAll(',', '');
+
+    // Handle common variations
+    final variations = {
+      'vitamin_d_25_hydroxy': 'vitamin_d',
+      'vitamin_d_25oh': 'vitamin_d',
+      '25_hydroxy_vitamin_d': 'vitamin_d',
+      'cholesterol_total': 'total_cholesterol',
+      'chol_total': 'total_cholesterol',
+      'ldl_cholesterol': 'ldl',
+      'ldl_chol': 'ldl',
+      'hdl_cholesterol': 'hdl',
+      'hdl_chol': 'hdl',
+      'triglyceride': 'triglycerides',
+      'trig': 'triglycerides',
+      'hemoglobin_a1c': 'hba1c',
+      'glycated_hemoglobin': 'hba1c',
+      'free_test': 'free_testosterone',
+      'testosterone_free': 'free_testosterone',
+      'estrogen': 'estradiol',
+      'e2': 'estradiol',
+      'white_blood_cell': 'wbc',
+      'white_blood_cells': 'wbc',
+      'red_blood_cell': 'rbc',
+      'red_blood_cells': 'rbc',
+      'platelet_count': 'platelets',
+      'glomerular_filtration_rate': 'egfr',
+      'estimated_gfr': 'egfr',
+      'c_reactive_protein': 'crp',
+      'hs_crp': 'crp',
+    };
+
+    return variations[normalized] ?? normalized;
+  }
+
   String _beautifyBiomarkerName(String key) {
+    final normalizedKey = _normalizeBiomarkerKey(key);
+
     final names = {
       // Hormones
       'testosterone': 'Testosterone',
@@ -951,9 +1003,8 @@ class _LabsScreenState extends State<LabsScreen> {
       'igf1': 'IGF-1',
       'hgh': 'HGH',
 
-      // Metabolic + Lipids
+      // Metabolic + Lipids (HIGH PRIORITY)
       'vitamin_d': 'Vitamin D',
-      'hemoglobin_a1c': 'Hemoglobin A1C',
       'hba1c': 'HbA1c',
       'total_cholesterol': 'Total Cholesterol',
       'ldl': 'LDL',
@@ -963,12 +1014,12 @@ class _LabsScreenState extends State<LabsScreen> {
       'insulin': 'Insulin',
       'apob': 'ApoB',
 
-      // Liver (simplified)
+      // Liver
       'alt': 'ALT',
       'ast': 'AST',
       'ggt': 'GGT',
 
-      // Kidney (simplified)
+      // Kidney
       'creatinine': 'Creatinine',
       'bun': 'BUN',
       'egfr': 'eGFR',
@@ -978,13 +1029,12 @@ class _LabsScreenState extends State<LabsScreen> {
       'esr': 'ESR',
       'homocysteine': 'Homocysteine',
 
-      // CBC (simplified)
+      // CBC
       'wbc': 'WBC',
       'rbc': 'RBC',
       'hemoglobin': 'Hemoglobin',
       'hematocrit': 'Hematocrit',
       'platelets': 'Platelets',
-      'platelet_count': 'Platelets',
       'neutrophils': 'Neutrophils',
       'lymphocytes': 'Lymphocytes',
       'basophils': 'Basophils',
@@ -994,7 +1044,17 @@ class _LabsScreenState extends State<LabsScreen> {
       // Other
       'psa': 'PSA',
     };
-    return names[key.toLowerCase()] ?? key;
+
+    // If not found, create readable name from key
+    if (!names.containsKey(normalizedKey)) {
+      // Convert underscores to spaces and capitalize words
+      return normalizedKey
+        .split('_')
+        .map((word) => word.isNotEmpty ? (word[0].toUpperCase() + word.substring(1)) : '')
+        .join(' ');
+    }
+
+    return names[normalizedKey]!;
   }
 
   String _getBiomarkerCategory(String key) {
@@ -1030,6 +1090,8 @@ class _LabsScreenState extends State<LabsScreen> {
   }
 
   String _getBiomarkerHint(String key) {
+    final normalizedKey = _normalizeBiomarkerKey(key);
+
     final hints = {
       // Hormones
       'testosterone': 'Primary male sex hormone',
@@ -1047,7 +1109,6 @@ class _LabsScreenState extends State<LabsScreen> {
 
       // Metabolic + Lipids
       'vitamin_d': 'Bone health & immunity',
-      'hemoglobin_a1c': '3-month glucose average',
       'hba1c': '3-month glucose average',
       'total_cholesterol': 'Overall cholesterol',
       'ldl': 'Bad cholesterol',
@@ -1059,12 +1120,12 @@ class _LabsScreenState extends State<LabsScreen> {
       'hgh': 'Human growth hormone',
       'apob': 'Cardiovascular risk marker',
 
-      // Liver (simplified)
+      // Liver
       'alt': 'Liver enzyme',
       'ast': 'Liver enzyme',
       'ggt': 'Liver enzyme',
 
-      // Kidney (simplified)
+      // Kidney
       'creatinine': 'Kidney function',
       'bun': 'Kidney function',
       'egfr': 'Kidney filtration rate',
@@ -1074,13 +1135,12 @@ class _LabsScreenState extends State<LabsScreen> {
       'esr': 'Inflammation marker',
       'homocysteine': 'Cardiovascular inflammation',
 
-      // CBC (simplified)
+      // CBC
       'wbc': 'White blood cells',
       'rbc': 'Red blood cells',
       'hemoglobin': 'Oxygen carrier',
       'hematocrit': 'Blood volume %',
       'platelets': 'Clotting cells',
-      'platelet_count': 'Clotting cells',
       'neutrophils': 'Infection fighters',
       'lymphocytes': 'Immune cells',
       'basophils': 'Allergy cells',
@@ -1090,10 +1150,12 @@ class _LabsScreenState extends State<LabsScreen> {
       // Other
       'psa': 'Prostate marker',
     };
-    return hints[key.toLowerCase()] ?? '';
+    return hints[normalizedKey] ?? '';
   }
 
   IconData _getBiomarkerIcon(String key) {
+    final normalizedKey = _normalizeBiomarkerKey(key);
+
     final icons = {
       // Hormones - fitness/health icons
       'testosterone': Icons.male,
@@ -1129,7 +1191,6 @@ class _LabsScreenState extends State<LabsScreen> {
       // Metabolic - food/medication
       'glucose': Icons.energy_savings_leaf,
       'insulin': Icons.medication,
-      'hemoglobin_a1c': Icons.calendar_month,
       'hba1c': Icons.calendar_month,
 
       // Liver - healing
@@ -1156,12 +1217,13 @@ class _LabsScreenState extends State<LabsScreen> {
       'hematocrit': Icons.waves,
       'hemoglobin': Icons.opacity,
       'platelets': Icons.healing,
-      'platelet_count': Icons.healing,
     };
-    return icons[key.toLowerCase()] ?? Icons.science;
+    return icons[normalizedKey] ?? Icons.science;
   }
 
   String _getUnitForBiomarker(String key) {
+    final normalizedKey = _normalizeBiomarkerKey(key);
+
     final units = {
       // Hormones
       'testosterone': 'ng/dL',
@@ -1183,7 +1245,6 @@ class _LabsScreenState extends State<LabsScreen> {
 
       // Metabolic + Lipids
       'vitamin_d': 'ng/mL',
-      'hemoglobin_a1c': '%',
       'hba1c': '%',
       'total_cholesterol': 'mg/dL',
       'ldl': 'mg/dL',
@@ -1214,7 +1275,6 @@ class _LabsScreenState extends State<LabsScreen> {
       'hemoglobin': 'g/dL',
       'hematocrit': '%',
       'platelets': 'K/µL',
-      'platelet_count': 'K/µL',
       'neutrophils': '%',
       'lymphocytes': '%',
       'basophils': '%',
@@ -1224,7 +1284,7 @@ class _LabsScreenState extends State<LabsScreen> {
       // Other
       'psa': 'ng/mL',
     };
-    return units[key.toLowerCase()] ?? '';
+    return units[normalizedKey] ?? '';
   }
 
   int _getTotalMarkerCount() {
@@ -1272,52 +1332,56 @@ class _LabsScreenState extends State<LabsScreen> {
 
   // Biomarker priority order (lower = more important, shown first)
   int _getBiomarkerPriority(String key) {
+    final normalizedKey = _normalizeBiomarkerKey(key);
+
     const priorities = {
-      // Hormones (highest priority)
+      // Hormones (10-19)
       'testosterone': 10,
       'free_testosterone': 11,
       'estradiol': 12,
       'tsh': 13,
-      't3': 14,
-      't4': 15,
-      'progesterone': 16,
+      'progesterone': 14,
+      't3': 15,
+      't4': 16,
       'dhea': 17,
       'cortisol': 18,
       'prolactin': 19,
 
-      // Metabolic + Key Lipids (moved higher)
+      // Metabolic + Key Lipids (20-29) - HIGH PRIORITY
       'hba1c': 20,
-      'hemoglobin_a1c': 20,
-      'vitamin_d': 21,
-      'total_cholesterol': 22,
-      'ldl': 23,
-      'hdl': 24,
-      'triglycerides': 25,
+      'vitamin_d': 21,  // ← HIGH
+      'total_cholesterol': 22,  // ← HIGH
+      'ldl': 23,  // ← HIGH
+      'hdl': 24,  // ← HIGH
+      'triglycerides': 25,  // ← HIGH
       'glucose': 26,
       'insulin': 27,
       'igf1': 28,
-      'apob': 29,
 
-      // Liver/Kidney
+      // Rest of lipids (30-49)
+      'apob': 30,
+
+      // Liver (70-79)
       'alt': 70,
       'ast': 71,
       'ggt': 72,
+
+      // Kidney (75-79)
       'creatinine': 75,
       'bun': 76,
       'egfr': 77,
 
-      // Inflammation
+      // Inflammation (90-99)
       'crp': 90,
       'esr': 91,
       'homocysteine': 92,
 
-      // CBC (lower priority)
+      // CBC (200+)
       'wbc': 200,
       'rbc': 201,
       'hemoglobin': 202,
       'hematocrit': 203,
       'platelets': 204,
-      'platelet_count': 204,
       'neutrophils': 205,
       'lymphocytes': 206,
       'basophils': 207,
@@ -1325,34 +1389,36 @@ class _LabsScreenState extends State<LabsScreen> {
       'ferritin': 209,
     };
 
-    return priorities[key.toLowerCase()] ?? 999; // Unknown markers at end
+    return priorities[normalizedKey] ?? 999; // Unknowns go to bottom
   }
 
   // Get category color for biomarker
   Color _getCategoryColor(String key) {
+    final normalizedKey = _normalizeBiomarkerKey(key);
+
     // Hormones - Purple/Magenta
     if (['testosterone', 'free_testosterone', 'estradiol', 'progesterone', 'dhea',
-         'cortisol', 'tsh', 't3', 't4', 'prolactin'].contains(key.toLowerCase())) {
+         'cortisol', 'tsh', 't3', 't4', 'prolactin'].contains(normalizedKey)) {
       return const Color(0xFFB388FF); // Light purple
     }
 
     // Metabolic - Orange
-    if (['glucose', 'insulin', 'hba1c', 'hemoglobin_a1c', 'igf1'].contains(key.toLowerCase())) {
+    if (['glucose', 'insulin', 'hba1c', 'igf1'].contains(normalizedKey)) {
       return const Color(0xFFFF9100); // Orange
     }
 
-    // Lipids - Blue
-    if (['total_cholesterol', 'ldl', 'hdl', 'triglycerides', 'apob'].contains(key.toLowerCase())) {
+    // Lipids - Blue (includes vitamin D)
+    if (['total_cholesterol', 'ldl', 'hdl', 'triglycerides', 'apob', 'vitamin_d'].contains(normalizedKey)) {
       return const Color(0xFF448AFF); // Blue
     }
 
     // Liver/Kidney - Green
-    if (['alt', 'ast', 'ggt', 'creatinine', 'bun'].contains(key.toLowerCase())) {
+    if (['alt', 'ast', 'ggt', 'creatinine', 'bun', 'egfr'].contains(normalizedKey)) {
       return const Color(0xFF69F0AE); // Green
     }
 
     // Inflammation - Red
-    if (['crp', 'homocysteine'].contains(key.toLowerCase())) {
+    if (['crp', 'esr', 'homocysteine'].contains(normalizedKey)) {
       return const Color(0xFFFF5252); // Red
     }
 
