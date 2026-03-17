@@ -531,7 +531,8 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
           ),
           ],  // Close Stack children
         ),  // Close Stack
-    );
+      ),  // Close GestureDetector
+    );  // Close Container
   }
 
   Widget _buildInfoChip({
