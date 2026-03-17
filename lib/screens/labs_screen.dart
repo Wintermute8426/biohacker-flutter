@@ -1228,7 +1228,7 @@ class _LabsScreenState extends State<LabsScreen> {
       // Minerals
       'magnesium': Icons.category,
       'zinc': Icons.shield,
-      'calcium': Icons.bone,
+      'calcium': Icons.grain,
 
       // Liver - healing
       'alt': Icons.healing,
