@@ -484,7 +484,7 @@ class _LabsScreenState extends State<LabsScreen> {
     return GestureDetector(
       onTap: () => _showLabDetail(lab),
       child: Container(
-        height: 180,  // Taller for BIOS scan aesthetic
+        height: 210,  // Taller for cyberpunk lab testing aesthetic
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -575,41 +575,95 @@ class _LabsScreenState extends State<LabsScreen> {
               ),
             ),
             
-            // Bottom-left: Timestamp
+            // Bottom: Cyberpunk lab testing certification bar
             Positioned(
-              bottom: 8,
-              left: 8,
-              child: Text(
-                'ANALYZED: ${DateFormat('yyyy.MM.dd').format(lab.uploadDate)}',
-                style: TextStyle(
-                  color: Color(0xFF00FFFF).withOpacity(0.5),
-                  fontSize: 8,
-                  fontFamily: 'monospace',
-                  decoration: TextDecoration.none,
-                ),
-              ),
-            ),
-            
-            // Bottom-right: QR + Barcode
-            Positioned(
-              bottom: 6,
-              right: 8,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.qr_code_2, color: Color(0xFF00FFFF).withOpacity(0.4), size: 12),
-                  SizedBox(width: 4),
-                  CustomPaint(
-                    size: Size(30, 8),
-                    painter: BarcodePainter(color: Color(0xFF00FFFF)),
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 32,
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Color(0xFF00FFFF).withOpacity(0.05),
+                  border: Border(
+                    top: BorderSide(
+                      color: Color(0xFF00FFFF).withOpacity(0.3),
+                      width: 1,
+                    ),
                   ),
-                ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Left side: Timestamp + QR codes
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.qr_code_2, color: Color(0xFF00FFFF).withOpacity(0.4), size: 14),
+                        SizedBox(width: 6),
+                        Text(
+                          DateFormat('yyyy.MM.dd').format(lab.uploadDate),
+                          style: TextStyle(
+                            color: Color(0xFF00FFFF).withOpacity(0.5),
+                            fontSize: 8,
+                            fontFamily: 'monospace',
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.verified_outlined, color: Color(0xFF00FFFF).withOpacity(0.4), size: 10),
+                      ],
+                    ),
+                    
+                    // Center: Multiple barcodes
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CustomPaint(
+                          size: Size(25, 10),
+                          painter: BarcodePainter(color: Color(0xFF00FFFF)),
+                        ),
+                        SizedBox(width: 6),
+                        Icon(Icons.qr_code_2, color: Color(0xFF00FFFF).withOpacity(0.35), size: 12),
+                        SizedBox(width: 6),
+                        CustomPaint(
+                          size: Size(30, 10),
+                          painter: BarcodePainter(color: Color(0xFF00FFFF)),
+                        ),
+                      ],
+                    ),
+                    
+                    // Right side: Lab certification + serial
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.science_outlined, color: Color(0xFF00FFFF).withOpacity(0.4), size: 10),
+                        SizedBox(width: 4),
+                        Text(
+                          'LAB-${lab.uploadDate.year}',
+                          style: TextStyle(
+                            color: Color(0xFF00FFFF).withOpacity(0.45),
+                            fontSize: 7,
+                            fontFamily: 'monospace',
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        SizedBox(width: 6),
+                        CustomPaint(
+                          size: Size(20, 10),
+                          painter: BarcodePainter(color: Color(0xFF00FFFF)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
             
             // Main content
             Padding(
-              padding: EdgeInsets.fromLTRB(8, 35, 8, 25),  // More space for corner badges
+              padding: EdgeInsets.fromLTRB(8, 35, 8, 38),  // More space for corner badges + bottom bar
               child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
