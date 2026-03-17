@@ -43,23 +43,15 @@ class CRTCard extends StatelessWidget {
         height: height,
         margin: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF000000), // Pure black
-              _getColor.withOpacity(0.02), // Barely visible tint
-              Color(0xFF000000),
-            ],
-          ),
+          color: Colors.black, // Pure black, NO gradient
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: _getColor.withOpacity(0.85), // Much brighter border
+            color: _getColor.withOpacity(0.85), // Keep bright border
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: _getColor.withOpacity(0.5), // Brighter glow
+              color: _getColor.withOpacity(0.5), // Keep bright glow
               blurRadius: 25,
               spreadRadius: 4,
             ),
@@ -122,101 +114,36 @@ class CRTCard extends StatelessWidget {
               ),
             ),
 
-            // Resistance elements
-            // Resistance callsign (top-left)
-            Positioned(
-              top: 8,
-              left: 8,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                decoration: BoxDecoration(
-                  color: _getColor.withOpacity(0.15),
-                  border: Border.all(color: _getColor.withOpacity(0.7), width: 1),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.flash_on, color: _getColor.withOpacity(0.8), size: 10),
-                    SizedBox(width: 3),
-                    Text(
-                      'ROGUE-1',
-                      style: TextStyle(
-                        color: _getColor.withOpacity(0.85),
-                        fontSize: 7,
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
+            // Minimal resistance elements
             // Sovereignty badge (top-right)
             Positioned(
               top: 8,
               right: 8,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                 decoration: BoxDecoration(
-                  border: Border.all(color: _getColor.withOpacity(0.8), width: 1.5),
+                  border: Border.all(color: _getColor.withOpacity(0.8), width: 1),
                   borderRadius: BorderRadius.circular(2),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.lock_open, color: _getColor.withOpacity(0.85), size: 9),
-                    SizedBox(width: 3),
-                    Text(
-                      'SOVEREIGN',
-                      style: TextStyle(
-                        color: _getColor.withOpacity(0.9),
-                        fontSize: 7,
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'SOVEREIGN',
+                  style: TextStyle(
+                    color: _getColor.withOpacity(0.85),
+                    fontSize: 7,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
 
-            // Liberation timestamp (bottom-left)
+            // Minimal barcode (bottom-right)
             Positioned(
-              bottom: 6,
-              left: 8,
-              child: Text(
-                'LIBERATED: ${DateTime.now().year}',
-                style: TextStyle(
-                  color: _getColor.withOpacity(0.4),
-                  fontSize: 7,
-                  fontFamily: 'monospace',
-                ),
-              ),
-            ),
-
-            // Resistance barcode (bottom-right)
-            Positioned(
-              bottom: 4,
+              bottom: 5,
               right: 8,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'ID: ',
-                    style: TextStyle(
-                      color: _getColor.withOpacity(0.4),
-                      fontSize: 7,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                  CustomPaint(
-                    size: Size(30, 8),
-                    painter: _BarcodePainter(color: _getColor),
-                  ),
-                ],
+              child: CustomPaint(
+                size: Size(25, 6), // Smaller
+                painter: _BarcodePainter(color: _getColor),
               ),
             ),
           ],
@@ -234,10 +161,10 @@ class _ScanlinesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withOpacity(0.12)
+      ..color = color.withOpacity(0.06) // Reduce from 0.12 to 0.06
       ..strokeWidth = 1.5;
 
-    for (double i = 0; i < size.height; i += 3) {
+    for (double i = 0; i < size.height; i += 4) { // Increase spacing from 3 to 4
       canvas.drawLine(Offset(0, i), Offset(size.width, i), paint);
     }
   }
