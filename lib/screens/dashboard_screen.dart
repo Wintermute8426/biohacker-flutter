@@ -426,7 +426,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       title: 'ACTIVE EXPERIMENTS',
       subtitle: 'UNAUTHORIZED RESEARCH',
       color: CRTColor.amber,
-      height: 200,
+      height: 240, // Taller
       trailing: Icon(Icons.science, color: Color(0xFFFF9800), size: 20),
       child: _activeCycles.isEmpty
           ? Center(
@@ -444,7 +444,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               itemBuilder: (context, i) {
                 final cycle = _activeCycles[i];
                 return Padding(
-                  padding: EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.only(bottom: 12), // More spacing
                   child: Row(
                     children: [
                       Icon(Icons.fiber_manual_record, color: Color(0xFFFF9800), size: 8),
@@ -527,7 +527,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       title: 'SOVEREIGN DOSING',
       subtitle: 'SELF-ADMINISTERED',
       color: CRTColor.green,
-      height: 200,
+      height: 240, // Taller
       trailing: Icon(Icons.schedule, color: Color(0xFF00FF00), size: 20),
       child: _todaysDoses.isEmpty
           ? Center(
@@ -550,7 +550,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 final mlDraw = calculateMLDraw(dose.peptideName, dose.doseAmount);
 
                 return Padding(
-                  padding: EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.only(bottom: 12), // More spacing
                   child: Row(
                     children: [
                       // Status indicator with peptide color

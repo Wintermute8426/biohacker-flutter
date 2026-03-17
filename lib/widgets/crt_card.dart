@@ -37,10 +37,12 @@ class CRTCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double effectiveHeight = height ?? 220; // Taller default for better spacing
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: height,
+        height: effectiveHeight,
         margin: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.black, // Pure black, NO gradient
@@ -68,7 +70,7 @@ class CRTCard extends StatelessWidget {
 
             // Content
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(16, 40, 16, 30), // More top/bottom padding
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -106,7 +108,7 @@ class CRTCard extends StatelessWidget {
                     ],
                   ),
 
-                  SizedBox(height: 12),
+                  SizedBox(height: 16), // More spacing
 
                   // Child content
                   Expanded(child: child),
@@ -114,36 +116,97 @@ class CRTCard extends StatelessWidget {
               ),
             ),
 
-            // Minimal resistance elements
-            // Sovereignty badge (top-right)
+            // All four resistance elements with better spacing
+            // Top-left: ROGUE-1 resistance callsign
             Positioned(
-              top: 8,
-              right: 8,
+              top: 10,
+              left: 10,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  border: Border.all(color: _getColor.withOpacity(0.8), width: 1),
+                  color: _getColor.withOpacity(0.12),
+                  border: Border.all(color: _getColor.withOpacity(0.7), width: 1),
                   borderRadius: BorderRadius.circular(2),
                 ),
-                child: Text(
-                  'SOVEREIGN',
-                  style: TextStyle(
-                    color: _getColor.withOpacity(0.85),
-                    fontSize: 7,
-                    fontFamily: 'monospace',
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.flash_on, color: _getColor.withOpacity(0.8), size: 10),
+                    SizedBox(width: 4),
+                    Text(
+                      'ROGUE-1',
+                      style: TextStyle(
+                        color: _getColor.withOpacity(0.85),
+                        fontSize: 8,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
 
-            // Minimal barcode (bottom-right)
+            // Top-right: SOVEREIGN badge
             Positioned(
-              bottom: 5,
-              right: 8,
-              child: CustomPaint(
-                size: Size(25, 6), // Smaller
-                painter: _BarcodePainter(color: _getColor),
+              top: 10,
+              right: 10,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  border: Border.all(color: _getColor.withOpacity(0.8), width: 1.5),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.lock_open, color: _getColor.withOpacity(0.85), size: 10),
+                    SizedBox(width: 4),
+                    Text(
+                      'SOVEREIGN',
+                      style: TextStyle(
+                        color: _getColor.withOpacity(0.9),
+                        fontSize: 8,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Bottom-left: LIBERATED timestamp
+            Positioned(
+              bottom: 10,
+              left: 10,
+              child: Text(
+                'LIBERATED: ${DateTime.now().year}',
+                style: TextStyle(
+                  color: _getColor.withOpacity(0.5),
+                  fontSize: 8,
+                  fontFamily: 'monospace',
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+
+            // Bottom-right: Resistance barcode
+            Positioned(
+              bottom: 8,
+              right: 10,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.qr_code_2, color: _getColor.withOpacity(0.35), size: 12),
+                  SizedBox(width: 4),
+                  CustomPaint(
+                    size: Size(30, 8),
+                    painter: _BarcodePainter(color: _getColor),
+                  ),
+                ],
               ),
             ),
           ],
@@ -181,7 +244,7 @@ class _BarcodePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withOpacity(0.4)
+      ..color = color.withOpacity(0.35)
       ..style = PaintingStyle.fill;
 
     // Draw random-looking barcode lines
