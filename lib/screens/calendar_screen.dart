@@ -1118,9 +1118,37 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   ),
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Top row: SOVEREIGN DOSING badge (left) + close button (right)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.flash_on, color: const Color(0xFF00FF00).withOpacity(0.7), size: 14),
+                          const SizedBox(width: 4),
+                          Text(
+                            'SOVEREIGN DOSING',
+                            style: TextStyle(
+                              color: const Color(0xFF00FF00).withOpacity(0.7),
+                              fontSize: 9,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color: const Color(0xFF00FF00).withOpacity(0.8)),
+                        onPressed: () => Navigator.pop(context),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Date below
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1144,24 +1172,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                         ),
                       ),
                     ],
-                  ),
-                  Row(
-                    children: [
-                      Icon(Icons.flash_on, color: const Color(0xFF00FF00).withOpacity(0.7), size: 14),
-                      const SizedBox(width: 4),
-                      Text(
-                        'SOVEREIGN DOSING',
-                        style: TextStyle(
-                          color: const Color(0xFF00FF00).withOpacity(0.7),
-                          fontSize: 9,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close, color: const Color(0xFF00FF00).withOpacity(0.8)),
-                    onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
