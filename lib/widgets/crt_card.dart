@@ -47,21 +47,21 @@ class CRTCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.black,
-              _getColor.withOpacity(0.05),
-              Colors.black,
+              Color(0xFF000000), // Pure black
+              _getColor.withOpacity(0.02), // Barely visible tint
+              Color(0xFF000000),
             ],
           ),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: _getColor.withOpacity(0.6),
+            color: _getColor.withOpacity(0.85), // Much brighter border
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: _getColor.withOpacity(0.3),
-              blurRadius: 20,
-              spreadRadius: 3,
+              color: _getColor.withOpacity(0.5), // Brighter glow
+              blurRadius: 25,
+              spreadRadius: 4,
             ),
           ],
         ),
@@ -122,59 +122,96 @@ class CRTCard extends StatelessWidget {
               ),
             ),
 
-            // Dystopian elements
-            // Security classification badge (top-right)
+            // Resistance elements
+            // Resistance callsign (top-left)
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                decoration: BoxDecoration(
+                  color: _getColor.withOpacity(0.15),
+                  border: Border.all(color: _getColor.withOpacity(0.7), width: 1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.flash_on, color: _getColor.withOpacity(0.8), size: 10),
+                    SizedBox(width: 3),
+                    Text(
+                      'ROGUE-1',
+                      style: TextStyle(
+                        color: _getColor.withOpacity(0.85),
+                        fontSize: 7,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Sovereignty badge (top-right)
             Positioned(
               top: 8,
               right: 8,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
                 decoration: BoxDecoration(
-                  border: Border.all(color: _getColor.withOpacity(0.6), width: 1),
+                  border: Border.all(color: _getColor.withOpacity(0.8), width: 1.5),
                   borderRadius: BorderRadius.circular(2),
                 ),
-                child: Text(
-                  'AUTHORIZED',
-                  style: TextStyle(
-                    color: _getColor.withOpacity(0.7),
-                    fontSize: 7,
-                    fontFamily: 'monospace',
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.lock_open, color: _getColor.withOpacity(0.85), size: 9),
+                    SizedBox(width: 3),
+                    Text(
+                      'SOVEREIGN',
+                      style: TextStyle(
+                        color: _getColor.withOpacity(0.9),
+                        fontSize: 7,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
 
-            // Classification marker (top-left)
+            // Liberation timestamp (bottom-left)
             Positioned(
-              top: 8,
+              bottom: 6,
               left: 8,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.shield_outlined, color: _getColor.withOpacity(0.5), size: 10),
-                  SizedBox(width: 3),
-                  Text(
-                    'DELTA-4',
-                    style: TextStyle(
-                      color: _getColor.withOpacity(0.5),
-                      fontSize: 7,
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                ],
+              child: Text(
+                'LIBERATED: ${DateTime.now().year}',
+                style: TextStyle(
+                  color: _getColor.withOpacity(0.4),
+                  fontSize: 7,
+                  fontFamily: 'monospace',
+                ),
               ),
             ),
 
-            // Barcode at bottom
+            // Resistance barcode (bottom-right)
             Positioned(
               bottom: 4,
               right: 8,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.qr_code_2, color: _getColor.withOpacity(0.3), size: 12),
-                  SizedBox(width: 4),
+                  Text(
+                    'ID: ',
+                    style: TextStyle(
+                      color: _getColor.withOpacity(0.4),
+                      fontSize: 7,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
                   CustomPaint(
                     size: Size(30, 8),
                     painter: _BarcodePainter(color: _getColor),

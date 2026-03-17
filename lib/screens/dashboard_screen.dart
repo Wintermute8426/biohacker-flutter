@@ -423,10 +423,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   Widget _buildActiveProtocolsCard() {
     return CRTCard(
-      title: 'ACTIVE PROTOCOLS',
-      subtitle: '${_activeCycles.length} RUNNING',
+      title: 'ACTIVE EXPERIMENTS',
+      subtitle: 'UNAUTHORIZED RESEARCH',
       color: CRTColor.amber,
-      height: 180,
+      height: 200,
       trailing: Icon(Icons.science, color: Color(0xFFFF9800), size: 20),
       child: _activeCycles.isEmpty
           ? Center(
@@ -460,7 +460,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 Text(
                                   cycle.peptideName.toUpperCase(),
                                   style: TextStyle(
-                                    color: Color(0xFFFF9800).withOpacity(0.5),
+                                    color: Color(0xFFFF9800).withOpacity(0.85),
                                     fontSize: 11,
                                     fontFamily: 'monospace',
                                   ),
@@ -468,7 +468,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 Text(
                                   '${cycle.dose}mg',
                                   style: TextStyle(
-                                    color: Color(0xFFFF9800).withOpacity(0.5),
+                                    color: Color(0xFFFF9800).withOpacity(0.85),
                                     fontSize: 10,
                                     fontFamily: 'monospace',
                                   ),
@@ -485,7 +485,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   child: Container(
                                     height: 4,
                                     decoration: BoxDecoration(
-                                      color: Color(0xFFFF9800).withOpacity(0.15),
+                                      color: Color(0xFFFF9800).withOpacity(0.25),
                                       borderRadius: BorderRadius.circular(2),
                                     ),
                                     child: FractionallySizedBox(
@@ -493,7 +493,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       widthFactor: _calculateCycleProgress(cycle),
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: Color(0xFFFF9800).withOpacity(0.7),
+                                          color: Color(0xFFFF9800).withOpacity(0.9),
                                           borderRadius: BorderRadius.circular(2),
                                         ),
                                       ),
@@ -504,7 +504,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 Text(
                                   '${(_calculateCycleProgress(cycle) * 100).toStringAsFixed(0)}%',
                                   style: TextStyle(
-                                    color: Color(0xFFFF9800).withOpacity(0.5),
+                                    color: Color(0xFFFF9800).withOpacity(0.85),
                                     fontSize: 9,
                                     fontFamily: 'monospace',
                                   ),
@@ -524,10 +524,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   Widget _buildTodaysScheduleCard() {
     return CRTCard(
-      title: 'TODAY\'S SCHEDULE',
-      subtitle: '${_todaysDoses.length} DOSES',
+      title: 'SOVEREIGN DOSING',
+      subtitle: 'SELF-ADMINISTERED',
       color: CRTColor.green,
-      height: 180,
+      height: 200,
       trailing: Icon(Icons.schedule, color: Color(0xFF00FF00), size: 20),
       child: _todaysDoses.isEmpty
           ? Center(
@@ -572,7 +572,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       Text(
                         dose.time,
                         style: TextStyle(
-                          color: peptideColor.withOpacity(0.5),
+                          color: peptideColor.withOpacity(0.7),
                           fontSize: 10,
                           fontFamily: 'monospace',
                         ),
@@ -584,7 +584,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         child: Text(
                           dose.peptideName.toUpperCase(),
                           style: TextStyle(
-                            color: peptideColor.withOpacity(0.5),
+                            color: peptideColor.withOpacity(0.85),
                             fontSize: 11,
                             fontFamily: 'monospace',
                           ),
@@ -598,7 +598,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           Text(
                             '${dose.doseAmount}mg',
                             style: TextStyle(
-                              color: peptideColor.withOpacity(0.55),
+                              color: peptideColor.withOpacity(0.9),
                               fontSize: 10,
                               fontFamily: 'monospace',
                               fontWeight: FontWeight.bold,
@@ -607,7 +607,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           Text(
                             '${mlDraw.toStringAsFixed(2)}mL',
                             style: TextStyle(
-                              color: peptideColor.withOpacity(0.45),
+                              color: peptideColor.withOpacity(0.7),
                               fontSize: 8,
                               fontFamily: 'monospace',
                             ),
@@ -1289,7 +1289,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
+
+        // Resistance tagline
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+          child: Text(
+            '// TAKE CONTROL. OPTIMIZE YOURSELF. //',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Color(0xFF00FF00).withOpacity(0.6),
+              fontSize: 9,
+              fontFamily: 'monospace',
+              fontStyle: FontStyle.italic,
+              letterSpacing: 1,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
 
         // CRT-styled action buttons
         Row(
@@ -1340,24 +1357,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           padding: EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
             color: Colors.black,
-            border: Border.all(color: color.withOpacity(0.5), width: 2),
+            border: Border.all(color: color.withOpacity(0.75), width: 2),
             borderRadius: BorderRadius.circular(6),
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.2),
-                blurRadius: 15,
-                spreadRadius: 2,
+                color: color.withOpacity(0.4),
+                blurRadius: 20,
+                spreadRadius: 3,
               ),
             ],
           ),
           child: Column(
             children: [
-              Icon(icon, color: color.withOpacity(0.7), size: 24),
+              Icon(icon, color: color.withOpacity(0.9), size: 24),
               SizedBox(height: 6),
               Text(
                 label,
                 style: TextStyle(
-                  color: color.withOpacity(0.6),
+                  color: color.withOpacity(0.85),
                   fontSize: 9,
                   fontFamily: 'monospace',
                   letterSpacing: 0.5,
@@ -1460,7 +1477,7 @@ class SyringePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color.withOpacity(0.3)
+      ..color = color.withOpacity(0.6)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
@@ -1474,7 +1491,7 @@ class SyringePainter extends CustomPainter {
     // Draw fill amount
     if (fillPercent > 0) {
       final fillPaint = Paint()
-        ..color = color.withOpacity(0.6)
+        ..color = color.withOpacity(0.85)
         ..style = PaintingStyle.fill;
 
       final fillWidth = (size.width - 8) * fillPercent.clamp(0.0, 1.0);
