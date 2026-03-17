@@ -531,10 +531,10 @@ class _LabsScreenState extends State<LabsScreen> {
               runSpacing: 8,
               children: lab.extractedData.entries.take(6).map((entry) {
                 final isOut = _isOutOfRange(entry.key, entry.value);
-                final displayValue = entry.value is Map 
+                final displayValue = entry.value is Map
                   ? (entry.value['value']?.toString() ?? 'N/A')
                   : entry.value.toString();
-                
+
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -983,8 +983,14 @@ class _LabsScreenState extends State<LabsScreen> {
       'dheas': 'dhea',
       'dhea_sulfate': 'dhea',
       'fasting_insulin': 'insulin_fasting',
+      'vitamin_b12': 'b12',
+      'vitamin_b_12': 'b12',
+      'serum_b12': 'b12',
+      'methylcobalamin': 'cobalamin',
+      'hydroxocobalamin': 'cobalamin',
+      'serum_cobalamin': 'cobalamin',
     };
-
+    
     return variations[normalized] ?? normalized;
   }
 
