@@ -15,6 +15,7 @@ import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
 import '../widgets/full_screen_modal.dart';
+import '../widgets/crt_card.dart';
 import 'labs_screen.dart';
 import 'research_screen.dart';
 import '../main.dart' show authProviderProvider;
@@ -337,22 +338,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    const SizedBox(height: 4),
+
+                                    // ACTIVE PROTOCOLS CARD
+                                    _buildActiveProtocolsCard(),
+
+                                    // TODAY'S SCHEDULE CARD
+                                    _buildTodaysScheduleCard(),
+
+                                    // SYSTEM STATUS CARD
+                                    _buildSystemStatusCard(),
+
+                                    // QUICK ACTIONS SECTION
                                     Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 16),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          const SizedBox(height: 20),
-
-                                          // TODAY'S DOSES SECTION
-                                          _buildTodaysDosesSection(),
-                                          const SizedBox(height: 32),
-
-                                          // CYCLE PROGRESS SECTION
-                                          _buildCycleProgressSection(),
-                                          const SizedBox(height: 32),
-
-                                          // QUICK ACTIONS SECTION
                                           _buildQuickActionsSection(),
                                           const SizedBox(height: 32),
                                         ],
@@ -378,6 +379,177 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildActiveProtocolsCard() {
+    return CRTCard(
+      title: 'ACTIVE PROTOCOLS',
+      subtitle: '${_activeCycles.length} RUNNING',
+      color: CRTColor.amber,
+      height: 180,
+      trailing: Icon(Icons.science, color: Color(0xFFFF9800), size: 20),
+      child: _activeCycles.isEmpty
+          ? Center(
+              child: Text(
+                '[ NO ACTIVE PROTOCOLS ]',
+                style: TextStyle(
+                  color: Color(0xFFFF9800).withOpacity(0.4),
+                  fontSize: 10,
+                  fontFamily: 'monospace',
+                ),
+              ),
+            )
+          : ListView.builder(
+              itemCount: _activeCycles.length,
+              itemBuilder: (context, i) {
+                final cycle = _activeCycles[i];
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Icon(Icons.fiber_manual_record, color: Color(0xFFFF9800), size: 8),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          cycle.peptideName.toUpperCase(),
+                          style: TextStyle(
+                            color: Color(0xFFFF9800).withOpacity(0.9),
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${cycle.dose}mg',
+                        style: TextStyle(
+                          color: Color(0xFFFF9800).withOpacity(0.7),
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+    );
+  }
+
+  Widget _buildTodaysScheduleCard() {
+    return CRTCard(
+      title: 'TODAY\'S SCHEDULE',
+      subtitle: '${_todaysDoses.length} DOSES',
+      color: CRTColor.green,
+      height: 180,
+      trailing: Icon(Icons.schedule, color: Color(0xFF00FF00), size: 20),
+      child: _todaysDoses.isEmpty
+          ? Center(
+              child: Text(
+                '[ NO DOSES SCHEDULED ]',
+                style: TextStyle(
+                  color: Color(0xFF00FF00).withOpacity(0.4),
+                  fontSize: 10,
+                  fontFamily: 'monospace',
+                ),
+              ),
+            )
+          : ListView.builder(
+              itemCount: _todaysDoses.length,
+              itemBuilder: (context, i) {
+                final dose = _todaysDoses[i];
+                final isCompleted = dose.status == 'COMPLETED';
+                final isMissed = dose.status == 'MISSED';
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isCompleted
+                            ? Icons.check_circle
+                            : isMissed
+                                ? Icons.cancel
+                                : Icons.circle_outlined,
+                        color: isCompleted
+                            ? Color(0xFF39FF14)
+                            : isMissed
+                                ? Color(0xFFFF6B00)
+                                : Color(0xFF00FF00),
+                        size: 12,
+                      ),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${dose.time} - ${dose.peptideName.toUpperCase()}',
+                          style: TextStyle(
+                            color: Color(0xFF00FF00).withOpacity(0.9),
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '${dose.doseAmount}mg',
+                        style: TextStyle(
+                          color: Color(0xFF00FF00).withOpacity(0.7),
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+    );
+  }
+
+  Widget _buildSystemStatusCard() {
+    final totalCycles = _activeCycles.length;
+    final completedToday = _todaysDoses.where((d) => d.status == 'COMPLETED').length;
+    final totalToday = _todaysDoses.length;
+    final compliance = totalToday > 0 ? ((completedToday / totalToday) * 100).toInt() : 0;
+
+    return CRTCard(
+      title: 'SYSTEM STATUS',
+      subtitle: 'COMPLIANCE METRICS',
+      color: CRTColor.magenta,
+      height: 160,
+      trailing: Icon(Icons.analytics, color: Color(0xFFFF00FF), size: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildStatRow('ADHERENCE', '$compliance%', Color(0xFFFF00FF)),
+          _buildStatRow('PROTOCOLS', '$totalCycles', Color(0xFFFF00FF)),
+          _buildStatRow('TODAY', '$completedToday/$totalToday', Color(0xFFFF00FF)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatRow(String label, String value, Color color) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: color.withOpacity(0.7),
+            fontSize: 10,
+            fontFamily: 'monospace',
+            letterSpacing: 1,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 12,
+            fontFamily: 'monospace',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 

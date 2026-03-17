@@ -1290,30 +1290,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     children: [
                       // Header
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Icon(Icons.flag, color: Color(0xFF00FF00), size: 12),
-                              SizedBox(width: 6),
-                              Text(
-                                'MISSION OBJECTIVES',
-                                style: TextStyle(
-                                  color: Color(0xFF00FF00),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1,
-                                  fontFamily: 'monospace',
-                                ),
-                              ),
-                            ],
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.edit, size: 14),
-                            color: Color(0xFF00FF00).withOpacity(0.7),
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            onPressed: _editGoals,
+                          Icon(Icons.flag, color: Color(0xFF00FF00), size: 12),
+                          SizedBox(width: 6),
+                          Text(
+                            'MISSION OBJECTIVES',
+                            style: TextStyle(
+                              color: Color(0xFF00FF00),
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                              fontFamily: 'monospace',
+                            ),
                           ),
                         ],
                       ),
@@ -1537,6 +1525,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
 
           const SizedBox(height: 16),
+
+          // EDIT PROFILE BUTTON
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 16),
+            child: ElevatedButton.icon(
+              onPressed: _editGoals,
+              icon: Icon(Icons.edit, size: 16),
+              label: Text(
+                'EDIT PROFILE',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                  letterSpacing: 1,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFFF9800).withOpacity(0.15),
+                foregroundColor: Color(0xFFFF9800),
+                side: BorderSide(color: Color(0xFFFF9800).withOpacity(0.6), width: 2),
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                minimumSize: Size(double.infinity, 48),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
 
           // DANGER ZONE
           MatteCard(
