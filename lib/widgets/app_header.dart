@@ -69,11 +69,6 @@ class AppHeader extends StatelessWidget {
             ],
           ),
         ),
-        Divider(
-          color: AppColors.primary.withOpacity(0.3),
-          thickness: 1,
-          height: 1,
-        ),
       ],
     );
   }
