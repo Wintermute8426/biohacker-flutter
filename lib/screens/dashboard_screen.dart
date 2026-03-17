@@ -458,7 +458,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Peptide name + dose
+                            // Peptide name + dose + mL draw
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -470,13 +470,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                     fontFamily: 'monospace',
                                   ),
                                 ),
-                                Text(
-                                  '${cycle.dose}mg',
-                                  style: TextStyle(
-                                    color: Color(0xFFFF9800).withOpacity(0.85),
-                                    fontSize: 10,
-                                    fontFamily: 'monospace',
-                                  ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '${cycle.dose}mg',
+                                      style: TextStyle(
+                                        color: Color(0xFFFF9800).withOpacity(0.9),
+                                        fontSize: 10,
+                                        fontFamily: 'monospace',
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${calculateMLDraw(cycle.peptideName, cycle.dose).toStringAsFixed(2)}mL',
+                                      style: TextStyle(
+                                        color: Color(0xFFFF9800).withOpacity(0.65),
+                                        fontSize: 8,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),

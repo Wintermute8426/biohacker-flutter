@@ -28,6 +28,33 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
   bool _showMonthView = false; // Toggle between week and month views
   int _buildCounter = 0; // Debug: Track rebuilds
 
+  // Reconstitution data (TODO: move to database)
+  // Maps peptide name to reconstitution info: [totalMg, totalML]
+  final Map<String, List<double>> _reconstitutionData = {
+    'BPC-157': [5.0, 2.0],
+    'TB-500': [5.0, 2.0],
+    'GHK-Cu': [50.0, 2.0],
+    'Semaglutide': [5.0, 2.0],
+    'Tirzepatide': [10.0, 2.0],
+    'CJC-1295': [2.0, 2.0],
+    'Ipamorelin': [5.0, 2.0],
+    'MOTS-c': [10.0, 2.0],
+    'Thymosin Alpha-1': [5.0, 2.0],
+    'PT-141': [10.0, 2.0],
+  };
+
+  // Calculate mL draw amount
+  double calculateMLDraw(String peptideName, double doseMg) {
+    final reconInfo = _reconstitutionData[peptideName];
+    if (reconInfo == null) {
+      return (doseMg / 5.0) * 2.0; // Default: 5mg/2mL
+    }
+    final totalMg = reconInfo[0];
+    final totalML = reconInfo[1];
+    final concentration = totalMg / totalML; // mg/mL
+    return doseMg / concentration;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -1100,9 +1127,33 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '${dose.peptideName} - ${dose.doseAmount}mg',
-                      style: WintermmuteStyles.bodyStyle,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          dose.peptideName.toUpperCase(),
+                          style: WintermmuteStyles.bodyStyle,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${dose.doseAmount}mg',
+                              style: WintermmuteStyles.bodyStyle.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '${calculateMLDraw(dose.peptideName, dose.doseAmount).toStringAsFixed(2)}mL',
+                              style: WintermmuteStyles.smallStyle.copyWith(
+                                color: AppColors.textMid,
+                                fontSize: 10,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
