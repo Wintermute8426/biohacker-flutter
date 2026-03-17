@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -44,7 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   bool _isLoggingOut = false;
   String _userName = '';
-  String? _profilePhotoPath;
+  String? _profilePhotoUrl;
 
   @override
   void initState() {
@@ -69,7 +68,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final prefs = await SharedPreferences.getInstance();
       if (mounted) {
         setState(() {
-          _profilePhotoPath = prefs.getString('profile_photo_path');
+          _profilePhotoUrl = prefs.getString('profile_photo_url');
         });
       }
     } catch (e) {
@@ -156,14 +155,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     CircleAvatar(
                       radius: 28,
                       backgroundColor: AppColors.primary.withOpacity(0.15),
-                      backgroundImage: _profilePhotoPath != null &&
-                                      _profilePhotoPath!.isNotEmpty &&
-                                      File(_profilePhotoPath!).existsSync()
-                        ? FileImage(File(_profilePhotoPath!)) as ImageProvider
+                      backgroundImage: _profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty
+                        ? NetworkImage(_profilePhotoUrl!) as ImageProvider
                         : null,
-                      child: _profilePhotoPath == null ||
-                              _profilePhotoPath!.isEmpty ||
-                              !File(_profilePhotoPath!).existsSync()
+                      child: _profilePhotoUrl == null || _profilePhotoUrl!.isEmpty
                         ? Text(
                             _getInitials(_userName),
                             style: TextStyle(

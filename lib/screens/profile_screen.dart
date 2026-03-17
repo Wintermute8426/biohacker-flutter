@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -68,7 +67,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String? _errorMessage;
   String? _latestWeight;
   String _heightDisplay = 'Not set';
-  String? _profilePhotoPath;
+  String? _profilePhotoUrl;
 
   // Stats
 
@@ -447,9 +446,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final profile = await profileService.getUserProfile(userId);
 
       if (profile != null) {
-        // Load profile photo path from SharedPreferences
+        // Load profile photo URL from SharedPreferences
         final prefs = await SharedPreferences.getInstance();
-        final photoPath = prefs.getString('profile_photo_path');
+        final photoUrl = prefs.getString('profile_photo_url');
 
         setState(() {
           _usernameController.text = profile.username ?? '';
@@ -461,7 +460,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _selectedTimezone = profile.timezone;
           _selectedUnits = profile.unitsPreference ?? 'imperial';
           _heightDisplay = profile.heightFormatted;
-          _profilePhotoPath = photoPath;
+          _profilePhotoUrl = photoUrl;
 
           if (profile.notificationPreferences != null) {
             profile.notificationPreferences!.forEach((key, value) {
@@ -544,18 +543,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         imageQuality: 85,
       );
 
-      if (image != null) {
-        // Save local file path to SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('profile_photo_path', image.path);
+      if (image == null) {
+        setState(() => _isUploadingPhoto = false);
+        return;
+      }
 
-        setState(() {
-          _profilePhotoPath = image.path;
-        });
+      // Read image bytes
+      final bytes = await image.readAsBytes();
 
-        if (mounted) {
-          UserFeedback.showSuccess(context, 'Profile photo updated successfully');
-        }
+      // Upload to Supabase Storage
+      final userId = Supabase.instance.client.auth.currentUser?.id ?? 'anonymous';
+      final fileName = '${userId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      await Supabase.instance.client.storage
+          .from('profiles')
+          .uploadBinary(fileName, bytes);
+
+      // Get public URL
+      final photoUrl = Supabase.instance.client.storage
+          .from('profiles')
+          .getPublicUrl(fileName);
+
+      // Save URL to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('profile_photo_url', photoUrl);
+
+      setState(() {
+        _profilePhotoUrl = photoUrl;
+      });
+
+      if (mounted) {
+        UserFeedback.showSuccess(context, 'Profile photo updated successfully');
       }
     } catch (e) {
       print('[ProfileScreen] Error uploading photo: $e');
@@ -835,9 +853,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             color: crtOrange.withOpacity(0.7),  // Orange border
                             width: 2,
                           ),
-                          image: _profilePhotoPath != null && _profilePhotoPath!.isNotEmpty
+                          image: _profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty
                             ? DecorationImage(
-                                image: FileImage(File(_profilePhotoPath!)),
+                                image: NetworkImage(_profilePhotoUrl!),
                                 fit: BoxFit.cover,
                               )
                             : null,
@@ -845,7 +863,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         child: Stack(
                           children: [
                             // Avatar (show only if no photo)
-                            if (_profilePhotoPath == null || _profilePhotoPath!.isEmpty)
+                            if (_profilePhotoUrl == null || _profilePhotoUrl!.isEmpty)
                               Center(
                                 child: Text(
                                   _getInitials(_usernameController.text),
@@ -859,7 +877,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               ),
 
                             // Biometric scan overlay (if photo exists)
-                            if (_profilePhotoPath != null && _profilePhotoPath!.isNotEmpty)
+                            if (_profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty)
                               Positioned(
                                 top: 2,
                                 left: 2,
@@ -1183,112 +1201,111 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
 
 
-          // GOALS CARD - Separate, editable
-          MatteCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.flag, color: AppColors.primary, size: 16),
-                        const SizedBox(width: 8),
-                        Text(
-                          'GOALS',
-                          style: TextStyle(
-                            fontFamily: 'monospace',
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: _editGoals,
-                        borderRadius: BorderRadius.circular(4),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4),
-                          child: Icon(
-                            Icons.edit,
-                            size: 16,
-                            color: AppColors.primary.withOpacity(0.7),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  _goalsController.text.isEmpty ? 'No goals set - tap edit to add your goals' : _goalsController.text,
-                  style: TextStyle(
-                    color: _goalsController.text.isEmpty ? AppColors.textDim : AppColors.textMid,
-                    fontSize: 13,
-                    fontFamily: 'monospace',
-                    fontStyle: _goalsController.text.isEmpty ? FontStyle.italic : FontStyle.normal,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+          // GOALS CARD - Green CRT aesthetic
+          Container(
+            height: 100,
+            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Color(0xFF00FF00).withOpacity(0.5),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFF00FF00).withOpacity(0.3),
+                  blurRadius: 20,
+                  spreadRadius: 3,
                 ),
               ],
             ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // ACCOUNT SECTION
-          _buildSectionCard(
-            'ACCOUNT',
-            Column(
+            child: Stack(
               children: [
-                _buildInfoRow('Email', user?.email ?? 'N/A'),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final confirmed = await UserFeedback.showConfirmDialog(
-                        context: context,
-                        title: 'Sign Out',
-                        message: 'Are you sure you want to sign out?',
-                        confirmText: 'SIGN OUT',
-                        isDangerous: true,
-                      );
+                // Scanlines
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: HeavyScanlinesPainter(color: Color(0xFF00FF00)),
+                  ),
+                ),
 
-                      if (confirmed && context.mounted) {
-                        try {
-                          await ref.read(authProviderProvider).signOut();
-                          if (context.mounted) {
-                            Navigator.of(context).popUntil((route) => route.isFirst);
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            UserFeedback.showError(
-                              context,
-                              'Failed to sign out - please try again',
-                            );
-                          }
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.error,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                // Content
+                Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.flag, color: Color(0xFF00FF00), size: 12),
+                              SizedBox(width: 6),
+                              Text(
+                                'MISSION OBJECTIVES',
+                                style: TextStyle(
+                                  color: Color(0xFF00FF00),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                            ],
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.edit, size: 14),
+                            color: Color(0xFF00FF00).withOpacity(0.7),
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                            onPressed: _editGoals,
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 8),
+
+                      // Goals text
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Text(
+                            _goalsController.text.isEmpty
+                              ? '[ NO OBJECTIVES SET ]'
+                              : _goalsController.text.toUpperCase(),
+                            style: TextStyle(
+                              color: _goalsController.text.isEmpty
+                                ? Color(0xFF00FF00).withOpacity(0.4)
+                                : Color(0xFF00FF00).withOpacity(0.8),
+                              fontSize: 10,
+                              fontFamily: 'monospace',
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Classification badge
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Color(0xFF00FF00), width: 1),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                     child: Text(
-                      'SIGN OUT',
+                      'PRIORITY-1',
                       style: TextStyle(
+                        color: Color(0xFF00FF00),
+                        fontSize: 7,
                         fontFamily: 'monospace',
-                        fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
-                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -1461,6 +1478,63 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   Icons.delete_forever,
                   _confirmDeleteAccount,
                   isDanger: true,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ACCOUNT SECTION
+          _buildSectionCard(
+            'ACCOUNT',
+            Column(
+              children: [
+                _buildInfoRow('Email', user?.email ?? 'N/A'),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final confirmed = await UserFeedback.showConfirmDialog(
+                        context: context,
+                        title: 'Sign Out',
+                        message: 'Are you sure you want to sign out?',
+                        confirmText: 'SIGN OUT',
+                        isDangerous: true,
+                      );
+
+                      if (confirmed && context.mounted) {
+                        try {
+                          await ref.read(authProviderProvider).signOut();
+                          if (context.mounted) {
+                            Navigator.of(context).popUntil((route) => route.isFirst);
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            UserFeedback.showError(
+                              context,
+                              'Failed to sign out - please try again',
+                            );
+                          }
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: Text(
+                      'SIGN OUT',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
