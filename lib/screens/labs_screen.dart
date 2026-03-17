@@ -17,6 +17,7 @@ import '../widgets/app_header.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/full_screen_modal.dart';
 import '../widgets/common/matte_card.dart';
+import '../widgets/common/scanlines_painter.dart' as common;
 
 class LabsScreen extends StatefulWidget {
   const LabsScreen({Key? key}) : super(key: key);
@@ -576,104 +577,213 @@ class _LabsScreenState extends State<LabsScreen> {
       context: context,
       title: 'Lab Report - ${DateFormat('MMM d, yyyy').format(lab.uploadDate)}',
       child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
         children: [
-
-              // Lab metadata - SOURCE section with icon
-              if (lab.notes != null && lab.notes!.isNotEmpty) ...[
-                MatteCard(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.source,
-                            color: AppColors.primary,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'SOURCE',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                        ],
+          // Header section with CRT styling
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.black, const Color(0xFF001a1a), Colors.black],
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: const Color(0xFF00FFFF).withOpacity(0.5),
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.flash_on, color: const Color(0xFF00FFFF).withOpacity(0.7), size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      'BIOMETRIC ANALYSIS',
+                      style: TextStyle(
+                        color: const Color(0xFF00FFFF).withOpacity(0.7),
+                        fontSize: 9,
+                        fontFamily: 'monospace',
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        lab.notes!,
-                        style: TextStyle(
-                          color: AppColors.textMid,
-                          fontSize: 12,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  DateFormat('MMM d, yyyy').format(lab.uploadDate).toUpperCase(),
+                  style: TextStyle(
+                    color: const Color(0xFF00FFFF),
+                    fontSize: 18,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
                   ),
                 ),
-                const SizedBox(height: 16),
               ],
+            ),
+          ),
 
-              // All biomarkers header with icon
-              MatteCard(
+          const SizedBox(height: 24),
+
+          // Lab metadata - SOURCE section with icon
+          if (lab.notes != null && lab.notes!.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFF00FFFF).withOpacity(0.6),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF00FFFF).withOpacity(0.3),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Stack(
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.biotech,
-                          color: AppColors.primary,
-                          size: 20,
+                    // Scanlines
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: common.ScanlinesPainter(
+                          opacity: 0.05,
+                          spacing: 3.0,
                         ),
-                        const SizedBox(width: 8),
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.source,
+                              color: const Color(0xFF00FFFF),
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'SOURCE',
+                              style: TextStyle(
+                                color: const Color(0xFF00FFFF).withOpacity(0.7),
+                                fontSize: 11,
+                                fontFamily: 'monospace',
+                                letterSpacing: 1,
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
                         Text(
-                          'ALL BIOMARKERS',
+                          lab.notes!,
                           style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
+                            color: AppColors.textMid,
+                            fontSize: 12,
                             decoration: TextDecoration.none,
                           ),
                         ),
                       ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface.withOpacity(0.15),
-                        border: Border.all(
-                          color: AppColors.accent.withOpacity(0.2),
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Text(
-                        '${lab.extractedData.length} markers',
-                        style: TextStyle(
-                          color: AppColors.textMid,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+            ),
+          ],
 
-              // Individual biomarker cards with icons - SORTED BY PRIORITY
-              ...(lab.extractedData.entries.toList()
+          // All biomarkers header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: const Color(0xFF00FFFF).withOpacity(0.6),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00FFFF).withOpacity(0.3),
+                    blurRadius: 15,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  // Scanlines
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: common.ScanlinesPainter(
+                        opacity: 0.05,
+                        spacing: 3.0,
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.biotech,
+                            color: const Color(0xFF00FFFF),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'ALL BIOMARKERS',
+                            style: TextStyle(
+                              color: const Color(0xFF00FFFF).withOpacity(0.7),
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                              letterSpacing: 1,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: const Color(0xFF00FFFF).withOpacity(0.8), width: 1),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                        child: Text(
+                          '${lab.extractedData.length} markers',
+                          style: TextStyle(
+                            color: const Color(0xFF00FFFF).withOpacity(0.9),
+                            fontSize: 8,
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Individual biomarker cards - SORTED BY PRIORITY
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: (lab.extractedData.entries.toList()
                 ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
               ).map((entry) {
                 final isOut = _isOutOfRange(entry.key, entry.value);
@@ -686,110 +796,129 @@ class _LabsScreenState extends State<LabsScreen> {
                 final hint = _getBiomarkerHint(entry.key);
                 final icon = _getBiomarkerIcon(entry.key);
                 final statusColor = _getStatusColor(status);
+                final categoryColor = _getCategoryColor(entry.key);
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Container(
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: Colors.black,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border(
-                        left: BorderSide(
-                          color: _getCategoryColor(entry.key),
-                          width: 4,
-                        ),
+                      border: Border.all(
+                        color: categoryColor.withOpacity(0.7),
+                        width: 2,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: categoryColor.withOpacity(0.3),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                        ),
+                      ],
                     ),
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
+                    child: Stack(
                       children: [
-                        // Left side: Icon + Name + Description
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Icon(
-                                icon,
-                                color: _getCategoryColor(entry.key),
-                                size: 20,
+                        // Scanlines
+                        Positioned.fill(
+                          child: CustomPaint(
+                            painter: common.ScanlinesPainter(
+                              opacity: 0.05,
+                              spacing: 3.0,
+                            ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            // Left side: Icon + Name + Description
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    icon,
+                                    color: categoryColor,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          _beautifyBiomarkerName(entry.key),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                        if (hint.isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            hint,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: AppColors.textMid,
+                                              decoration: TextDecoration.none,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
+                            ),
+                            // Right side: Value + Unit + Status
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                                  textBaseline: TextBaseline.alphabetic,
                                   children: [
                                     Text(
-                                      _beautifyBiomarkerName(entry.key),
+                                      displayValue,
                                       style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: statusColor,
                                         decoration: TextDecoration.none,
                                       ),
                                     ),
-                                    if (hint.isNotEmpty) ...[
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        hint,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: AppColors.textMid,
-                                          decoration: TextDecoration.none,
-                                        ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      _getUnitForBiomarker(entry.key),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.textMid,
+                                        decoration: TextDecoration.none,
                                       ),
-                                    ],
+                                    ),
                                   ],
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Right side: Value + Unit + Status
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
-                              children: [
-                                Text(
-                                  displayValue,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: statusColor,
-                                    decoration: TextDecoration.none,
+                                const SizedBox(height: 2),
+                                // Status badge
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(3),
                                   ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _getUnitForBiomarker(entry.key),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textMid,
-                                    decoration: TextDecoration.none,
+                                  child: Text(
+                                    status.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      color: statusColor,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.none,
+                                    ),
                                   ),
                                 ),
                               ],
-                            ),
-                            const SizedBox(height: 2),
-                            // Status badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                              child: Text(
-                                status.toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: statusColor,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
                             ),
                           ],
                         ),
@@ -798,12 +927,15 @@ class _LabsScreenState extends State<LabsScreen> {
                   ),
                 );
               }).toList(),
+            ),
+          ),
 
-              const SizedBox(height: 24),
-            ],
+          const SizedBox(height: 40),
+        ],
       ),
     );
   }
+
 
   String _beautifyBiomarkerName(String key) {
     final names = {

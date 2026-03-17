@@ -6,6 +6,7 @@ import '../data/peptides.dart';
 import '../widgets/peptide_selector.dart';
 import '../widgets/common/matte_card.dart';
 import '../widgets/common/cyber_button.dart';
+import '../widgets/common/scanlines_painter.dart' as common;
 
 class CycleSetupFormV4 extends StatefulWidget {
   final String? defaultPeptideName;
@@ -391,6 +392,110 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
     });
   }
 
+  Widget _buildCRTCard({
+    required String sectionTitle,
+    required List<Widget> children,
+    Color borderColor = const Color(0xFFFF9800),
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: borderColor.withOpacity(0.6),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: borderColor.withOpacity(0.3),
+            blurRadius: 15,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Scanlines
+          Positioned.fill(
+            child: CustomPaint(
+              painter: common.ScanlinesPainter(
+                opacity: 0.05,
+                spacing: 3.0,
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Section header
+              Text(
+                sectionTitle.toUpperCase(),
+                style: TextStyle(
+                  color: borderColor.withOpacity(0.7),
+                  fontSize: 11,
+                  fontFamily: 'monospace',
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...children,
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCRTButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback? onPressed,
+  }) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: onPressed == null ? color.withOpacity(0.3) : color.withOpacity(0.8),
+            width: 2,
+          ),
+          boxShadow: onPressed != null
+              ? [
+                  BoxShadow(
+                    color: color.withOpacity(0.3),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : [],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: onPressed == null ? color.withOpacity(0.3) : color, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: onPressed == null ? color.withOpacity(0.3) : color,
+                fontSize: 12,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   List<Map<String, dynamic>> _generateDoseSchedule() {
     print('[DOSE GEN] Starting dose generation for ${_phases.length} phases');
     final doses = <Map<String, dynamic>>[];
@@ -543,75 +648,150 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 40,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('CYCLE SETUP', style: WintermmuteStyles.headerStyle),
-          const SizedBox(height: 24),
+          // Header section with CRT styling
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.black, const Color(0xFF1a0d00), Colors.black],
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: const Color(0xFFFF9800).withOpacity(0.5),
+                  width: 2,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.flash_on, color: const Color(0xFFFF9800).withOpacity(0.7), size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          'PROTOCOL SETUP',
+                          style: TextStyle(
+                            color: const Color(0xFFFF9800).withOpacity(0.7),
+                            fontSize: 9,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'NEW ENHANCEMENT CYCLE',
+                      style: TextStyle(
+                        color: const Color(0xFFFF9800),
+                        fontSize: 18,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.8), width: 1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                  child: Text(
+                    'ROGUE-2',
+                    style: TextStyle(
+                      color: const Color(0xFFFF9800).withOpacity(0.9),
+                      fontSize: 8,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
 
           // ===== PEPTIDE =====
-          Row(
+          _buildCRTCard(
+            sectionTitle: 'Peptide Selection',
             children: [
-              Icon(Icons.medication, color: AppColors.primary, size: 20),
-              const SizedBox(width: 12),
-              Text('PEPTIDE SELECTION', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+              PeptideSelector(
+                initialValue: _selectedPeptide,
+                label: 'Select peptide',
+                onSelected: (peptide) {
+                  setState(() => _selectedPeptide = peptide);
+                  _validatePeptide();
+                },
+              ),
+              if (_fieldErrors['peptide'] != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(_fieldErrors['peptide']!, style: TextStyle(color: AppColors.error, fontSize: 10)),
+                ),
             ],
           ),
-          const SizedBox(height: 12),
-          PeptideSelector(
-            initialValue: _selectedPeptide,
-            label: 'Select peptide',
-            onSelected: (peptide) {
-              setState(() => _selectedPeptide = peptide);
-              _validatePeptide();
-            },
-          ),
-          if (_fieldErrors['peptide'] != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(_fieldErrors['peptide']!, style: TextStyle(color: AppColors.error, fontSize: 10)),
-            ),
-          const SizedBox(height: 20),
-
-          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
 
           // ===== RECONSTITUTION =====
-          Row(
+          _buildCRTCard(
+            sectionTitle: 'Reconstitution',
             children: [
-              Icon(Icons.water_drop, color: AppColors.primary, size: 20),
-              const SizedBox(width: 12),
-              Text('RECONSTITUTION', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          MatteCard(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                TextField(
+              TextField(
                   controller: _totalPeptideController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(color: AppColors.primary),
+                  style: TextStyle(
+                    color: const Color(0xFFFF9800).withOpacity(0.9),
+                    fontSize: 14,
+                    fontFamily: 'monospace',
+                  ),
                   decoration: InputDecoration(
                     labelText: 'VIAL SIZE (mg)',
-                    labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+                    labelStyle: TextStyle(
+                      color: const Color(0xFFFF9800).withOpacity(0.5),
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                    ),
                     hintText: 'e.g., 10',
                     helperText: '5-500mg recommended',
-                    prefixIcon: Icon(Icons.science, color: AppColors.primary, size: 18),
+                    helperStyle: TextStyle(color: AppColors.textMid.withOpacity(0.6), fontSize: 10),
+                    prefixIcon: Icon(Icons.science, color: const Color(0xFFFF9800), size: 18),
                     errorText: _fieldErrors['vialSize'],
                     errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
                     filled: true,
-                    fillColor: AppColors.surface,
-                    border: OutlineInputBorder(
+                    fillColor: Colors.black,
+                    enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: _fieldErrors['vialSize'] != null ? AppColors.error : AppColors.textMid,
+                        color: const Color(0xFFFF9800).withOpacity(0.4),
+                        width: 1.5,
                       ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: const Color(0xFFFF9800).withOpacity(0.8),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.error,
+                        width: 1.5,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
@@ -625,21 +805,46 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                 TextField(
                   controller: _desiredDosageController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(color: AppColors.primary),
+                  style: TextStyle(
+                    color: const Color(0xFFFF9800).withOpacity(0.9),
+                    fontSize: 14,
+                    fontFamily: 'monospace',
+                  ),
                   decoration: InputDecoration(
                     labelText: 'DESIRED DOSAGE PER INJECTION (mg)',
-                    labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+                    labelStyle: TextStyle(
+                      color: const Color(0xFFFF9800).withOpacity(0.5),
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                    ),
                     hintText: 'e.g., 1',
                     helperText: '0.1-10mg recommended',
-                    suffixIcon: Icon(Icons.science, color: AppColors.accent, size: 18),
+                    helperStyle: TextStyle(color: AppColors.textMid.withOpacity(0.6), fontSize: 10),
+                    suffixIcon: Icon(Icons.science, color: const Color(0xFFFF9800), size: 18),
                     errorText: _fieldErrors['desiredDose'],
                     errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
                     filled: true,
-                    fillColor: AppColors.surface,
-                    border: OutlineInputBorder(
+                    fillColor: Colors.black,
+                    enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: _fieldErrors['desiredDose'] != null ? AppColors.error : AppColors.textMid,
+                        color: const Color(0xFFFF9800).withOpacity(0.4),
+                        width: 1.5,
                       ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: const Color(0xFFFF9800).withOpacity(0.8),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.error,
+                        width: 1.5,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
@@ -655,21 +860,46 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                 TextField(
                   controller: _concentrationMlController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: TextStyle(color: AppColors.primary),
+                  style: TextStyle(
+                    color: const Color(0xFFFF9800).withOpacity(0.9),
+                    fontSize: 14,
+                    fontFamily: 'monospace',
+                  ),
                   decoration: InputDecoration(
                     labelText: 'DRAW PER INJECTION (ml)',
-                    labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
+                    labelStyle: TextStyle(
+                      color: const Color(0xFFFF9800).withOpacity(0.5),
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                    ),
                     hintText: '0.1',
                     helperText: '0.05-1.0ml recommended',
-                    suffixIcon: Icon(Icons.water_drop, color: AppColors.accent, size: 18),
+                    helperStyle: TextStyle(color: AppColors.textMid.withOpacity(0.6), fontSize: 10),
+                    suffixIcon: Icon(Icons.water_drop, color: const Color(0xFFFF9800), size: 18),
                     errorText: _fieldErrors['draw'],
                     errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
                     filled: true,
-                    fillColor: AppColors.surface,
-                    border: OutlineInputBorder(
+                    fillColor: Colors.black,
+                    enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: _fieldErrors['draw'] != null ? AppColors.error : AppColors.textMid,
+                        color: const Color(0xFFFF9800).withOpacity(0.4),
+                        width: 1.5,
                       ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: const Color(0xFFFF9800).withOpacity(0.8),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: AppColors.error,
+                        width: 1.5,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
@@ -682,437 +912,454 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                     }
                   },
                 ),
+              // Reconstitution summary with syringe visual
+              if (_bacRequired != null && _concentrationMl != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0d0600),
+                    border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.6)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('RECONSTITUTION INSTRUCTIONS', style: TextStyle(color: const Color(0xFFFF9800), fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Add BAC (sterile water):', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
+                          Text('${_bacRequired!.toStringAsFixed(1)}ml', style: TextStyle(color: const Color(0xFFFF9800), fontSize: 14, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text('DRAW PER INJECTION', style: TextStyle(color: AppColors.textMid, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                      const SizedBox(height: 8),
+                      // REALISTIC SYRINGE VISUAL
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Plunger (darker, with grip)
+                          Container(
+                            width: 14,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              color: AppColors.textMid,
+                              border: Border.all(color: const Color(0xFFFF9800), width: 1),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF9800),
+                                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(1), topRight: Radius.circular(1)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 1),
+
+                          // Barrel
+                          Expanded(
+                            child: Stack(
+                              children: [
+                                // Outer barrel border
+                                Container(
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: const Color(0xFFFF9800), width: 2),
+                                    borderRadius: const BorderRadius.only(
+                                      topRight: Radius.circular(6),
+                                      bottomRight: Radius.circular(6),
+                                    ),
+                                  ),
+                                ),
+                                // Fill (liquid in barrel)
+                                Container(
+                                  height: 70,
+                                  width: ((_concentrationMl ?? 0) / 1.0) * (MediaQuery.of(context).size.width - 100),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF9800).withOpacity(0.15),
+                                    borderRadius: const BorderRadius.only(
+                                      topRight: Radius.circular(4),
+                                      bottomRight: Radius.circular(4),
+                                    ),
+                                  ),
+                                ),
+                                // Graduation marks
+                                Positioned.fill(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('0', style: TextStyle(color: AppColors.textMid, fontSize: 8, fontWeight: FontWeight.bold)),
+                                        Text('${_concentrationMl?.toStringAsFixed(3) ?? '0.0'}ml', style: TextStyle(color: const Color(0xFFFF9800), fontSize: 9, fontWeight: FontWeight.bold)),
+                                        Text('1.0', style: TextStyle(color: AppColors.textMid, fontSize: 8, fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Needle (thin tip)
+                          Container(
+                            width: 3,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF9800),
+                              borderRadius: BorderRadius.circular(1.5),
+                            ),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 70,
+                            color: const Color(0xFFFF9800),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ],
-            ),
-          ),
-
-          // Reconstitution summary with syringe visual
-          if (_bacRequired != null && _concentrationMl != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.primary),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('RECONSTITUTION INSTRUCTIONS', style: TextStyle(color: AppColors.primary, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Add BAC (sterile water):', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
-                      Text('${_bacRequired!.toStringAsFixed(1)}ml', style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text('DRAW PER INJECTION', style: TextStyle(color: AppColors.textMid, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                  const SizedBox(height: 8),
-                  // REALISTIC SYRINGE VISUAL
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Plunger (darker, with grip)
-                      Container(
-                        width: 14,
-                        height: 70,
-                        decoration: BoxDecoration(
-                          color: AppColors.textMid,
-                          border: Border.all(color: AppColors.primary, width: 1),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Container(
-                              width: 12,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary,
-                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(1), topRight: Radius.circular(1)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 1),
-                      
-                      // Barrel
-                      Expanded(
-                        child: Stack(
-                          children: [
-                            // Outer barrel border
-                            Container(
-                              height: 70,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.accent, width: 2),
-                                borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(6),
-                                  bottomRight: Radius.circular(6),
-                                ),
-                              ),
-                            ),
-                            // Fill (liquid in barrel)
-                            Container(
-                              height: 70,
-                              width: ((_concentrationMl ?? 0) / 1.0) * (MediaQuery.of(context).size.width - 100),
-                              decoration: BoxDecoration(
-                                color: AppColors.accent.withOpacity(0.15),
-                                borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(4),
-                                  bottomRight: Radius.circular(4),
-                                ),
-                              ),
-                            ),
-                            // Graduation marks
-                            Positioned.fill(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text('0', style: TextStyle(color: AppColors.textMid, fontSize: 8, fontWeight: FontWeight.bold)),
-                                    Text('${_concentrationMl?.toStringAsFixed(3) ?? '0.0'}ml', style: TextStyle(color: AppColors.primary, fontSize: 9, fontWeight: FontWeight.bold)),
-                                    Text('1.0', style: TextStyle(color: AppColors.textMid, fontSize: 8, fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      // Needle (thin tip)
-                      Container(
-                        width: 3,
-                        height: 70,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(1.5),
-                        ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 70,
-                        color: AppColors.primary,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          const SizedBox(height: 20),
-
-          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
-
-          // ===== ROUTE =====
-          Row(
-            children: [
-              Icon(Icons.straighten, color: AppColors.primary, size: 20),
-              const SizedBox(width: 12),
-              Text('ROUTE', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
             ],
           ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            initialValue: _selectedRoute,
-            decoration: InputDecoration(
-              labelText: 'INJECTION ROUTE',
-              labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            dropdownColor: AppColors.surface,
-            style: TextStyle(color: AppColors.primary),
-            items: _routeMap.keys.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
-            onChanged: (value) => setState(() => _selectedRoute = value),
-          ),
 
-          const SizedBox(height: 20),
-
-          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
-
-          // ===== FREQUENCY =====
-          Row(
+          // ===== ROUTE & FREQUENCY =====
+          _buildCRTCard(
+            sectionTitle: 'Route & Frequency',
             children: [
-              Icon(Icons.event_repeat, color: AppColors.primary, size: 20),
-              const SizedBox(width: 12),
-              Text('INJECTION FREQUENCY', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedRoute,
+                decoration: InputDecoration(
+                  labelText: 'INJECTION ROUTE',
+                  labelStyle: TextStyle(
+                    color: const Color(0xFFFF9800).withOpacity(0.5),
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                  ),
+                  filled: true,
+                  fillColor: Colors.black,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1.5),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+                dropdownColor: Colors.black,
+                style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
+                items: _routeMap.keys.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+                onChanged: (value) => setState(() => _selectedRoute = value),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _injectionFrequency,
+                decoration: InputDecoration(
+                  labelText: 'FREQUENCY',
+                  labelStyle: TextStyle(
+                    color: const Color(0xFFFF9800).withOpacity(0.5),
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                  ),
+                  filled: true,
+                  fillColor: Colors.black,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1.5),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+                dropdownColor: Colors.black,
+                style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
+                items: ['Daily', '3x/week', '1x/week'].map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
+                onChanged: (value) {
+                  setState(() => _injectionFrequency = value);
+                  _updateCycleDuration();
+                },
+              ),
             ],
           ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            initialValue: _injectionFrequency,
-            decoration: InputDecoration(
-              labelText: 'FREQUENCY',
-              labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            dropdownColor: AppColors.surface,
-            style: TextStyle(color: AppColors.primary),
-            items: ['Daily', '3x/week', '1x/week'].map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
-            onChanged: (value) {
-              setState(() => _injectionFrequency = value);
-              _updateCycleDuration();
-            },
-          ),
-
-          const SizedBox(height: 20),
-
-          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
 
           // ===== CYCLE DURATION (IN WEEKS) =====
-          Row(
+          _buildCRTCard(
+            sectionTitle: 'Cycle Duration',
             children: [
-              Icon(Icons.timeline, color: AppColors.primary, size: 20),
-              const SizedBox(width: 12),
-              Text('CYCLE DURATION', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          
-          TextField(
-            controller: _cycleDurationController,
-            keyboardType: TextInputType.number,
-            style: TextStyle(color: AppColors.primary),
-            decoration: InputDecoration(
-              labelText: 'DURATION (weeks)',
-              labelStyle: TextStyle(color: AppColors.textMid, fontSize: 12),
-              hintText: 'e.g., 4',
-              helperText: '1-52 weeks recommended',
-              errorText: _fieldErrors['cycleDuration'],
-              errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: _fieldErrors['cycleDuration'] != null ? AppColors.error : AppColors.textMid,
+              TextField(
+                controller: _cycleDurationController,
+                keyboardType: TextInputType.number,
+                style: TextStyle(
+                  color: const Color(0xFFFF9800).withOpacity(0.9),
+                  fontSize: 14,
+                  fontFamily: 'monospace',
                 ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            onChanged: (value) {
-              _cycleDurationWeeks = int.tryParse(value);
-              _validateCycleDuration();
-              _validatePhases();
-              _updateCycleDuration();
-            },
-          ),
-
-          if (_cycleDurationWeeks != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.accent, width: 0.5),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Total duration: $cycleDays days ($_cycleDurationWeeks weeks)', 
-                    style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Text('START: ${DateFormat('MMM d, yyyy').format(_startDate!)}', 
-                    style: TextStyle(color: AppColors.textMid, fontSize: 11)),
-                  const SizedBox(height: 4),
-                  Text('END: ${DateFormat('MMM d, yyyy').format(_endDate!)}', 
-                    style: TextStyle(color: AppColors.textMid, fontSize: 11)),
-                  const SizedBox(height: 12),
-                  GestureDetector(
-                    onTap: () => setState(() => _showDateEditor = !_showDateEditor),
-                    child: Text(
-                      _showDateEditor ? 'Hide date editor' : 'Edit dates',
-                      style: TextStyle(color: AppColors.accent, fontSize: 11),
+                decoration: InputDecoration(
+                  labelText: 'DURATION (weeks)',
+                  labelStyle: TextStyle(
+                    color: const Color(0xFFFF9800).withOpacity(0.5),
+                    fontSize: 12,
+                    fontFamily: 'monospace',
+                  ),
+                  hintText: 'e.g., 4',
+                  helperText: '1-52 weeks recommended',
+                  helperStyle: TextStyle(color: AppColors.textMid.withOpacity(0.6), fontSize: 10),
+                  errorText: _fieldErrors['cycleDuration'],
+                  errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
+                  filled: true,
+                  fillColor: Colors.black,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: const Color(0xFFFF9800).withOpacity(0.4),
+                      width: 1.5,
                     ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: const Color(0xFFFF9800).withOpacity(0.8),
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: AppColors.error,
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+                onChanged: (value) {
+                  _cycleDurationWeeks = int.tryParse(value);
+                  _validateCycleDuration();
+                  _validatePhases();
+                  _updateCycleDuration();
+                },
+              ),
+
+              if (_cycleDurationWeeks != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0d0600),
+                    border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Total duration: $cycleDays days ($_cycleDurationWeeks weeks)',
+                        style: TextStyle(color: const Color(0xFFFF9800), fontSize: 12, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Text('START: ${DateFormat('MMM d, yyyy').format(_startDate!)}',
+                        style: TextStyle(color: AppColors.textMid, fontSize: 11)),
+                      const SizedBox(height: 4),
+                      Text('END: ${DateFormat('MMM d, yyyy').format(_endDate!)}',
+                        style: TextStyle(color: AppColors.textMid, fontSize: 11)),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () => setState(() => _showDateEditor = !_showDateEditor),
+                        child: Text(
+                          _showDateEditor ? 'Hide date editor' : 'Edit dates',
+                          style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.7), fontSize: 11),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                if (_showDateEditor) ...[
+                  const SizedBox(height: 12),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.calendar_today, color: const Color(0xFFFF9800), size: 18),
+                    title: Text('START DATE', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
+                    trailing: Text(DateFormat('MMM d').format(_startDate!), style: TextStyle(color: const Color(0xFFFF9800), fontWeight: FontWeight.bold)),
+                    onTap: () async {
+                      final date = await showDatePicker(context: context, initialDate: _startDate!, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
+                      if (date != null) {
+                        setState(() {
+                          _startDate = date;
+                          _endDate = date.add(Duration(days: cycleDays - 1));
+                        });
+                      }
+                    },
                   ),
                 ],
-              ),
-            ),
+              ],
+            ],
+          ),
 
-            if (_showDateEditor) ...[
-              const SizedBox(height: 12),
+          // ===== INJECTION TIME =====
+          _buildCRTCard(
+            sectionTitle: 'Injection Time',
+            children: [
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.calendar_today, color: AppColors.primary, size: 18),
-                title: Text('START DATE', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
-                trailing: Text(DateFormat('MMM d').format(_startDate!), style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                leading: Icon(Icons.access_time, color: const Color(0xFFFF9800), size: 18),
+                title: Text('TIME', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
+                trailing: Text(_scheduledTime ?? '08:00', style: TextStyle(color: const Color(0xFFFF9800), fontWeight: FontWeight.bold)),
                 onTap: () async {
-                  final date = await showDatePicker(context: context, initialDate: _startDate!, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
-                  if (date != null) {
-                    setState(() {
-                      _startDate = date;
-                      _endDate = date.add(Duration(days: cycleDays - 1));
-                    });
+                  final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(DateTime.parse('2000-01-01 ${_scheduledTime ?? "08:00"}')));
+                  if (time != null) {
+                    setState(() => _scheduledTime = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}');
                   }
                 },
               ),
             ],
-          ],
-
-          const SizedBox(height: 20),
-
-          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
-
-          // ===== INJECTION TIME (MOVED HERE) =====
-          Row(
-            children: [
-              Icon(Icons.schedule, color: AppColors.primary, size: 20),
-              const SizedBox(width: 12),
-              Text('INJECTION TIME', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
-            ],
           ),
-          const SizedBox(height: 12),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.access_time, color: AppColors.primary, size: 18),
-            title: Text('TIME', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
-            trailing: Text(_scheduledTime ?? '08:00', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
-            onTap: () async {
-              final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(DateTime.parse('2000-01-01 ${_scheduledTime ?? "08:00"}')));
-              if (time != null) {
-                setState(() => _scheduledTime = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}');
-              }
-            },
-          ),
-
-          const SizedBox(height: 20),
-
-          Divider(color: AppColors.primary.withOpacity(0.2), thickness: 1, height: 32),
 
           // ===== DOSING PHASES (LIKE WEB APP) =====
-          Row(
+          _buildCRTCard(
+            sectionTitle: 'Multi-Phase Dosing (Optional)',
             children: [
-              Icon(Icons.auto_graph, color: AppColors.primary, size: 20),
-              const SizedBox(width: 12),
-              Text('MULTI-PHASE DOSING (OPTIONAL)', style: WintermmuteStyles.titleStyle.copyWith(fontSize: 14, letterSpacing: 1)),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // Quick add buttons
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => _addPhase('taper_up'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.surface,
-                    side: BorderSide(color: AppColors.primary, width: 1),
+              // Quick add buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildCRTButton(
+                      label: '↗ TAPER UP',
+                      icon: Icons.trending_up,
+                      color: const Color(0xFFFF9800),
+                      onPressed: () => _addPhase('taper_up'),
+                    ),
                   ),
-                  child: Text('↗ Taper Up', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14)),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => _addPhase('taper_down'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.surface,
-                    side: BorderSide(color: AppColors.primary, width: 1),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildCRTButton(
+                      label: '↘ TAPER DOWN',
+                      icon: Icons.trending_down,
+                      color: const Color(0xFFFF9800),
+                      onPressed: () => _addPhase('taper_down'),
+                    ),
                   ),
-                  child: Text('↘ Taper Down', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14)),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // Phase cards
-          if (_phases.isEmpty)
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.textMid, width: 1),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Center(child: Text('No phases added. Click above to add one.', style: TextStyle(color: AppColors.textMid, fontSize: 12))),
-            )
-          else
-            Column(
-              children: [
-                for (int i = 0; i < _phases.length; i++) ...[
-                  PhaseCard(
-                    phaseNumber: i + 1,
-                    phase: _phases[i],
-                    cycleStart: _startDate,
-                    cycleEnd: _endDate,
-                    onUpdate: (phase) => _updatePhase(i, phase),
-                    onDurationChange: _recalculatePhaseDates,
-                    onRemove: () => _removePhase(i),
-                  ),
-                  const SizedBox(height: 12),
                 ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Phase cards
+              if (_phases.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0d0600),
+                    border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.3), width: 1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Center(child: Text('No phases added. Click above to add one.', style: TextStyle(color: AppColors.textMid, fontSize: 12))),
+                )
+              else
+                Column(
+                  children: [
+                    for (int i = 0; i < _phases.length; i++) ...[
+                      PhaseCard(
+                        phaseNumber: i + 1,
+                        phase: _phases[i],
+                        cycleStart: _startDate,
+                        cycleEnd: _endDate,
+                        onUpdate: (phase) => _updatePhase(i, phase),
+                        onDurationChange: _recalculatePhaseDates,
+                        onRemove: () => _removePhase(i),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ],
+                ),
+
+              // Add phase button
+              const SizedBox(height: 12),
+              _buildCRTButton(
+                label: '+ ADD PLATEAU PHASE',
+                icon: Icons.add,
+                color: const Color(0xFFFF9800),
+                onPressed: () => _addPhase('plateau'),
+              ),
+            ],
+          ),
+
+          // Bottom buttons with more padding
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildCRTButton(
+                    label: 'CANCEL',
+                    icon: Icons.close,
+                    color: const Color(0xFF666666),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: _buildCRTButton(
+                    label: _isFormValid() ? 'CREATE PROTOCOL' : 'COMPLETE FORM',
+                    icon: Icons.rocket_launch,
+                    color: const Color(0xFFFF9800),
+                    onPressed: _isFormValid() ? _submit : null,
+                  ),
+                ),
               ],
             ),
-
-          // Add phase button
-          GestureDetector(
-            onTap: () => _addPhase('plateau'),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.primary, width: 1, style: BorderStyle.solid),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Center(
-                child: Text('+ Add Phase', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
-              ),
-            ),
           ),
 
-          const SizedBox(height: 24),
-
-          CyberButton(
-            text: _isFormValid() ? 'CREATE CYCLE' : 'Complete form to create',
-            icon: Icons.check_circle,
-            onPressed: _isFormValid() ? _submit : null,
-            style: CyberButtonStyle.primary,
-            fullWidth: true,
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-          ),
-          
           // Show validation summary if form invalid
           if (!_isFormValid() && (_selectedPeptide != null || _totalPeptideMg != null || _cycleDurationWeeks != null)) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                border: Border.all(color: AppColors.error, width: 0.5),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('⚠️ Fix the following to continue:', style: TextStyle(color: AppColors.error, fontSize: 11, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  ..._fieldErrors.entries
-                      .where((e) => e.value != null)
-                      .map(
-                        (e) => Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Text('• ${e.value}', style: TextStyle(color: AppColors.error, fontSize: 10)),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  border: Border.all(color: AppColors.error.withOpacity(0.8), width: 2),
+                  borderRadius: BorderRadius.circular(4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.error.withOpacity(0.2),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('⚠️ Fix the following to continue:', style: TextStyle(color: AppColors.error, fontSize: 11, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    ..._fieldErrors.entries
+                        .where((e) => e.value != null)
+                        .map(
+                          (e) => Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text('• ${e.value}', style: TextStyle(color: AppColors.error, fontSize: 10)),
+                          ),
                         ),
-                      ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
-          const SizedBox(height: 20),
         ],
       ),
     );
@@ -1225,9 +1472,16 @@ class _PhaseCardState extends State<PhaseCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.95),
-        border: Border.all(color: AppColors.primary, width: 1),
+        color: const Color(0xFF0d0600),
+        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.6), width: 2),
         borderRadius: BorderRadius.circular(4),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF9800).withOpacity(0.2),
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1235,7 +1489,7 @@ class _PhaseCardState extends State<PhaseCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Phase ${widget.phaseNumber} • $phaseLabel', style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
+              Text('Phase ${widget.phaseNumber} • $phaseLabel', style: TextStyle(color: const Color(0xFFFF9800), fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'monospace', letterSpacing: 1)),
               GestureDetector(
                 onTap: widget.onRemove,
                 child: Icon(Icons.close, color: Color(0xFFFF0040), size: 18),
@@ -1243,20 +1497,20 @@ class _PhaseCardState extends State<PhaseCard> {
             ],
           ),
           const SizedBox(height: 12),
-          
+
           // DATE RANGE (DISPLAY ONLY)
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.surface.withOpacity(0.95),
-              border: Border.all(color: AppColors.textMid, width: 0.5),
+              color: Colors.black,
+              border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.3), width: 1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Dates:', style: TextStyle(color: AppColors.textMid, fontSize: 11)),
-                Text(dateRange, style: TextStyle(color: AppColors.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+                Text(dateRange, style: TextStyle(color: const Color(0xFFFF9800), fontSize: 11, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -1268,14 +1522,21 @@ class _PhaseCardState extends State<PhaseCard> {
             TextField(
               controller: _durationController,
               keyboardType: TextInputType.number,
-              style: TextStyle(color: AppColors.primary),
+              style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 13, fontFamily: 'monospace'),
               decoration: InputDecoration(
                 labelText: 'DURATION (days)',
-                labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
+                labelStyle: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
                 hintText: '7',
                 filled: true,
-                fillColor: AppColors.surface,
-                border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+                fillColor: Colors.black,
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                  borderRadius: BorderRadius.circular(4),
+                ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               ),
               onChanged: (v) {
@@ -1301,16 +1562,16 @@ class _PhaseCardState extends State<PhaseCard> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                       decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.textMid),
+                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.4)),
                         borderRadius: BorderRadius.circular(4),
-                        color: AppColors.surface,
+                        color: Colors.black,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Dosage (mg)', style: TextStyle(color: AppColors.textMid, fontSize: 10)),
                           const SizedBox(height: 4),
-                          Text('${widget.phase.dosage}mg (Desired)', style: TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold)),
+                          Text('${widget.phase.dosage}mg (Desired)', style: TextStyle(color: const Color(0xFFFF9800), fontSize: 12, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     )
@@ -1318,14 +1579,21 @@ class _PhaseCardState extends State<PhaseCard> {
                     TextField(
                       controller: _dosageController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: TextStyle(color: AppColors.primary),
+                      style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 13, fontFamily: 'monospace'),
                       decoration: InputDecoration(
                         labelText: 'Dosage (mg)',
-                        labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
+                        labelStyle: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
                         hintText: '50',
                         filled: true,
-                        fillColor: AppColors.surface,
-                        border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+                        fillColor: Colors.black,
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       ),
                       onChanged: (v) {
@@ -1339,14 +1607,21 @@ class _PhaseCardState extends State<PhaseCard> {
                   initialValue: widget.phase.frequency,
                   decoration: InputDecoration(
                     labelText: 'Frequency',
-                    labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
+                    labelStyle: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
                     filled: true,
-                    fillColor: AppColors.surface,
-                    border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+                    fillColor: Colors.black,
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                   ),
-                  dropdownColor: AppColors.surface,
-                  style: TextStyle(color: AppColors.primary, fontSize: 12),
+                  dropdownColor: Colors.black,
+                  style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 12, fontFamily: 'monospace'),
                   items: ['Daily', '3x/week', '1x/week'].map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
                   onChanged: (value) {
                     widget.onUpdate(widget.phase.copyWith(frequency: value));
@@ -1360,14 +1635,21 @@ class _PhaseCardState extends State<PhaseCard> {
           // NOTES
           TextField(
             controller: _notesController,
-            style: TextStyle(color: AppColors.primary),
+            style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 13, fontFamily: 'monospace'),
             decoration: InputDecoration(
               labelText: 'Notes (optional)',
-              labelStyle: TextStyle(color: AppColors.textMid, fontSize: 10),
+              labelStyle: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
               hintText: 'e.g., slowly increase...',
               filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.textMid)),
+              fillColor: Colors.black,
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                borderRadius: BorderRadius.circular(4),
+              ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             ),
             maxLines: 1,
