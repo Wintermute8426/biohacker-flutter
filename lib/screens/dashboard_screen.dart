@@ -45,6 +45,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   final Map<String, int> _currentDayCache = {};
   final Map<String, int> _totalDaysCache = {};
 
+  // Reconstitution data (TODO: move to database)
+  // Maps peptide name to reconstitution info: [totalMg, totalML]
+  final Map<String, List<double>> _reconstitutionData = {
+    'BPC-157': [5.0, 2.0],
+    'TB-500': [5.0, 2.0],
+    'GHK-Cu': [50.0, 2.0],
+    'Semaglutide': [5.0, 2.0],
+    'Tirzepatide': [10.0, 2.0],
+    'CJC-1295': [2.0, 2.0],
+    'Ipamorelin': [5.0, 2.0],
+    'MOTS-c': [10.0, 2.0],
+    'Thymosin Alpha-1': [5.0, 2.0],
+    'PT-141': [10.0, 2.0],
+  };
+
   @override
   void initState() {
     super.initState();
@@ -290,6 +305,33 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return totalDays;
   }
 
+  // Get color for peptide based on hash
+  Color getPeptideColor(String peptideName) {
+    final hash = peptideName.hashCode;
+    final colors = [
+      const Color(0xFF00FFFF), // Cyan
+      const Color(0xFF00FF00), // Green
+      const Color(0xFFFF9800), // Amber
+      const Color(0xFFFF00FF), // Magenta
+      const Color(0xFFFFFF00), // Yellow
+      const Color(0xFF00FF99), // Mint
+    ];
+    return colors[hash.abs() % colors.length];
+  }
+
+  // Calculate mL draw amount
+  double calculateMLDraw(String peptideName, double doseMg) {
+    final reconInfo = _reconstitutionData[peptideName];
+    if (reconInfo == null) {
+      // Default: assume 5mg in 2mL
+      return (doseMg / 5.0) * 2.0;
+    }
+    final totalMg = reconInfo[0];
+    final totalML = reconInfo[1];
+    final concentration = totalMg / totalML; // mg/mL
+    return doseMg / concentration;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -418,7 +460,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 Text(
                                   cycle.peptideName.toUpperCase(),
                                   style: TextStyle(
-                                    color: Color(0xFFFF9800).withOpacity(0.65),
+                                    color: Color(0xFFFF9800).withOpacity(0.5),
                                     fontSize: 11,
                                     fontFamily: 'monospace',
                                   ),
@@ -426,7 +468,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 Text(
                                   '${cycle.dose}mg',
                                   style: TextStyle(
-                                    color: Color(0xFFFF9800).withOpacity(0.6),
+                                    color: Color(0xFFFF9800).withOpacity(0.5),
                                     fontSize: 10,
                                     fontFamily: 'monospace',
                                   ),
@@ -462,7 +504,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 Text(
                                   '${(_calculateCycleProgress(cycle) * 100).toStringAsFixed(0)}%',
                                   style: TextStyle(
-                                    color: Color(0xFFFF9800).withOpacity(0.6),
+                                    color: Color(0xFFFF9800).withOpacity(0.5),
                                     fontSize: 9,
                                     fontFamily: 'monospace',
                                   ),
@@ -504,54 +546,85 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 final dose = _todaysDoses[i];
                 final isCompleted = dose.status == 'COMPLETED';
                 final isMissed = dose.status == 'MISSED';
+                final peptideColor = getPeptideColor(dose.peptideName);
+                final mlDraw = calculateMLDraw(dose.peptideName, dose.doseAmount);
+
                 return Padding(
                   padding: EdgeInsets.only(bottom: 8),
                   child: Row(
                     children: [
-                      Icon(
-                        isCompleted
-                            ? Icons.check_circle
-                            : isMissed
-                                ? Icons.cancel
-                                : Icons.circle_outlined,
-                        color: isCompleted
-                            ? Color(0xFF39FF14)
-                            : isMissed
-                                ? Color(0xFFFF6B00)
-                                : Color(0xFF00FF00),
-                        size: 12,
+                      // Status indicator with peptide color
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: isCompleted
+                              ? Color(0xFF39FF14)
+                              : isMissed
+                                  ? Color(0xFFFF6B00)
+                                  : peptideColor,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                       SizedBox(width: 8),
+
+                      // Time
+                      Text(
+                        dose.time,
+                        style: TextStyle(
+                          color: peptideColor.withOpacity(0.5),
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      SizedBox(width: 8),
+
+                      // Peptide name
                       Expanded(
                         child: Text(
-                          '${dose.time} - ${dose.peptideName.toUpperCase()}',
+                          dose.peptideName.toUpperCase(),
                           style: TextStyle(
-                            color: Color(0xFF00FF00).withOpacity(0.65),
+                            color: peptideColor.withOpacity(0.5),
                             fontSize: 11,
                             fontFamily: 'monospace',
                           ),
                         ),
                       ),
-                      // Syringe visual with amount
-                      Row(
+
+                      // Dose info (mg + mL)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          CustomPaint(
-                            size: Size(30, 12),
-                            painter: SyringePainter(
-                              fillPercent: dose.doseAmount / 10.0, // Assuming max 10mg
-                              color: Color(0xFF00FF00),
-                            ),
-                          ),
-                          SizedBox(width: 6),
                           Text(
                             '${dose.doseAmount}mg',
                             style: TextStyle(
-                              color: Color(0xFF00FF00).withOpacity(0.7),
+                              color: peptideColor.withOpacity(0.55),
                               fontSize: 10,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${mlDraw.toStringAsFixed(2)}mL',
+                            style: TextStyle(
+                              color: peptideColor.withOpacity(0.45),
+                              fontSize: 8,
                               fontFamily: 'monospace',
                             ),
                           ),
                         ],
+                      ),
+                      SizedBox(width: 8),
+
+                      // Syringe visual
+                      CustomPaint(
+                        size: Size(35, 14),
+                        painter: SyringePainter(
+                          fillPercent: mlDraw / 1.0, // Assume 1mL max for visualization
+                          color: peptideColor,
+                          mlAmount: mlDraw,
+                          showML: true,
+                        ),
                       ),
                     ],
                   ),
@@ -1218,48 +1291,82 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
         const SizedBox(height: 16),
 
+        // CRT-styled action buttons
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Expanded(
-              child: _buildQuickActionCard(
-                icon: Icons.scale_outlined,
-                label: 'LOG WEIGHT',
-                color: AppColors.accent,
-                onTap: _showWeightLogModal,
-              ),
+            _buildCRTActionButton(
+              icon: Icons.scale_outlined,
+              label: 'LOG WEIGHT',
+              color: Color(0xFF00FF00),
+              onTap: _showWeightLogModal,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildQuickActionCard(
-                icon: Icons.science_outlined,
-                label: 'VIEW LABS',
-                color: AppColors.primary,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LabsScreen(),
-                    ),
-                  );
-                },
-              ),
+            _buildCRTActionButton(
+              icon: Icons.science_outlined,
+              label: 'VIEW LABS',
+              color: Color(0xFF00FFFF),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LabsScreen(),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildQuickActionCard(
-                icon: Icons.biotech,
-                label: '🔬 RESEARCH',
-                color: AppColors.secondary,
-                onTap: _navigateToResearch,
-              ),
+            _buildCRTActionButton(
+              icon: Icons.biotech,
+              label: 'RESEARCH',
+              color: Color(0xFFFF9800),
+              onTap: _navigateToResearch,
             ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildCRTActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 8),
+          padding: EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            border: Border.all(color: color.withOpacity(0.5), width: 2),
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.2),
+                blurRadius: 15,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: color.withOpacity(0.7), size: 24),
+              SizedBox(height: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color.withOpacity(0.6),
+                  fontSize: 9,
+                  fontFamily: 'monospace',
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -1340,8 +1447,15 @@ class _ScanlinesPainter extends CustomPainter {
 class SyringePainter extends CustomPainter {
   final double fillPercent;
   final Color color;
+  final double? mlAmount;
+  final bool showML;
 
-  SyringePainter({required this.fillPercent, required this.color});
+  SyringePainter({
+    required this.fillPercent,
+    required this.color,
+    this.mlAmount,
+    this.showML = false,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
