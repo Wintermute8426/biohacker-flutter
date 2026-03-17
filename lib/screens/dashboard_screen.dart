@@ -340,14 +340,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   children: [
                                     const SizedBox(height: 4),
 
-                                    // ACTIVE PROTOCOLS CARD
-                                    _buildActiveProtocolsCard(),
-
-                                    // TODAY'S SCHEDULE CARD
+                                    // TODAY'S SCHEDULE CARD - MOVED TO TOP
                                     _buildTodaysScheduleCard(),
 
-                                    // SYSTEM STATUS CARD
-                                    _buildSystemStatusCard(),
+                                    // ACTIVE PROTOCOLS CARD
+                                    _buildActiveProtocolsCard(),
 
                                     // QUICK ACTIONS SECTION
                                     Padding(
@@ -411,21 +408,68 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       Icon(Icons.fiber_manual_record, color: Color(0xFFFF9800), size: 8),
                       SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          cycle.peptideName.toUpperCase(),
-                          style: TextStyle(
-                            color: Color(0xFFFF9800).withOpacity(0.9),
-                            fontSize: 11,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ),
-                      Text(
-                        '${cycle.dose}mg',
-                        style: TextStyle(
-                          color: Color(0xFFFF9800).withOpacity(0.7),
-                          fontSize: 10,
-                          fontFamily: 'monospace',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Peptide name + dose
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  cycle.peptideName.toUpperCase(),
+                                  style: TextStyle(
+                                    color: Color(0xFFFF9800).withOpacity(0.65),
+                                    fontSize: 11,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                                Text(
+                                  '${cycle.dose}mg',
+                                  style: TextStyle(
+                                    color: Color(0xFFFF9800).withOpacity(0.6),
+                                    fontSize: 10,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 4),
+
+                            // Progress bar
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFFF9800).withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(2),
+                                    ),
+                                    child: FractionallySizedBox(
+                                      alignment: Alignment.centerLeft,
+                                      widthFactor: _calculateCycleProgress(cycle),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFFFF9800).withOpacity(0.7),
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 6),
+                                Text(
+                                  '${(_calculateCycleProgress(cycle) * 100).toStringAsFixed(0)}%',
+                                  style: TextStyle(
+                                    color: Color(0xFFFF9800).withOpacity(0.6),
+                                    fontSize: 9,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -482,74 +526,38 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         child: Text(
                           '${dose.time} - ${dose.peptideName.toUpperCase()}',
                           style: TextStyle(
-                            color: Color(0xFF00FF00).withOpacity(0.9),
+                            color: Color(0xFF00FF00).withOpacity(0.65),
                             fontSize: 11,
                             fontFamily: 'monospace',
                           ),
                         ),
                       ),
-                      Text(
-                        '${dose.doseAmount}mg',
-                        style: TextStyle(
-                          color: Color(0xFF00FF00).withOpacity(0.7),
-                          fontSize: 10,
-                          fontFamily: 'monospace',
-                        ),
+                      // Syringe visual with amount
+                      Row(
+                        children: [
+                          CustomPaint(
+                            size: Size(30, 12),
+                            painter: SyringePainter(
+                              fillPercent: dose.doseAmount / 10.0, // Assuming max 10mg
+                              color: Color(0xFF00FF00),
+                            ),
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            '${dose.doseAmount}mg',
+                            style: TextStyle(
+                              color: Color(0xFF00FF00).withOpacity(0.7),
+                              fontSize: 10,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 );
               },
             ),
-    );
-  }
-
-  Widget _buildSystemStatusCard() {
-    final totalCycles = _activeCycles.length;
-    final completedToday = _todaysDoses.where((d) => d.status == 'COMPLETED').length;
-    final totalToday = _todaysDoses.length;
-    final compliance = totalToday > 0 ? ((completedToday / totalToday) * 100).toInt() : 0;
-
-    return CRTCard(
-      title: 'SYSTEM STATUS',
-      subtitle: 'COMPLIANCE METRICS',
-      color: CRTColor.magenta,
-      height: 160,
-      trailing: Icon(Icons.analytics, color: Color(0xFFFF00FF), size: 20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildStatRow('ADHERENCE', '$compliance%', Color(0xFFFF00FF)),
-          _buildStatRow('PROTOCOLS', '$totalCycles', Color(0xFFFF00FF)),
-          _buildStatRow('TODAY', '$completedToday/$totalToday', Color(0xFFFF00FF)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatRow(String label, String value, Color color) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: color.withOpacity(0.7),
-            fontSize: 10,
-            fontFamily: 'monospace',
-            letterSpacing: 1,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            color: color,
-            fontSize: 12,
-            fontFamily: 'monospace',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
     );
   }
 
@@ -1323,6 +1331,57 @@ class _ScanlinesPainter extends CustomPainter {
     for (double y = 0; y < size.height; y += 3) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class SyringePainter extends CustomPainter {
+  final double fillPercent;
+  final Color color;
+
+  SyringePainter({required this.fillPercent, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    // Draw syringe barrel outline
+    final rect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(2, 2, size.width - 6, size.height - 4),
+      Radius.circular(2),
+    );
+    canvas.drawRRect(rect, paint);
+
+    // Draw fill amount
+    if (fillPercent > 0) {
+      final fillPaint = Paint()
+        ..color = color.withOpacity(0.6)
+        ..style = PaintingStyle.fill;
+
+      final fillWidth = (size.width - 8) * fillPercent.clamp(0.0, 1.0);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(3, 3, fillWidth, size.height - 6),
+          Radius.circular(1),
+        ),
+        fillPaint,
+      );
+    }
+
+    // Draw plunger
+    final plungerPaint = Paint()
+      ..color = color.withOpacity(0.5)
+      ..strokeWidth = 1;
+    canvas.drawLine(
+      Offset(size.width - 4, 0),
+      Offset(size.width - 4, size.height),
+      plungerPaint,
+    );
   }
 
   @override
