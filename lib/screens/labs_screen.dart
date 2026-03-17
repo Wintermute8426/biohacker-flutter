@@ -1030,6 +1030,9 @@ class _LabsScreenState extends State<LabsScreen> {
       'magnesium': 'Magnesium',
       'zinc': 'Zinc',
       'calcium': 'Calcium',
+      'b12': 'Vitamin B12',
+      'cobalamin': 'Vitamin B12',
+      'cyanocobalamin': 'Vitamin B12',
 
       // Liver
       'alt': 'ALT',
@@ -1146,6 +1149,9 @@ class _LabsScreenState extends State<LabsScreen> {
       'magnesium': 'Muscle & nerve function',
       'zinc': 'Immune & metabolism',
       'calcium': 'Bone & muscle health',
+      'b12': 'Energy & nervous system',
+      'cobalamin': 'Energy & nervous system',
+      'cyanocobalamin': 'Energy & nervous system',
 
       // Liver
       'alt': 'Liver enzyme',
@@ -1229,6 +1235,9 @@ class _LabsScreenState extends State<LabsScreen> {
       'magnesium': Icons.category,
       'zinc': Icons.shield,
       'calcium': Icons.grain,
+      'b12': Icons.energy_savings_leaf,
+      'cobalamin': Icons.energy_savings_leaf,
+      'cyanocobalamin': Icons.energy_savings_leaf,
 
       // Liver - healing
       'alt': Icons.healing,
@@ -1300,6 +1309,9 @@ class _LabsScreenState extends State<LabsScreen> {
       'magnesium': 'mg/dL',
       'zinc': 'µg/dL',
       'calcium': 'mg/dL',
+      'b12': 'pg/mL',
+      'cobalamin': 'pg/mL',
+      'cyanocobalamin': 'pg/mL',
 
       // Liver
       'alt': 'U/L',
@@ -1409,6 +1421,9 @@ class _LabsScreenState extends State<LabsScreen> {
       'magnesium': 35,
       'zinc': 36,
       'calcium': 37,
+      'b12': 38,
+      'cobalamin': 38,
+      'cyanocobalamin': 38,
 
       // Advanced Lipids (40-49) - MOVED UP
       'apob': 40,
