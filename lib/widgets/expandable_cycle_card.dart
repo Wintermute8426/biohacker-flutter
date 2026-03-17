@@ -88,13 +88,78 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
             .clamp(0.0, 1.0)
         : 0.0;
 
+    final protocolId = 'PROT-${widget.cycle.startDate.millisecondsSinceEpoch.toString().substring(7)}';
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: WintermmuteStyles.cardDecoration, // Matte background
       child: GestureDetector(
         onTap: _toggleExpand,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+        child: Stack(
+          children: [
+            // Top-left: PROTOCOL ID badge
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Color(0xFFFF9800).withOpacity(0.15),
+                  border: Border.all(color: Color(0xFFFF9800).withOpacity(0.7), width: 1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.science, color: Color(0xFFFF9800).withOpacity(0.8), size: 10),
+                    SizedBox(width: 4),
+                    Text(
+                      protocolId,
+                      style: TextStyle(
+                        color: Color(0xFFFF9800).withOpacity(0.85),
+                        fontSize: 8,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Top-right: ROGUE-2 callsign
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Color(0xFFFF9800).withOpacity(0.8), width: 1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.flash_on, color: Color(0xFFFF9800).withOpacity(0.8), size: 10),
+                    SizedBox(width: 3),
+                    Text(
+                      'ROGUE-2',
+                      style: TextStyle(
+                        color: Color(0xFFFF9800).withOpacity(0.9),
+                        fontSize: 8,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            Padding(
+          padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),  // More top padding for badges
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -464,7 +529,8 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
               ],
             ),
           ),
-        ),
+          ],  // Close Stack children
+        ),  // Close Stack
     );
   }
 
