@@ -584,7 +584,13 @@ class _LabsScreenState extends State<LabsScreen> {
             padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.black, const Color(0xFF001a1a), Colors.black],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.5),
+                  const Color(0xFF001a1a),
+                  const Color(0xFF001a1a), // Solid color at bottom to avoid harsh line
+                ],
               ),
             ),
             child: Column(
