@@ -54,6 +54,18 @@ class FullScreenModal extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.surface.withOpacity(0.95),  // Match modal background
+            AppColors.surface.withOpacity(0.5),   // Fade to semi-transparent
+            Colors.transparent,                    // Fully transparent - no hard edge!
+          ],
+          stops: [0.0, 0.7, 1.0],
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
