@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/cycles_database.dart';
+import 'dose_display.dart';
 
 /// Expandable cycle card with inline expansion (Wintermute dashboard style)
 /// Removes navigation buttons, expands inline to show edit/complete/delete actions
@@ -30,33 +31,6 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
   bool _isExpanded = false;
   late AnimationController _animationController;
   late Animation<double> _expandAnimation;
-
-  // Reconstitution data (TODO: move to database)
-  // Maps peptide name to reconstitution info: [totalMg, totalML]
-  final Map<String, List<double>> _reconstitutionData = {
-    'BPC-157': [5.0, 2.0],
-    'TB-500': [5.0, 2.0],
-    'GHK-Cu': [50.0, 2.0],
-    'Semaglutide': [5.0, 2.0],
-    'Tirzepatide': [10.0, 2.0],
-    'CJC-1295': [2.0, 2.0],
-    'Ipamorelin': [5.0, 2.0],
-    'MOTS-c': [10.0, 2.0],
-    'Thymosin Alpha-1': [5.0, 2.0],
-    'PT-141': [10.0, 2.0],
-  };
-
-  // Calculate mL draw amount
-  double calculateMLDraw(String peptideName, double doseMg) {
-    final reconInfo = _reconstitutionData[peptideName];
-    if (reconInfo == null) {
-      return (doseMg / 5.0) * 2.0; // Default: 5mg/2mL
-    }
-    final totalMg = reconInfo[0];
-    final totalML = reconInfo[1];
-    final concentration = totalMg / totalML; // mg/mL
-    return doseMg / concentration;
-  }
 
   @override
   void initState() {
@@ -467,42 +441,23 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
   }
 
   Widget _buildDoseColumn() {
-    final mlDraw = calculateMLDraw(widget.cycle.peptideName, widget.cycle.dose);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'DOSE',
-          style: TextStyle(
-            color: AppColors.textDim,
-            fontSize: 10,
-            fontFamily: 'monospace',
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '${widget.cycle.dose} mg',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'monospace',
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        Text(
-          '${mlDraw.toStringAsFixed(2)} mL',
-          style: TextStyle(
-            color: AppColors.textMid,
-            fontSize: 9,
-            fontFamily: 'monospace',
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+    return DoseDisplay(
+      doseMg: widget.cycle.dose,
+      peptideName: widget.cycle.peptideName,
+      color: AppColors.primary,
+      showLabel: true,
+      showSyringe: true,
+      mgStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        color: AppColors.primary,
+        fontFamily: 'monospace',
+      ),
+      mlStyle: TextStyle(
+        fontSize: 9,
+        color: AppColors.textMid,
+        fontFamily: 'monospace',
+      ),
     );
   }
 

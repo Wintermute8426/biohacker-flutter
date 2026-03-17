@@ -12,6 +12,7 @@ import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
 import '../widgets/full_screen_modal.dart';
+import '../widgets/dose_display.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -1134,24 +1135,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           dose.peptideName.toUpperCase(),
                           style: WintermmuteStyles.bodyStyle,
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '${dose.doseAmount}mg',
-                              style: WintermmuteStyles.bodyStyle.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              '${calculateMLDraw(dose.peptideName, dose.doseAmount).toStringAsFixed(2)}mL',
-                              style: WintermmuteStyles.smallStyle.copyWith(
-                                color: AppColors.textMid,
-                                fontSize: 10,
-                                fontFamily: 'monospace',
-                              ),
-                            ),
-                          ],
+                        DoseDisplay(
+                          doseMg: dose.doseAmount,
+                          peptideName: dose.peptideName,
+                          color: statusColor,
+                          showLabel: false,
+                          showSyringe: true,
                         ),
                       ],
                     ),

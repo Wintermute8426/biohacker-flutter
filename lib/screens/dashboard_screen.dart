@@ -16,6 +16,7 @@ import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
 import '../widgets/full_screen_modal.dart';
 import '../widgets/crt_card.dart';
+import '../widgets/dose_display.dart';
 import 'labs_screen.dart';
 import 'research_screen.dart';
 import '../main.dart' show authProviderProvider;
@@ -458,7 +459,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Peptide name + dose + mL draw
+                            // Peptide name + dose display with syringe
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -470,27 +471,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                     fontFamily: 'monospace',
                                   ),
                                 ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      '${cycle.dose}mg',
-                                      style: TextStyle(
-                                        color: Color(0xFFFF9800).withOpacity(0.9),
-                                        fontSize: 10,
-                                        fontFamily: 'monospace',
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      '${calculateMLDraw(cycle.peptideName, cycle.dose).toStringAsFixed(2)}mL',
-                                      style: TextStyle(
-                                        color: Color(0xFFFF9800).withOpacity(0.65),
-                                        fontSize: 8,
-                                        fontFamily: 'monospace',
-                                      ),
-                                    ),
-                                  ],
+                                DoseDisplay(
+                                  doseMg: cycle.dose,
+                                  peptideName: cycle.peptideName,
+                                  color: Color(0xFFFF9800),
+                                  showLabel: false,
+                                  showSyringe: true,
                                 ),
                               ],
                             ),
@@ -611,40 +597,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         ),
                       ),
 
-                      // Dose info (mg + mL)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${dose.doseAmount}mg',
-                            style: TextStyle(
-                              color: peptideColor.withOpacity(0.9),
-                              fontSize: 10,
-                              fontFamily: 'monospace',
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            '${mlDraw.toStringAsFixed(2)}mL',
-                            style: TextStyle(
-                              color: peptideColor.withOpacity(0.7),
-                              fontSize: 8,
-                              fontFamily: 'monospace',
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(width: 8),
-
-                      // Syringe visual
-                      CustomPaint(
-                        size: Size(35, 14),
-                        painter: SyringePainter(
-                          fillPercent: mlDraw / 1.0, // Assume 1mL max for visualization
-                          color: peptideColor,
-                          mlAmount: mlDraw,
-                          showML: true,
-                        ),
+                      // Dose display with syringe
+                      DoseDisplay(
+                        doseMg: dose.doseAmount,
+                        peptideName: dose.peptideName,
+                        color: peptideColor,
+                        showLabel: false,
+                        showSyringe: true,
                       ),
                     ],
                   ),
@@ -1481,60 +1440,3 @@ class _ScanlinesPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class SyringePainter extends CustomPainter {
-  final double fillPercent;
-  final Color color;
-  final double? mlAmount;
-  final bool showML;
-
-  SyringePainter({
-    required this.fillPercent,
-    required this.color,
-    this.mlAmount,
-    this.showML = false,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color.withOpacity(0.6)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-
-    // Draw syringe barrel outline
-    final rect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(2, 2, size.width - 6, size.height - 4),
-      Radius.circular(2),
-    );
-    canvas.drawRRect(rect, paint);
-
-    // Draw fill amount
-    if (fillPercent > 0) {
-      final fillPaint = Paint()
-        ..color = color.withOpacity(0.85)
-        ..style = PaintingStyle.fill;
-
-      final fillWidth = (size.width - 8) * fillPercent.clamp(0.0, 1.0);
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(3, 3, fillWidth, size.height - 6),
-          Radius.circular(1),
-        ),
-        fillPaint,
-      );
-    }
-
-    // Draw plunger
-    final plungerPaint = Paint()
-      ..color = color.withOpacity(0.5)
-      ..strokeWidth = 1;
-    canvas.drawLine(
-      Offset(size.width - 4, 0),
-      Offset(size.width - 4, size.height),
-      plungerPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
