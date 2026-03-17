@@ -98,74 +98,102 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
+                // Header: Peptide name, status badge, and dose on right
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Left side: Peptide name + status
                     Expanded(
-                      child: Text(
-                        widget.cycle.peptideName.toUpperCase(),
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'monospace',
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: widget.cycle.isActive
-                                ? AppColors.accent.withOpacity(0.15)
-                                : AppColors.textDim.withOpacity(0.15),
-                            border: Border.all(
-                              color: widget.cycle.isActive
-                                  ? AppColors.accent.withOpacity(0.2)
-                                  : AppColors.textDim.withOpacity(0.2),
-                            ),
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          child: Text(
-                            widget.cycle.isActive ? 'ACTIVE' : 'COMPLETE',
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Peptide name
+                          Text(
+                            widget.cycle.peptideName.toUpperCase(),
                             style: TextStyle(
-                              color: widget.cycle.isActive
-                                  ? AppColors.accent
-                                  : AppColors.textDim,
-                              fontSize: 10,
+                              color: AppColors.primary,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'monospace',
-                              letterSpacing: 0.5,
+                              letterSpacing: 1.5,
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          // Status badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: widget.cycle.isActive
+                                  ? AppColors.accent.withOpacity(0.15)
+                                  : AppColors.textDim.withOpacity(0.15),
+                              border: Border.all(
+                                color: widget.cycle.isActive
+                                    ? AppColors.accent.withOpacity(0.2)
+                                    : AppColors.textDim.withOpacity(0.2),
+                              ),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            child: Text(
+                              widget.cycle.isActive ? 'ACTIVE' : 'COMPLETE',
+                              style: TextStyle(
+                                color: widget.cycle.isActive
+                                    ? AppColors.accent
+                                    : AppColors.textDim,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'monospace',
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    // Right side: DoseDisplay widget
+                    DoseDisplay(
+                      doseMg: widget.cycle.dose,
+                      peptideName: widget.cycle.peptideName,
+                      color: AppColors.primary,
+                      showLabel: true,
+                      showSyringe: true,
+                      mgStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                        fontFamily: 'monospace',
+                      ),
+                      mlStyle: TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textMid,
+                        fontFamily: 'monospace',
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
 
-                // Dose, Route (full name), Frequency Grid
+                // Route and Frequency info chips
                 Row(
                   children: [
                     Expanded(
-                      child: _buildDoseColumn(),
-                    ),
-                    Expanded(
-                      child: _buildStatColumn(
-                        'ROUTE',
-                        _getFullRouteName(widget.cycle.route),
-                        AppColors.textLight,
+                      child: _buildInfoChip(
+                        label: 'ROUTE',
+                        value: _getFullRouteName(widget.cycle.route),
+                        icon: Icons.medical_services,
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: _buildStatColumn('FREQ', widget.cycle.frequency, AppColors.textLight),
+                      child: _buildInfoChip(
+                        label: 'FREQ',
+                        value: widget.cycle.frequency,
+                        icon: Icons.calendar_today,
+                      ),
                     ),
                   ],
                 ),
@@ -440,53 +468,52 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
     );
   }
 
-  Widget _buildDoseColumn() {
-    return DoseDisplay(
-      doseMg: widget.cycle.dose,
-      peptideName: widget.cycle.peptideName,
-      color: AppColors.primary,
-      showLabel: true,
-      showSyringe: true,
-      mgStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        color: AppColors.primary,
-        fontFamily: 'monospace',
-      ),
-      mlStyle: TextStyle(
-        fontSize: 9,
-        color: AppColors.textMid,
-        fontFamily: 'monospace',
-      ),
-    );
-  }
-
-  Widget _buildStatColumn(String label, String value, Color valueColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: AppColors.textDim,
-            fontSize: 10,
-            fontFamily: 'monospace',
-            letterSpacing: 0.5,
-          ),
+  Widget _buildInfoChip({
+    required String label,
+    required String value,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.2),
+          width: 1,
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            color: valueColor,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'monospace',
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 14, color: AppColors.primary.withOpacity(0.6)),
+          const SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 9,
+                  color: AppColors.textDim,
+                  fontFamily: 'monospace',
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textLight,
+                  fontFamily: 'monospace',
+                ),
+              ),
+            ],
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+        ],
+      ),
     );
   }
 

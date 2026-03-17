@@ -21,6 +21,9 @@ class DoseDisplay extends StatelessWidget {
   }) : super(key: key);
 
   static double calculateMLDraw(String peptideName, double doseMg) {
+    // Normalize peptide name (remove extra text in parentheses and trim)
+    final normalizedName = peptideName.split('(')[0].trim();
+
     final reconstitutionData = {
       'BPC-157': [5.0, 2.0],
       'TB-500': [5.0, 2.0],
@@ -34,12 +37,20 @@ class DoseDisplay extends StatelessWidget {
       'PT-141': [10.0, 2.0],
     };
 
-    final reconInfo = reconstitutionData[peptideName];
+    final reconInfo = reconstitutionData[normalizedName];
     if (reconInfo == null) {
+      print('[DoseDisplay] WARNING: No recon data for "$peptideName" (normalized: "$normalizedName"), using default 5mg/2mL');
       return (doseMg / 5.0) * 2.0;
     }
-    final concentration = reconInfo[0] / reconInfo[1];
-    return doseMg / concentration;
+
+    final totalMg = reconInfo[0];
+    final totalML = reconInfo[1];
+    final concentration = totalMg / totalML; // mg/mL
+    final mlDraw = doseMg / concentration;
+
+    print('[DoseDisplay] $normalizedName: ${doseMg}mg from ${totalMg}mg/${totalML}mL = ${concentration}mg/mL → ${mlDraw.toStringAsFixed(3)}mL');
+
+    return mlDraw;
   }
 
   @override
