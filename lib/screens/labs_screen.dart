@@ -484,7 +484,21 @@ class _LabsScreenState extends State<LabsScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
-        decoration: WintermmuteStyles.cardDecoration,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: const Color(0xFF00FFFF).withOpacity(0.7),  // Cyan for labs
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00FFFF).withOpacity(0.3),
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -529,27 +543,38 @@ class _LabsScreenState extends State<LabsScreen> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: lab.extractedData.entries.take(6).map((entry) {
+              children: (lab.extractedData.entries.toList()
+                ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
+              ).take(6).map((entry) {
                 final isOut = _isOutOfRange(entry.key, entry.value);
                 final displayValue = entry.value is Map
                   ? (entry.value['value']?.toString() ?? 'N/A')
                   : entry.value.toString();
+                final categoryColor = _getCategoryColor(entry.key);
 
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.surface.withOpacity(0.15),
+                    color: Colors.black,
                     border: Border.all(
-                      color: isOut ? AppColors.error.withOpacity(0.2) : AppColors.primary.withOpacity(0.2),
+                      color: isOut ? AppColors.error.withOpacity(0.7) : categoryColor.withOpacity(0.7),
                       width: 1,
                     ),
                     borderRadius: BorderRadius.circular(2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: categoryColor.withOpacity(0.2),
+                        blurRadius: 4,
+                        spreadRadius: 1,
+                      ),
+                    ],
                   ),
                   child: Text(
-                    '${entry.key}: $displayValue${isOut ? ' [HIGH]' : ''}',
+                    '${_beautifyBiomarkerName(entry.key)}: $displayValue${isOut ? ' [HIGH]' : ''}',
                     style: TextStyle(
-                      color: isOut ? AppColors.error : AppColors.textMid,
+                      color: isOut ? AppColors.error : categoryColor,
                       fontSize: 10,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 );
@@ -1411,12 +1436,13 @@ class _LabsScreenState extends State<LabsScreen> {
     final normalizedKey = _normalizeBiomarkerKey(key);
 
     const priorities = {
-      // Hormones - Core (10-14)
+      // Hormones - Core (10-15)
       'testosterone': 10,
       'free_testosterone': 11,
       'estradiol': 12,
       'tsh': 13,
       'progesterone': 14,
+      'dhea': 15,  // MOVED UP from 30 - key adrenal hormone
 
       // Metabolic + Key Lipids (20-29) - HIGH PRIORITY
       'hba1c': 20,
@@ -1427,8 +1453,8 @@ class _LabsScreenState extends State<LabsScreen> {
       'triglycerides': 25,
       'glucose': 26,
 
-      // Hormones - Secondary (30-34) - MOVED UP
-      'dhea': 30,
+      // Hormones - Secondary (30-34)
+      // dhea moved to 15
       't4': 31,
       'cortisol': 32,
       'insulin': 33,
