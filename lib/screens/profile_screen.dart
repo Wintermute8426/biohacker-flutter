@@ -21,6 +21,8 @@ import '../widgets/common/matte_card.dart';
 import '../widgets/common/cyber_button.dart';
 import '../utils/user_feedback.dart';
 import '../main.dart';
+import 'legal_screen.dart';
+import '../assets/legal_documents.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -1522,14 +1524,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   'Privacy Policy',
                   'View our privacy policy',
                   Icons.privacy_tip,
-                  () => _launchURL('https://wintermute8426.github.io/biohacker-flutter/#privacy'),
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => LegalScreen(
+                        title: 'PRIVACY POLICY',
+                        content: LegalDocuments.privacyPolicy,
+                      ),
+                    ),
+                  ),
                 ),
                 const Divider(height: 24, color: AppColors.textDim),
                 _buildActionTile(
                   'Terms of Service',
                   'View our terms of service',
                   Icons.description,
-                  () => _launchURL('https://wintermute8426.github.io/biohacker-flutter/#terms'),
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => LegalScreen(
+                        title: 'TERMS OF SERVICE',
+                        content: LegalDocuments.termsOfService,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
