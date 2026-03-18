@@ -99,11 +99,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
-              // Full neon logo - transparent background
+              // Full vectorized neon logo
               Image.asset(
-                'assets/logo/biohacker-neon-logo.png',
-                width: 240,
-                height: 220,
+                'assets/logo/biohacker-neon-logo-vectorized.png',
+                width: 260,
+                height: 240,
                 fit: BoxFit.contain,
               ),
               const SizedBox(height: 40),

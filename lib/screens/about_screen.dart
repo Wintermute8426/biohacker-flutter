@@ -37,11 +37,11 @@ class AboutScreen extends StatelessWidget {
             Center(
               child: Column(
                 children: [
-                  // Neon Cyberpunk Brain Logo
+                  // Vectorized Neon Cyberpunk Brain Logo
                   Image.asset(
-                    'assets/logo/biohacker-neon-logo.png',
-                    width: 280,
-                    height: 260,
+                    'assets/logo/biohacker-neon-logo-vectorized.png',
+                    width: 300,
+                    height: 280,
                     fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 16),

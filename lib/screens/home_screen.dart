@@ -413,7 +413,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  'assets/logo/biohacker-brain.png',
+                  'assets/logo/biohacker-brain-vectorized.png',
                   height: 28,
                   width: 28,
                   fit: BoxFit.contain,
