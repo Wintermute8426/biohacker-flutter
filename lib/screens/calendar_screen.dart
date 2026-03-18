@@ -810,79 +810,33 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           ),
                         ),
                         if (dayDoses.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          // Dose count badge - cyberpunk style
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: const Color(0xFF00FFFF).withOpacity(0.7),
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.zero,
-                            ),
-                            child: Text(
-                              '${dayDoses.length}×',
-                              style: WintermmuteStyles.smallStyle.copyWith(
-                                color: const Color(0xFF00FFFF),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                              ),
+                          const SizedBox(height: 4),
+                          // Dose count badge - simple text
+                          Text(
+                            '${dayDoses.length}×',
+                            style: WintermmuteStyles.smallStyle.copyWith(
+                              color: const Color(0xFF00FFFF),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 9,
                             ),
                           ),
-                          if (dayDoses.isNotEmpty || hasLab)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if (completed > 0)
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 1),
-                                      child: Icon(
-                                        Icons.check_circle,
-                                        size: 6,
-                                        color: Color(0xFF39FF14),
-                                      ),
-                                    ),
-                                  if (scheduled > 0)
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 1),
-                                      child: Icon(
-                                        Icons.schedule,
-                                        size: 6,
-                                        color: Color(0xFF00FFFF),
-                                      ),
-                                    ),
-                                  if (missed > 0)
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 1),
-                                      child: Icon(
-                                        Icons.cancel,
-                                        size: 6,
-                                        color: Color(0xFFFF0040),
-                                      ),
-                                    ),
-                                  if (hasLab)
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 1),
-                                      child: Icon(
-                                        Icons.science,
-                                        size: 6,
-                                        color: Color(0xFFFF00FF),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                        ] else if (hasLab) ...[
-                          const SizedBox(height: 4),
-                          const Icon(
-                            Icons.science,
-                            size: 12,
-                            color: Color(0xFFFF00FF),
+                          const SizedBox(height: 2),
+                          // Status indicator row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (completed > 0)
+                                const Icon(Icons.check_circle, size: 8, color: Color(0xFF39FF14)),
+                              if (scheduled > 0)
+                                const Icon(Icons.schedule, size: 8, color: Color(0xFF00FFFF)),
+                              if (missed > 0)
+                                const Icon(Icons.cancel, size: 8, color: Color(0xFFFF0040)),
+                            ],
                           ),
                         ],
+                        if (hasLab && dayDoses.isEmpty)
+                          const Icon(Icons.science, size: 10, color: Color(0xFFFF00FF)),
                       ],
                     ),
                   ),
