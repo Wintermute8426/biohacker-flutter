@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.biohacker.biohacker_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35  // Android 15 SDK for building
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -24,8 +24,8 @@ android {
         applicationId = "com.biohacker.biohacker_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 21  // Minimum Android 5.0
+        targetSdk = 35  // MANDATORY: Android 15 for Play Store (2026 requirement)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
