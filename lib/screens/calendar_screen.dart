@@ -826,6 +826,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           const Icon(Icons.science, size: 10, color: Color(0xFFFF00FF)),
                       ],
                     ),
+                ),
               );
           },
         ),
