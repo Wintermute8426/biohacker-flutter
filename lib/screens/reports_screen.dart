@@ -111,7 +111,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
         children: [
           Column(
             children: [
-              const AppHeader(title: 'REPORTS'),
+              AppHeader(
+                icon: Icons.assessment,
+                iconColor: const Color(0xFF00FFFF),
+                title: 'REPORTS',
+              ),
               _buildTabSelector(),
               Expanded(
                 child: _isLoading
