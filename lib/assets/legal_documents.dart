@@ -67,9 +67,9 @@ Biohacker is intended for ages 13+. We do not knowingly collect data from childr
 
 ## 8. Contact Us
 
-Privacy questions: privacy@biohacker.app
-Data deletion requests: dpo@biohacker.app
-Security concerns: security@biohacker.app
+For questions about this Privacy Policy, visit the About section in the app or contact through the app's support feature.
+
+Data deletion requests can be submitted through the app Settings screen under "Delete Account & Data".
 ''';
 
   static const String termsOfService = '''# TERMS OF SERVICE
@@ -180,8 +180,8 @@ We may update these Terms. We will notify you of material changes via email. Con
 
 ## 15. Contact
 
-Questions about these Terms: legal@biohacker.app
-Support: support@biohacker.app
-Complaints: complaints@biohacker.app
+For questions about these Terms, visit the About section in the app or submit feedback through the app's support feature.
+
+Account deletion requests can be submitted through app Settings under "Delete Account & Data".
 ''';
 }

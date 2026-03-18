@@ -22,6 +22,7 @@ import '../widgets/common/cyber_button.dart';
 import '../utils/user_feedback.dart';
 import '../main.dart';
 import 'legal_screen.dart';
+import 'about_screen.dart';
 import '../assets/legal_documents.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -1519,6 +1520,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 _buildInfoRow('Version', '2.0.0'),
+                const Divider(height: 24, color: AppColors.textDim),
+                _buildActionTile(
+                  'About',
+                  'Learn about Biohacker',
+                  Icons.info,
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AboutScreen()),
+                  ),
+                ),
                 const Divider(height: 24, color: AppColors.textDim),
                 _buildActionTile(
                   'Privacy Policy',
