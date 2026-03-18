@@ -154,17 +154,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         SafeArea(
           child: Column(
             children: [
-              // Header with app branding and profile pic
+              // Header with app branding and profile pic - CRT styled
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: AppColors.primary.withOpacity(0.3),
-                      width: 1,
+                      color: const Color(0xFF00FFFF).withOpacity(0.5),
+                      width: 2,
                     ),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF00FFFF).withOpacity(0.1),
+                      blurRadius: 8,
+                    ),
+                  ],
                 ),
+              ),
                 child: Row(
                   children: [
                     // Profile picture with initials
@@ -265,10 +272,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 },
               ),
               const Spacer(),
-              // Divider before logout
-              Divider(
-                color: AppColors.error.withOpacity(0.3),
-                thickness: 1,
+              // Divider before logout - cyan line
+              Container(
+                height: 2,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                color: const Color(0xFF00FFFF).withOpacity(0.4),
               ),
               // Logout button
               _buildMenuItem(
@@ -334,23 +342,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     bool enabled = true,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: enabled ? onTap : null,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.zero,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               border: Border.all(
                 color: isDanger
-                    ? AppColors.error.withOpacity(0.3)
-                    : AppColors.primary.withOpacity(0.15),
-                width: 1,
+                    ? const Color(0xFFFF0040).withOpacity(0.7)
+                    : const Color(0xFF00FFFF).withOpacity(0.5),
+                width: 2,
               ),
-              borderRadius: BorderRadius.circular(8),
-              color: AppColors.surface.withOpacity(0.1),
+              borderRadius: BorderRadius.zero,
+              color: AppColors.background,
+              boxShadow: [
+                BoxShadow(
+                  color: isDanger 
+                      ? const Color(0xFFFF0040).withOpacity(0.15)
+                      : const Color(0xFF00FFFF).withOpacity(0.1),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+              ],
             ),
             child: Row(
               children: [
