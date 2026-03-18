@@ -711,10 +711,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                         ),
                       ),
-                      // Edit button (floating)
+                      // Edit button (floating at bottom)
                       if (!_isEditMode)
                         Positioned(
-                          top: 16,
+                          bottom: 24,
                           right: 16,
                           child: Material(
                             color: Colors.transparent,
@@ -839,7 +839,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final Color crtGlow = Color(0xFFFF6600);   // Darker orange for glow
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
       child: Column(
         children: [
           // BLADE RUNNER STYLE ID CARD - Compact horizontal layout
@@ -1868,7 +1868,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Form(
       key: _formKey,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
         children: [
           // User Info Card
           MatteCard(

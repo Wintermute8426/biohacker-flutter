@@ -40,7 +40,7 @@ class _LegalScreenState extends State<LegalScreen> {
       ),
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 60),
         child: Container(
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFF00FFFF), width: 1),
