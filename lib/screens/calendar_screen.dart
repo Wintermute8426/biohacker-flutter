@@ -301,61 +301,38 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             }
           });
 
-          return Stack(
-            children: [
-              SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // View header with navigation
-                    _showMonthView
-                        ? _buildMonthHeader()
-                        : _buildWeekHeader(),
-                    const SizedBox(height: 20),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // View header with navigation
+                _showMonthView
+                    ? _buildMonthHeader()
+                    : _buildWeekHeader(),
+                const SizedBox(height: 20),
 
-                    // Compliance tracker - bordered section
-                    _buildBorderedSection(
-                      child: _buildComplianceTracker(displayDoses),
-                    ),
-                    const SizedBox(height: 20),
+                // Compliance tracker
+                _buildComplianceTracker(displayDoses),
+                const SizedBox(height: 16),
 
-                    // Cycle filter - bordered section
-                    _buildBorderedSection(
-                      child: _buildCycleFilter(cyclesInDoses),
-                    ),
-                    const SizedBox(height: 20),
+                // Cycle filter
+                _buildCycleFilter(cyclesInDoses),
+                const SizedBox(height: 16),
 
-                    // Calendar grid - bordered section
-                    _buildBorderedSection(
-                      child: Builder(builder: (context) {
-                        return _showMonthView
-                            ? _buildMonthGrid(displayDoses, labDates)
-                            : _buildWeekGrid(displayDoses, labDates);
-                      }),
-                    ),
-                    const SizedBox(height: 16),
+                // Calendar grid
+                Builder(builder: (context) {
+                  return _showMonthView
+                      ? _buildMonthGrid(displayDoses, labDates)
+                      : _buildWeekGrid(displayDoses, labDates);
+                }),
+                const SizedBox(height: 16),
 
-                    // Status bar - only show for week view
-                    if (!_showMonthView)
-                      _buildBorderedSection(
-                        child: _buildStatusBar(displayDoses),
-                      ),
-                  ],
-                ),
-              ),
-              // Scanlines overlay - subtle
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: common.ScanlinesPainter(
-                    opacity: 0.03,
-                    spacing: 3.0,
-                  ),
-                  isComplex: true,
-                  willChange: false,
-                ),
-              ),
-            ],
+                // Status bar - only show for week view
+                if (!_showMonthView)
+                  _buildStatusBar(displayDoses),
+              ],
+            ),
           );
         },
         loading: () => Center(
@@ -450,44 +427,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           ],
         ),
       ],
-    );
-  }
-
-  // Bordered section wrapper - adds CRT styling around content
-  Widget _buildBorderedSection({required Widget child}) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: const Color(0xFF00FFFF).withOpacity(0.5),
-          width: 2,
-        ),
-        borderRadius: BorderRadius.zero,
-        color: AppColors.background,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00FFFF).withOpacity(0.1),
-            blurRadius: 8,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(14),
-      child: Stack(
-        children: [
-          child,
-          // Subtle scanlines on section
-          Positioned.fill(
-            child: CustomPaint(
-              painter: common.ScanlinesPainter(
-                opacity: 0.02,
-                spacing: 4.0,
-              ),
-              isComplex: true,
-              willChange: false,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
