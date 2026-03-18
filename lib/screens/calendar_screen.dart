@@ -220,7 +220,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                           ),
                           child: Text(
-                            _showMonthView ? 'WEEK' : 'MONTH',
+                            _showMonthView ? 'MONTH' : 'WEEK',
                             style: WintermmuteStyles.bodyStyle.copyWith(
                               color: const Color(0xFF00FFFF),
                               fontWeight: FontWeight.bold,
@@ -335,8 +335,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                 }),
                 const SizedBox(height: 16),
 
-                // Status bar
-                _buildStatusBar(displayDoses),
+                // Status bar - only show for week view
+                if (!_showMonthView)
+                  _buildStatusBar(displayDoses),
               ],
             ),
           );
