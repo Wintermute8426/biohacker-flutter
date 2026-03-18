@@ -1132,55 +1132,61 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.85,
         decoration: const BoxDecoration(
-          color: Colors.black,
+          color: Color(0xFF0A0A0A),
           borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
         ),
         child: Column(
           children: [
-            // CRT-styled header
+            // CRT-styled header with cyan theme
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.black, const Color(0xFF001a00), Colors.black],
-                ),
+                color: AppColors.background,
                 border: Border(
                   bottom: BorderSide(
-                    color: const Color(0xFF00FF00).withOpacity(0.5),
+                    color: const Color(0xFF00FFFF).withOpacity(0.6),
                     width: 2,
                   ),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00FFFF).withOpacity(0.1),
+                    blurRadius: 8,
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top row: SOVEREIGN DOSING badge (left) + close button (right)
+                  // Top row: DOSE DETAIL badge (left) + close button (right)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.flash_on, color: const Color(0xFF00FF00).withOpacity(0.7), size: 14),
-                          const SizedBox(width: 4),
+                          Icon(Icons.calendar_today, color: const Color(0xFF00FFFF).withOpacity(0.8), size: 14),
+                          const SizedBox(width: 6),
                           Text(
-                            'SOVEREIGN DOSING',
+                            'DAILY DOSES',
                             style: TextStyle(
-                              color: const Color(0xFF00FF00).withOpacity(0.7),
+                              color: const Color(0xFF00FFFF).withOpacity(0.8),
                               fontSize: 9,
                               fontFamily: 'monospace',
+                              letterSpacing: 1.2,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
                       IconButton(
-                        icon: Icon(Icons.close, color: const Color(0xFF00FF00).withOpacity(0.8)),
+                        icon: Icon(Icons.close, color: const Color(0xFF00FFFF).withOpacity(0.9)),
                         onPressed: () => Navigator.pop(context),
                         padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
+                        constraints: const BoxConstraints(),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   // Date below
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1188,20 +1194,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                       Text(
                         DateFormat('EEEE').format(date).toUpperCase(),
                         style: TextStyle(
-                          color: const Color(0xFF00FF00).withOpacity(0.6),
-                          fontSize: 11,
+                          color: const Color(0xFF00FFFF).withOpacity(0.7),
+                          fontSize: 10,
                           fontFamily: 'monospace',
-                          letterSpacing: 1,
+                          letterSpacing: 0.8,
                         ),
                       ),
                       Text(
                         DateFormat('MMM dd, yyyy').format(date).toUpperCase(),
                         style: const TextStyle(
-                          color: Color(0xFF00FF00),
+                          color: Color(0xFF00FFFF),
                           fontSize: 16,
                           fontFamily: 'monospace',
                           fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
+                          letterSpacing: 1.2,
                         ),
                       ),
                     ],
@@ -1222,7 +1228,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     );
   }
 
-  // CRT-styled dose card with resistance aesthetic
+  // CRT-styled dose card matching calendar aesthetic
   Widget _buildDoseCard(BuildContext context, DoseInstance dose) {
     // Determine status for coloring
     final now = DateTime.now();
@@ -1235,20 +1241,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     final isMissed = dose.status == 'MISSED';
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(8),
+        color: AppColors.background,
+        borderRadius: BorderRadius.zero,
         border: Border.all(
-          color: peptideColor.withOpacity(0.7),
+          color: peptideColor.withOpacity(0.8),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: peptideColor.withOpacity(0.3),
-            blurRadius: 15,
-            spreadRadius: 2,
+            color: peptideColor.withOpacity(0.25),
+            blurRadius: 12,
+            spreadRadius: 1,
           ),
         ],
       ),
