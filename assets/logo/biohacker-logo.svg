@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="800" height="200">
+  <defs>
+    <style>
+      .bg { fill: #0A0A0A; }
+      .cyan { fill: #00FFFF; }
+      .amber { fill: #FF9800; }
+      .text {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        font-size: 80px;
+        letter-spacing: 4px;
+      }
+    </style>
+    <!-- Glow effect for cyberpunk aesthetic -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect class="bg" width="800" height="200"/>
+
+  <!-- Bitcoin B Symbol - Geometric/Modern Style -->
+  <g transform="translate(50, 60)" filter="url(#glow)">
+    <!-- Left vertical bar -->
+    <rect class="cyan" x="0" y="0" width="8" height="100"/>
+
+    <!-- Right vertical bar -->
+    <rect class="cyan" x="52" y="0" width="8" height="100"/>
+
+    <!-- Top horizontal curve (upper B bulge) -->
+    <path class="cyan" d="M 8,15 Q 40,5 52,25 L 52,15 Q 40,0 8,10 Z"/>
+
+    <!-- Middle horizontal bar with amber accent -->
+    <rect class="amber" x="8" y="48" width="44" height="6"/>
+
+    <!-- Bottom horizontal curve (lower B bulge) -->
+    <path class="cyan" d="M 8,85 Q 45,95 52,75 L 52,85 Q 45,100 8,90 Z"/>
+
+    <!-- Top bar extension (Bitcoin style) -->
+    <rect class="cyan" x="-2" y="-10" width="12" height="12" rx="2"/>
+    <rect class="cyan" x="50" y="-10" width="12" height="12" rx="2"/>
+
+    <!-- Bottom bar extension (Bitcoin style) -->
+    <rect class="cyan" x="-2" y="98" width="12" height="12" rx="2"/>
+    <rect class="cyan" x="50" y="98" width="12" height="12" rx="2"/>
+  </g>
+
+  <!-- IOHACKER text -->
+  <text class="text cyan" x="140" y="135" filter="url(#glow)">IOHACKER</text>
+</svg>
