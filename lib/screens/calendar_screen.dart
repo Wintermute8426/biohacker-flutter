@@ -771,28 +771,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               onTap: dayDoses.isNotEmpty
                   ? () => _showDayDetail(context, date, dayDoses)
                   : null,
-              child: Material(
-                color: cellColor,
-                child: InkWell(
-                  onTap: dayDoses.isNotEmpty
-                      ? () => _showDayDetail(context, date, dayDoses)
-                      : null,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      border: Border.all(
-                        color: isToday ? const Color(0xFF00FFFF) : AppColors.textMid.withOpacity(0.4),
-                        width: isToday ? 2 : 1,
-                      ),
-                      borderRadius: BorderRadius.zero,
-                      boxShadow: isToday ? [
-                        BoxShadow(
-                          color: const Color(0xFF00FFFF).withOpacity(0.2),
-                          blurRadius: 4,
-                          spreadRadius: 1,
-                        ),
-                      ] : null,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  border: Border.all(
+                    color: isToday ? const Color(0xFF00FFFF) : AppColors.textMid.withOpacity(0.4),
+                    width: isToday ? 2 : 1,
+                  ),
+                  borderRadius: BorderRadius.zero,
+                  boxShadow: isToday ? [
+                    BoxShadow(
+                      color: const Color(0xFF00FFFF).withOpacity(0.2),
+                      blurRadius: 4,
+                      spreadRadius: 1,
                     ),
+                  ] : null,
+                ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -832,10 +826,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           const Icon(Icons.science, size: 10, color: Color(0xFFFF00FF)),
                       ],
                     ),
-                  ),
-                ),
-              ),
-            );
+              );
           },
         ),
       ],
@@ -1058,7 +1049,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                     ],
                   ],
                 ),
-              ),
             );
           },
         ),
