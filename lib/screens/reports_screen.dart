@@ -103,6 +103,85 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return colors[hash.abs() % colors.length];
   }
 
+  Color getCategoryColor(String category) {
+    switch (category.toUpperCase()) {
+      case 'HORMONES':
+        return const Color(0xFFFF00FF); // Magenta
+      case 'METABOLIC':
+        return const Color(0xFF39FF14); // Neon Green
+      case 'LIPIDS':
+        return const Color(0xFFFFAA00); // Amber
+      case 'MINERALS':
+        return const Color(0xFF00AAFF); // Blue
+      default:
+        return const Color(0xFF00FFFF); // Cyan
+    }
+  }
+
+  String getBiomarkerCategory(String biomarkerName) {
+    final name = biomarkerName.toLowerCase();
+
+    // Hormones
+    if (name.contains('testosterone') || name.contains('estradiol') ||
+        name.contains('e2') || name.contains('dht') || name.contains('cortisol') ||
+        name.contains('igf') || name.contains('tsh') || name.contains('t3') ||
+        name.contains('t4') || name.contains('prolactin')) {
+      return 'HORMONES';
+    }
+
+    // Metabolic
+    if (name.contains('glucose') || name.contains('insulin') ||
+        name.contains('hba1c') || name.contains('crp')) {
+      return 'METABOLIC';
+    }
+
+    // Lipids
+    if (name.contains('cholesterol') || name.contains('hdl') ||
+        name.contains('ldl') || name.contains('triglyceride')) {
+      return 'LIPIDS';
+    }
+
+    // Minerals
+    if (name.contains('calcium') || name.contains('magnesium') ||
+        name.contains('zinc') || name.contains('iron')) {
+      return 'MINERALS';
+    }
+
+    return 'OTHER';
+  }
+
+  List<String> getTop3Biomarkers(Map<String, dynamic> biomarkers) {
+    // Priority biomarkers to show
+    final priority = ['testosterone', 'free_testosterone', 'estradiol', 'e2',
+                      'dht', 'igf1', 'glucose', 'hdl', 'ldl'];
+
+    final available = biomarkers.keys.toList();
+    final result = <String>[];
+
+    for (final p in priority) {
+      final match = available.firstWhere(
+        (key) => key.toLowerCase().contains(p),
+        orElse: () => '',
+      );
+      if (match.isNotEmpty && !result.contains(match)) {
+        result.add(match);
+        if (result.length >= 3) break;
+      }
+    }
+
+    // Fill remaining with any available
+    while (result.length < 3 && result.length < available.length) {
+      for (final key in available) {
+        if (!result.contains(key)) {
+          result.add(key);
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -175,7 +254,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF0A0A0A),
+          color: isActive
+              ? const Color(0xFF0A0A0A)
+              : const Color(0xFF00FFFF).withOpacity(0.1), // Faint cyan for inactive
           border: Border.all(
             color: isActive ? const Color(0xFF00FFFF) : const Color(0xFF1A2540),
             width: 1,
@@ -247,9 +328,17 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   Widget _buildLabCorrelationCard(CycleLabCorrelation lab) {
     final dateFormat = DateFormat('MMM d, yyyy');
+    final top3Markers = getTop3Biomarkers(lab.biomarkers);
+
+    // Calculate which cycles were active in 30 days before lab
+    final windowStart = lab.labDate.subtract(const Duration(days: 30));
+    final activeCycles = lab.cycles.where((cycle) {
+      return cycle.endDate.isAfter(windowStart) &&
+             cycle.startDate.isBefore(lab.labDate);
+    }).toList();
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         color: const Color(0xFF0A0A0A),
         border: Border.all(color: const Color(0xFF00FFFF), width: 1),
@@ -258,7 +347,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
+          // Header: LAB - [Date]
           Container(
             padding: const EdgeInsets.all(12),
             decoration: const BoxDecoration(
@@ -268,10 +357,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.science, color: Color(0xFF00FFFF), size: 16),
-                const SizedBox(width: 8),
                 Text(
-                  'LAB RESULTS',
+                  'LAB - ${dateFormat.format(lab.labDate)}',
                   style: const TextStyle(
                     fontFamily: 'Courier New',
                     fontSize: 14,
@@ -279,117 +366,152 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     color: Color(0xFF00FFFF),
                   ),
                 ),
-                const Spacer(),
-                Text(
-                  dateFormat.format(lab.labDate),
-                  style: const TextStyle(
-                    fontFamily: 'Courier New',
-                    fontSize: 12,
-                    color: Color(0xFFA0A0A0),
-                  ),
-                ),
               ],
             ),
           ),
 
-          // Active cycles during lab
-          if (lab.cycles.isNotEmpty)
+          // Subheader: Key biomarkers
+          if (top3Markers.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                top3Markers.map((m) => m.toUpperCase().replaceAll('_', ' ')).join(' • '),
+                style: const TextStyle(
+                  fontFamily: 'Courier New',
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFFFAA00), // Amber
+                ),
+              ),
+            ),
+
+          // Section: ACTIVE CYCLES
+          if (activeCycles.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'ACTIVE CYCLES',
+                    style: TextStyle(
+                      fontFamily: 'Courier New',
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF39FF14), // Green
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ...activeCycles.map((cycle) {
+                    final daysBefore = lab.labDate.difference(cycle.endDate).inDays;
+                    final daysBeforeStart = lab.labDate.difference(cycle.startDate).inDays;
+                    final timeRange = daysBefore < 0
+                        ? 'Active during lab'
+                        : '($daysBeforeStart days before - $daysBefore days before)';
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            cycle.peptideName.toUpperCase(),
+                            style: const TextStyle(
+                              fontFamily: 'Courier New',
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFFFFFFF),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: getPeptideColor(cycle.peptideName)
+                                      .withOpacity(0.2),
+                                  border: Border.all(
+                                    color: getPeptideColor(cycle.peptideName),
+                                    width: 1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  timeRange,
+                                  style: TextStyle(
+                                    fontFamily: 'Courier New',
+                                    fontSize: 9,
+                                    color: getPeptideColor(cycle.peptideName),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
+            ),
+
+          // Section: RESULTS (Top 3 biomarkers with changes)
+          if (top3Markers.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'ACTIVE CYCLES:',
+                    'RESULTS',
                     style: TextStyle(
                       fontFamily: 'Courier New',
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFA0A0A0),
+                      color: Color(0xFF00FFFF), // Cyan
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: lab.cycles.map((cycle) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: getPeptideColor(cycle.peptideName)
-                              .withOpacity(0.2),
-                          border: Border.all(
-                            color: getPeptideColor(cycle.peptideName),
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          cycle.peptideName.toUpperCase(),
-                          style: TextStyle(
-                            fontFamily: 'Courier New',
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: getPeptideColor(cycle.peptideName),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
+                  ...top3Markers.map((marker) {
+                    final value = lab.biomarkers[marker];
+                    final displayName = marker.toUpperCase().replaceAll('_', ' ');
 
-          // Key biomarkers
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'KEY BIOMARKERS:',
-                  style: TextStyle(
-                    fontFamily: 'Courier New',
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFA0A0A0),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ...lab.biomarkers.entries.take(5).map((entry) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            entry.key.toUpperCase(),
+                    // For now, just show current value
+                    // TODO: Add before/after comparison when previous lab data is available
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              displayName,
+                              style: const TextStyle(
+                                fontFamily: 'Courier New',
+                                fontSize: 11,
+                                color: Color(0xFFA0A0A0),
+                              ),
+                            ),
+                          ),
+                          Text(
+                            '$value',
                             style: const TextStyle(
                               fontFamily: 'Courier New',
                               fontSize: 11,
-                              color: Color(0xFFFFFFFF),
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF00FFFF),
                             ),
                           ),
-                        ),
-                        Text(
-                          '${entry.value}',
-                          style: const TextStyle(
-                            fontFamily: 'Courier New',
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF00FFFF),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ],
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -703,6 +825,18 @@ class _ReportsScreenState extends State<ReportsScreen> {
           children: [
             Row(
               children: [
+                // Status dot
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? const Color(0xFF39FF14) // Green for active
+                        : const Color(0xFFFFAA00), // Amber for completed
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -1006,8 +1140,31 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Widget _buildInsightsTab() {
     return Column(
       children: [
+        // Header with brain icon
         Padding(
           padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.psychology,
+                color: Color(0xFF00FFFF),
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'AI INSIGHTS',
+                style: TextStyle(
+                  fontFamily: 'Courier New',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF00FFFF),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GestureDetector(
             onTap: _isGeneratingAI ? null : _regenerateAIInsights,
             child: Container(
@@ -1059,6 +1216,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ),
           ),
         ),
+        const SizedBox(height: 16),
         Expanded(
           child: _aiInsights.isEmpty
               ? const EmptyState(
