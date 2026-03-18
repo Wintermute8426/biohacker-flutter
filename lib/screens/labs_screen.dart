@@ -484,7 +484,7 @@ class _LabsScreenState extends State<LabsScreen> {
     return GestureDetector(
       onTap: () => _showLabDetail(lab),
       child: Container(
-        height: 220,  // Taller for cyberpunk lab testing aesthetic with better spacing
+        height: 235,  // Taller for cyberpunk lab testing aesthetic with better spacing
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -663,7 +663,7 @@ class _LabsScreenState extends State<LabsScreen> {
             
             // Main content
             Padding(
-              padding: EdgeInsets.fromLTRB(8, 35, 8, 38),  // More space for corner badges + bottom bar
+              padding: EdgeInsets.fromLTRB(8, 35, 8, 44),  // More space for corner badges + bottom bar
               child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

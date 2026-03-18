@@ -526,6 +526,82 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
                     ),
                   ),
                 ),
+                
+                // Bottom protocol certification bar
+                SizedBox(height: 16),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFF9800).withOpacity(0.05),
+                    border: Border(
+                      top: BorderSide(
+                        color: Color(0xFFFF9800).withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Left: Start date + certification icon
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.calendar_today, color: Color(0xFFFF9800).withOpacity(0.4), size: 10),
+                          SizedBox(width: 6),
+                          Text(
+                            'START: ${widget.cycle.startDate.year}.${widget.cycle.startDate.month.toString().padLeft(2, '0')}.${widget.cycle.startDate.day.toString().padLeft(2, '0')}',
+                            style: TextStyle(
+                              color: Color(0xFFFF9800).withOpacity(0.5),
+                              fontSize: 8,
+                              fontFamily: 'monospace',
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      // Center: Protocol certification
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.verified, color: Color(0xFFFF9800).withOpacity(0.4), size: 10),
+                          SizedBox(width: 4),
+                          Text(
+                            'SELF-ADMIN',
+                            style: TextStyle(
+                              color: Color(0xFFFF9800).withOpacity(0.45),
+                              fontSize: 7,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      // Right: Duration + barcode
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${widget.cycle.durationWeeks}W',
+                            style: TextStyle(
+                              color: Color(0xFFFF9800).withOpacity(0.5),
+                              fontSize: 8,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                          SizedBox(width: 6),
+                          Icon(Icons.qr_code, color: Color(0xFFFF9800).withOpacity(0.35), size: 12),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
