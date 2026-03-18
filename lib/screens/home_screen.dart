@@ -170,14 +170,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     CircleAvatar(
                       radius: 28,
                       backgroundColor: AppColors.primary.withOpacity(0.15),
-                      backgroundImage: _profilePhotoUrl != null && 
-                                      _profilePhotoUrl!.isNotEmpty &&
-                                      File(_profilePhotoUrl!).existsSync()
-                        ? FileImage(File(_profilePhotoUrl!)) as ImageProvider
+                      backgroundImage: _profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty
+                        ? (_profilePhotoUrl!.startsWith('http') 
+                            ? NetworkImage(_profilePhotoUrl!) as ImageProvider
+                            : FileImage(File(_profilePhotoUrl!)) as ImageProvider)
                         : null,
-                      child: _profilePhotoUrl == null || 
-                              _profilePhotoUrl!.isEmpty ||
-                              !File(_profilePhotoUrl!).existsSync()
+                      child: _profilePhotoUrl == null || _profilePhotoUrl!.isEmpty
                         ? Text(
                             _getInitials(_userName),
                             style: TextStyle(
