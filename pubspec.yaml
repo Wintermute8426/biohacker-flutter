@@ -75,6 +75,7 @@ flutter:
     - assets/logo/biohacker-logo.svg
     - assets/logo/biohacker-icon.svg
     - assets/logo/biohacker-neon-logo.png
+    - assets/logo/biohacker-brain.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
