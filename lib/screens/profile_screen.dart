@@ -446,9 +446,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final profile = await profileService.getUserProfile(userId);
 
       if (profile != null) {
-        // Load profile photo URL from SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        final photoUrl = prefs.getString('profile_photo_url');
+        // Load profile photo URL from database (persists across reinstalls)
+        // Also check SharedPreferences as fallback for backwards compatibility
+        String? photoUrl = profile.photoUrl;
+        if (photoUrl == null || photoUrl.isEmpty) {
+          final prefs = await SharedPreferences.getInstance();
+          photoUrl = prefs.getString('profile_photo_url');
+        }
 
         setState(() {
           _usernameController.text = profile.username ?? '';
@@ -567,6 +571,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       // Save URL to SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('profile_photo_url', photoUrl);
+      
+      // CRITICAL: Save URL to database so it persists across reinstalls
+      final profileService = ref.read(userProfileServiceProvider);
+      await profileService.updateUserProfile(
+        userId: userId,
+        photoUrl: photoUrl,
+      );
 
       setState(() {
         _profilePhotoUrl = photoUrl;
