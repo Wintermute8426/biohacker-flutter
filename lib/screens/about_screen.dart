@@ -37,11 +37,11 @@ class AboutScreen extends StatelessWidget {
             Center(
               child: Column(
                 children: [
-                  // Logo Icon
+                  // Logo Icon - DNA Helix Bitcoin B
                   SvgPicture.asset(
-                    'assets/logo/biohacker-icon.svg',
-                    width: 80,
-                    height: 80,
+                    'assets/icon/biohacker-app-icon-1024.svg',
+                    width: 100,
+                    height: 100,
                   ),
                   const SizedBox(height: 16),
                   Text(

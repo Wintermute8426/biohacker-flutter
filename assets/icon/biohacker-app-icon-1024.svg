@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <style>
+      .bg { fill: #0A0A0A; }
+      .cyan { fill: #00FFFF; stroke: #00FFFF; }
+      .amber { fill: #FF9800; stroke: #FF9800; }
+      .glow-cyan { filter: url(#glowCyan); }
+      .glow-amber { filter: url(#glowAmber); }
+    </style>
+
+    <!-- Cyan glow effect -->
+    <filter id="glowCyan">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Amber glow effect -->
+    <filter id="glowAmber">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Pure black background -->
+  <rect class="bg" width="1024" height="1024"/>
+
+  <!-- Main Bitcoin B with DNA double helix structure -->
+  <g transform="translate(512, 512)">
+
+    <!-- Left DNA helix strand (vertical bar of B) -->
+    <g class="glow-cyan">
+      <!-- Left vertical backbone -->
+      <path class="cyan" d="M -160,-300 Q -170,-150 -160,0 Q -150,150 -160,300"
+            fill="none" stroke-width="12" stroke-linecap="round"/>
+    </g>
+
+    <!-- Right DNA helix strand (right side of B) -->
+    <g class="glow-cyan">
+      <!-- Upper bulge of B -->
+      <path class="cyan" d="M -160,-300 Q 80,-320 160,-220 Q 180,-150 160,-80"
+            fill="none" stroke-width="12" stroke-linecap="round"/>
+
+      <!-- Lower bulge of B -->
+      <path class="cyan" d="M -160,20 Q 100,0 180,100 Q 200,200 160,300 Q 80,350 -160,300"
+            fill="none" stroke-width="12" stroke-linecap="round"/>
+    </g>
+
+    <!-- DNA ladder rungs forming the structure of B -->
+    <!-- Top section rungs (cyan) -->
+    <g class="glow-cyan">
+      <line class="cyan" x1="-160" y1="-280" x2="-40" y2="-290" stroke-width="8" stroke-linecap="round"/>
+      <line class="cyan" x1="-160" y1="-220" x2="20" y2="-240" stroke-width="8" stroke-linecap="round"/>
+      <line class="cyan" x1="-160" y1="-160" x2="60" y2="-180" stroke-width="8" stroke-linecap="round"/>
+    </g>
+
+    <!-- Upper middle rungs (amber accents) -->
+    <g class="glow-amber">
+      <line class="amber" x1="-160" y1="-100" x2="90" y2="-120" stroke-width="8" stroke-linecap="round"/>
+      <line class="amber" x1="-160" y1="-40" x2="120" y2="-60" stroke-width="8" stroke-linecap="round"/>
+    </g>
+
+    <!-- Center horizontal bar (prominent amber DNA rung) -->
+    <g class="glow-amber">
+      <rect class="amber" x="-160" y="-15" width="320" height="12" rx="6"/>
+      <!-- DNA helix nodes at ends -->
+      <circle class="amber" cx="-160" cy="-9" r="14"/>
+      <circle class="amber" cx="160" cy="-9" r="14"/>
+    </g>
+
+    <!-- Lower middle rungs (cyan) -->
+    <g class="glow-cyan">
+      <line class="cyan" x1="-160" y1="40" x2="100" y2="30" stroke-width="8" stroke-linecap="round"/>
+      <line class="cyan" x1="-160" y1="100" x2="130" y2="90" stroke-width="8" stroke-linecap="round"/>
+    </g>
+
+    <!-- Bottom section rungs (alternating amber) -->
+    <g class="glow-amber">
+      <line class="amber" x1="-160" y1="160" x2="120" y2="150" stroke-width="8" stroke-linecap="round"/>
+      <line class="amber" x1="-160" y1="220" x2="80" y2="220" stroke-width="8" stroke-linecap="round"/>
+    </g>
+
+    <!-- Lower rungs (cyan) -->
+    <g class="glow-cyan">
+      <line class="cyan" x1="-160" y1="280" x2="20" y2="290" stroke-width="8" stroke-linecap="round"/>
+    </g>
+
+    <!-- Bitcoin symbol top bars (extended vertical bars) -->
+    <g class="glow-cyan">
+      <rect class="cyan" x="-168" y="-340" width="16" height="36" rx="4"/>
+      <rect class="cyan" x="152" y="-340" width="16" height="36" rx="4"/>
+    </g>
+
+    <!-- Bitcoin symbol bottom bars -->
+    <g class="glow-cyan">
+      <rect class="cyan" x="-168" y="304" width="16" height="36" rx="4"/>
+      <rect class="cyan" x="152" y="304" width="16" height="36" rx="4"/>
+    </g>
+
+    <!-- DNA helix connection nodes (decorative) -->
+    <g class="glow-cyan">
+      <circle class="cyan" cx="-160" cy="-280" r="10"/>
+      <circle class="cyan" cx="-160" cy="-160" r="10"/>
+      <circle class="cyan" cx="-160" cy="40" r="10"/>
+      <circle class="cyan" cx="-160" cy="220" r="10"/>
+    </g>
+
+    <g class="glow-amber">
+      <circle class="amber" cx="-160" cy="-100" r="10"/>
+      <circle class="amber" cx="-160" cy="160" r="10"/>
+    </g>
+
+    <!-- Angular geometric accents for sharp modern style -->
+    <g class="glow-cyan" opacity="0.3">
+      <!-- Upper left corner accent -->
+      <polygon class="cyan" points="-200,-330 -160,-340 -160,-300" fill="#00FFFF" stroke="none"/>
+      <!-- Lower right corner accent -->
+      <polygon class="cyan" points="200,330 160,340 160,300" fill="#00FFFF" stroke="none"/>
+    </g>
+
+  </g>
+</svg>
