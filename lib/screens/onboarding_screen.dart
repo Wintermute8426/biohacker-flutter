@@ -266,8 +266,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Neon brain logo + text
+              Image.asset(
+                'assets/logo/biohacker-brain.png',
+                height: 140,
+                width: 140,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 16),
               Text(
-                '🧊 BIOHACKER',
+                'BIOHACKER',
                 style: WintermmuteStyles.titleStyle.copyWith(fontSize: 36),
                 textAlign: TextAlign.center,
               ),

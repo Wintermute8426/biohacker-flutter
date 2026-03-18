@@ -409,9 +409,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           appBar: AppBar(
             backgroundColor: AppColors.background,
             elevation: 0,
-            title: Text(
-              'BIOHACKER',
-              style: WintermmuteStyles.titleStyle.copyWith(fontSize: 18),
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/logo/biohacker-brain.png',
+                  height: 28,
+                  width: 28,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'BIOHACKER',
+                  style: WintermmuteStyles.titleStyle.copyWith(fontSize: 18),
+                ),
+              ],
             ),
             actions: [
               IconButton(

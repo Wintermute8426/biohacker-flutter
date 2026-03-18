@@ -14,7 +14,6 @@ import '../widgets/cyberpunk_frame.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
-import '../widgets/biohacker_header.dart';
 import '../widgets/full_screen_modal.dart';
 import '../widgets/crt_card.dart';
 import '../widgets/dose_display.dart';
@@ -363,8 +362,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             backgroundColor: Colors.transparent,
             body: Column(
               children: [
-                // Biohacker branded header with neon brain logo
-                const BiohackerHeader(),
+                // Header using reusable widget
+                const AppHeader(
+                  icon: Icons.dashboard,
+                  iconColor: WintermmuteStyles.colorCyan,
+                  title: 'DAILY ACTIONS',
+                ),
                 Expanded(
                   child: Stack(
                     children: [
