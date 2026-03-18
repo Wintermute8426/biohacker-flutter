@@ -1050,7 +1050,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                     ],
                   ],
                 ),
-            );
+              );
           },
         ),
       ],
