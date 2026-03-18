@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.biohacker.biohacker_app"
-    compileSdk = 35  // Android 15 SDK for building
+    compileSdk = 36  // Latest Android SDK for building (dependencies require 36+)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
