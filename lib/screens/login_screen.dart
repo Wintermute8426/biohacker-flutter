@@ -99,13 +99,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
-              // Logo - Enhanced BH Monogram
+              // Logo - Neon brain with BIOHACKER text
               Column(
                 children: [
                   Image.asset(
-                    'assets/icon/app_icon.png',
-                    width: 140,
-                    height: 140,
+                    'assets/logo/biohacker-brain.png',
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 16),
                   Text(
