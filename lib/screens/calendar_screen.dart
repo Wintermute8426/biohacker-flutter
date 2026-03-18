@@ -27,7 +27,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
   late DateTime _monthStart;
   String? _selectedCycleId;
   String? _selectedDate;
-  bool _showMonthView = false; // Toggle between week and month views
+  bool _showMonthView = true; // Default to month/30-day view
   int _buildCounter = 0; // Debug: Track rebuilds
 
   // Reconstitution data (TODO: move to database)
@@ -192,27 +192,42 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // CRT-styled view toggle button
                       Container(
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(6),
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.zero,
                           border: Border.all(
-                            color: AppColors.primary.withOpacity(0.5),
+                            color: const Color(0xFF00FFFF),
                             width: 2,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF00FFFF).withOpacity(0.3),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            ),
+                          ],
                         ),
-                        child: IconButton(
-                          icon: Icon(
-                            _showMonthView ? Icons.view_week : Icons.calendar_view_month,
-                            size: 26,
-                          ),
-                          color: AppColors.primary,
+                        child: TextButton(
                           onPressed: () {
                             setState(() {
                               _showMonthView = !_showMonthView;
                             });
                           },
-                          tooltip: _showMonthView ? 'Week View' : 'Month View',
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                          ),
+                          child: Text(
+                            _showMonthView ? 'WEEK' : 'MONTH',
+                            style: WintermmuteStyles.bodyStyle.copyWith(
+                              color: const Color(0xFF00FFFF),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -595,13 +610,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     );
   }
 
-  // 7-column week grid
+  // 7-column week grid - CRT styled
   Widget _buildWeekGrid(List<DoseInstance> weekDoses, List<DateTime> labDates) {
     const daysOfWeek = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
     return Column(
       children: [
-        // Day headers - optimize with const and caching
+        // Day headers - CRT styled with cyan text
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -610,21 +625,23 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             childAspectRatio: 1.0,
           ),
           itemCount: 7,
-          addAutomaticKeepAlives: false, // Optimize: Don't keep children alive
-          addRepaintBoundaries: false, // Optimize: Reduce repaint boundaries for simple cells
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
           itemBuilder: (context, index) {
             return Center(
               child: Text(
                 daysOfWeek[index],
                 style: WintermmuteStyles.bodyStyle.copyWith(
-                  color: AppColors.primary,
+                  color: const Color(0xFF00FFFF),
                   fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                  letterSpacing: 1.0,
                 ),
               ),
             );
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
 
         // Date cells - optimize with keys and performance flags
         GridView.builder(
@@ -728,11 +745,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                       : null,
                   child: Container(
                     decoration: BoxDecoration(
+                      color: AppColors.background,
                       border: Border.all(
-                        color: isToday ? AppColors.primary : AppColors.textMid,
+                        color: isToday ? const Color(0xFF00FFFF) : AppColors.textMid.withOpacity(0.4),
                         width: isToday ? 2 : 1,
                       ),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.zero,
+                      boxShadow: isToday ? [
+                        BoxShadow(
+                          color: const Color(0xFF00FFFF).withOpacity(0.2),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ] : null,
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -837,7 +862,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
     return Column(
       children: [
-        // Day headers - optimize with const
+        // Day headers - CRT styled
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -846,22 +871,23 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             childAspectRatio: 1.0,
           ),
           itemCount: 7,
-          addAutomaticKeepAlives: false, // Optimize: Reduce memory overhead
-          addRepaintBoundaries: false, // Optimize: Reduce repaint boundaries for simple cells
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
           itemBuilder: (context, index) {
             return Center(
               child: Text(
                 daysOfWeek[index],
                 style: WintermmuteStyles.bodyStyle.copyWith(
-                  color: AppColors.primary,
+                  color: const Color(0xFF00FFFF),
                   fontWeight: FontWeight.bold,
-                  fontSize: 11,
+                  fontSize: 10,
+                  letterSpacing: 0.8,
                 ),
               ),
             );
           },
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
 
         // Date cells with padding - optimize with performance flags
         GridView.builder(
@@ -958,12 +984,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   : null,
               child: Container(
                 decoration: BoxDecoration(
-                  color: cellColor,
+                  color: AppColors.background,
                   border: Border.all(
-                    color: isToday ? AppColors.primary : AppColors.border,
-                    width: isToday ? 2 : 0.5,
+                    color: isToday ? const Color(0xFF00FFFF) : AppColors.border.withOpacity(0.3),
+                    width: isToday ? 2 : 1,
                   ),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.zero,
+                  boxShadow: isToday ? [
+                    BoxShadow(
+                      color: const Color(0xFF00FFFF).withOpacity(0.15),
+                      blurRadius: 3,
+                      spreadRadius: 1,
+                    ),
+                  ] : null,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
