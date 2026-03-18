@@ -17,6 +17,7 @@ import 'labs_screen.dart';
 import 'reports_screen.dart';
 import 'calendar_screen.dart';
 import 'profile_screen.dart';
+import 'about_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -257,40 +258,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 label: 'About',
                 onTap: () {
                   Navigator.pop(context);
-                  // Show about dialog
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      backgroundColor: AppColors.surface,
-                      title: Text(
-                        'BIOHACKER',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontFamily: 'monospace',
-                          letterSpacing: 2,
-                        ),
-                      ),
-                      content: Text(
-                        'Version 2.0.0\n\nPeptide tracking & optimization platform\n\nPowered by Wintermute cyberpunk aesthetics',
-                        style: TextStyle(
-                          color: AppColors.textMid,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(
-                            'CLOSE',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontFamily: 'monospace',
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AboutScreen()),
                   );
                 },
               ),
