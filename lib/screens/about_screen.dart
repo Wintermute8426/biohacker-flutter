@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/colors.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -32,12 +33,19 @@ class AboutScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Header with Logo
             Center(
               child: Column(
                 children: [
+                  // Logo Icon
+                  SvgPicture.asset(
+                    'assets/logo/biohacker-icon.svg',
+                    width: 80,
+                    height: 80,
+                  ),
+                  const SizedBox(height: 16),
                   Text(
-                    '🧊 BIOHACKER',
+                    'BIOHACKER',
                     style: const TextStyle(
                       color: Color(0xFF00FFFF),
                       fontSize: 28,
