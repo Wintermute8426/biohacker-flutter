@@ -171,7 +171,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ],
                 ),
-              ),
                 child: Row(
                   children: [
                     // Profile picture with initials
