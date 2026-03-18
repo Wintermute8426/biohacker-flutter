@@ -436,82 +436,122 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     );
   }
 
-  // Compliance tracker widget
+  // Compliance tracker widget - dystopian cyberpunk style
   Widget _buildComplianceTracker(List<DoseInstance> doses) {
     // NEW MODEL: Assume all past scheduled doses are taken unless explicitly marked as MISSED
     final pastDoses = doses.where((d) => d.date.isBefore(DateTime.now())).toList();
     final pastMissed = pastDoses.where((d) => d.status == 'MISSED').length;
     final pastTotal = pastDoses.length;
-    final pastTaken = pastTotal - pastMissed; // Everything except explicitly missed
+    final pastTaken = pastTotal - pastMissed;
     final pastComplianceRate = pastTotal > 0 ? (pastTaken / pastTotal * 100).toStringAsFixed(1) : '100.0';
 
     // For display: count logged doses (COMPLETED status)
     final logged = doses.where((d) => d.status == 'COMPLETED').length;
-    final total = doses.length;
+    final upcoming = doses.where((d) => d.date.isAfter(DateTime.now())).length;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.accent.withOpacity(0.3)),
-        borderRadius: BorderRadius.circular(8),
-        color: AppColors.surface,
+        border: Border.all(
+          color: const Color(0xFF00FFFF).withOpacity(0.6),
+          width: 2,
+        ),
+        borderRadius: BorderRadius.zero,
+        color: AppColors.background,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00FFFF).withOpacity(0.15),
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
+          // Compliance rate
           Column(
             children: [
               Text(
                 '$pastComplianceRate%',
-                style: WintermmuteStyles.statValueAccentStyle.copyWith(fontSize: 20),
+                style: WintermmuteStyles.statValueAccentStyle.copyWith(
+                  fontSize: 22,
+                  color: const Color(0xFF00FFFF),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
-                'Compliance',
-                style: WintermmuteStyles.smallStyle.copyWith(color: AppColors.textMid),
+                'COMPLIANCE',
+                style: WintermmuteStyles.smallStyle.copyWith(
+                  color: const Color(0xFF00FFFF).withOpacity(0.7),
+                  fontSize: 9,
+                  letterSpacing: 1.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
-                '($pastTaken/$pastTotal assumed taken)',
+                '($pastTaken/$pastTotal)',
                 style: WintermmuteStyles.smallStyle.copyWith(
                   color: AppColors.textDim,
-                  fontSize: 10,
+                  fontSize: 8,
+                  letterSpacing: 0.5,
                 ),
               ),
             ],
           ),
+          // Vertical divider
           Container(
             width: 1,
-            height: 40,
-            color: AppColors.border,
+            height: 50,
+            color: const Color(0xFF00FFFF).withOpacity(0.3),
           ),
+          // Upcoming doses
           Column(
             children: [
               Text(
-                '$logged',
-                style: WintermmuteStyles.statValueStyle.copyWith(fontSize: 20),
+                '$upcoming',
+                style: WintermmuteStyles.statValueStyle.copyWith(
+                  fontSize: 22,
+                  color: const Color(0xFF00FFFF),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
-                'Logged',
-                style: WintermmuteStyles.smallStyle.copyWith(color: AppColors.textMid),
+                'UPCOMING',
+                style: WintermmuteStyles.smallStyle.copyWith(
+                  color: const Color(0xFF00FFFF).withOpacity(0.7),
+                  fontSize: 9,
+                  letterSpacing: 1.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
+          // Vertical divider
           Container(
             width: 1,
-            height: 40,
-            color: AppColors.border,
+            height: 50,
+            color: const Color(0xFF00FFFF).withOpacity(0.3),
           ),
+          // Missed doses
           Column(
             children: [
               Text(
                 '$pastMissed',
                 style: WintermmuteStyles.statValueStyle.copyWith(
-                  fontSize: 20,
-                  color: AppColors.error,
+                  fontSize: 22,
+                  color: const Color(0xFFFF0040),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                'Missed',
-                style: WintermmuteStyles.smallStyle.copyWith(color: AppColors.textMid),
+                'MISSED',
+                style: WintermmuteStyles.smallStyle.copyWith(
+                  color: const Color(0xFFFF0040).withOpacity(0.7),
+                  fontSize: 9,
+                  letterSpacing: 1.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -769,55 +809,59 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           ),
                         ),
                         if (dayDoses.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            '${dayDoses.length}',
-                            style: WintermmuteStyles.smallStyle
-                                .copyWith(color: AppColors.primary),
+                          const SizedBox(height: 6),
+                          // Dose count badge - cyberpunk style
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color(0xFF00FFFF).withOpacity(0.7),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.zero,
+                            ),
+                            child: Text(
+                              '${dayDoses.length}×',
+                              style: WintermmuteStyles.smallStyle.copyWith(
+                                color: const Color(0xFF00FFFF),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
                           ),
                           if (dayDoses.isNotEmpty || hasLab)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (completed > 0)
-                                  const SizedBox(
-                                    width: 4,
-                                    height: 4,
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  if (completed > 0)
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 1),
+                                      child: Icon(
+                                        Icons.check_circle,
+                                        size: 6,
                                         color: Color(0xFF39FF14),
-                                        shape: BoxShape.circle,
                                       ),
                                     ),
-                                  ),
-                                if (scheduled > 0)
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 2),
-                                    child: SizedBox(
-                                      width: 4,
-                                      height: 4,
-                                      child: DecoratedBox(
-                                        decoration: BoxDecoration(
-                                          color: Color(0xFF00FFFF),
-                                          shape: BoxShape.circle,
-                                        ),
+                                  if (scheduled > 0)
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 1),
+                                      child: Icon(
+                                        Icons.schedule,
+                                        size: 6,
+                                        color: Color(0xFF00FFFF),
                                       ),
                                     ),
-                                  ),
-                                if (missed > 0)
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 2),
-                                    child: SizedBox(
-                                      width: 4,
-                                      height: 4,
-                                      child: DecoratedBox(
-                                        decoration: BoxDecoration(
-                                          color: Color(0xFFFF0000),
-                                          shape: BoxShape.circle,
-                                        ),
+                                  if (missed > 0)
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 1),
+                                      child: Icon(
+                                        Icons.cancel,
+                                        size: 6,
+                                        color: Color(0xFFFF0040),
                                       ),
                                     ),
-                                  ),
                                 if (hasLab)
                                   const Padding(
                                     padding: EdgeInsets.only(left: 2),
@@ -1009,55 +1053,54 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                       ),
                     ),
                     if (dayDoses.isNotEmpty || hasLab) ...[
+                      const SizedBox(height: 3),
+                      // Dose count indicator - compact month view style
+                      if (dayDoses.isNotEmpty)
+                        Text(
+                          '${dayDoses.length}×',
+                          style: WintermmuteStyles.smallStyle.copyWith(
+                            color: const Color(0xFF00FFFF),
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       const SizedBox(height: 2),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (completed > 0)
-                            const SizedBox(
-                              width: 3,
-                              height: 3,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: Color(0xFF39FF14),
-                                  shape: BoxShape.circle,
-                                ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 0.5),
+                              child: Icon(
+                                Icons.check_circle,
+                                size: 5,
+                                color: Color(0xFF39FF14),
                               ),
                             ),
                           if (scheduled > 0)
                             const Padding(
-                              padding: EdgeInsets.only(left: 1),
-                              child: SizedBox(
-                                width: 3,
-                                height: 3,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFF00FFFF),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
+                              padding: EdgeInsets.symmetric(horizontal: 0.5),
+                              child: Icon(
+                                Icons.schedule,
+                                size: 5,
+                                color: Color(0xFF00FFFF),
                               ),
                             ),
                           if (missed > 0)
                             const Padding(
-                              padding: EdgeInsets.only(left: 1),
-                              child: SizedBox(
-                                width: 3,
-                                height: 3,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFFFF0000),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
+                              padding: EdgeInsets.symmetric(horizontal: 0.5),
+                              child: Icon(
+                                Icons.cancel,
+                                size: 5,
+                                color: Color(0xFFFF0040),
                               ),
                             ),
                           if (hasLab)
                             const Padding(
-                              padding: EdgeInsets.only(left: 1),
+                              padding: EdgeInsets.symmetric(horizontal: 0.5),
                               child: Icon(
                                 Icons.science,
-                                size: 6,
+                                size: 5,
                                 color: Color(0xFFFF00FF),
                               ),
                             ),
