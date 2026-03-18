@@ -862,16 +862,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                                         color: Color(0xFFFF0040),
                                       ),
                                     ),
-                                if (hasLab)
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 2),
-                                    child: Icon(
-                                      Icons.science,
-                                      size: 8,
-                                      color: Color(0xFFFF00FF),
+                                  if (hasLab)
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 1),
+                                      child: Icon(
+                                        Icons.science,
+                                        size: 6,
+                                        color: Color(0xFFFF00FF),
+                                      ),
                                     ),
-                                  ),
-                              ],
+                                ],
+                              ),
                             ),
                         ] else if (hasLab) ...[
                           const SizedBox(height: 4),
