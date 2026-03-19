@@ -443,7 +443,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     return CRTCard(
       title: 'PROTOCOL STATUS',
       subtitle: 'COMPLIANCE TRACKER',
-      color: CRTColor.magenta,
+      color: CRTColor.cyan,
       height: 180,
       rogueId: 'DOSE-SYNC',
       child: Row(
