@@ -443,26 +443,51 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     final logged = doses.where((d) => d.status == 'COMPLETED').length;
     final upcoming = doses.where((d) => d.date.isAfter(DateTime.now())).length;
 
-    return Stack(
-      children: [
-        Container(
-          padding: const EdgeInsets.fromLTRB(14, 20, 14, 20),
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: const Color(0xFF00FFFF).withOpacity(0.6),
-              width: 2,
-            ),
-            borderRadius: BorderRadius.zero,
-            color: AppColors.background,
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF00FFFF).withOpacity(0.15),
-                blurRadius: 8,
-                spreadRadius: 1,
-              ),
-            ],
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: const Color(0xFF00FFFF).withOpacity(0.6),
+          width: 2,
+        ),
+        borderRadius: BorderRadius.zero,
+        color: AppColors.background,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00FFFF).withOpacity(0.15),
+            blurRadius: 8,
+            spreadRadius: 1,
           ),
-          child: Row(
+        ],
+      ),
+      child: Column(
+        children: [
+          // Top decorative bar with SYSTEM STATUS
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: const Color(0xFF00FFFF).withOpacity(0.4),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Center(
+              child: Text(
+                '◆ SYSTEM STATUS ◆',
+                style: WintermmuteStyles.smallStyle.copyWith(
+                  color: const Color(0xFF00FFFF),
+                  fontSize: 8,
+                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Main stats row
+          Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           // Compliance rate
@@ -551,74 +576,32 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          // Bottom decorative bar with PROTOCOL ACTIVE
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: const Color(0xFF00FFFF).withOpacity(0.4),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Center(
+              child: Text(
+                '◆ PROTOCOL ACTIVE ◆',
+                style: WintermmuteStyles.smallStyle.copyWith(
+                  color: const Color(0xFF00FFFF),
+                  fontSize: 8,
+                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
-        ),
-        // Top enhancement badge - SYSTEM STATUS
-        Positioned(
-          top: 6,
-          left: 14,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              border: Border.all(color: const Color(0xFF00FFFF), width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF00FFFF).withOpacity(0.3),
-                  blurRadius: 6,
-                  spreadRadius: 1,
-                ),
-                BoxShadow(
-                  color: const Color(0xFFFF00FF).withOpacity(0.15),
-                  blurRadius: 3,
-                ),
-              ],
-            ),
-            child: Text(
-              '◆ SYSTEM STATUS ◆',
-              style: WintermmuteStyles.smallStyle.copyWith(
-                color: const Color(0xFF00FFFF),
-                fontSize: 8,
-                letterSpacing: 1.5,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        // Bottom enhancement badge - PROTOCOL ACTIVE
-        Positioned(
-          bottom: 6,
-          right: 14,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              border: Border.all(color: const Color(0xFF00FFFF), width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF00FFFF).withOpacity(0.3),
-                  blurRadius: 6,
-                  spreadRadius: 1,
-                ),
-                BoxShadow(
-                  color: const Color(0xFF39FF14).withOpacity(0.15),
-                  blurRadius: 3,
-                ),
-              ],
-            ),
-            child: Text(
-              '◆ PROTOCOL ACTIVE ◆',
-              style: WintermmuteStyles.smallStyle.copyWith(
-                color: const Color(0xFF00FFFF),
-                fontSize: 8,
-                letterSpacing: 1.5,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
