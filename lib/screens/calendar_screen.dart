@@ -431,64 +431,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     );
   }
 
-  // Compliance tracker widget - dystopian cyberpunk style
+  // Compliance tracker widget - uses CRTCard like dashboard
   Widget _buildComplianceTracker(List<DoseInstance> doses) {
-    // NEW MODEL: Assume all past scheduled doses are taken unless explicitly marked as MISSED
     final pastDoses = doses.where((d) => d.date.isBefore(DateTime.now())).toList();
     final pastMissed = pastDoses.where((d) => d.status == 'MISSED').length;
     final pastTotal = pastDoses.length;
     final pastTaken = pastTotal - pastMissed;
     final pastComplianceRate = pastTotal > 0 ? (pastTaken / pastTotal * 100).toStringAsFixed(1) : '100.0';
-
-    // For display: count logged doses (COMPLETED status)
-    final logged = doses.where((d) => d.status == 'COMPLETED').length;
     final upcoming = doses.where((d) => d.date.isAfter(DateTime.now())).length;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: const Color(0xFF00FFFF).withOpacity(0.6),
-          width: 2,
-        ),
-        borderRadius: BorderRadius.zero,
-        color: AppColors.background,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00FFFF).withOpacity(0.15),
-            blurRadius: 8,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Top decorative bar with SYSTEM STATUS
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: const Color(0xFF00FFFF).withOpacity(0.4),
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '◆ SYSTEM STATUS ◆',
-                style: WintermmuteStyles.smallStyle.copyWith(
-                  color: const Color(0xFF00FFFF),
-                  fontSize: 8,
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Main stats row
-          Row(
+    return CRTCard(
+      title: 'PROTOCOL STATUS',
+      subtitle: 'COMPLIANCE TRACKER',
+      color: CRTColor.cyan,
+      height: 180,
+      rogueId: 'DOSE-SYNC',
+      child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               // Compliance rate
@@ -578,30 +536,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               ],
               ),
             ],
-          ),
-          const SizedBox(height: 8),
-          // Bottom decorative bar with PROTOCOL ACTIVE
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: const Color(0xFF00FFFF).withOpacity(0.4),
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '◆ PROTOCOL ACTIVE ◆',
-                style: WintermmuteStyles.smallStyle.copyWith(
-                  color: const Color(0xFF00FFFF),
-                  fontSize: 8,
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
           ),
         ],
       ),
