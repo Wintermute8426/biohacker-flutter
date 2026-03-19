@@ -787,9 +787,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                     ),
                   ] : null,
                 ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
                         Text(
                           date.day.toString(),
                           style: WintermmuteStyles.bodyStyle.copyWith(
