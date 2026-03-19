@@ -60,375 +60,796 @@ class _ResearchScreenState extends State<ResearchScreen> {
   void _showPeptideDetails(PeptideInfo peptide) {
     FullScreenModal.show(
       context: context,
-      title: peptide.name,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-
-            // Category badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(3),
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+        children: [
+          // Header section with gradient and peptide name + category
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 40, 20, 44),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.5),
+                  const Color(0xFF001a1a),
+                  const Color(0xFF001a1a).withOpacity(0.5),
+                  Colors.transparent,
+                ],
+                stops: [0.0, 0.3, 0.7, 1.0],
               ),
-              child: Text(
-                peptide.category,
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.none,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Category badge with cyan accent
+                Row(
+                  children: [
+                    Icon(Icons.category, color: const Color(0xFF00FFFF).withOpacity(0.7), size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      peptide.category.toUpperCase(),
+                      style: TextStyle(
+                        color: const Color(0xFF00FFFF).withOpacity(0.7),
+                        fontSize: 9,
+                        fontFamily: 'monospace',
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 8),
+                // Peptide name
+                Text(
+                  peptide.name.toUpperCase(),
+                  style: TextStyle(
+                    color: const Color(0xFF00FFFF),
+                    fontSize: 18,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Description section
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: const Color(0xFF00FFFF).withOpacity(0.6),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00FFFF).withOpacity(0.3),
+                    blurRadius: 15,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  // Scanlines overlay
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: _ScanlinesPainter(),
+                    ),
+                  ),
+                  Text(
+                    peptide.description,
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 13,
+                      height: 1.5,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
+          ),
 
-            // Description
-            Text(
-              peptide.description,
-              style: TextStyle(
-                color: AppColors.textLight,
-                fontSize: 13,
-                height: 1.5,
-                decoration: TextDecoration.none,
-              ),
-            ),
-            const SizedBox(height: 20),
+          // PepScore section - enhanced with prominent display
+          _buildEnhancedPepScoreSection(peptide),
 
-            // PepScore
-            _buildPepScoreSection(peptide),
-            const SizedBox(height: 20),
-
-            // Dosing info
-            _buildInfoSection('DOSING', [
+          // Dosing section - full-width card
+          _buildFullWidthSection(
+            'DOSING',
+            Icons.medication,
+            [
               '${peptide.commonDoseRange} ${peptide.unit}',
               'Timing: ${peptide.timing}',
               'Route: ${peptide.route}',
-            ]),
-            const SizedBox(height: 16),
+            ],
+          ),
 
-            // Effects
-            _buildEffectsList('EFFECTS', peptide.effects, AppColors.accent),
-            const SizedBox(height: 16),
+          // Effects section - bordered chips
+          _buildEffectsSection('EFFECTS', peptide.effects, AppColors.accent),
 
-            // Side effects
-            _buildEffectsList('SIDE EFFECTS', peptide.sideEffects, AppColors.error),
-            const SizedBox(height: 16),
+          // Side effects section - bordered chips
+          _buildEffectsSection('SIDE EFFECTS', peptide.sideEffects, AppColors.error),
 
-            // Safety notes
-            _buildInfoSection('SAFETY', [peptide.safetyNotes]),
-            const SizedBox(height: 16),
+          // Safety section - full-width card
+          _buildFullWidthSection(
+            'SAFETY',
+            Icons.shield,
+            [peptide.safetyNotes],
+          ),
 
-            // Study links
-            if (peptide.studyLinks.isNotEmpty) ...[
-              Text(
-                'RESEARCH',
-                style: TextStyle(
-                  color: AppColors.textMid,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                  decoration: TextDecoration.none,
+          // Study links - full-width cards with cyan glow
+          if (peptide.studyLinks.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFF00FFFF).withOpacity(0.6),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF00FFFF).withOpacity(0.3),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              ...peptide.studyLinks.map((study) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: GestureDetector(
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Link: ${study.url}'),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface.withOpacity(0.15),
-                        border: Border.all(
-                          color: AppColors.primary.withOpacity(0.2),
-                        ),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            study.title,
-                            style: TextStyle(
-                              color: AppColors.textMid,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Text(
-                                study.source,
-                                style: TextStyle(
-                                  color: AppColors.textDim,
-                                  fontSize: 10,
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '${study.year}',
-                                style: TextStyle(
-                                  color: AppColors.textDim,
-                                  fontSize: 10,
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                              const Spacer(),
-                              Icon(
-                                Icons.link,
-                                color: AppColors.textMid,
-                                size: 12,
-                              ),
-                            ],
-                          ),
-                        ],
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: _ScanlinesPainter(),
                       ),
                     ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.biotech,
+                              color: const Color(0xFF00FFFF),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'RESEARCH',
+                              style: TextStyle(
+                                color: const Color(0xFF00FFFF).withOpacity(0.7),
+                                fontSize: 11,
+                                fontFamily: 'monospace',
+                                letterSpacing: 1,
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xFF00FFFF).withOpacity(0.8),
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              child: Text(
+                                '${peptide.studyLinks.length} studies',
+                                style: TextStyle(
+                                  color: const Color(0xFF00FFFF).withOpacity(0.9),
+                                  fontSize: 8,
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            ...peptide.studyLinks.map((study) => _buildStudyCard(study)),
+          ],
+
+          // Footer with LIBERATED: 2026 badge
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: const Color(0xFFFF0040).withOpacity(0.6),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF0040).withOpacity(0.3),
+                    blurRadius: 15,
+                    spreadRadius: 2,
                   ),
-                );
-              }),
-              const SizedBox(height: 20),
-            ],
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.verified,
+                    color: const Color(0xFFFF0040),
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'LIBERATED: 2026',
+                    style: TextStyle(
+                      color: const Color(0xFFFF0040),
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
+
+  // Enhanced PepScore section with prominent display and color coding
+  Widget _buildEnhancedPepScoreSection(PeptideInfo peptide) {
+    final score = peptide.pepScore;
+    final overall = score.overallScore;
+    final rating = score.rating;
+
+    // Color based on rating
+    Color scoreColor;
+    if (rating == 'Excellent') {
+      scoreColor = const Color(0xFF00FFFF); // Cyan
+    } else if (rating == 'Good') {
+      scoreColor = const Color(0xFFFFD740); // Yellow
+    } else if (rating == 'Fair') {
+      scoreColor = const Color(0xFFFF0040); // Red/Magenta
+    } else {
+      scoreColor = const Color(0xFFFF0040); // Red for Limited
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: scoreColor.withOpacity(0.7),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: scoreColor.withOpacity(0.3),
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Scanlines overlay
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with icon
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.assessment, color: scoreColor, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'RESEARCH QUALITY (PepScore)',
+                          style: TextStyle(
+                            color: scoreColor.withOpacity(0.9),
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: scoreColor.withOpacity(0.8), width: 1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Text(
+                        rating.toUpperCase(),
+                        style: TextStyle(
+                          color: scoreColor,
+                          fontSize: 8,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Large score display
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      '$overall',
+                      style: TextStyle(
+                        color: scoreColor,
+                        fontSize: 36,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                    Text(
+                      '/100',
+                      style: TextStyle(
+                        color: scoreColor.withOpacity(0.6),
+                        fontSize: 18,
+                        fontFamily: 'monospace',
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Progress bar
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    value: overall / 100,
+                    minHeight: 8,
+                    backgroundColor: AppColors.surface.withOpacity(0.15),
+                    valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Score breakdown header
+                Text(
+                  'SCORE BREAKDOWN',
+                  style: TextStyle(
+                    color: AppColors.textMid,
+                    fontSize: 10,
+                    fontFamily: 'monospace',
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Component breakdown grid
+                GridView.count(
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  childAspectRatio: 2.5,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  children: [
+                    _buildEnhancedScoreMetric('Publication', score.publication, 25),
+                    _buildEnhancedScoreMetric('Evidence', score.evidence, 35),
+                    _buildEnhancedScoreMetric('Methodology', score.methodology, 25),
+                    _buildEnhancedScoreMetric('Relevance', score.relevance, 15),
+                  ],
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoSection(String title, List<String> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: AppColors.textMid,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-            decoration: TextDecoration.none,
-          ),
-        ),
-        const SizedBox(height: 8),
-        ...items.map((item) => Padding(
-          padding: const EdgeInsets.only(bottom: 6),
-          child: Text(
-            item,
-            style: TextStyle(
-              color: AppColors.textMid,
-              fontSize: 12,
-              decoration: TextDecoration.none,
-            ),
-          ),
-        )),
-      ],
-    );
-  }
-
-  Widget _buildEffectsList(String title, List<String> items, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: AppColors.textMid,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-            decoration: TextDecoration.none,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: items
-              .map((item) => Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface.withOpacity(0.15),
-                      border: Border.all(color: color.withOpacity(0.2)),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    child: Text(
-                      item,
-                      style: TextStyle(
-                        color: AppColors.textMid,
-                        decoration: TextDecoration.none,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ))
-              .toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPepScoreSection(PeptideInfo peptide) {
-    final score = peptide.pepScore;
-    final overall = score.overallScore;
-    final rating = score.rating;
-    
-    // Color based on score
-    Color scoreColor;
-    if (overall >= 80) {
-      scoreColor = AppColors.accent; // Green
-    } else if (overall >= 60) {
-      scoreColor = Color(0xFFFFB700); // Orange
-    } else {
-      scoreColor = AppColors.error; // Red
-    }
-
+  Widget _buildEnhancedScoreMetric(String label, int score, int weight) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: AppColors.surface.withOpacity(0.15),
-        border: Border.all(color: scoreColor.withOpacity(0.2)),
-        borderRadius: BorderRadius.circular(3),
+        color: Colors.black.withOpacity(0.3),
+        border: Border.all(color: const Color(0xFF00FFFF).withOpacity(0.3), width: 1),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Overall score row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'RESEARCH QUALITY (PepScore)',
+                label,
                 style: TextStyle(
                   color: AppColors.textMid,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+                  fontSize: 10,
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.w600,
                   decoration: TextDecoration.none,
                 ),
               ),
               Text(
-                '$overall/100',
+                '${score}%',
                 style: TextStyle(
-                  color: AppColors.textMid,
-                  fontSize: 13,
+                  color: const Color(0xFF00FFFF),
+                  fontSize: 11,
+                  fontFamily: 'monospace',
                   fontWeight: FontWeight.bold,
                   decoration: TextDecoration.none,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-
-          // Score bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(2),
-            child: LinearProgressIndicator(
-              value: overall / 100,
-              minHeight: 6,
-              backgroundColor: AppColors.surface.withOpacity(0.15),
-              valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // Rating label
+          const SizedBox(height: 2),
           Text(
-            rating,
+            'Weight: $weight%',
             style: TextStyle(
-              color: scoreColor,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
+              color: AppColors.textDim,
+              fontSize: 8,
+              fontFamily: 'monospace',
               decoration: TextDecoration.none,
             ),
-          ),
-          const SizedBox(height: 12),
-
-          // Component breakdown
-          Text(
-            'SCORE BREAKDOWN',
-            style: TextStyle(
-              color: AppColors.textMid,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
-              decoration: TextDecoration.none,
-            ),
-          ),
-          const SizedBox(height: 8),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 2.5,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            children: [
-              _buildScoreMetric('Publication', score.publication, 25),
-              _buildScoreMetric('Evidence', score.evidence, 35),
-              _buildScoreMetric('Methodology', score.methodology, 25),
-              _buildScoreMetric('Relevance', score.relevance, 15),
-            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildScoreMetric(String label, int score, int weight) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: AppColors.textDim,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.none,
-              ),
-            ),
-            Text(
-              '${score}%',
-              style: TextStyle(
-                color: AppColors.textMid,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                decoration: TextDecoration.none,
-              ),
+  // Full-width section card (for Dosing, Safety, etc.)
+  Widget _buildFullWidthSection(String title, IconData icon, List<String> items) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: const Color(0xFF00FFFF).withOpacity(0.6),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00FFFF).withOpacity(0.3),
+              blurRadius: 15,
+              spreadRadius: 2,
             ),
           ],
         ),
-        const SizedBox(height: 2),
-        Text(
-          '($weight%)',
-          style: TextStyle(
-            color: AppColors.textDim,
-            fontSize: 9,
-            decoration: TextDecoration.none,
+        child: Stack(
+          children: [
+            // Scanlines overlay
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, color: const Color(0xFF00FFFF), size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: const Color(0xFF00FFFF).withOpacity(0.7),
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                        letterSpacing: 1,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ...items.map((item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '▸',
+                        style: TextStyle(
+                          color: const Color(0xFF00FFFF),
+                          fontSize: 12,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          item,
+                          style: TextStyle(
+                            color: AppColors.textMid,
+                            fontSize: 12,
+                            fontFamily: 'monospace',
+                            height: 1.5,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Effects section with bordered chips
+  Widget _buildEffectsSection(String title, List<String> items, Color accentColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: accentColor.withOpacity(0.6),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: accentColor.withOpacity(0.3),
+              blurRadius: 15,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Scanlines overlay
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      title == 'EFFECTS' ? Icons.auto_awesome : Icons.warning,
+                      color: accentColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: accentColor.withOpacity(0.9),
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                        letterSpacing: 1,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: items.map((item) => Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      border: Border.all(
+                        color: accentColor.withOpacity(0.7),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: accentColor.withOpacity(0.2),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      item,
+                      style: TextStyle(
+                        color: accentColor,
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  )).toList(),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Study card with full-width styling
+  Widget _buildStudyCard(StudyLink study) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: GestureDetector(
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Link: ${study.url}'),
+                duration: const Duration(seconds: 1),
+                backgroundColor: const Color(0xFF00FFFF).withOpacity(0.9),
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFF00FFFF).withOpacity(0.6),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF00FFFF).withOpacity(0.3),
+                  blurRadius: 15,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Scanlines overlay
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _ScanlinesPainter(),
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Study title
+                    Text(
+                      study.title,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Source and year
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.source,
+                          color: const Color(0xFF00FFFF).withOpacity(0.7),
+                          size: 14,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          study.source,
+                          style: TextStyle(
+                            color: AppColors.textMid,
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Icon(
+                          Icons.calendar_today,
+                          color: const Color(0xFF00FFFF).withOpacity(0.7),
+                          size: 14,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${study.year}',
+                          style: TextStyle(
+                            color: AppColors.textMid,
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        const Spacer(),
+                        // View study button
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color(0xFF00FFFF).withOpacity(0.8),
+                              width: 1,
+                            ),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.link,
+                                color: const Color(0xFF00FFFF),
+                                size: 12,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'VIEW',
+                                style: TextStyle(
+                                  color: const Color(0xFF00FFFF),
+                                  fontSize: 9,
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.none,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      ],
+      ),
     );
   }
 
