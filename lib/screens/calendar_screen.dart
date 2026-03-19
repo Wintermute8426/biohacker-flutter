@@ -1142,10 +1142,16 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                     opacity: 0.25,
                   ),
                 ),
+                // Scanlines overlay
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: ScanlinesPainter(),
+                  ),
+                ),
                 // Main content
                 Column(
                   children: [
-                    // CRT-styled header with cyan theme
+                    // CRT-styled header with cyberpunk effects
                     Container(
                       padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
                       decoration: BoxDecoration(
@@ -1154,14 +1160,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                         ),
                         border: Border(
                           bottom: BorderSide(
-                            color: const Color(0xFF00FFFF).withOpacity(0.6),
+                            color: const Color(0xFF00FFFF).withOpacity(0.8),
                             width: 2,
+                          ),
+                          top: BorderSide(
+                            color: const Color(0xFF00FFFF).withOpacity(0.4),
+                            width: 1,
                           ),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF00FFFF).withOpacity(0.1),
-                            blurRadius: 8,
+                            color: const Color(0xFF00FFFF).withOpacity(0.2),
+                            blurRadius: 12,
+                            spreadRadius: 2,
                           ),
                         ],
                       ),
@@ -1248,6 +1259,53 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                       child: ListView(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         children: dayDoses.map((dose) => _buildDoseCard(context, dose)).toList(),
+                      ),
+                    ),
+                    // Dystopian status bar at bottom
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(
+                            color: const Color(0xFF00FFFF).withOpacity(0.4),
+                            width: 1,
+                          ),
+                        ),
+                        color: Colors.black.withOpacity(0.3),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '◆ SOVEREIGN DOSING PROTOCOL ◆',
+                            style: TextStyle(
+                              color: const Color(0xFF00FFFF).withOpacity(0.7),
+                              fontSize: 9,
+                              fontFamily: 'monospace',
+                              letterSpacing: 1.2,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color(0xFF00FFFF).withOpacity(0.6),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              'LIBERATED: 2026',
+                              style: TextStyle(
+                                color: const Color(0xFF00FFFF).withOpacity(0.8),
+                                fontSize: 8,
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
