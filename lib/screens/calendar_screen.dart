@@ -443,24 +443,26 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     final logged = doses.where((d) => d.status == 'COMPLETED').length;
     final upcoming = doses.where((d) => d.date.isAfter(DateTime.now())).length;
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: const Color(0xFF00FFFF).withOpacity(0.6),
-          width: 2,
-        ),
-        borderRadius: BorderRadius.zero,
-        color: AppColors.background,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00FFFF).withOpacity(0.15),
-            blurRadius: 8,
-            spreadRadius: 1,
+    return Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.fromLTRB(14, 20, 14, 20),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: const Color(0xFF00FFFF).withOpacity(0.6),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.zero,
+            color: AppColors.background,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF00FFFF).withOpacity(0.15),
+                blurRadius: 8,
+                spreadRadius: 1,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
+          child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           // Compliance rate
@@ -551,6 +553,50 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           ),
         ],
       ),
+        ),
+        // Top enhancement badge
+        Positioned(
+          top: -12,
+          left: 16,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              border: Border.all(color: const Color(0xFF00FFFF), width: 1),
+            ),
+            child: Text(
+              'SYSTEM STATUS',
+              style: WintermmuteStyles.smallStyle.copyWith(
+                color: const Color(0xFF00FFFF),
+                fontSize: 7,
+                letterSpacing: 1.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        // Bottom enhancement badge
+        Positioned(
+          bottom: -12,
+          right: 16,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              border: Border.all(color: const Color(0xFF00FFFF), width: 1),
+            ),
+            child: Text(
+              'PROTOCOL ACTIVE',
+              style: WintermmuteStyles.smallStyle.copyWith(
+                color: const Color(0xFF00FFFF),
+                fontSize: 7,
+                letterSpacing: 1.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1251,12 +1297,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         color: AppColors.background,
         borderRadius: BorderRadius.zero,
         border: Border.all(
-          color: peptideColor.withOpacity(0.8),
+          color: const Color(0xFF00FFFF).withOpacity(0.8),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: peptideColor.withOpacity(0.25),
+            color: const Color(0xFF00FFFF).withOpacity(0.25),
             blurRadius: 12,
             spreadRadius: 1,
           ),
@@ -1288,7 +1334,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                         Text(
                           dose.peptideName.toUpperCase(),
                           style: TextStyle(
-                            color: peptideColor.withOpacity(0.9),
+                            color: const Color(0xFF00FFFF),
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'monospace',
