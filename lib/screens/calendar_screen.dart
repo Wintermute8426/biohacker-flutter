@@ -302,35 +302,41 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           });
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // View header with navigation
-                _showMonthView
-                    ? _buildMonthHeader()
-                    : _buildWeekHeader(),
-                const SizedBox(height: 20),
-
-                // Compliance tracker
+                // Compliance tracker - full width at top
                 _buildComplianceTracker(displayDoses),
-                const SizedBox(height: 16),
+                
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // View header with navigation
+                      _showMonthView
+                          ? _buildMonthHeader()
+                          : _buildWeekHeader(),
+                      const SizedBox(height: 20),
 
-                // Cycle filter
-                _buildCycleFilter(cyclesInDoses),
-                const SizedBox(height: 16),
+                      // Cycle filter
+                      _buildCycleFilter(cyclesInDoses),
+                      const SizedBox(height: 16),
 
-                // Calendar grid
-                Builder(builder: (context) {
-                  return _showMonthView
-                      ? _buildMonthGrid(displayDoses, labDates)
-                      : _buildWeekGrid(displayDoses, labDates);
-                }),
-                const SizedBox(height: 16),
+                      // Calendar grid
+                      Builder(builder: (context) {
+                        return _showMonthView
+                            ? _buildMonthGrid(displayDoses, labDates)
+                            : _buildWeekGrid(displayDoses, labDates);
+                      }),
+                      const SizedBox(height: 16),
 
-                // Status bar - only show for week view
-                if (!_showMonthView)
-                  _buildStatusBar(displayDoses),
+                      // Status bar - only show for week view
+                      if (!_showMonthView)
+                        _buildStatusBar(displayDoses),
+                    ],
+                  ),
+                ),
               ],
             ),
           );
