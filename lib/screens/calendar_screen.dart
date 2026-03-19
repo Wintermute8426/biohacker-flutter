@@ -554,43 +554,65 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         ],
       ),
         ),
-        // Top enhancement badge
+        // Top enhancement badge - SYSTEM STATUS
         Positioned(
-          top: -12,
-          left: 16,
+          top: 6,
+          left: 14,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.background,
-              border: Border.all(color: const Color(0xFF00FFFF), width: 1),
+              border: Border.all(color: const Color(0xFF00FFFF), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF00FFFF).withOpacity(0.3),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+                BoxShadow(
+                  color: const Color(0xFFFF00FF).withOpacity(0.15),
+                  blurRadius: 3,
+                ),
+              ],
             ),
             child: Text(
-              'SYSTEM STATUS',
+              '◆ SYSTEM STATUS ◆',
               style: WintermmuteStyles.smallStyle.copyWith(
                 color: const Color(0xFF00FFFF),
-                fontSize: 7,
-                letterSpacing: 1.0,
+                fontSize: 8,
+                letterSpacing: 1.5,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ),
-        // Bottom enhancement badge
+        // Bottom enhancement badge - PROTOCOL ACTIVE
         Positioned(
-          bottom: -12,
-          right: 16,
+          bottom: 6,
+          right: 14,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.background,
-              border: Border.all(color: const Color(0xFF00FFFF), width: 1),
+              border: Border.all(color: const Color(0xFF00FFFF), width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF00FFFF).withOpacity(0.3),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+                BoxShadow(
+                  color: const Color(0xFF39FF14).withOpacity(0.15),
+                  blurRadius: 3,
+                ),
+              ],
             ),
             child: Text(
-              'PROTOCOL ACTIVE',
+              '◆ PROTOCOL ACTIVE ◆',
               style: WintermmuteStyles.smallStyle.copyWith(
                 color: const Color(0xFF00FFFF),
-                fontSize: 7,
-                letterSpacing: 1.0,
+                fontSize: 8,
+                letterSpacing: 1.5,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1535,7 +1557,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                       child: _buildCRTButton(
                         label: 'LOG EFFECTS',
                         icon: Icons.note_add_outlined,
-                        color: peptideColor,
+                        color: const Color(0xFF00FFFF),
                         onPressed: () => _showSideEffectsModal(context, dose),
                       ),
                     ),
@@ -1562,13 +1584,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: Colors.black,
-          border: Border.all(color: color.withOpacity(0.6), width: 2),
-          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: color.withOpacity(0.8), width: 2),
+          borderRadius: BorderRadius.zero,
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.2),
-              blurRadius: 10,
-              spreadRadius: 1,
+              color: color.withOpacity(0.3),
+              blurRadius: 12,
+              spreadRadius: 2,
+            ),
+            BoxShadow(
+              color: color.withOpacity(0.1),
+              blurRadius: 6,
+              spreadRadius: -1,
             ),
           ],
         ),
