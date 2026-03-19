@@ -1339,20 +1339,25 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     final isMissed = dose.status == 'MISSED';
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.zero,
         border: Border.all(
-          color: peptideColor.withOpacity(0.8),
+          color: peptideColor.withOpacity(0.85),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: peptideColor.withOpacity(0.25),
-            blurRadius: 12,
-            spreadRadius: 1,
+            color: peptideColor.withOpacity(0.3),
+            blurRadius: 14,
+            spreadRadius: 2,
+          ),
+          BoxShadow(
+            color: peptideColor.withOpacity(0.15),
+            blurRadius: 24,
+            spreadRadius: 4,
           ),
         ],
       ),
@@ -1413,7 +1418,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              dose.route.toUpperCase(),
+                              _getRouteName(dose.route),
                               style: TextStyle(
                                 color: peptideColor.withOpacity(0.7),
                                 fontSize: 11,
@@ -1748,6 +1753,25 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         );
       },
     );
+  }
+
+  // Helper to convert route abbreviations to full names
+  String _getRouteName(String route) {
+    switch (route.toLowerCase()) {
+      case 'sc':
+        return 'SUBCUTANEOUS';
+      case 'im':
+        return 'INTRAMUSCULAR';
+      case 'iv':
+        return 'INTRAVENOUS';
+      case 'intradermal':
+      case 'id':
+        return 'INTRADERMAL';
+      case 'oral':
+        return 'ORAL';
+      default:
+        return route.toUpperCase();
+    }
   }
 }
 
