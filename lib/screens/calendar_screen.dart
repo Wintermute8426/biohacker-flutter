@@ -476,7 +476,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   fontSize: 8,
                   letterSpacing: 0.5,
                 ),
-              ),
+                ),
               ],
               ),
               // Vertical divider
@@ -504,7 +504,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
                 ),
-              ),
+                ),
               ],
               ),
               // Vertical divider
@@ -532,6 +532,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
                 ),
+                ),
+              ],
               ),
             ],
           ),
