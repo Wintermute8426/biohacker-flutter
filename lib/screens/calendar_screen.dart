@@ -488,11 +488,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           const SizedBox(height: 8),
           // Main stats row
           Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          // Compliance rate
-          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
+              // Compliance rate
+              Column(
+                children: [
               Text(
                 '$pastComplianceRate%',
                 style: WintermmuteStyles.statValueAccentStyle.copyWith(
@@ -517,18 +517,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   fontSize: 8,
                   letterSpacing: 0.5,
                 ),
+                ),
+              ],
               ),
-            ],
-          ),
-          // Vertical divider
-          Container(
-            width: 1,
-            height: 50,
-            color: const Color(0xFF00FFFF).withOpacity(0.3),
-          ),
-          // Upcoming doses
-          Column(
-            children: [
+              // Vertical divider
+              Container(
+                width: 1,
+                height: 50,
+                color: const Color(0xFF00FFFF).withOpacity(0.3),
+              ),
+              // Upcoming doses
+              Column(
+                children: [
               Text(
                 '$upcoming',
                 style: WintermmuteStyles.statValueStyle.copyWith(
@@ -545,18 +545,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
                 ),
+                ),
+              ],
               ),
-            ],
-          ),
-          // Vertical divider
-          Container(
-            width: 1,
-            height: 50,
-            color: const Color(0xFF00FFFF).withOpacity(0.3),
-          ),
-          // Missed doses
-          Column(
-            children: [
+              // Vertical divider
+              Container(
+                width: 1,
+                height: 50,
+                color: const Color(0xFF00FFFF).withOpacity(0.3),
+              ),
+              // Missed doses
+              Column(
+                children: [
               Text(
                 '$pastMissed',
                 style: WintermmuteStyles.statValueStyle.copyWith(
@@ -573,6 +573,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
                 ),
+                ),
+              ],
               ),
             ],
           ),
