@@ -430,27 +430,42 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     );
   }
 
-  // Compliance tracker widget - uses CRTCard like dashboard
+  // Compliance tracker widget - dystopian cyberpunk style
   Widget _buildComplianceTracker(List<DoseInstance> doses) {
+    // NEW MODEL: Assume all past scheduled doses are taken unless explicitly marked as MISSED
     final pastDoses = doses.where((d) => d.date.isBefore(DateTime.now())).toList();
     final pastMissed = pastDoses.where((d) => d.status == 'MISSED').length;
     final pastTotal = pastDoses.length;
     final pastTaken = pastTotal - pastMissed;
     final pastComplianceRate = pastTotal > 0 ? (pastTaken / pastTotal * 100).toStringAsFixed(1) : '100.0';
+
+    // For display: count logged doses (COMPLETED status)
+    final logged = doses.where((d) => d.status == 'COMPLETED').length;
     final upcoming = doses.where((d) => d.date.isAfter(DateTime.now())).length;
 
-    return CRTCard(
-      title: 'PROTOCOL STATUS',
-      subtitle: 'COMPLIANCE TRACKER',
-      color: CRTColor.cyan,
-      height: 180,
-      rogueId: 'DOSE-SYNC',
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: const Color(0xFF00FFFF).withOpacity(0.6),
+          width: 2,
+        ),
+        borderRadius: BorderRadius.zero,
+        color: AppColors.background,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00FFFF).withOpacity(0.15),
+            blurRadius: 8,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
       child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          // Compliance rate
+          Column(
             children: [
-              // Compliance rate
-              Column(
-                children: [
               Text(
                 '$pastComplianceRate%',
                 style: WintermmuteStyles.statValueAccentStyle.copyWith(
@@ -475,18 +490,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   fontSize: 8,
                   letterSpacing: 0.5,
                 ),
-                ),
-              ],
               ),
-              // Vertical divider
-              Container(
-                width: 1,
-                height: 50,
-                color: const Color(0xFF00FFFF).withOpacity(0.3),
-              ),
-              // Upcoming doses
-              Column(
-                children: [
+            ],
+          ),
+          // Vertical divider
+          Container(
+            width: 1,
+            height: 50,
+            color: const Color(0xFF00FFFF).withOpacity(0.3),
+          ),
+          // Upcoming doses
+          Column(
+            children: [
               Text(
                 '$upcoming',
                 style: WintermmuteStyles.statValueStyle.copyWith(
@@ -503,18 +518,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
                 ),
-                ),
-              ],
               ),
-              // Vertical divider
-              Container(
-                width: 1,
-                height: 50,
-                color: const Color(0xFF00FFFF).withOpacity(0.3),
-              ),
-              // Missed doses
-              Column(
-                children: [
+            ],
+          ),
+          // Vertical divider
+          Container(
+            width: 1,
+            height: 50,
+            color: const Color(0xFF00FFFF).withOpacity(0.3),
+          ),
+          // Missed doses
+          Column(
+            children: [
               Text(
                 '$pastMissed',
                 style: WintermmuteStyles.statValueStyle.copyWith(
@@ -531,8 +546,6 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
                 ),
-                ),
-              ],
               ),
             ],
           ),
@@ -758,22 +771,28 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               onTap: dayDoses.isNotEmpty
                   ? () => _showDayDetail(context, date, dayDoses)
                   : null,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  border: Border.all(
-                    color: isToday ? const Color(0xFF00FFFF) : AppColors.textMid.withOpacity(0.4),
-                    width: isToday ? 2 : 1,
-                  ),
-                  borderRadius: BorderRadius.zero,
-                  boxShadow: isToday ? [
-                    BoxShadow(
-                      color: const Color(0xFF00FFFF).withOpacity(0.2),
-                      blurRadius: 4,
-                      spreadRadius: 1,
+              child: Material(
+                color: cellColor,
+                child: InkWell(
+                  onTap: dayDoses.isNotEmpty
+                      ? () => _showDayDetail(context, date, dayDoses)
+                      : null,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      border: Border.all(
+                        color: isToday ? const Color(0xFF00FFFF) : AppColors.textMid.withOpacity(0.4),
+                        width: isToday ? 2 : 1,
+                      ),
+                      borderRadius: BorderRadius.zero,
+                      boxShadow: isToday ? [
+                        BoxShadow(
+                          color: const Color(0xFF00FFFF).withOpacity(0.2),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ] : null,
                     ),
-                  ] : null,
-                ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -813,7 +832,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           const Icon(Icons.science, size: 10, color: Color(0xFFFF00FF)),
                       ],
                     ),
-              );
+                  ),
+                ),
+              ),
+            );
           },
         ),
       ],
@@ -1229,12 +1251,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         color: AppColors.background,
         borderRadius: BorderRadius.zero,
         border: Border.all(
-          color: const Color(0xFF00FFFF).withOpacity(0.8),
+          color: peptideColor.withOpacity(0.8),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF00FFFF).withOpacity(0.25),
+            color: peptideColor.withOpacity(0.25),
             blurRadius: 12,
             spreadRadius: 1,
           ),
@@ -1266,7 +1288,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                         Text(
                           dose.peptideName.toUpperCase(),
                           style: TextStyle(
-                            color: const Color(0xFF00FFFF),
+                            color: peptideColor.withOpacity(0.9),
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'monospace',
@@ -1467,7 +1489,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                       child: _buildCRTButton(
                         label: 'LOG EFFECTS',
                         icon: Icons.note_add_outlined,
-                        color: const Color(0xFF00FFFF),
+                        color: peptideColor,
                         onPressed: () => _showSideEffectsModal(context, dose),
                       ),
                     ),
@@ -1494,18 +1516,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: Colors.black,
-          border: Border.all(color: color.withOpacity(0.8), width: 2),
-          borderRadius: BorderRadius.zero,
+          border: Border.all(color: color.withOpacity(0.6), width: 2),
+          borderRadius: BorderRadius.circular(6),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.3),
-              blurRadius: 12,
-              spreadRadius: 2,
-            ),
-            BoxShadow(
-              color: color.withOpacity(0.1),
-              blurRadius: 6,
-              spreadRadius: -1,
+              color: color.withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: 1,
             ),
           ],
         ),
