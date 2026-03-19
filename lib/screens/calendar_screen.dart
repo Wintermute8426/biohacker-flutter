@@ -11,8 +11,8 @@ import '../widgets/side_effects_modal.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/city_background.dart';
 import '../widgets/app_header.dart';
-import '../widgets/full_screen_modal.dart';
 import '../widgets/dose_display.dart';
+import '../widgets/crt_card.dart';
 import '../widgets/common/scanlines_painter.dart' as common;
 
 class CalendarScreen extends ConsumerStatefulWidget {
@@ -430,7 +430,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     );
   }
 
-  // Compliance tracker widget - dystopian cyberpunk style
+  // Compliance tracker widget - CRT card style matching dashboard
   Widget _buildComplianceTracker(List<DoseInstance> doses) {
     // NEW MODEL: Assume all past scheduled doses are taken unless explicitly marked as MISSED
     final pastDoses = doses.where((d) => d.date.isBefore(DateTime.now())).toList();
@@ -443,52 +443,46 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     final logged = doses.where((d) => d.status == 'COMPLETED').length;
     final upcoming = doses.where((d) => d.date.isAfter(DateTime.now())).length;
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: const Color(0xFF00FFFF).withOpacity(0.6),
-          width: 2,
-        ),
-        borderRadius: BorderRadius.zero,
-        color: AppColors.background,
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00FFFF).withOpacity(0.15),
-            blurRadius: 8,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
+    return CRTCard(
+      title: 'PROTOCOL STATUS',
+      subtitle: 'COMPLIANCE TRACKER',
+      color: CRTColor.cyan,
+      height: 180,
+      rogueId: 'DOSE-SYNC',
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           // Compliance rate
           Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 '$pastComplianceRate%',
-                style: WintermmuteStyles.statValueAccentStyle.copyWith(
+                style: TextStyle(
                   fontSize: 22,
                   color: const Color(0xFF00FFFF),
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
                 ),
               ),
+              const SizedBox(height: 4),
               Text(
                 'COMPLIANCE',
-                style: WintermmuteStyles.smallStyle.copyWith(
+                style: TextStyle(
                   color: const Color(0xFF00FFFF).withOpacity(0.7),
                   fontSize: 9,
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
                 ),
               ),
               Text(
                 '($pastTaken/$pastTotal)',
-                style: WintermmuteStyles.smallStyle.copyWith(
+                style: TextStyle(
                   color: AppColors.textDim,
                   fontSize: 8,
                   letterSpacing: 0.5,
+                  fontFamily: 'monospace',
                 ),
               ),
             ],
@@ -501,22 +495,26 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           ),
           // Upcoming doses
           Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 '$upcoming',
-                style: WintermmuteStyles.statValueStyle.copyWith(
+                style: TextStyle(
                   fontSize: 22,
                   color: const Color(0xFF00FFFF),
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
                 ),
               ),
+              const SizedBox(height: 4),
               Text(
                 'UPCOMING',
-                style: WintermmuteStyles.smallStyle.copyWith(
+                style: TextStyle(
                   color: const Color(0xFF00FFFF).withOpacity(0.7),
                   fontSize: 9,
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
                 ),
               ),
             ],
@@ -529,22 +527,26 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           ),
           // Missed doses
           Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 '$pastMissed',
-                style: WintermmuteStyles.statValueStyle.copyWith(
+                style: TextStyle(
                   fontSize: 22,
                   color: const Color(0xFFFF0040),
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
                 ),
               ),
+              const SizedBox(height: 4),
               Text(
                 'MISSED',
-                style: WintermmuteStyles.smallStyle.copyWith(
+                style: TextStyle(
                   color: const Color(0xFFFF0040).withOpacity(0.7),
                   fontSize: 9,
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
                 ),
               ),
             ],
@@ -1103,122 +1105,158 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     );
   }
 
-  // Day detail modal with CRT resistance aesthetic
+  // Day detail modal with full-screen CRT aesthetic matching cycle setup form
   void _showDayDetail(
     BuildContext context,
     DateTime date,
     List<DoseInstance> dayDoses,
   ) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.85,
-        decoration: const BoxDecoration(
-          color: Color(0xFF0A0A0A),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
-        ),
-        child: Stack(
-          children: [
-            // Cyberpunk background effects
-            Positioned.fill(
-              child: CityBackground(enabled: true, opacity: 0.15),
-            ),
-            Positioned.fill(
-              child: CyberpunkRain(enabled: true, opacity: 0.1),
-            ),
-            // Main content
-            Column(
-          children: [
-            // CRT-styled header with cyan theme
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                border: Border(
-                  bottom: BorderSide(
-                    color: const Color(0xFF00FFFF).withOpacity(0.6),
-                    width: 2,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => Scaffold(
+          backgroundColor: const Color(0xFF0A0A0A),
+          body: SafeArea(
+            child: Stack(
+              children: [
+                // City background layer
+                const Positioned.fill(
+                  child: CityBackground(
+                    enabled: true,
+                    animateLights: true,
+                    opacity: 0.3,
                   ),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF00FFFF).withOpacity(0.1),
-                    blurRadius: 8,
+                // Rain effect layer
+                const Positioned.fill(
+                  child: CyberpunkRain(
+                    enabled: true,
+                    particleCount: 40,
+                    opacity: 0.25,
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Top row: DOSE DETAIL badge (left) + close button (right)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.calendar_today, color: const Color(0xFF00FFFF).withOpacity(0.8), size: 14),
-                          const SizedBox(width: 6),
-                          Text(
-                            'DAILY DOSES',
-                            style: TextStyle(
-                              color: const Color(0xFF00FFFF).withOpacity(0.8),
-                              fontSize: 9,
-                              fontFamily: 'monospace',
-                              letterSpacing: 1.2,
-                              fontWeight: FontWeight.bold,
-                            ),
+                ),
+                // Main content
+                Column(
+                  children: [
+                    // CRT-styled header with cyan theme
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.black, const Color(0xFF001a1a), Colors.black],
+                        ),
+                        border: Border(
+                          bottom: BorderSide(
+                            color: const Color(0xFF00FFFF).withOpacity(0.6),
+                            width: 2,
+                          ),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF00FFFF).withOpacity(0.1),
+                            blurRadius: 8,
                           ),
                         ],
                       ),
-                      IconButton(
-                        icon: Icon(Icons.close, color: const Color(0xFF00FFFF).withOpacity(0.9)),
-                        onPressed: () => Navigator.pop(context),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.calendar_today, color: const Color(0xFF00FFFF).withOpacity(0.7), size: 14),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'DOSE SCHEDULE',
+                                    style: TextStyle(
+                                      color: const Color(0xFF00FFFF).withOpacity(0.7),
+                                      fontSize: 9,
+                                      fontFamily: 'monospace',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    DateFormat('EEEE').format(date).toUpperCase(),
+                                    style: TextStyle(
+                                      color: const Color(0xFF00FFFF).withOpacity(0.7),
+                                      fontSize: 10,
+                                      fontFamily: 'monospace',
+                                      letterSpacing: 0.8,
+                                    ),
+                                  ),
+                                  Text(
+                                    DateFormat('MMM dd, yyyy').format(date).toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Color(0xFF00FFFF),
+                                      fontSize: 18,
+                                      fontFamily: 'monospace',
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          // Close button and ROGUE badge
+                          Column(
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.close, color: const Color(0xFF00FFFF).withOpacity(0.9)),
+                                onPressed: () => Navigator.pop(context),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: const Color(0xFF00FFFF).withOpacity(0.8), width: 1),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                                child: Text(
+                                  'DOSE-${dayDoses.length}',
+                                  style: TextStyle(
+                                    color: const Color(0xFF00FFFF).withOpacity(0.9),
+                                    fontSize: 8,
+                                    fontFamily: 'monospace',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
+                    // Dose list
+                    Expanded(
+                      child: ListView(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        children: dayDoses.map((dose) => _buildDoseCard(context, dose)).toList(),
+                      ),
+                    ),
+                  ],
+                ),
+                // Scanlines overlay
+                const Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: _ScanlinesPainter(),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  // Date below
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        DateFormat('EEEE').format(date).toUpperCase(),
-                        style: TextStyle(
-                          color: const Color(0xFF00FFFF).withOpacity(0.7),
-                          fontSize: 10,
-                          fontFamily: 'monospace',
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('MMM dd, yyyy').format(date).toUpperCase(),
-                        style: const TextStyle(
-                          color: Color(0xFF00FFFF),
-                          fontSize: 16,
-                          fontFamily: 'monospace',
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            // Dose list
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                children: dayDoses.map((dose) => _buildDoseCard(context, dose)).toList(),
-              ),
-            ),
-            ],
           ),
-          ],
         ),
       ),
     );
