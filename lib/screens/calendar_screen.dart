@@ -14,6 +14,7 @@ import '../widgets/app_header.dart';
 import '../widgets/full_screen_modal.dart';
 import '../widgets/dose_display.dart';
 import '../widgets/common/scanlines_painter.dart' as common;
+import '../widgets/crt_card.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
