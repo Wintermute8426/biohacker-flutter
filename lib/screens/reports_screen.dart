@@ -32,6 +32,22 @@ class _ReportsScreenState extends State<ReportsScreen> {
   // Tab 2: Trends state
   String _selectedCategory = 'HORMONES';
   Set<String> _selectedBiomarkers = {'testosterone', 'dht'};
+  
+  final Map<String, Color> _biomarkerColors = {
+    'testosterone': const Color(0xFFFF9800), // Amber
+    'dht': const Color(0xFF00FFFF),          // Cyan
+    'estradiol': const Color(0xFFFF00FF),    // Magenta
+    'vitamin_d': const Color(0xFFFFD740),    // Yellow
+    'b12': const Color(0xFF39FF14),          // Green
+  };
+  
+  final Map<String, IconData> _biomarkerIcons = {
+    'testosterone': Icons.trending_up,
+    'dht': Icons.science,
+    'estradiol': Icons.favorite,
+    'vitamin_d': Icons.wb_sunny,
+    'b12': Icons.flash_on,
+  };
 
   @override
   void initState() {
@@ -595,6 +611,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
         runSpacing: 8,
         children: biomarkers.map((marker) {
           final isSelected = _selectedBiomarkers.contains(marker);
+          final color = _biomarkerColors[marker] ?? const Color(0xFF00FFFF);
+          final icon = _biomarkerIcons[marker] ?? Icons.analytics;
+          
           return GestureDetector(
             onTap: () {
               setState(() {
@@ -605,40 +624,36 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 }
               });
             },
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFF00FFFF)
-                        : Colors.transparent,
-                    border: Border.all(
-                      color: const Color(0xFF00FFFF),
-                      width: 1,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected ? color.withOpacity(0.2) : Colors.transparent,
+                border: Border.all(
+                  color: color.withOpacity(isSelected ? 0.8 : 0.4),
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: 16,
+                    color: color.withOpacity(isSelected ? 1.0 : 0.6),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    marker.toUpperCase(),
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: color.withOpacity(isSelected ? 1.0 : 0.7),
                     ),
-                    borderRadius: BorderRadius.circular(2),
                   ),
-                  child: isSelected
-                      ? const Icon(
-                          Icons.check,
-                          size: 12,
-                          color: Color(0xFF0A0A0A),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  marker.toUpperCase(),
-                  style: const TextStyle(
-                    fontFamily: 'Courier New',
-                    fontSize: 11,
-                    color: Color(0xFFFFFFFF),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }).toList(),
@@ -753,26 +768,40 @@ class _ReportsScreenState extends State<ReportsScreen> {
             maxX: 10,
             minY: 0,
             maxY: 100,
-            lineBarsData: [
-              LineChartBarData(
-                spots: const [
-                  FlSpot(0, 50),
-                  FlSpot(2, 60),
-                  FlSpot(4, 55),
-                  FlSpot(6, 70),
-                  FlSpot(8, 65),
-                ],
+            lineBarsData: _selectedBiomarkers.map((marker) {
+              final color = _biomarkerColors[marker] ?? const Color(0xFF00FFFF);
+              // TODO: Generate real data from lab results
+              final spots = [
+                FlSpot(0, 50),
+                FlSpot(2, 60),
+                FlSpot(4, 55),
+                FlSpot(6, 70),
+                FlSpot(8, 65),
+              ];
+              
+              return LineChartBarData(
+                spots: spots,
                 isCurved: true,
-                color: const Color(0xFF00FFFF),
-                barWidth: 2,
+                color: color,
+                barWidth: 3,
                 isStrokeCapRound: true,
-                dotData: const FlDotData(show: true),
+                dotData: FlDotData(
+                  show: true,
+                  getDotPainter: (spot, percent, barData, index) {
+                    return FlDotCirclePainter(
+                      radius: 4,
+                      color: color,
+                      strokeWidth: 2,
+                      strokeColor: Colors.black,
+                    );
+                  },
+                ),
                 belowBarData: BarAreaData(
                   show: true,
-                  color: const Color(0xFF00FFFF).withOpacity(0.1),
+                  color: color.withOpacity(0.1),
                 ),
-              ),
-            ],
+              );
+            }).toList(),
           ),
         ),
       ),
