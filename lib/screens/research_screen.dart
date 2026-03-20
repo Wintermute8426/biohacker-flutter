@@ -73,7 +73,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
     FullScreenModal.show(
       context: context,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(0, 16, 0, 32),
+        padding: const EdgeInsets.fromLTRB(8, 24, 8, 24),
         children: [
           // Header section with badges (cycle card style)
           Container(
@@ -165,7 +165,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
 
           // Description section
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Container(
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(16),
@@ -206,7 +206,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
           // Side effects inline (if any)
           if (peptide.sideEffects.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(12),
@@ -375,7 +375,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
@@ -580,7 +580,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
   // Full-width section card (for Dosing, Safety, etc.)
   Widget _buildFullWidthSection(String title, IconData icon, List<String> items) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
@@ -660,7 +660,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
   // Effects section with bordered chips
   Widget _buildEffectsSection(String title, List<String> items, Color accentColor) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
@@ -753,7 +753,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
   // Study card with full-width styling
   Widget _buildStudyCard(StudyLink study) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         child: GestureDetector(
@@ -1200,7 +1200,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                 const SizedBox(height: 12),
                 // Tabs
                 Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1226,7 +1226,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                 if (_tabIndex == 0) ...[
                   // Search bar
                   Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
                 controller: _searchController,
                 style: const TextStyle(color: Colors.white),
@@ -1246,7 +1246,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
 
                   // Category filter
                   Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -1272,7 +1272,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       itemCount: _displayedPeptides.length,
                       itemBuilder: (context, index) {
                         final peptide = _displayedPeptides[index];
@@ -1453,7 +1453,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
 
   Widget _buildIntelligenceSection(PeptideInfo peptide) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),

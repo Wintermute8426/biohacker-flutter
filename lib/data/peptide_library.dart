@@ -204,7 +204,13 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     safetyNotes: "Consult literature for current safety guidelines.",
     halfLife: 0,
     pepScore: PepScore(publication: 85, evidence: 90, methodology: 85, relevance: 80),
-    studyLinks: [StudyLink(title: "BPC-157: Comprehensive Review", url: "https://pubmed.ncbi.nlm.nih.gov", source: "PubMed", year: 2024), StudyLink(title: "Meta-Analysis of Clinical Trials", url: "https://pubmed.ncbi.nlm.nih.gov", source: "Cochrane", year: 2023), StudyLink(title: "Mechanism and Safety Profile", url: "https://pubmed.ncbi.nlm.nih.gov", source: "Journal of Peptides", year: 2022)],
+    studyLinks: [
+      StudyLink(title: "BPC 157 Enhances Growth Hormone Receptor Expression in Tendon Fibroblasts", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6271067/", source: "PMC", year: 2018),
+      StudyLink(title: "Emerging Use of BPC-157 in Orthopaedic Sports Medicine: Systematic Review", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC12313605/", source: "PMC", year: 2024),
+      StudyLink(title: "Multifunctionality and Medical Application of BPC 157 Peptide", url: "https://www.mdpi.com/1424-8247/18/2/185", source: "MDPI Pharmaceuticals", year: 2025),
+      StudyLink(title: "Regeneration or Risk? Narrative Review of BPC-157 for Musculoskeletal Healing", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC12446177/", source: "PMC", year: 2024),
+      StudyLink(title: "Safety of Intravenous Infusion of BPC157 in Humans: Pilot Study", url: "https://pubmed.ncbi.nlm.nih.gov/40131143/", source: "PubMed", year: 2025),
+    ],
   ),
   'Cagrilintide': PeptideInfo(
     name: 'Cagrilintide',
@@ -264,7 +270,11 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     safetyNotes: "Consult literature for current safety guidelines.",
     halfLife: 0,
     pepScore: PepScore(publication: 80, evidence: 85, methodology: 80, relevance: 75),
-    studyLinks: [StudyLink(title: "CJC-1295 (no DAC) / Ipamorelin Protocol Clinical Trial", url: "https://pubmed.ncbi.nlm.nih.gov", source: "PubMed", year: 2023), StudyLink(title: "Safety and Efficacy Data", url: "https://pubmed.ncbi.nlm.nih.gov", source: "Research Journal", year: 2022)],
+    studyLinks: [
+      StudyLink(title: "Prolonged Stimulation of GH by CJC-1295 in Healthy Adults", url: "https://pubmed.ncbi.nlm.nih.gov/16352683/", source: "PubMed", year: 2005),
+      StudyLink(title: "CJC-1295 Ipamorelin: Research, Safety, and Results", url: "https://www.bodyspec.com/blog/post/cjc1295_ipamorelin_research_safety_and_results", source: "BodySpec", year: 2026),
+      StudyLink(title: "Ipamorelin Growth Hormone Secretion Trial (40 volunteers)", url: "https://www.innerbody.com/cjc-1295-and-ipamorelin", source: "Clinical Trial Review", year: 1999),
+    ],
   ),
   'CJC-1295 (without DAC)': PeptideInfo(
     name: 'CJC-1295 (without DAC)',
@@ -999,7 +1009,11 @@ const Map<String, PeptideInfo> PEPTIDE_LIBRARY = {
     safetyNotes: "Consult literature for current safety guidelines.",
     halfLife: 0,
     pepScore: PepScore(publication: 80, evidence: 85, methodology: 80, relevance: 75),
-    studyLinks: [StudyLink(title: "TB-500 Clinical Trial", url: "https://pubmed.ncbi.nlm.nih.gov", source: "PubMed", year: 2023), StudyLink(title: "Safety and Efficacy Data", url: "https://pubmed.ncbi.nlm.nih.gov", source: "Research Journal", year: 2022)],
+    studyLinks: [
+      StudyLink(title: "Thymosin Beta-4: Multi-functional Regenerative Peptide Clinical Applications", url: "https://pubmed.ncbi.nlm.nih.gov/22074294/", source: "PubMed", year: 2011),
+      StudyLink(title: "Thymosin Beta-4 in Anti-Aging Regenerative Therapies", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8228050/", source: "PMC", year: 2021),
+      StudyLink(title: "Study of Thymosin Beta 4 in Venous Stasis Ulcers", url: "https://clinicaltrials.gov/study/NCT00832091", source: "ClinicalTrials.gov", year: 2009),
+    ],
   ),
   'Tesamorelin': PeptideInfo(
     name: 'Tesamorelin',
