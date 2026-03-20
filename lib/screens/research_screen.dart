@@ -57,17 +57,27 @@ class _ResearchScreenState extends State<ResearchScreen> {
     });
   }
 
+  String _getFullRouteName(String route) {
+    final routeMap = {
+      'SC': 'Subcutaneous',
+      'IM': 'Intramuscular',
+      'Oral': 'Oral',
+      'IV': 'Intravenous',
+    };
+    return routeMap[route] ?? route;
+  }
+
   void _showPeptideDetails(PeptideInfo peptide) {
     final peptideId = 'PEPT-${peptide.name.hashCode.abs().toString().substring(0, 3)}';
     
     FullScreenModal.show(
       context: context,
       child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 32),
+        padding: const EdgeInsets.fromLTRB(0, 16, 0, 32),
         children: [
           // Header section with badges (cycle card style)
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
             decoration: BoxDecoration(
               color: Colors.black,
             ),
@@ -249,7 +259,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
             [
               '${peptide.commonDoseRange} ${peptide.unit}',
               'Timing: ${peptide.timing}',
-              'Route: ${peptide.route}',
+              'Route: ${_getFullRouteName(peptide.route)}',
             ],
           ),
 
@@ -264,58 +274,80 @@ class _ResearchScreenState extends State<ResearchScreen> {
           if (peptide.studyLinks.isNotEmpty) 
             _buildIntelligenceSection(peptide),
 
-          // Footer with barcode/QR styling
+          // Footer with dystopian data strip
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
-            child: Row(
-              children: [
-                // Left barcode
-                Expanded(
-                  child: Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: const Color(0xFFFF9800).withOpacity(0.35),
-                        width: 1,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface.withOpacity(0.15),
+                border: Border.all(
+                  color: const Color(0xFFFF9800).withOpacity(0.25),
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(2),
+              ),
+              child: Column(
+                children: [
+                  // Top hex strip
+                  Text(
+                    '0x${peptideId.hashCode.abs().toRadixString(16).toUpperCase().padLeft(8, '0')} • DATA CLASSIFIED • CORPO-ACCESS ONLY',
+                    style: TextStyle(
+                      color: const Color(0xFFFF9800).withOpacity(0.5),
+                      fontSize: 8,
+                      fontFamily: 'monospace',
+                      decoration: TextDecoration.none,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  // Terminal-style data row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'REF: ${peptideId}',
+                        style: TextStyle(
+                          color: const Color(0xFFFF9800).withOpacity(0.6),
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                          decoration: TextDecoration.none,
+                        ),
                       ),
-                    ),
-                    child: CustomPaint(
-                      painter: _BarcodePainter(color: const Color(0xFFFF9800)),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // QR code placeholder
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color(0xFFFF9800).withOpacity(0.35),
-                      width: 2,
-                    ),
-                  ),
-                  child: CustomPaint(
-                    painter: _QRCodePainter(color: const Color(0xFFFF9800)),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Right barcode
-                Expanded(
-                  child: Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: const Color(0xFFFF9800).withOpacity(0.35),
-                        width: 1,
+                      Text(
+                        '■ VERIFIED',
+                        style: TextStyle(
+                          color: const Color(0xFF39FF14).withOpacity(0.7),
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                          decoration: TextDecoration.none,
+                        ),
                       ),
-                    ),
-                    child: CustomPaint(
-                      painter: _BarcodePainter(color: const Color(0xFFFF9800)),
-                    ),
+                      Text(
+                        'v2.6.${DateTime.now().year}',
+                        style: TextStyle(
+                          color: const Color(0xFFFF9800).withOpacity(0.6),
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  // Bottom hex strip
+                  Text(
+                    '>>> END TRANSMISSION • LIBERATED: 2026 • SOVEREIGN ACCESS <<<',
+                    style: TextStyle(
+                      color: const Color(0xFFFF9800).withOpacity(0.5),
+                      fontSize: 8,
+                      fontFamily: 'monospace',
+                      decoration: TextDecoration.none,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -485,12 +517,20 @@ class _ResearchScreenState extends State<ResearchScreen> {
     );
   }
 
+  Color _getScoreColor(int score) {
+    if (score >= 80) return const Color(0xFF39FF14); // Green
+    if (score >= 60) return const Color(0xFFFFD740); // Yellow
+    return const Color(0xFFFF0040); // Red
+  }
+
   Widget _buildEnhancedScoreMetric(String label, int score, int weight) {
+    final metricColor = _getScoreColor(score);
+    
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.3),
-        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.3), width: 1),
+        border: Border.all(color: metricColor.withOpacity(0.3), width: 1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
@@ -513,7 +553,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
               Text(
                 '${score}%',
                 style: TextStyle(
-                  color: const Color(0xFFFF9800),
+                  color: metricColor,
                   fontSize: 11,
                   fontFamily: 'monospace',
                   fontWeight: FontWeight.bold,
@@ -1592,60 +1632,6 @@ class _ResearchScreenState extends State<ResearchScreen> {
     _searchController.dispose();
     super.dispose();
   }
-}
-
-class _BarcodePainter extends CustomPainter {
-  final Color color;
-  _BarcodePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color.withOpacity(0.4)
-      ..style = PaintingStyle.fill;
-
-    // Draw random barcode-like lines
-    final random = [3.0, 1.0, 2.0, 1.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 1.0, 3.0];
-    double x = 0;
-    for (int i = 0; i < random.length && x < size.width; i++) {
-      canvas.drawRect(
-        Rect.fromLTWH(x, 0, random[i], size.height),
-        paint,
-      );
-      x += random[i] + 1;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _QRCodePainter extends CustomPainter {
-  final Color color;
-  _QRCodePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color.withOpacity(0.4)
-      ..style = PaintingStyle.fill;
-
-    // Draw simple QR-like pattern
-    final boxSize = size.width / 5;
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < 5; j++) {
-        if ((i + j) % 2 == 0 || (i == 0 && j == 0) || (i == 4 && j == 4)) {
-          canvas.drawRect(
-            Rect.fromLTWH(i * boxSize, j * boxSize, boxSize - 1, boxSize - 1),
-            paint,
-          );
-        }
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _ScanlinesPainter extends CustomPainter {
