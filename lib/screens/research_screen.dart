@@ -366,7 +366,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
     // Color based on rating
     Color scoreColor;
     if (rating == 'Excellent') {
-      scoreColor = const Color(0xFFFF9800); // Cyan
+      scoreColor = const Color(0xFFFF9800); // Amber
     } else if (rating == 'Good') {
       scoreColor = const Color(0xFFFFD740); // Yellow
     } else if (rating == 'Fair') {
@@ -915,12 +915,12 @@ class _ResearchScreenState extends State<ResearchScreen> {
           _buildMetricExplanation(
             'PUBLICATION (25%)',
             'Peer-reviewed journal citations and mainstream scientific presence. Higher = more published research.',
-            AppColors.primary,
+            Color(0xFFFF9800),
           ),
           _buildMetricExplanation(
             'EVIDENCE (35%)',
             'Quality of human clinical data. Highest weight because real-world results matter most.',
-            AppColors.accent,
+            Color(0xFFFF9800),
           ),
           _buildMetricExplanation(
             'METHODOLOGY (25%)',
@@ -1126,7 +1126,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppColors.surface.withOpacity(0.15),
-          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+          border: Border.all(color: Color(0xFFFF9800).withOpacity(0.2)),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Column(
@@ -1312,13 +1312,13 @@ class _ResearchScreenState extends State<ResearchScreen> {
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.primary.withOpacity(0.15),
+                                        color: Color(0xFFFF9800).withOpacity(0.15),
                                         borderRadius: BorderRadius.circular(2),
                                       ),
                                       child: Text(
                                         peptide.category,
                                         style: TextStyle(
-                                          color: AppColors.primary,
+                                          color: Color(0xFFFF9800),
                                           fontSize: 10,
                                           decoration: TextDecoration.none,
                                         ),
@@ -1404,11 +1404,11 @@ class _ResearchScreenState extends State<ResearchScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withOpacity(0.15)
+              ? Color(0xFFFF9800).withOpacity(0.15)
               : Colors.transparent,
           border: Border(
             bottom: BorderSide(
-              color: isSelected ? AppColors.primary.withOpacity(0.2) : AppColors.primary.withOpacity(0.2),
+              color: isSelected ? Color(0xFFFF9800).withOpacity(0.2) : Color(0xFFFF9800).withOpacity(0.2),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -1416,7 +1416,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? AppColors.primary : AppColors.textMid,
+            color: isSelected ? Color(0xFFFF9800) : AppColors.textMid,
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             decoration: TextDecoration.none,
@@ -1436,17 +1436,17 @@ class _ResearchScreenState extends State<ResearchScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.primary.withOpacity(0.15)
+                ? Color(0xFFFF9800).withOpacity(0.15)
                 : AppColors.surface.withOpacity(0.15),
             border: Border.all(
-              color: isSelected ? AppColors.primary.withOpacity(0.2) : AppColors.primary.withOpacity(0.2),
+              color: isSelected ? Color(0xFFFF9800).withOpacity(0.2) : Color(0xFFFF9800).withOpacity(0.2),
             ),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? AppColors.primary : AppColors.textMid,
+              color: isSelected ? Color(0xFFFF9800) : AppColors.textMid,
               fontSize: 11,
               fontWeight: FontWeight.bold,
               decoration: TextDecoration.none,
@@ -1675,7 +1675,7 @@ class _ScanlinesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.primary.withOpacity(0.07)
+      ..color = Color(0xFFFF9800).withOpacity(0.07)
       ..strokeWidth = 1;
 
     for (double y = 0; y < size.height; y += 3) {
