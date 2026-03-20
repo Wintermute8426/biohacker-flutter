@@ -729,7 +729,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     children: [
                       Icon(
                         _getEffectIcon(item),
-                        color: accentColor.withOpacity(0.7),
+                        color: accentColor.withOpacity(0.7), // Force rebuild: amber icons
                         size: 14,
                       ),
                       const SizedBox(width: 10),
