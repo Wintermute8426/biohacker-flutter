@@ -773,7 +773,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               
               // Generate real data from lab results
               final spots = <FlSpot>[];
-              final labsWithMarker = _labResults.where((lab) {
+              final labsWithMarker = _labsWithContext.map((lwc) => lwc.labResult).where((lab) {
                 return lab.extractedData.containsKey(marker);
               }).toList();
               
