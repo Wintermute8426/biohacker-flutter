@@ -63,11 +63,11 @@ class _ResearchScreenState extends State<ResearchScreen> {
     FullScreenModal.show(
       context: context,
       child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 32),
         children: [
           // Header section with badges (cycle card style)
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
             decoration: BoxDecoration(
               color: Colors.black,
             ),
@@ -189,40 +189,17 @@ class _ResearchScreenState extends State<ResearchScreen> {
             ),
           ),
 
-          // PepScore section - enhanced with prominent display
-          _buildEnhancedPepScoreSection(peptide),
+          // Effects section - immediately after description
+          if (peptide.effects.isNotEmpty)
+            _buildEffectsSection('EFFECTS', peptide.effects, const Color(0xFFFF9800)),
 
-          // Dosing section - full-width card
-          _buildFullWidthSection(
-            'DOSING',
-            Icons.medication,
-            [
-              '${peptide.commonDoseRange} ${peptide.unit}',
-              'Timing: ${peptide.timing}',
-              'Route: ${peptide.route}',
-            ],
-          ),
-
-          // Effects section - bordered chips
-          _buildEffectsSection('EFFECTS', peptide.effects, AppColors.accent),
-
-          // Side effects section - bordered chips
-          _buildEffectsSection('SIDE EFFECTS', peptide.sideEffects, AppColors.error),
-
-          // Safety section - full-width card
-          _buildFullWidthSection(
-            'SAFETY',
-            Icons.shield,
-            [peptide.safetyNotes],
-          ),
-
-          // Study links - full-width cards with matte styling
-          if (peptide.studyLinks.isNotEmpty) ...[
+          // Side effects inline (if any)
+          if (peptide.sideEffects.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppColors.surface.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(4),
@@ -231,105 +208,116 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     width: 2,
                   ),
                 ),
-                child: Stack(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: _ScanlinesPainter(),
+                    Text(
+                      'POTENTIAL SIDE EFFECTS',
+                      style: TextStyle(
+                        color: const Color(0xFFFF9800).withOpacity(0.7),
+                        fontSize: 10,
+                        fontFamily: 'monospace',
+                        letterSpacing: 1,
+                        decoration: TextDecoration.none,
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.biotech,
-                              color: const Color(0xFFFF9800),
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'RESEARCH',
-                              style: TextStyle(
-                                color: const Color(0xFFFF9800).withOpacity(0.7),
-                                fontSize: 11,
-                                fontFamily: 'monospace',
-                                letterSpacing: 1,
-                                decoration: TextDecoration.none,
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: const Color(0xFFFF9800).withOpacity(0.8),
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                              child: Text(
-                                '${peptide.studyLinks.length} studies',
-                                style: TextStyle(
-                                  color: const Color(0xFFFF9800).withOpacity(0.9),
-                                  fontSize: 8,
-                                  fontFamily: 'monospace',
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                            ),
-                          ],
+                    const SizedBox(height: 8),
+                    ...peptide.sideEffects.take(3).map((effect) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        '▸ $effect',
+                        style: TextStyle(
+                          color: AppColors.textMid,
+                          fontSize: 11,
+                          fontFamily: 'monospace',
+                          decoration: TextDecoration.none,
                         ),
-                      ],
-                    ),
+                      ),
+                    )),
                   ],
                 ),
               ),
             ),
-            ...peptide.studyLinks.map((study) => _buildStudyCard(study)),
-          ],
 
-          // Footer with LIBERATED: 2026 badge
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.surface.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(
-                  color: const Color(0xFFFF0040).withOpacity(0.35),
-                  width: 2,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.verified,
-                    color: const Color(0xFFFF0040),
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'LIBERATED: 2026',
-                    style: TextStyle(
-                      color: const Color(0xFFFF0040),
-                      fontSize: 12,
-                      fontFamily: 'monospace',
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          // PepScore section
+          _buildEnhancedPepScoreSection(peptide),
+
+          // Suggested Dosing section
+          _buildFullWidthSection(
+            'SUGGESTED DOSING',
+            Icons.medication,
+            [
+              '${peptide.commonDoseRange} ${peptide.unit}',
+              'Timing: ${peptide.timing}',
+              'Route: ${peptide.route}',
+            ],
           ),
 
-          const SizedBox(height: 40),
+          // Safety section
+          _buildFullWidthSection(
+            'SAFETY',
+            Icons.shield,
+            [peptide.safetyNotes],
+          ),
+
+          // INTELLIGENCE section - consolidated research
+          if (peptide.studyLinks.isNotEmpty) 
+            _buildIntelligenceSection(peptide),
+
+          // Footer with barcode/QR styling
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+            child: Row(
+              children: [
+                // Left barcode
+                Expanded(
+                  child: Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFFFF9800).withOpacity(0.35),
+                        width: 1,
+                      ),
+                    ),
+                    child: CustomPaint(
+                      painter: _BarcodePainter(color: const Color(0xFFFF9800)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // QR code placeholder
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xFFFF9800).withOpacity(0.35),
+                      width: 2,
+                    ),
+                  ),
+                  child: CustomPaint(
+                    painter: _QRCodePainter(color: const Color(0xFFFF9800)),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Right barcode
+                Expanded(
+                  child: Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color(0xFFFF9800).withOpacity(0.35),
+                        width: 1,
+                      ),
+                    ),
+                    child: CustomPaint(
+                      painter: _BarcodePainter(color: const Color(0xFFFF9800)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -1423,11 +1411,241 @@ class _ResearchScreenState extends State<ResearchScreen> {
     );
   }
 
+  Widget _buildIntelligenceSection(PeptideInfo peptide) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surface.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: const Color(0xFFFF9800).withOpacity(0.35),
+            width: 2,
+          ),
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _ScanlinesPainter(),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top tags
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.5), width: 1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Text(
+                        'PHARMA-SOURCED',
+                        style: TextStyle(
+                          color: const Color(0xFFFF9800).withOpacity(0.7),
+                          fontSize: 7,
+                          fontFamily: 'monospace',
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.5), width: 1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Text(
+                        'CORPO-INTEL',
+                        style: TextStyle(
+                          color: const Color(0xFFFF9800).withOpacity(0.7),
+                          fontSize: 7,
+                          fontFamily: 'monospace',
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Header
+                Row(
+                  children: [
+                    Icon(Icons.biotech, color: const Color(0xFFFF9800), size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'INTELLIGENCE',
+                      style: TextStyle(
+                        color: const Color(0xFFFF9800).withOpacity(0.7),
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                        letterSpacing: 1,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.8), width: 1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Text(
+                        '${peptide.studyLinks.length} SOURCES',
+                        style: TextStyle(
+                          color: const Color(0xFFFF9800).withOpacity(0.9),
+                          fontSize: 8,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Study list (compact)
+                ...peptide.studyLinks.map((study) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        study.title,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 11,
+                          fontFamily: 'monospace',
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${study.source} • ${study.year}',
+                        style: TextStyle(
+                          color: AppColors.textMid,
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+                const SizedBox(height: 12),
+                // Bottom tags
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.5), width: 1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Text(
+                        'VERIFIED',
+                        style: TextStyle(
+                          color: const Color(0xFFFF9800).withOpacity(0.7),
+                          fontSize: 7,
+                          fontFamily: 'monospace',
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.5), width: 1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                      child: Text(
+                        'LIBERATED: 2026',
+                        style: TextStyle(
+                          color: const Color(0xFFFF9800).withOpacity(0.7),
+                          fontSize: 7,
+                          fontFamily: 'monospace',
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
+}
+
+class _BarcodePainter extends CustomPainter {
+  final Color color;
+  _BarcodePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.4)
+      ..style = PaintingStyle.fill;
+
+    // Draw random barcode-like lines
+    final random = [3.0, 1.0, 2.0, 1.0, 3.0, 1.0, 2.0, 3.0, 1.0, 2.0, 1.0, 3.0];
+    double x = 0;
+    for (int i = 0; i < random.length && x < size.width; i++) {
+      canvas.drawRect(
+        Rect.fromLTWH(x, 0, random[i], size.height),
+        paint,
+      );
+      x += random[i] + 1;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _QRCodePainter extends CustomPainter {
+  final Color color;
+  _QRCodePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withOpacity(0.4)
+      ..style = PaintingStyle.fill;
+
+    // Draw simple QR-like pattern
+    final boxSize = size.width / 5;
+    for (int i = 0; i < 5; i++) {
+      for (int j = 0; j < 5; j++) {
+        if ((i + j) % 2 == 0 || (i == 0 && j == 0) || (i == 4 && j == 4)) {
+          canvas.drawRect(
+            Rect.fromLTWH(i * boxSize, j * boxSize, boxSize - 1, boxSize - 1),
+            paint,
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _ScanlinesPainter extends CustomPainter {
