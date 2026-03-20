@@ -787,8 +787,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 }
               }
               
-              // Skip if no data
-              if (spots.isEmpty) return null;
+              // Default to flat line if no data
+              if (spots.isEmpty) {
+                spots.add(FlSpot(0, 0));
+              }
               
               return LineChartBarData(
                 spots: spots,
@@ -812,7 +814,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   color: color.withOpacity(0.1),
                 ),
               );
-            }).whereType<LineChartBarData>().toList(),
+            }).toList(),
           ),
         ),
       ),
