@@ -683,12 +683,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.surface.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: accentColor.withOpacity(0.35),
-            width: 2,
-          ),
+          color: Colors.transparent,
         ),
         child: Stack(
           children: [
