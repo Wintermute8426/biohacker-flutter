@@ -31,10 +31,6 @@ class FullScreenModal extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surface.withOpacity(0.95), // Almost opaque for readability
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: AppColors.primary.withOpacity(0.3),
-              width: 1,
-            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
