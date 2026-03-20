@@ -773,17 +773,22 @@ class _ReportsScreenState extends State<ReportsScreen> {
               
               // Generate real data from lab results
               final spots = <FlSpot>[];
-              final labsWithMarker = _labsWithContext.map((lwc) => lwc.labResult).where((lab) {
-                return lab.extractedData.containsKey(marker);
-              }).toList();
-              
-              // Sort by date
-              labsWithMarker.sort((a, b) => a.uploadDate.compareTo(b.uploadDate));
-              
-              for (int i = 0; i < labsWithMarker.length; i++) {
-                final value = labsWithMarker[i].extractedData[marker];
-                if (value is num) {
-                  spots.add(FlSpot(i.toDouble(), value.toDouble()));
+              // Extract biomarker values from comparisons
+              for (int i = 0; i < _labsWithContext.length; i++) {
+                final lwc = _labsWithContext[i];
+                // Check biomarker changes for this marker
+                final markerChange = lwc.biomarkerChanges.firstWhere(
+                  (bc) => bc.biomarkerKey == marker,
+                  orElse: () => BiomarkerComparison(
+                    biomarkerKey: marker,
+                    previousValue: null,
+                    currentValue: null,
+                    changePercent: null,
+                  ),
+                );
+                
+                if (markerChange.currentValue != null) {
+                  spots.add(FlSpot(i.toDouble(), markerChange.currentValue!));
                 }
               }
               
