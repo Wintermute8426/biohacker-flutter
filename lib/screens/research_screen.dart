@@ -659,6 +659,23 @@ class _ResearchScreenState extends State<ResearchScreen> {
   }
 
   // Effects section with bordered chips
+  IconData _getEffectIcon(String effect) {
+    final effectLower = effect.toLowerCase();
+    if (effectLower.contains('growth') || effectLower.contains('gh') || effectLower.contains('hormone')) return Icons.trending_up;
+    if (effectLower.contains('muscle') || effectLower.contains('protein')) return Icons.fitness_center;
+    if (effectLower.contains('wound') || effectLower.contains('healing') || effectLower.contains('repair')) return Icons.healing;
+    if (effectLower.contains('tendon') || effectLower.contains('ligament') || effectLower.contains('bone')) return Icons.accessibility_new;
+    if (effectLower.contains('inflammation') || effectLower.contains('inflammatory')) return Icons.local_fire_department;
+    if (effectLower.contains('angiogenesis') || effectLower.contains('vascular')) return Icons.water_drop;
+    if (effectLower.contains('recovery')) return Icons.refresh;
+    if (effectLower.contains('fat') || effectLower.contains('metabolism')) return Icons.whatshot;
+    if (effectLower.contains('sleep')) return Icons.bedtime;
+    if (effectLower.contains('neuro') || effectLower.contains('brain')) return Icons.psychology;
+    if (effectLower.contains('collagen')) return Icons.layers;
+    if (effectLower.contains('igf') || effectLower.contains('synthesis')) return Icons.science;
+    return Icons.check_circle_outline;
+  }
+
   Widget _buildEffectsSection(String title, List<String> items, Color accentColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -666,23 +683,15 @@ class _ResearchScreenState extends State<ResearchScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(8),
+          color: AppColors.surface.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: accentColor.withOpacity(0.6),
+            color: accentColor.withOpacity(0.35),
             width: 2,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: accentColor.withOpacity(0.3),
-              blurRadius: 15,
-              spreadRadius: 2,
-            ),
-          ],
         ),
         child: Stack(
           children: [
-            // Scanlines overlay
             Positioned.fill(
               child: CustomPaint(
                 painter: _ScanlinesPainter(),
@@ -696,14 +705,14 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     Icon(
                       title == 'EFFECTS' ? Icons.auto_awesome : Icons.warning,
                       color: accentColor,
-                      size: 20,
+                      size: 16,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       title,
                       style: TextStyle(
-                        color: accentColor.withOpacity(0.9),
-                        fontSize: 11,
+                        color: accentColor.withOpacity(0.7),
+                        fontSize: 10,
                         fontFamily: 'monospace',
                         letterSpacing: 1,
                         decoration: TextDecoration.none,
@@ -712,37 +721,33 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: items.map((item) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      border: Border.all(
+                // Clean list with icons (no borders per item)
+                ...items.map((item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        _getEffectIcon(item),
                         color: accentColor.withOpacity(0.7),
-                        width: 1,
+                        size: 14,
                       ),
-                      borderRadius: BorderRadius.circular(4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: accentColor.withOpacity(0.2),
-                          blurRadius: 8,
-                          spreadRadius: 1,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          item,
+                          style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 12,
+                            fontFamily: 'monospace',
+                            decoration: TextDecoration.none,
+                            height: 1.3,
+                          ),
                         ),
-                      ],
-                    ),
-                    child: Text(
-                      item,
-                      style: TextStyle(
-                        color: accentColor,
-                        fontSize: 11,
-                        fontFamily: 'monospace',
-                        decoration: TextDecoration.none,
                       ),
-                    ),
-                  )).toList(),
-                ),
+                    ],
+                  ),
+                )),
               ],
             ),
           ],
