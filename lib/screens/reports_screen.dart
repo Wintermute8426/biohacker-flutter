@@ -770,14 +770,25 @@ class _ReportsScreenState extends State<ReportsScreen> {
             maxY: 100,
             lineBarsData: _selectedBiomarkers.map((marker) {
               final color = _biomarkerColors[marker] ?? const Color(0xFF00FFFF);
-              // TODO: Generate real data from lab results
-              final spots = [
-                FlSpot(0, 50),
-                FlSpot(2, 60),
-                FlSpot(4, 55),
-                FlSpot(6, 70),
-                FlSpot(8, 65),
-              ];
+              
+              // Generate real data from lab results
+              final spots = <FlSpot>[];
+              final labsWithMarker = _labResults.where((lab) {
+                return lab.extractedData.containsKey(marker);
+              }).toList();
+              
+              // Sort by date
+              labsWithMarker.sort((a, b) => a.uploadDate.compareTo(b.uploadDate));
+              
+              for (int i = 0; i < labsWithMarker.length; i++) {
+                final value = labsWithMarker[i].extractedData[marker];
+                if (value is num) {
+                  spots.add(FlSpot(i.toDouble(), value.toDouble()));
+                }
+              }
+              
+              // Skip if no data
+              if (spots.isEmpty) return null;
               
               return LineChartBarData(
                 spots: spots,
@@ -801,7 +812,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   color: color.withOpacity(0.1),
                 ),
               );
-            }).toList(),
+            }).whereType<LineChartBarData>().toList(),
           ),
         ),
       ),

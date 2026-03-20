@@ -145,22 +145,20 @@ class _LabsScreenState extends State<LabsScreen> {
       final bytes = await image.readAsBytes();
       print('Image upload started: ${image.name}');
 
-      final mockResult = LabResult(
+      // TODO: Call real extraction API
+      // For now, just add to results without extracted data
+      final result = LabResult(
         id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
         userId: _userId,
         pdfPath: image.name,
         uploadDate: DateTime.now(),
-        notes: 'Image Upload',
-        extractedData: {
-          'testosterone': 680,
-          'igf1': 210,
-          'cortisol': 9,
-        },
+        notes: 'Image Upload - Pending Extraction',
+        extractedData: {}, // Empty until API extraction
       );
 
       if (mounted) {
         setState(() {
-          _labResults.insert(0, mockResult);
+          _labResults.insert(0, result);
           _isUploading = false;
         });
       }
