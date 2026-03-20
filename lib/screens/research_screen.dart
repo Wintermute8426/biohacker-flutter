@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../data/peptide_library.dart';
@@ -73,7 +74,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
     FullScreenModal.show(
       context: context,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(8, 24, 8, 24),
+        padding: const EdgeInsets.fromLTRB(12, 24, 12, 32),
         children: [
           // Header section with badges (cycle card style)
           Container(
@@ -1551,32 +1552,63 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Study list (compact)
+                // Study list (compact, clickable)
                 ...peptide.studyLinks.map((study) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        study.title,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 11,
-                          fontFamily: 'monospace',
-                          decoration: TextDecoration.none,
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: GestureDetector(
+                    onTap: () async {
+                      final uri = Uri.parse(study.url);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        border: Border.all(
+                          color: const Color(0xFFFF9800).withOpacity(0.25),
+                          width: 1,
                         ),
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${study.source} • ${study.year}',
-                        style: TextStyle(
-                          color: AppColors.textMid,
-                          fontSize: 9,
-                          fontFamily: 'monospace',
-                          decoration: TextDecoration.none,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.link,
+                                color: const Color(0xFFFF9800).withOpacity(0.7),
+                                size: 12,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  study.title,
+                                  style: TextStyle(
+                                    color: const Color(0xFFFF9800).withOpacity(0.9),
+                                    fontSize: 11,
+                                    fontFamily: 'monospace',
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${study.source} • ${study.year}',
+                            style: TextStyle(
+                              color: AppColors.textMid,
+                              fontSize: 9,
+                              fontFamily: 'monospace',
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 )),
                 const SizedBox(height: 12),
