@@ -7,6 +7,7 @@ import '../services/reports_service.dart';
 import '../widgets/common/scanlines_painter.dart';
 import '../widgets/app_header.dart';
 import '../widgets/common/empty_state.dart';
+import '../widgets/reports/dystopian_trend_chart.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({Key? key}) : super(key: key);
@@ -547,7 +548,16 @@ class _ReportsScreenState extends State<ReportsScreen> {
       children: [
         _buildCategorySelector(),
         _buildBiomarkerCheckboxes(),
-        Expanded(child: _buildTrendsChart()),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: DystopianTrendChart(
+              labResults: _labsWithContext,
+              selectedBiomarkers: _selectedBiomarkers,
+              biomarkerColors: _biomarkerColors,
+            ),
+          ),
+        ),
       ],
     );
   }
