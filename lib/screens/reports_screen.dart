@@ -777,18 +777,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
               for (int i = 0; i < _labsWithContext.length; i++) {
                 final lwc = _labsWithContext[i];
                 // Check biomarker changes for this marker
-                final markerChange = lwc.biomarkerChanges.firstWhere(
-                  (bc) => bc.biomarkerKey == marker,
-                  orElse: () => BiomarkerComparison(
-                    biomarkerKey: marker,
-                    previousValue: null,
-                    currentValue: null,
-                    changePercent: null,
-                  ),
-                );
+                final markerChange = lwc.biomarkerChanges.where(
+                  (bc) => bc.name.toLowerCase() == marker.toLowerCase(),
+                ).firstOrNull;
                 
-                if (markerChange.currentValue != null) {
-                  spots.add(FlSpot(i.toDouble(), markerChange.currentValue!));
+                if (markerChange?.currentValue != null) {
+                  spots.add(FlSpot(i.toDouble(), markerChange!.currentValue!));
                 }
               }
               
