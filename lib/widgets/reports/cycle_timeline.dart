@@ -161,12 +161,12 @@ class CycleTimeline extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.calendar_today,
-                      size: 11,
-                      color: AppColors.textDim,
+                      size: 16,
+                      color: AppColors.textMid.withOpacity(0.8),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 6),
                     Text(
                       '${dateFormat.format(cycle.startDate)} - ${dateFormat.format(cycle.endDate)}',
                       style: const TextStyle(
@@ -235,7 +235,7 @@ class CycleTimeline extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.info_outline,
-                      size: 14,
+                      size: 16,
                       color: Color(0xFFFFAA00),
                     ),
                     const SizedBox(width: 8),
@@ -272,13 +272,13 @@ class CycleTimeline extends StatelessWidget {
       children: [
         // Timeline bar
         Container(
-          height: 20,
+          height: 24,
           decoration: BoxDecoration(
             color: const Color(0xFF0D0D0D),
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(3),
             border: Border.all(
-              color: const Color(0xFF1A2540),
-              width: 1,
+              color: color.withOpacity(0.4),
+              width: 2,
             ),
           ),
           child: LayoutBuilder(
@@ -289,8 +289,8 @@ class CycleTimeline extends StatelessWidget {
                   Container(
                     width: _getCycleProgress(cycle) * constraints.maxWidth,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(1),
+                      color: color.withOpacity(0.35),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                   // Lab markers
@@ -299,22 +299,29 @@ class CycleTimeline extends StatelessWidget {
                         lab.labDate.difference(cycle.startDate).inDays;
                     final position = (daysIn / totalDays).clamp(0.0, 1.0);
                     return Positioned(
-                      left: position * constraints.maxWidth - 4,
-                      top: 2,
+                      left: position * constraints.maxWidth - 6,
+                      top: 1,
                       child: Container(
-                        width: 8,
-                        height: 16,
+                        width: 12,
+                        height: 18,
                         decoration: BoxDecoration(
                           color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BorderRadius.circular(3),
                           border: Border.all(
-                            color: AppColors.primary,
-                            width: 1,
+                            color: AppColors.primary.withOpacity(0.8),
+                            width: 1.5,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withOpacity(0.6),
+                              blurRadius: 6,
+                              spreadRadius: 1,
+                            ),
+                          ],
                         ),
                         child: const Icon(
                           Icons.science,
-                          size: 8,
+                          size: 10,
                           color: Colors.black,
                         ),
                       ),
@@ -330,32 +337,44 @@ class CycleTimeline extends StatelessWidget {
         Row(
           children: [
             Container(
-              width: 8,
-              height: 8,
-              color: color.withOpacity(0.2),
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.35),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-            const SizedBox(width: 4),
-            const Text(
+            const SizedBox(width: 6),
+            Text(
               'Cycle duration',
               style: TextStyle(
                 fontFamily: 'JetBrains Mono',
-                fontSize: 8,
-                color: AppColors.textDim,
+                fontSize: 9,
+                color: AppColors.textMid.withOpacity(0.7),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Container(
-              width: 8,
-              height: 8,
-              color: AppColors.primary,
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.4),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(width: 4),
-            const Text(
+            const SizedBox(width: 6),
+            Text(
               'Lab taken',
               style: TextStyle(
                 fontFamily: 'JetBrains Mono',
-                fontSize: 8,
-                color: AppColors.textDim,
+                fontSize: 9,
+                color: AppColors.textMid.withOpacity(0.7),
               ),
             ),
           ],

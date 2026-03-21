@@ -238,13 +238,13 @@ class LabResultCard extends StatelessWidget {
     final hasChange = biomarker.changePercent != null;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
           // Status indicator
           Container(
-            width: 6,
-            height: 6,
+            width: 8,
+            height: 8,
             decoration: BoxDecoration(
               color: statusColor,
               shape: BoxShape.circle,
@@ -272,19 +272,19 @@ class LabResultCard extends StatelessWidget {
                   : '--',
               style: TextStyle(
                 fontFamily: 'JetBrains Mono',
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
                 color: statusColor,
               ),
               textAlign: TextAlign.right,
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           // Status label
           SizedBox(
-            width: 50,
+            width: 54,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
               decoration: BoxDecoration(
                 color: statusColor.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(2),
