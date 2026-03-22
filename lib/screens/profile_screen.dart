@@ -23,6 +23,7 @@ import '../utils/user_feedback.dart';
 import '../main.dart';
 import 'legal_screen.dart';
 import 'about_screen.dart';
+import 'onboarding_screen.dart';
 import '../assets/legal_documents.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -422,6 +423,74 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _confirmResetOnboarding() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(
+          'Reset Onboarding?',
+          style: TextStyle(
+            color: AppColors.error,
+            fontFamily: 'monospace',
+            letterSpacing: 1,
+          ),
+        ),
+        content: Text(
+          'This will reset your onboarding status and take you back through the setup flow.\n\n'
+          'Your existing data will not be deleted.',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'CANCEL',
+              style: TextStyle(
+                color: AppColors.textMid,
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'RESET',
+              style: TextStyle(
+                color: AppColors.error,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        final userId = Supabase.instance.client.auth.currentUser?.id;
+        if (userId != null) {
+          await Supabase.instance.client
+              .from('user_profiles')
+              .update({'onboarding_completed': false})
+              .eq('id', userId);
+        }
+
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          UserFeedback.showError(context, 'Failed to reset onboarding: ${e.toString()}');
+        }
+      }
+    }
+  }
+
   @override
   void dispose() {
     _usernameController.dispose();
@@ -712,59 +781,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           ),
                         ),
                       ),
-                      // Edit button (floating at bottom)
-                      if (!_isEditMode)
-                        Positioned(
-                          bottom: 24,
-                          right: 16,
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                setState(() => _isEditMode = true);
-                              },
-                              borderRadius: BorderRadius.circular(20),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primary.withOpacity(0.3),
-                                      blurRadius: 8,
-                                      spreadRadius: 0,
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.edit,
-                                      color: AppColors.background,
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      'EDIT',
-                                      style: TextStyle(
-                                        fontFamily: 'monospace',
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.background,
-                                        letterSpacing: 1,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -1620,6 +1636,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   'Permanently delete all your data',
                   Icons.delete_forever,
                   _confirmDeleteAccount,
+                  isDanger: true,
+                ),
+                const SizedBox(height: 8),
+                _buildActionTile(
+                  'Reset Onboarding',
+                  'Re-run the onboarding setup flow',
+                  Icons.restart_alt,
+                  _confirmResetOnboarding,
                   isDanger: true,
                 ),
               ],
