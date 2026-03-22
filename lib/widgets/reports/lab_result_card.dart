@@ -240,6 +240,7 @@ class LabResultCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
+        clipBehavior: Clip.hardEdge,
         children: [
           // Status indicator
           Container(
@@ -257,6 +258,7 @@ class LabResultCard extends StatelessWidget {
             child: Text(
               biomarker.name,
               overflow: TextOverflow.ellipsis,
+              softWrap: false,
               maxLines: 1,
               style: const TextStyle(
                 fontFamily: 'JetBrains Mono',
@@ -272,6 +274,9 @@ class LabResultCard extends StatelessWidget {
               biomarker.currentValue != null
                   ? '${biomarker.currentValue!.toStringAsFixed(1)} ${biomarker.unit ?? ''}'
                   : '--',
+              overflow: TextOverflow.ellipsis,
+              softWrap: false,
+              maxLines: 1,
               style: TextStyle(
                 fontFamily: 'JetBrains Mono',
                 fontSize: 12,
