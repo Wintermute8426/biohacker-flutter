@@ -156,9 +156,9 @@ class _HealthGoalsScreenState extends State<HealthGoalsScreen> {
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 1.2,
+                childAspectRatio: MediaQuery.of(context).size.width > 400 ? 1.2 : 1.0,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
               ),

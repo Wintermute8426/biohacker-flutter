@@ -163,8 +163,6 @@ class OnboardingService {
         'lab_reminder_frequency': data.labReminderFrequency,
         'cycle_milestones_enabled': data.cycleMilestonesEnabled,
         'research_updates_enabled': data.researchUpdatesEnabled,
-        'lab_alerts_enabled': true,
-        'weekly_progress_enabled': true,
       };
 
       final existingPrefs = await _supabase
