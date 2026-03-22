@@ -299,11 +299,18 @@ class UserProfileService {
     Map<String, dynamic>? baselineLabs,
     String? timezone,
     bool? onboardingCompleted,
+    bool? usedPeptidesBefore,
+    List<String>? previousPeptides,
+    String? peptideExperienceDuration,
+    String? cycleStatus,
+    String? trainingLevel,
+    String? bloodworkFrequency,
+    String? lastLabDate,
   }) async {
     try {
       final updates = <String, dynamic>{};
-      
-      // NEW: Profile screen fields (Tier 1)
+
+      // Profile screen fields (Tier 1)
       if (username != null) updates['username'] = username;
       if (age != null) updates['age'] = age;
       if (gender != null) updates['gender'] = gender;
@@ -311,8 +318,8 @@ class UserProfileService {
       if (heightInches != null) updates['height_inches'] = heightInches;
       if (allergies != null) updates['allergies'] = allergies;
       if (medicalConditions != null) updates['medical_conditions'] = medicalConditions;
-      
-      // NEW: Profile preferences (Tier 3)
+
+      // Profile preferences (Tier 3)
       if (notificationPreferences != null) updates['notification_preferences'] = notificationPreferences;
       if (healthGoalsList != null) updates['health_goals_list'] = healthGoalsList;
       if (unitsPreference != null) updates['units_preference'] = unitsPreference;
@@ -320,7 +327,7 @@ class UserProfileService {
       if (bio != null) updates['bio'] = bio;
       if (photoUrl != null) updates['photo_url'] = photoUrl;
 
-      // EXISTING: Onboarding fields
+      // Onboarding fields
       if (experienceLevel != null) updates['experience_level'] = experienceLevel;
       if (healthGoals != null) updates['health_goals'] = healthGoals;
       if (baselineWeight != null) updates['baseline_weight'] = baselineWeight;
@@ -333,6 +340,15 @@ class UserProfileService {
           updates['onboarding_completed_at'] = DateTime.now().toIso8601String();
         }
       }
+
+      // Onboarding V2 / Peptide fields
+      if (usedPeptidesBefore != null) updates['used_peptides_before'] = usedPeptidesBefore;
+      if (previousPeptides != null) updates['previous_peptides'] = previousPeptides;
+      if (peptideExperienceDuration != null) updates['peptide_experience_duration'] = peptideExperienceDuration;
+      if (cycleStatus != null) updates['cycle_status'] = cycleStatus;
+      if (trainingLevel != null) updates['training_level'] = trainingLevel;
+      if (bloodworkFrequency != null) updates['bloodwork_frequency'] = bloodworkFrequency;
+      if (lastLabDate != null) updates['last_lab_date'] = lastLabDate;
 
       if (kDebugMode) {
         print('[UserProfile] ========================================');
