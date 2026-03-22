@@ -224,7 +224,7 @@ class LabResultCard extends StatelessWidget {
     });
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Column(
         children: sorted.map((biomarker) {
           return _buildBiomarkerRow(biomarker);
@@ -256,6 +256,8 @@ class LabResultCard extends StatelessWidget {
             flex: 3,
             child: Text(
               biomarker.name,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
               style: const TextStyle(
                 fontFamily: 'JetBrains Mono',
                 fontSize: 11,

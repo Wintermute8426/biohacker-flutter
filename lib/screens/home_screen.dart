@@ -469,6 +469,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             unselectedItemColor: AppColors.textMid,
             type: BottomNavigationBarType.fixed,
             showUnselectedLabels: true,
+            iconSize: 22,
+            selectedFontSize: 10,
+            unselectedFontSize: 10,
             items: [
               BottomNavigationBarItem(
                 icon: Icon(
