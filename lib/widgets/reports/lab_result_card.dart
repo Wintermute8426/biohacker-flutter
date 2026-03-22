@@ -239,9 +239,9 @@ class LabResultCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        clipBehavior: Clip.hardEdge,
-        children: [
+      child: ClipRect(
+        child: Row(
+          children: [
           // Status indicator
           Container(
             width: 8,
@@ -334,7 +334,8 @@ class LabResultCard extends StatelessWidget {
                     textAlign: TextAlign.right,
                   ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
