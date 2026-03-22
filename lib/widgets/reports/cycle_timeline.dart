@@ -283,11 +283,14 @@ class CycleTimeline extends StatelessWidget {
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              return Stack(
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Stack(
+                  clipBehavior: Clip.none,
                 children: [
                   // Progress fill
                   Container(
-                    width: _getCycleProgress(cycle) * constraints.maxWidth,
+                    width: _getCycleProgress(cycle) * (constraints.maxWidth - 12),
                     decoration: BoxDecoration(
                       color: color.withOpacity(0.35),
                       borderRadius: BorderRadius.circular(2),
@@ -299,7 +302,7 @@ class CycleTimeline extends StatelessWidget {
                         lab.labDate.difference(cycle.startDate).inDays;
                     final position = (daysIn / totalDays).clamp(0.0, 1.0);
                     return Positioned(
-                      left: position * constraints.maxWidth - 6,
+                      left: position * (constraints.maxWidth - 12) - 6,
                       top: 1,
                       child: Container(
                         width: 12,
@@ -328,6 +331,7 @@ class CycleTimeline extends StatelessWidget {
                     );
                   }),
                 ],
+              ),
               );
             },
           ),
