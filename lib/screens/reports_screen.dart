@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart' hide ScanlinesOverlay;
 import '../services/reports_service.dart';
 import '../widgets/common/scanlines_painter.dart';
 import '../widgets/app_header.dart';
@@ -58,11 +59,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
     'psa': (0.0, 4.0),
   };
 
-  final List<Color> _chartColorPalette = const [
-    Color(0xFFFF9800), // Amber
-    Color(0xFF00FFFF), // Cyan
-    Color(0xFFFF00FF), // Magenta
-    Color(0xFF39FF14), // Green
+  final List<Color> _chartColorPalette = [
+    AppColors.amber, // Amber
+    AppColors.primary, // Cyan
+    AppColors.secondary, // Magenta
+    AppColors.accent, // Green
     Color(0xFFFFD740), // Yellow
     Color(0xFF00AAFF), // Blue
     Color(0xFFFF0088), // Pink
@@ -1127,9 +1128,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Color _getPeptideColor(String peptideName) {
     final hash = peptideName.hashCode;
     final colors = [
-      const Color(0xFF00FFFF),
-      const Color(0xFFFF00FF),
-      const Color(0xFF39FF14),
+      AppColors.primary,
+      AppColors.secondary,
+      AppColors.accent,
       const Color(0xFFFFAA00),
       const Color(0xFF00AAFF),
       const Color(0xFFFF0088),

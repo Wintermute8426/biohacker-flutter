@@ -382,7 +382,7 @@ class _DystopianTrendChartState extends State<DystopianTrendChart>
         color: const Color(0xFF0A0A0A),
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
-          color: const Color(0xFFFF9800).withOpacity(0.3),
+          color: AppColors.amber.withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -426,7 +426,7 @@ class _ScanlinesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF00FFFF).withOpacity(0.03)
+      ..color = AppColors.primary.withOpacity(0.03)
       ..strokeWidth = 1;
 
     for (double y = 0; y < size.height; y += 3) {

@@ -59,7 +59,7 @@ class _AddSymptomsModalState extends State<AddSymptomsModal> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select or describe at least one symptom'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -184,7 +184,7 @@ class _AddSymptomsModalState extends State<AddSymptomsModal> {
                     child: Text(
                       symptom,
                       style: WintermmuteStyles.tinyStyle.copyWith(
-                        color: isSelected ? AppColors.primary : Colors.white,
+                        color: isSelected ? AppColors.primary : AppColors.textLight,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
@@ -209,7 +209,7 @@ class _AddSymptomsModalState extends State<AddSymptomsModal> {
                     max: 10,
                     divisions: 9,
                     activeColor: _severity > 7 
-                      ? Color(0xFFFF0040) 
+                      ? AppColors.error 
                       : _severity > 4 
                         ? Color(0xFFFFA500) 
                         : AppColors.primary,
@@ -229,7 +229,7 @@ class _AddSymptomsModalState extends State<AddSymptomsModal> {
                     _severity.toString(),
                     style: WintermmuteStyles.bodyStyle.copyWith(
                       color: _severity > 7 
-                        ? Color(0xFFFF0040) 
+                        ? AppColors.error 
                         : _severity > 4 
                           ? Color(0xFFFFA500) 
                           : AppColors.primary,
@@ -250,7 +250,7 @@ class _AddSymptomsModalState extends State<AddSymptomsModal> {
             TextField(
               controller: _descriptionController,
               maxLines: 3,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textLight),
               decoration: InputDecoration(
                 hintText: 'Describe any additional symptoms or details...',
                 hintStyle: TextStyle(color: AppColors.textDim),
@@ -282,7 +282,7 @@ class _AddSymptomsModalState extends State<AddSymptomsModal> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.textLight),
                         ),
                       )
                     : Text(

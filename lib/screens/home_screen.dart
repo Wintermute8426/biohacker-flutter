@@ -160,13 +160,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: const Color(0xFF00FFFF).withOpacity(0.5),
+                      color: AppColors.primary.withOpacity(0.5),
                       width: 2,
                     ),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF00FFFF).withOpacity(0.1),
+                      color: AppColors.primary.withOpacity(0.1),
                       blurRadius: 8,
                     ),
                   ],
@@ -275,7 +275,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Container(
                 height: 2,
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                color: const Color(0xFF00FFFF).withOpacity(0.4),
+                color: AppColors.primary.withOpacity(0.4),
               ),
               // Logout button
               _buildMenuItem(
@@ -352,8 +352,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             decoration: BoxDecoration(
               border: Border.all(
                 color: isDanger
-                    ? const Color(0xFFFF0040).withOpacity(0.7)
-                    : const Color(0xFF00FFFF).withOpacity(0.5),
+                    ? AppColors.error.withOpacity(0.7)
+                    : AppColors.primary.withOpacity(0.5),
                 width: 2,
               ),
               borderRadius: BorderRadius.zero,
@@ -361,8 +361,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               boxShadow: [
                 BoxShadow(
                   color: isDanger 
-                      ? const Color(0xFFFF0040).withOpacity(0.15)
-                      : const Color(0xFF00FFFF).withOpacity(0.1),
+                      ? AppColors.error.withOpacity(0.15)
+                      : AppColors.primary.withOpacity(0.1),
                   blurRadius: 6,
                   spreadRadius: 1,
                 ),
@@ -385,7 +385,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Text(
                   label,
                   style: TextStyle(
-                    color: isDanger ? AppColors.error : Colors.white,
+                    color: isDanger ? AppColors.error : AppColors.textLight,
                     fontSize: 15,
                     fontFamily: 'monospace',
                     letterSpacing: 0.5,

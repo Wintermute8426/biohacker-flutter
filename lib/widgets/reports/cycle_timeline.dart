@@ -140,7 +140,7 @@ class CycleTimeline extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: (isActive ? AppColors.accent : const Color(0xFFFFAA00))
+                        color: (isActive ? AppColors.accent : AppColors.amber)
                             .withOpacity(0.15),
                         borderRadius: BorderRadius.circular(3),
                       ),
@@ -152,7 +152,7 @@ class CycleTimeline extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           color: isActive
                               ? AppColors.accent
-                              : const Color(0xFFFFAA00),
+                              : AppColors.amber,
                         ),
                       ),
                     ),
@@ -226,7 +226,7 @@ class CycleTimeline extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   border: Border.all(
-                    color: const Color(0xFFFFAA00).withOpacity(0.3),
+                    color: AppColors.amber.withOpacity(0.3),
                     width: 1,
                   ),
                   borderRadius: BorderRadius.circular(4),
@@ -236,7 +236,7 @@ class CycleTimeline extends StatelessWidget {
                     const Icon(
                       Icons.info_outline,
                       size: 16,
-                      color: Color(0xFFFFAA00),
+                      color: AppColors.amber,
                     ),
                     const SizedBox(width: 8),
                     const Expanded(
@@ -472,7 +472,7 @@ class CycleTimeline extends StatelessWidget {
                       style: const TextStyle(
                         fontFamily: 'JetBrains Mono',
                         fontSize: 9,
-                        color: Color(0xFFFFAA00),
+                        color: AppColors.amber,
                       ),
                     )
                   else
@@ -686,7 +686,7 @@ class CycleTimeline extends StatelessWidget {
       case 'HIGH':
         return AppColors.error;
       case 'LOW':
-        return const Color(0xFFFFAA00);
+        return AppColors.amber;
       default:
         return AppColors.accent;
     }
@@ -695,10 +695,10 @@ class CycleTimeline extends StatelessWidget {
   Color _getPeptideColor(String peptideName) {
     final hash = peptideName.hashCode;
     final colors = [
-      const Color(0xFF00FFFF),
-      const Color(0xFFFF00FF),
-      const Color(0xFF39FF14),
-      const Color(0xFFFFAA00),
+      AppColors.primary,
+      AppColors.secondary,
+      AppColors.accent,
+      AppColors.amber,
       const Color(0xFF00AAFF),
       const Color(0xFFFF0088),
     ];

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 
 class LegalScreen extends StatefulWidget {
   final String title;
@@ -23,18 +24,12 @@ class _LegalScreenState extends State<LegalScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF00FFFF)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           widget.title,
-          style: const TextStyle(
-            color: Color(0xFF00FFFF),
-            fontFamily: 'Courier New',
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
+          style: WintermmuteStyles.subHeaderStyle,
         ),
         centerTitle: true,
       ),
@@ -43,7 +38,7 @@ class _LegalScreenState extends State<LegalScreen> {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 60),
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFF00FFFF), width: 1),
+            border: Border.all(color: AppColors.primary, width: 1),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Stack(
@@ -76,13 +71,7 @@ class _LegalScreenState extends State<LegalScreen> {
             padding: const EdgeInsets.only(top: 24, bottom: 12),
             child: Text(
               line.replaceFirst('# ', ''),
-              style: const TextStyle(
-                color: Color(0xFF00FFFF),
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Courier New',
-                letterSpacing: 1,
-              ),
+              style: WintermmuteStyles.headerStyle,
             ),
           );
         } else if (line.startsWith('## ')) {
@@ -90,12 +79,7 @@ class _LegalScreenState extends State<LegalScreen> {
             padding: const EdgeInsets.only(top: 18, bottom: 10),
             child: Text(
               line.replaceFirst('## ', ''),
-              style: const TextStyle(
-                color: Color(0xFFFF9800),
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Courier New',
-              ),
+              style: WintermmuteStyles.subHeaderStyle.copyWith(color: AppColors.amber),
             ),
           );
         } else if (line.startsWith('### ')) {
@@ -103,12 +87,7 @@ class _LegalScreenState extends State<LegalScreen> {
             padding: const EdgeInsets.only(top: 12, bottom: 8),
             child: Text(
               line.replaceFirst('### ', ''),
-              style: const TextStyle(
-                color: Color(0xFFCCCCCC),
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Courier New',
-              ),
+              style: WintermmuteStyles.smallStyle.copyWith(color: AppColors.textLight),
             ),
           );
         } else if (line.startsWith('- ')) {
@@ -116,11 +95,7 @@ class _LegalScreenState extends State<LegalScreen> {
             padding: const EdgeInsets.only(left: 20, top: 6, bottom: 6),
             child: Text(
               '• ${line.replaceFirst('- ', '')}',
-              style: const TextStyle(
-                color: Color(0xFFCCCCCC),
-                fontSize: 12,
-                fontFamily: 'Courier New',
-              ),
+              style: WintermmuteStyles.smallStyle.copyWith(color: AppColors.textLight),
             ),
           );
         } else if (line.trim().isEmpty) {
@@ -130,10 +105,8 @@ class _LegalScreenState extends State<LegalScreen> {
             padding: const EdgeInsets.only(bottom: 10),
             child: Text(
               line,
-              style: const TextStyle(
-                color: Color(0xFFCCCCCC),
-                fontSize: 12,
-                fontFamily: 'Courier New',
+              style: WintermmuteStyles.smallStyle.copyWith(
+                color: AppColors.textLight,
                 height: 1.6,
               ),
             ),
@@ -148,7 +121,7 @@ class _ScanlinesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF00FFFF).withOpacity(0.05)
+      ..color = AppColors.primary.withOpacity(0.05)
       ..strokeWidth = 1;
 
     for (double i = 0; i < size.height; i += 3) {

@@ -102,7 +102,7 @@ class _AdherenceCard extends StatelessWidget {
         ? AppColors.accent // Green
         : adherence >= 60
             ? Color(0xFFFFA500) // Orange
-            : Color(0xFFFF0040); // Red
+            : AppColors.error; // Red
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -356,7 +356,7 @@ class _SideEffectsCard extends StatelessWidget {
                   Text(
                     avgSeverity.toStringAsFixed(1),
                     style: WintermmuteStyles.headerStyle.copyWith(
-                      color: avgSeverity > 5 ? Color(0xFFFF0040) : AppColors.textMid,
+                      color: avgSeverity > 5 ? AppColors.error : AppColors.textMid,
                       fontSize: 24,
                     ),
                   ),
@@ -410,7 +410,7 @@ class _WeightChangeCard extends StatelessWidget {
                   Text(
                     '${isGain ? '+' : ''}${weightChange.toStringAsFixed(1)} lbs',
                     style: WintermmuteStyles.headerStyle.copyWith(
-                      color: isGain ? Color(0xFFFF0040) : AppColors.accent,
+                      color: isGain ? AppColors.error : AppColors.accent,
                       fontSize: 18,
                     ),
                   ),
@@ -426,7 +426,7 @@ class _WeightChangeCard extends StatelessWidget {
                   Text(
                     '${bodyFatChange > 0 ? '+' : ''}${bodyFatChange.toStringAsFixed(1)}%',
                     style: WintermmuteStyles.headerStyle.copyWith(
-                      color: bodyFatChange < 0 ? AppColors.accent : Color(0xFFFF0040),
+                      color: bodyFatChange < 0 ? AppColors.accent : AppColors.error,
                       fontSize: 18,
                     ),
                   ),

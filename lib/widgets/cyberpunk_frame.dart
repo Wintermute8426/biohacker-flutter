@@ -18,8 +18,8 @@ class CyberpunkFrame extends StatelessWidget {
     Key? key,
     required this.child,
     this.strokeWidth = 2.0, // Thicker for hardware feel
-    this.frameColor = const Color(0xFF00FFFF),
-    this.glowColor = const Color(0xFF00FFFF),
+    this.frameColor = AppColors.primary,
+    this.glowColor = AppColors.primary,
     this.showStatusLed = false,
     this.statusLedActive = true,
     this.padding = const EdgeInsets.all(12),
@@ -29,8 +29,8 @@ class CyberpunkFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveFrameColor = frameColor == const Color(0xFF00FFFF) ? AppColors.primary : frameColor;
-    final effectiveGlowColor = glowColor == const Color(0xFF00FFFF) ? AppColors.primary : glowColor;
+    final effectiveFrameColor = frameColor == AppColors.primary ? AppColors.primary : frameColor;
+    final effectiveGlowColor = glowColor == AppColors.primary ? AppColors.primary : glowColor;
 
     return Stack(
       children: [
@@ -104,7 +104,7 @@ class CyberpunkFrame extends StatelessWidget {
   }
 
   Widget _buildRivet(Alignment alignment) {
-    final effectiveFrameColor = frameColor == const Color(0xFF00FFFF) ? AppColors.primary : frameColor;
+    final effectiveFrameColor = frameColor == AppColors.primary ? AppColors.primary : frameColor;
     return Align(
       alignment: alignment,
       child: Container(
@@ -266,7 +266,7 @@ class PulsingGlow extends StatefulWidget {
   const PulsingGlow({
     Key? key,
     required this.child,
-    this.glowColor = const Color(0xFF00FFFF),
+    this.glowColor = AppColors.primary,
     this.minOpacity = 0.3,
     this.maxOpacity = 0.8,
     this.duration = const Duration(milliseconds: 1500),
@@ -305,7 +305,7 @@ class _PulsingGlowState extends State<PulsingGlow> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = widget.glowColor == const Color(0xFF00FFFF) ? AppColors.primary : widget.glowColor;
+    final effectiveColor = widget.glowColor == AppColors.primary ? AppColors.primary : widget.glowColor;
 
     return AnimatedBuilder(
       animation: _animation,

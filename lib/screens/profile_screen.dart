@@ -341,14 +341,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Color _getGoalColor(String goal) {
     final goalLower = goal.toLowerCase();
-    if (goalLower.contains('weight') || goalLower.contains('lose') || goalLower.contains('fat')) return const Color(0xFF00FFFF);
+    if (goalLower.contains('weight') || goalLower.contains('lose') || goalLower.contains('fat')) return AppColors.primary;
     if (goalLower.contains('muscle') || goalLower.contains('gain')) return const Color(0xFFFF6600);
     if (goalLower.contains('energy')) return const Color(0xFFFFFF00);
     if (goalLower.contains('recovery')) return const Color(0xFF00FF99);
-    if (goalLower.contains('longevity')) return const Color(0xFFFF00FF);
+    if (goalLower.contains('longevity')) return AppColors.secondary;
     if (goalLower.contains('sleep')) return const Color(0xFF8B5CF6);
-    if (goalLower.contains('cognitive') || goalLower.contains('focus')) return const Color(0xFF00FFFF);
-    if (goalLower.contains('immune')) return const Color(0xFF39FF14);
+    if (goalLower.contains('cognitive') || goalLower.contains('focus')) return AppColors.primary;
+    if (goalLower.contains('immune')) return AppColors.accent;
     if (goalLower.contains('performance')) return const Color(0xFFFFAA00);
     return const Color(0xFF00FF00);
   }
@@ -591,7 +591,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           '- All dose logs\n'
           '- Your account\n\n'
           'This action cannot be undone.',
-          style: TextStyle(color: Colors.white, fontFamily: 'monospace', fontSize: 12),
+          style: TextStyle(color: AppColors.textLight, fontFamily: 'monospace', fontSize: 12),
         ),
         actions: [
           TextButton(
@@ -637,7 +637,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         content: Text(
           'This will reset your onboarding status and take you back through the setup flow.\n\n'
           'Your existing data will not be deleted.',
-          style: TextStyle(color: Colors.white, fontFamily: 'monospace', fontSize: 12),
+          style: TextStyle(color: AppColors.textLight, fontFamily: 'monospace', fontSize: 12),
         ),
         actions: [
           TextButton(
@@ -946,7 +946,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildDisplayView() {
     final user = Supabase.instance.client.auth.currentUser;
     final userId = user?.id ?? '';
-    const Color crtOrange = Color(0xFFFF9800);
+    final Color crtOrange = AppColors.amber;
     const Color crtGlow = Color(0xFFFF6600);
 
     return SingleChildScrollView(

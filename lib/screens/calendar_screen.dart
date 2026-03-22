@@ -61,10 +61,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
   Color getPeptideColor(String peptideName) {
     final hash = peptideName.hashCode;
     final colors = [
-      const Color(0xFF00FFFF), // Cyan
+      AppColors.primary, // Cyan
       const Color(0xFF00FF00), // Green
-      const Color(0xFFFF9800), // Amber
-      const Color(0xFFFF00FF), // Magenta
+      AppColors.amber, // Amber
+      AppColors.secondary, // Magenta
       const Color(0xFFFFFF00), // Yellow
       const Color(0xFF00FF99), // Mint
     ];
@@ -198,12 +198,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           color: AppColors.background,
                           borderRadius: BorderRadius.zero,
                           border: Border.all(
-                            color: const Color(0xFF00FFFF),
+                            color: AppColors.primary,
                             width: 2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF00FFFF).withOpacity(0.3),
+                              color: AppColors.primary.withOpacity(0.3),
                               blurRadius: 8,
                               spreadRadius: 2,
                             ),
@@ -222,7 +222,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           child: Text(
                             _showMonthView ? 'MONTH' : 'WEEK',
                             style: WintermmuteStyles.bodyStyle.copyWith(
-                              color: const Color(0xFF00FFFF),
+                              color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                               letterSpacing: 1.5,
@@ -466,7 +466,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                 '$pastComplianceRate%',
                 style: TextStyle(
                   fontSize: 22,
-                  color: const Color(0xFF00FFFF),
+                  color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'monospace',
                 ),
@@ -475,7 +475,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               Text(
                 'COMPLIANCE',
                 style: TextStyle(
-                  color: const Color(0xFF00FFFF).withOpacity(0.7),
+                  color: AppColors.primary.withOpacity(0.7),
                   fontSize: 9,
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
@@ -497,7 +497,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           Container(
             width: 1,
             height: 50,
-            color: const Color(0xFF00FFFF).withOpacity(0.3),
+            color: AppColors.primary.withOpacity(0.3),
           ),
           // Upcoming doses
           Column(
@@ -507,7 +507,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                 '$upcoming',
                 style: TextStyle(
                   fontSize: 22,
-                  color: const Color(0xFF00FFFF),
+                  color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'monospace',
                 ),
@@ -516,7 +516,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               Text(
                 'UPCOMING',
                 style: TextStyle(
-                  color: const Color(0xFF00FFFF).withOpacity(0.7),
+                  color: AppColors.primary.withOpacity(0.7),
                   fontSize: 9,
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
@@ -529,7 +529,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
           Container(
             width: 1,
             height: 50,
-            color: const Color(0xFF00FFFF).withOpacity(0.3),
+            color: AppColors.primary.withOpacity(0.3),
           ),
           // Missed doses
           Column(
@@ -539,7 +539,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                 '$pastMissed',
                 style: TextStyle(
                   fontSize: 22,
-                  color: const Color(0xFFFF0040),
+                  color: AppColors.error,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'monospace',
                 ),
@@ -548,7 +548,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               Text(
                 'MISSED',
                 style: TextStyle(
-                  color: const Color(0xFFFF0040).withOpacity(0.7),
+                  color: AppColors.error.withOpacity(0.7),
                   fontSize: 9,
                   letterSpacing: 1.0,
                   fontWeight: FontWeight.bold,
@@ -674,7 +674,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               child: Text(
                 daysOfWeek[index],
                 style: WintermmuteStyles.bodyStyle.copyWith(
-                  color: const Color(0xFF00FFFF),
+                  color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                   fontSize: 11,
                   letterSpacing: 1.0,
@@ -783,13 +783,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   border: Border.all(
-                    color: isToday ? const Color(0xFF00FFFF) : AppColors.textMid.withOpacity(0.4),
+                    color: isToday ? AppColors.primary : AppColors.textMid.withOpacity(0.4),
                     width: isToday ? 2 : 1,
                   ),
                   borderRadius: BorderRadius.zero,
                   boxShadow: isToday ? [
                     BoxShadow(
-                      color: const Color(0xFF00FFFF).withOpacity(0.2),
+                      color: AppColors.primary.withOpacity(0.2),
                       blurRadius: 4,
                       spreadRadius: 1,
                     ),
@@ -810,7 +810,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           Text(
                             '${dayDoses.length}×',
                             style: WintermmuteStyles.smallStyle.copyWith(
-                              color: const Color(0xFF00FFFF),
+                              color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                               fontSize: 9,
                             ),
@@ -822,16 +822,16 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               if (completed > 0)
-                                const Icon(Icons.check_circle, size: 8, color: Color(0xFF39FF14)),
+                                const Icon(Icons.check_circle, size: 8, color: AppColors.accent),
                               if (scheduled > 0)
-                                const Icon(Icons.schedule, size: 8, color: Color(0xFF00FFFF)),
+                                const Icon(Icons.schedule, size: 8, color: AppColors.primary),
                               if (missed > 0)
-                                const Icon(Icons.cancel, size: 8, color: Color(0xFFFF0040)),
+                                const Icon(Icons.cancel, size: 8, color: AppColors.error),
                             ],
                           ),
                         ],
                         if (hasLab && dayDoses.isEmpty)
-                          const Icon(Icons.science, size: 10, color: Color(0xFFFF00FF)),
+                          const Icon(Icons.science, size: 10, color: AppColors.secondary),
                       ],
                     ),
                 ),
@@ -871,7 +871,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
               child: Text(
                 daysOfWeek[index],
                 style: WintermmuteStyles.bodyStyle.copyWith(
-                  color: const Color(0xFF00FFFF),
+                  color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                   fontSize: 10,
                   letterSpacing: 0.8,
@@ -979,13 +979,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   border: Border.all(
-                    color: isToday ? const Color(0xFF00FFFF) : AppColors.border.withOpacity(0.3),
+                    color: isToday ? AppColors.primary : AppColors.border.withOpacity(0.3),
                     width: isToday ? 2 : 1,
                   ),
                   borderRadius: BorderRadius.zero,
                   boxShadow: isToday ? [
                     BoxShadow(
-                      color: const Color(0xFF00FFFF).withOpacity(0.15),
+                      color: AppColors.primary.withOpacity(0.15),
                       blurRadius: 3,
                       spreadRadius: 1,
                     ),
@@ -1008,7 +1008,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                         Text(
                           '${dayDoses.length}×',
                           style: WintermmuteStyles.smallStyle.copyWith(
-                            color: const Color(0xFF00FFFF),
+                            color: AppColors.primary,
                             fontSize: 8,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1023,7 +1023,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                               child: Icon(
                                 Icons.check_circle,
                                 size: 5,
-                                color: Color(0xFF39FF14),
+                                color: AppColors.accent,
                               ),
                             ),
                           if (scheduled > 0)
@@ -1032,7 +1032,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                               child: Icon(
                                 Icons.schedule,
                                 size: 5,
-                                color: Color(0xFF00FFFF),
+                                color: AppColors.primary,
                               ),
                             ),
                           if (missed > 0)
@@ -1041,7 +1041,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                               child: Icon(
                                 Icons.cancel,
                                 size: 5,
-                                color: Color(0xFFFF0040),
+                                color: AppColors.error,
                               ),
                             ),
                           if (hasLab)
@@ -1050,7 +1050,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                               child: Icon(
                                 Icons.science,
                                 size: 5,
-                                color: Color(0xFFFF00FF),
+                                color: AppColors.secondary,
                               ),
                             ),
                         ],
@@ -1084,8 +1084,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildStatusChip('$assumedTaken', 'Assumed Taken', const Color(0xFF39FF14)),
-        _buildStatusChip('$futureScheduled', 'Upcoming', const Color(0xFF00FFFF)),
+        _buildStatusChip('$assumedTaken', 'Assumed Taken', AppColors.accent),
+        _buildStatusChip('$futureScheduled', 'Upcoming', AppColors.primary),
         _buildStatusChip('$missed', 'Missed', AppColors.error),
       ],
     );
@@ -1160,17 +1160,17 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                         ),
                         border: Border(
                           bottom: BorderSide(
-                            color: const Color(0xFF00FFFF).withOpacity(0.8),
+                            color: AppColors.primary.withOpacity(0.8),
                             width: 2,
                           ),
                           top: BorderSide(
-                            color: const Color(0xFF00FFFF).withOpacity(0.4),
+                            color: AppColors.primary.withOpacity(0.4),
                             width: 1,
                           ),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF00FFFF).withOpacity(0.2),
+                            color: AppColors.primary.withOpacity(0.2),
                             blurRadius: 12,
                             spreadRadius: 2,
                           ),
@@ -1184,12 +1184,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                             children: [
                               Row(
                                 children: [
-                                  Icon(Icons.calendar_today, color: const Color(0xFF00FFFF).withOpacity(0.7), size: 14),
+                                  Icon(Icons.calendar_today, color: AppColors.primary.withOpacity(0.7), size: 14),
                                   const SizedBox(width: 4),
                                   Text(
                                     'DOSE SCHEDULE',
                                     style: TextStyle(
-                                      color: const Color(0xFF00FFFF).withOpacity(0.7),
+                                      color: AppColors.primary.withOpacity(0.7),
                                       fontSize: 9,
                                       fontFamily: 'monospace',
                                     ),
@@ -1203,7 +1203,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                                   Text(
                                     DateFormat('EEEE').format(date).toUpperCase(),
                                     style: TextStyle(
-                                      color: const Color(0xFF00FFFF).withOpacity(0.7),
+                                      color: AppColors.primary.withOpacity(0.7),
                                       fontSize: 10,
                                       fontFamily: 'monospace',
                                       letterSpacing: 0.8,
@@ -1212,7 +1212,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                                   Text(
                                     DateFormat('MMM dd, yyyy').format(date).toUpperCase(),
                                     style: const TextStyle(
-                                      color: Color(0xFF00FFFF),
+                                      color: AppColors.primary,
                                       fontSize: 18,
                                       fontFamily: 'monospace',
                                       fontWeight: FontWeight.bold,
@@ -1227,7 +1227,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           Column(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.close, color: const Color(0xFF00FFFF).withOpacity(0.9)),
+                                icon: Icon(Icons.close, color: AppColors.primary.withOpacity(0.9)),
                                 onPressed: () => Navigator.pop(context),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
@@ -1236,13 +1236,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: const Color(0xFF00FFFF).withOpacity(0.8), width: 1),
+                                  border: Border.all(color: AppColors.primary.withOpacity(0.8), width: 1),
                                   borderRadius: BorderRadius.circular(2),
                                 ),
                                 child: Text(
                                   'DOSE-${dayDoses.length}',
                                   style: TextStyle(
-                                    color: const Color(0xFF00FFFF).withOpacity(0.9),
+                                    color: AppColors.primary.withOpacity(0.9),
                                     fontSize: 8,
                                     fontFamily: 'monospace',
                                     fontWeight: FontWeight.bold,
@@ -1267,7 +1267,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                       decoration: BoxDecoration(
                         border: Border(
                           top: BorderSide(
-                            color: const Color(0xFF00FFFF).withOpacity(0.4),
+                            color: AppColors.primary.withOpacity(0.4),
                             width: 1,
                           ),
                         ),
@@ -1279,7 +1279,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                           Text(
                             '◆ SOVEREIGN DOSING PROTOCOL ◆',
                             style: TextStyle(
-                              color: const Color(0xFF00FFFF).withOpacity(0.7),
+                              color: AppColors.primary.withOpacity(0.7),
                               fontSize: 9,
                               fontFamily: 'monospace',
                               letterSpacing: 1.2,
@@ -1290,14 +1290,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: const Color(0xFF00FFFF).withOpacity(0.6),
+                                color: AppColors.primary.withOpacity(0.6),
                                 width: 1,
                               ),
                             ),
                             child: Text(
                               'LIBERATED: 2026',
                               style: TextStyle(
-                                color: const Color(0xFF00FFFF).withOpacity(0.8),
+                                color: AppColors.primary.withOpacity(0.8),
                                 fontSize: 8,
                                 fontFamily: 'monospace',
                                 fontWeight: FontWeight.bold,
@@ -1481,7 +1481,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: const Color(0xFFFF0040).withOpacity(0.6),
+                      color: AppColors.error.withOpacity(0.6),
                       width: 1,
                     ),
                     borderRadius: BorderRadius.circular(4),
@@ -1492,13 +1492,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                       Icon(
                         Icons.cancel,
                         size: 12,
-                        color: const Color(0xFFFF0040).withOpacity(0.8),
+                        color: AppColors.error.withOpacity(0.8),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         'MISSED',
                         style: TextStyle(
-                          color: const Color(0xFFFF0040).withOpacity(0.8),
+                          color: AppColors.error.withOpacity(0.8),
                           fontSize: 9,
                           fontFamily: 'monospace',
                           fontWeight: FontWeight.bold,
@@ -1579,7 +1579,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                       child: _buildCRTButton(
                         label: 'MARK MISSED',
                         icon: Icons.cancel_outlined,
-                        color: const Color(0xFFFF0040),
+                        color: AppColors.error,
                         onPressed: () => _markAsMissed(context, dose),
                       ),
                     ),

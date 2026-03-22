@@ -263,7 +263,7 @@ class _LabsScreenState extends State<LabsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('Delete Lab Report?', style: TextStyle(color: Colors.white)),
+        title: Text('Delete Lab Report?', style: TextStyle(color: AppColors.textLight)),
         content: Text(
           'This will permanently delete this lab report and all its biomarkers.',
           style: TextStyle(color: AppColors.textMid),
@@ -489,12 +489,12 @@ class _LabsScreenState extends State<LabsScreen> {
           color: Colors.black,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: const Color(0xFF00FFFF).withOpacity(0.7),  // Cyan for labs
+            color: AppColors.primary.withOpacity(0.7),  // Cyan for labs
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00FFFF).withOpacity(0.3),
+              color: AppColors.primary.withOpacity(0.3),
               blurRadius: 15,
               spreadRadius: 2,
             ),
@@ -519,19 +519,19 @@ class _LabsScreenState extends State<LabsScreen> {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Color(0xFF00FFFF).withOpacity(0.15),
-                  border: Border.all(color: Color(0xFF00FFFF).withOpacity(0.7), width: 1),
+                  color: AppColors.primary.withOpacity(0.15),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.7), width: 1),
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.biotech, color: Color(0xFF00FFFF).withOpacity(0.8), size: 10),
+                    Icon(Icons.biotech, color: AppColors.primary.withOpacity(0.8), size: 10),
                     SizedBox(width: 4),
                     Text(
                       scanId,
                       style: TextStyle(
-                        color: Color(0xFF00FFFF).withOpacity(0.85),
+                        color: AppColors.primary.withOpacity(0.85),
                         fontSize: 8,
                         fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
@@ -550,18 +550,18 @@ class _LabsScreenState extends State<LabsScreen> {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Color(0xFF00FFFF).withOpacity(0.8), width: 1),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.8), width: 1),
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.flash_on, color: Color(0xFF00FFFF).withOpacity(0.8), size: 10),
+                    Icon(Icons.flash_on, color: AppColors.primary.withOpacity(0.8), size: 10),
                     SizedBox(width: 3),
                     Text(
                       'ROGUE-3',
                       style: TextStyle(
-                        color: Color(0xFF00FFFF).withOpacity(0.9),
+                        color: AppColors.primary.withOpacity(0.9),
                         fontSize: 8,
                         fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
@@ -582,10 +582,10 @@ class _LabsScreenState extends State<LabsScreen> {
                 height: 32,
                 padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Color(0xFF00FFFF).withOpacity(0.05),
+                  color: AppColors.primary.withOpacity(0.05),
                   border: Border(
                     top: BorderSide(
-                      color: Color(0xFF00FFFF).withOpacity(0.3),
+                      color: AppColors.primary.withOpacity(0.3),
                       width: 1,
                     ),
                   ),
@@ -598,19 +598,19 @@ class _LabsScreenState extends State<LabsScreen> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.qr_code_2, color: Color(0xFF00FFFF).withOpacity(0.4), size: 14),
+                        Icon(Icons.qr_code_2, color: AppColors.primary.withOpacity(0.4), size: 14),
                         SizedBox(width: 6),
                         Text(
                           DateFormat('yyyy.MM.dd').format(lab.uploadDate),
                           style: TextStyle(
-                            color: Color(0xFF00FFFF).withOpacity(0.5),
+                            color: AppColors.primary.withOpacity(0.5),
                             fontSize: 8,
                             fontFamily: 'monospace',
                             decoration: TextDecoration.none,
                           ),
                         ),
                         SizedBox(width: 8),
-                        Icon(Icons.verified_outlined, color: Color(0xFF00FFFF).withOpacity(0.4), size: 10),
+                        Icon(Icons.verified_outlined, color: AppColors.primary.withOpacity(0.4), size: 10),
                       ],
                     ),
                     
@@ -620,14 +620,14 @@ class _LabsScreenState extends State<LabsScreen> {
                       children: [
                         CustomPaint(
                           size: Size(25, 10),
-                          painter: BarcodePainter(color: Color(0xFF00FFFF)),
+                          painter: BarcodePainter(color: AppColors.primary),
                         ),
                         SizedBox(width: 6),
-                        Icon(Icons.qr_code_2, color: Color(0xFF00FFFF).withOpacity(0.35), size: 12),
+                        Icon(Icons.qr_code_2, color: AppColors.primary.withOpacity(0.35), size: 12),
                         SizedBox(width: 6),
                         CustomPaint(
                           size: Size(30, 10),
-                          painter: BarcodePainter(color: Color(0xFF00FFFF)),
+                          painter: BarcodePainter(color: AppColors.primary),
                         ),
                       ],
                     ),
@@ -636,12 +636,12 @@ class _LabsScreenState extends State<LabsScreen> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.science_outlined, color: Color(0xFF00FFFF).withOpacity(0.4), size: 10),
+                        Icon(Icons.science_outlined, color: AppColors.primary.withOpacity(0.4), size: 10),
                         SizedBox(width: 4),
                         Text(
                           'LAB-${lab.uploadDate.year}',
                           style: TextStyle(
-                            color: Color(0xFF00FFFF).withOpacity(0.45),
+                            color: AppColors.primary.withOpacity(0.45),
                             fontSize: 7,
                             fontFamily: 'monospace',
                             decoration: TextDecoration.none,
@@ -650,7 +650,7 @@ class _LabsScreenState extends State<LabsScreen> {
                         SizedBox(width: 6),
                         CustomPaint(
                           size: Size(20, 10),
-                          painter: BarcodePainter(color: Color(0xFF00FFFF)),
+                          painter: BarcodePainter(color: AppColors.primary),
                         ),
                       ],
                     ),
@@ -792,12 +792,12 @@ class _LabsScreenState extends State<LabsScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.flash_on, color: const Color(0xFF00FFFF).withOpacity(0.7), size: 14),
+                    Icon(Icons.flash_on, color: AppColors.primary.withOpacity(0.7), size: 14),
                     const SizedBox(width: 4),
                     Text(
                       'BIOMETRIC ANALYSIS',
                       style: TextStyle(
-                        color: const Color(0xFF00FFFF).withOpacity(0.7),
+                        color: AppColors.primary.withOpacity(0.7),
                         fontSize: 9,
                         fontFamily: 'monospace',
                         decoration: TextDecoration.none,
@@ -809,7 +809,7 @@ class _LabsScreenState extends State<LabsScreen> {
                 Text(
                   DateFormat('MMM d, yyyy').format(lab.uploadDate).toUpperCase(),
                   style: TextStyle(
-                    color: const Color(0xFF00FFFF),
+                    color: AppColors.primary,
                     fontSize: 18,
                     fontFamily: 'monospace',
                     fontWeight: FontWeight.bold,
@@ -835,12 +835,12 @@ class _LabsScreenState extends State<LabsScreen> {
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFF00FFFF).withOpacity(0.6),
+                    color: AppColors.primary.withOpacity(0.6),
                     width: 2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF00FFFF).withOpacity(0.3),
+                      color: AppColors.primary.withOpacity(0.3),
                       blurRadius: 15,
                       spreadRadius: 2,
                     ),
@@ -864,14 +864,14 @@ class _LabsScreenState extends State<LabsScreen> {
                           children: [
                             Icon(
                               Icons.source,
-                              color: const Color(0xFF00FFFF),
+                              color: AppColors.primary,
                               size: 18,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               'SOURCE',
                               style: TextStyle(
-                                color: const Color(0xFF00FFFF).withOpacity(0.7),
+                                color: AppColors.primary.withOpacity(0.7),
                                 fontSize: 11,
                                 fontFamily: 'monospace',
                                 letterSpacing: 1,
@@ -907,12 +907,12 @@ class _LabsScreenState extends State<LabsScreen> {
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: const Color(0xFF00FFFF).withOpacity(0.6),
+                  color: AppColors.primary.withOpacity(0.6),
                   width: 2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF00FFFF).withOpacity(0.3),
+                    color: AppColors.primary.withOpacity(0.3),
                     blurRadius: 15,
                     spreadRadius: 2,
                   ),
@@ -936,14 +936,14 @@ class _LabsScreenState extends State<LabsScreen> {
                         children: [
                           Icon(
                             Icons.biotech,
-                            color: const Color(0xFF00FFFF),
+                            color: AppColors.primary,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'ALL BIOMARKERS',
                             style: TextStyle(
-                              color: const Color(0xFF00FFFF).withOpacity(0.7),
+                              color: AppColors.primary.withOpacity(0.7),
                               fontSize: 11,
                               fontFamily: 'monospace',
                               letterSpacing: 1,
@@ -955,13 +955,13 @@ class _LabsScreenState extends State<LabsScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                         decoration: BoxDecoration(
-                          border: Border.all(color: const Color(0xFF00FFFF).withOpacity(0.8), width: 1),
+                          border: Border.all(color: AppColors.primary.withOpacity(0.8), width: 1),
                           borderRadius: BorderRadius.circular(2),
                         ),
                         child: Text(
                           '${lab.extractedData.length} markers',
                           style: TextStyle(
-                            color: const Color(0xFF00FFFF).withOpacity(0.9),
+                            color: AppColors.primary.withOpacity(0.9),
                             fontSize: 8,
                             fontFamily: 'monospace',
                             fontWeight: FontWeight.bold,
@@ -1053,7 +1053,7 @@ class _LabsScreenState extends State<LabsScreen> {
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
-                                            color: Colors.white,
+                                            color: AppColors.textLight,
                                             decoration: TextDecoration.none,
                                                       ),
                                         ),
@@ -1592,7 +1592,7 @@ class _LabsScreenState extends State<LabsScreen> {
       case 'HIGH':
       case 'LOW':
       case 'OUT OF RANGE':
-        return const Color(0xFFFF0040); // Red
+        return AppColors.error; // Red
       default:
         return AppColors.primary; // Cyan fallback
     }

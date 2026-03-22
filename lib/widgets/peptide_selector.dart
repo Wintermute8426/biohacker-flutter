@@ -70,7 +70,7 @@ class _PeptideSelectorState extends State<PeptideSelector> {
         TextField(
           controller: _searchController,
           onChanged: (_) => _updateFilteredList(),
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: AppColors.textLight),
           decoration: InputDecoration(
             hintText: 'Search peptides...',
             hintStyle: TextStyle(color: AppColors.textDim),
@@ -172,7 +172,7 @@ class _PeptideSelectorState extends State<PeptideSelector> {
                           child: Text(
                             peptide,
                             style: WintermmuteStyles.bodyStyle.copyWith(
-                              color: isSelected ? AppColors.primary : Colors.white,
+                              color: isSelected ? AppColors.primary : AppColors.textLight,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),

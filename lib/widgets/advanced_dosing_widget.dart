@@ -272,7 +272,7 @@ class _AdvancedDosingWidgetState extends State<AdvancedDosingWidget> {
         const SizedBox(height: 8),
         TextField(
           controller: _startDoseController,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: AppColors.textLight),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (_) => _updatePreview(),
           decoration: InputDecoration(
@@ -299,7 +299,7 @@ class _AdvancedDosingWidgetState extends State<AdvancedDosingWidget> {
                   const SizedBox(height: 4),
                   TextField(
                     controller: _startDoseController,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => _updatePreview(),
@@ -323,7 +323,7 @@ class _AdvancedDosingWidgetState extends State<AdvancedDosingWidget> {
                   const SizedBox(height: 4),
                   TextField(
                     controller: _peakDoseController,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => _updatePreview(),
@@ -357,7 +357,7 @@ class _AdvancedDosingWidgetState extends State<AdvancedDosingWidget> {
                   const SizedBox(height: 4),
                   TextField(
                     controller: _peakDoseController,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => _updatePreview(),
@@ -381,7 +381,7 @@ class _AdvancedDosingWidgetState extends State<AdvancedDosingWidget> {
                   const SizedBox(height: 4),
                   TextField(
                     controller: _endDoseController,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => _updatePreview(),
@@ -415,7 +415,7 @@ class _AdvancedDosingWidgetState extends State<AdvancedDosingWidget> {
                   const SizedBox(height: 4),
                   TextField(
                     controller: _startDoseController,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => _updatePreview(),
@@ -439,7 +439,7 @@ class _AdvancedDosingWidgetState extends State<AdvancedDosingWidget> {
                   const SizedBox(height: 4),
                   TextField(
                     controller: _peakDoseController,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => _updatePreview(),
@@ -463,7 +463,7 @@ class _AdvancedDosingWidgetState extends State<AdvancedDosingWidget> {
                   const SizedBox(height: 4),
                   TextField(
                     controller: _endDoseController,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => _updatePreview(),

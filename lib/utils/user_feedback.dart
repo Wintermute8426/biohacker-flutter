@@ -41,13 +41,13 @@ class UserFeedback {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.error, color: Colors.white),
+            const Icon(Icons.error, color: AppColors.textLight),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 message,
                 style: WintermmuteStyles.bodyStyle.copyWith(
-                  color: Colors.white,
+                  color: AppColors.textLight,
                   fontWeight: FontWeight.w500,
                 ),
               ),

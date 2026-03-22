@@ -196,7 +196,7 @@ class LabResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFAA00).withOpacity(0.15),
+              color: AppColors.amber.withOpacity(0.15),
               borderRadius: BorderRadius.circular(3),
             ),
             child: Text(
@@ -205,7 +205,7 @@ class LabResultCard extends StatelessWidget {
                 fontFamily: 'JetBrains Mono',
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFFFAA00),
+                color: AppColors.amber,
               ),
             ),
           ),
@@ -344,7 +344,7 @@ class LabResultCard extends StatelessWidget {
       case 'HIGH':
         return AppColors.error;
       case 'LOW':
-        return const Color(0xFFFFAA00);
+        return AppColors.amber;
       default:
         return AppColors.accent;
     }
@@ -353,10 +353,10 @@ class LabResultCard extends StatelessWidget {
   Color _getPeptideColor(String peptideName) {
     final hash = peptideName.hashCode;
     final colors = [
-      const Color(0xFF00FFFF),
-      const Color(0xFFFF00FF),
-      const Color(0xFF39FF14),
-      const Color(0xFFFFAA00),
+      AppColors.primary,
+      AppColors.secondary,
+      AppColors.accent,
+      AppColors.amber,
       const Color(0xFF00AAFF),
       const Color(0xFFFF0088),
     ];

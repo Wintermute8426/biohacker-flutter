@@ -42,7 +42,7 @@ class BiohackerHeader extends StatelessWidget {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2,
-                      color: const Color(0xFF00FFFF),
+                      color: AppColors.primary,
                     ),
                   ),
                 ],

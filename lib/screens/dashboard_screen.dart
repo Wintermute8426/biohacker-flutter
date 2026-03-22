@@ -310,10 +310,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Color getPeptideColor(String peptideName) {
     final hash = peptideName.hashCode;
     final colors = [
-      const Color(0xFF00FFFF), // Cyan
+      AppColors.primary, // Cyan
       const Color(0xFF00FF00), // Green
-      const Color(0xFFFF9800), // Amber
-      const Color(0xFFFF00FF), // Magenta
+      AppColors.amber, // Amber
+      AppColors.secondary, // Magenta
       const Color(0xFFFFFF00), // Yellow
       const Color(0xFF00FF99), // Mint
     ];
@@ -432,14 +432,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       subtitle: 'UNAUTHORIZED RESEARCH',
       color: CRTColor.amber,
       height: 240, // Taller
-      trailing: Icon(Icons.science, color: Color(0xFFFF9800), size: 20),
+      trailing: Icon(Icons.science, color: AppColors.amber, size: 20),
       rogueId: 'ROGUE-2',
       child: _activeCycles.isEmpty
           ? Center(
               child: Text(
                 '[ NO ACTIVE PROTOCOLS ]',
                 style: TextStyle(
-                  color: Color(0xFFFF9800).withOpacity(0.4),
+                  color: AppColors.amber.withOpacity(0.4),
                   fontSize: 10,
                   fontFamily: 'monospace',
                 ),
@@ -453,7 +453,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   padding: EdgeInsets.only(bottom: 12), // More spacing
                   child: Row(
                     children: [
-                      Icon(Icons.fiber_manual_record, color: Color(0xFFFF9800), size: 8),
+                      Icon(Icons.fiber_manual_record, color: AppColors.amber, size: 8),
                       SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -466,7 +466,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 Text(
                                   cycle.peptideName.toUpperCase(),
                                   style: TextStyle(
-                                    color: Color(0xFFFF9800).withOpacity(0.85),
+                                    color: AppColors.amber.withOpacity(0.85),
                                     fontSize: 11,
                                     fontFamily: 'monospace',
                                   ),
@@ -474,7 +474,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 DoseDisplay(
                                   doseMg: cycle.dose,
                                   peptideName: cycle.peptideName,
-                                  color: Color(0xFFFF9800),
+                                  color: AppColors.amber,
                                   showLabel: false,
                                   showSyringe: true,
                                 ),
@@ -490,7 +490,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   child: Container(
                                     height: 4,
                                     decoration: BoxDecoration(
-                                      color: Color(0xFFFF9800).withOpacity(0.25),
+                                      color: AppColors.amber.withOpacity(0.25),
                                       borderRadius: BorderRadius.circular(2),
                                     ),
                                     child: FractionallySizedBox(
@@ -498,7 +498,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       widthFactor: _calculateCycleProgress(cycle),
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: Color(0xFFFF9800).withOpacity(0.9),
+                                          color: AppColors.amber.withOpacity(0.9),
                                           borderRadius: BorderRadius.circular(2),
                                         ),
                                       ),
@@ -509,7 +509,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 Text(
                                   '${(_calculateCycleProgress(cycle) * 100).toStringAsFixed(0)}%',
                                   style: TextStyle(
-                                    color: Color(0xFFFF9800).withOpacity(0.85),
+                                    color: AppColors.amber.withOpacity(0.85),
                                     fontSize: 9,
                                     fontFamily: 'monospace',
                                   ),
@@ -565,7 +565,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         height: 8,
                         decoration: BoxDecoration(
                           color: isCompleted
-                              ? Color(0xFF39FF14)
+                              ? AppColors.accent
                               : isMissed
                                   ? Color(0xFFFF6B00)
                                   : peptideColor,
@@ -896,14 +896,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              const Color(0xFF00FFFF), // Cyan
+                              AppColors.primary, // Cyan
                               const Color(0xFF00FF41), // Neon green
                             ],
                           ),
                           borderRadius: BorderRadius.circular(4),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF00FFFF).withOpacity(0.15),
+                              color: AppColors.primary.withOpacity(0.15),
                               blurRadius: 6,
                             ),
                           ],
@@ -956,14 +956,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     label: Text(
                       'MARK MISSED',
                       style: WintermmuteStyles.bodyStyle.copyWith(
-                        color: Colors.white,
+                        color: AppColors.textLight,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6B00), // Orange warning color
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.textLight,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
@@ -1300,7 +1300,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             _buildCRTActionButton(
               icon: Icons.science_outlined,
               label: 'VIEW LABS',
-              color: Color(0xFF00FFFF),
+              color: AppColors.primary,
               onTap: () {
                 Navigator.push(
                   context,
@@ -1313,7 +1313,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             _buildCRTActionButton(
               icon: Icons.biotech,
               label: 'RESEARCH',
-              color: Color(0xFFFF9800),
+              color: AppColors.amber,
               onTap: _navigateToResearch,
             ),
           ],

@@ -121,7 +121,7 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
             const SizedBox(height: 8),
             TextField(
               controller: weightController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textLight),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 hintText: '185.5',
@@ -145,7 +145,7 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
             const SizedBox(height: 8),
             TextField(
               controller: bodyFatController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textLight),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 hintText: '15.5',

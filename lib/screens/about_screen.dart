@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/colors.dart';
+import '../theme/wintermute_styles.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({Key? key}) : super(key: key);
@@ -12,15 +13,12 @@ class AboutScreen extends StatelessWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF00FFFF)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'ABOUT',
-          style: TextStyle(
-            color: Color(0xFF00FFFF),
-            fontFamily: 'Courier New',
-            fontSize: 14,
+          style: WintermmuteStyles.subHeaderStyle.copyWith(
             fontWeight: FontWeight.bold,
             letterSpacing: 1,
           ),
@@ -47,21 +45,15 @@ class AboutScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'BIOHACKER',
-                    style: const TextStyle(
-                      color: Color(0xFF00FFFF),
+                    style: WintermmuteStyles.titleStyle.copyWith(
                       fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Courier New',
-                      letterSpacing: 2,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'PEPTIDE TRACKING & HEALTH OPTIMIZATION',
-                    style: const TextStyle(
-                      color: Color(0xFFFF9800),
-                      fontSize: 12,
-                      fontFamily: 'Courier New',
+                    style: WintermmuteStyles.smallStyle.copyWith(
+                      color: AppColors.amber,
                       letterSpacing: 1,
                     ),
                   ),
@@ -112,91 +104,35 @@ class AboutScreen extends StatelessWidget {
             // Version Info
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF00FFFF).withOpacity(0.3), width: 1),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              decoration: WintermmuteStyles.cardDecoration,
+              child: Row(
                 children: [
-                  Text(
-                    'APP INFORMATION',
-                    style: const TextStyle(
-                      color: Color(0xFF00FFFF),
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Courier New',
-                      letterSpacing: 1,
+                  Container(
+                    width: 3,
+                    height: 100,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'APP INFORMATION',
+                          style: WintermmuteStyles.smallStyle.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildInfoRow('Version:', '1.0.0'),
+                        const SizedBox(height: 8),
+                        _buildInfoRow('Release:', 'March 2026'),
+                        const SizedBox(height: 8),
+                        _buildInfoRow('Platform:', 'Android & iOS'),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Version:',
-                        style: const TextStyle(
-                          color: Color(0xFFCCCCCC),
-                          fontSize: 11,
-                          fontFamily: 'Courier New',
-                        ),
-                      ),
-                      Text(
-                        '1.0.0',
-                        style: const TextStyle(
-                          color: Color(0xFFFF9800),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Courier New',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Release:',
-                        style: const TextStyle(
-                          color: Color(0xFFCCCCCC),
-                          fontSize: 11,
-                          fontFamily: 'Courier New',
-                        ),
-                      ),
-                      Text(
-                        'March 2026',
-                        style: const TextStyle(
-                          color: Color(0xFFFF9800),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Courier New',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Platform:',
-                        style: const TextStyle(
-                          color: Color(0xFFCCCCCC),
-                          fontSize: 11,
-                          fontFamily: 'Courier New',
-                        ),
-                      ),
-                      Text(
-                        'Android & iOS',
-                        style: const TextStyle(
-                          color: Color(0xFFFF9800),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Courier New',
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -206,27 +142,34 @@ class AboutScreen extends StatelessWidget {
             // Legal Links
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF00FFFF).withOpacity(0.3), width: 1),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              decoration: WintermmuteStyles.cardDecoration,
+              child: Row(
                 children: [
-                  Text(
-                    'LEGAL',
-                    style: const TextStyle(
-                      color: Color(0xFF00FFFF),
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Courier New',
-                      letterSpacing: 1,
+                  Container(
+                    width: 3,
+                    height: 80,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'LEGAL',
+                          style: WintermmuteStyles.smallStyle.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildLegalLink('Privacy Policy', 'View our privacy and data handling practices'),
+                        const SizedBox(height: 8),
+                        _buildLegalLink('Terms of Service', 'Read our terms and health disclaimers'),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  _buildLegalLink('Privacy Policy', 'View our privacy and data handling practices'),
-                  const SizedBox(height: 8),
-                  _buildLegalLink('Terms of Service', 'Read our terms and health disclaimers'),
                 ],
               ),
             ),
@@ -236,23 +179,15 @@ class AboutScreen extends StatelessWidget {
             // Footer
             Center(
               child: Column(
-                children: [
+                children: const [
                   Text(
-                    '© 2026 Biohacker',
-                    style: const TextStyle(
-                      color: Color(0xFF666666),
-                      fontSize: 10,
-                      fontFamily: 'Courier New',
-                    ),
+                    '\u00A9 2026 Biohacker',
+                    style: WintermmuteStyles.tinyStyle,
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
-                    'Built with ❤️ for health optimization',
-                    style: const TextStyle(
-                      color: Color(0xFF666666),
-                      fontSize: 10,
-                      fontFamily: 'Courier New',
-                    ),
+                    'Built for health optimization',
+                    style: WintermmuteStyles.tinyStyle,
                   ),
                 ],
               ),
@@ -263,81 +198,114 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: WintermmuteStyles.smallStyle.copyWith(
+            color: AppColors.textLight,
+            fontSize: 11,
+          ),
+        ),
+        Text(
+          value,
+          style: WintermmuteStyles.smallStyle.copyWith(
+            color: AppColors.amber,
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSection({
     required String title,
     String? content,
     List<String>? items,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFF00FFFF),
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Courier New',
-            letterSpacing: 1,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: WintermmuteStyles.cardDecoration,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 3,
+            constraints: const BoxConstraints(minHeight: 40),
+            color: AppColors.primary,
           ),
-        ),
-        const SizedBox(height: 12),
-        if (content != null)
-          Text(
-            content,
-            style: const TextStyle(
-              color: Color(0xFFCCCCCC),
-              fontSize: 12,
-              fontFamily: 'Courier New',
-              height: 1.6,
-            ),
-          ),
-        if (items != null)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: items
-                .map(
-                  (item) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '▪ ',
-                          style: const TextStyle(
-                            color: Color(0xFFFF9800),
-                            fontSize: 12,
-                            fontFamily: 'Courier New',
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            item,
-                            style: const TextStyle(
-                              color: Color(0xFFCCCCCC),
-                              fontSize: 12,
-                              fontFamily: 'Courier New',
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                      ],
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: WintermmuteStyles.smallStyle.copyWith(
+                    color: AppColors.primary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (content != null)
+                  Text(
+                    content,
+                    style: WintermmuteStyles.smallStyle.copyWith(
+                      color: AppColors.textLight,
+                      height: 1.6,
                     ),
                   ),
-                )
-                .toList(),
+                if (items != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: items
+                        .map(
+                          (item) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '\u25AA ',
+                                  style: WintermmuteStyles.smallStyle.copyWith(
+                                    color: AppColors.amber,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    item,
+                                    style: WintermmuteStyles.smallStyle.copyWith(
+                                      color: AppColors.textLight,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+              ],
+            ),
           ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildLegalLink(String title, String subtitle) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
           left: BorderSide(
-            color: const Color(0xFFFF9800),
+            color: AppColors.amber,
             width: 2,
           ),
         ),
@@ -347,20 +315,17 @@ class AboutScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFFFF9800),
+            style: WintermmuteStyles.smallStyle.copyWith(
+              color: AppColors.amber,
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              fontFamily: 'Courier New',
             ),
           ),
           const SizedBox(height: 2),
           Text(
             subtitle,
-            style: const TextStyle(
-              color: Color(0xFF888888),
-              fontSize: 10,
-              fontFamily: 'Courier New',
+            style: WintermmuteStyles.tinyStyle.copyWith(
+              color: AppColors.textMid,
             ),
           ),
         ],

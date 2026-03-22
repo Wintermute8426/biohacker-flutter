@@ -131,7 +131,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               const SizedBox(height: 16),
               TextField(
                 controller: nameController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textLight),
                 decoration: InputDecoration(
                   labelText: 'Protocol Name',
                   labelStyle: TextStyle(color: AppColors.primary),
@@ -141,7 +141,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               const SizedBox(height: 12),
               TextField(
                 controller: descController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textLight),
                 maxLines: 2,
                 decoration: InputDecoration(
                   labelText: 'Description',
@@ -154,13 +154,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 value: selectedPeptide,
                 isExpanded: true,
                 dropdownColor: AppColors.surface,
-                items: PEPTIDE_LIST.map((p) => DropdownMenuItem(value: p, child: Text(p, style: TextStyle(color: Colors.white)))).toList(),
+                items: PEPTIDE_LIST.map((p) => DropdownMenuItem(value: p, child: Text(p, style: TextStyle(color: AppColors.textLight)))).toList(),
                 onChanged: (val) => setModalState(() => selectedPeptide = val!),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: doseController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textLight),
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Dose (mg)',
@@ -174,7 +174,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 isExpanded: true,
                 dropdownColor: AppColors.surface,
                 items: ['SC (subcutaneous)', 'IM (intramuscular)', 'IV (intravenous)', 'Intranasal', 'Oral']
-                    .map((r) => DropdownMenuItem(value: r, child: Text(r, style: TextStyle(color: Colors.white))))
+                    .map((r) => DropdownMenuItem(value: r, child: Text(r, style: TextStyle(color: AppColors.textLight))))
                     .toList(),
                 onChanged: (val) => setModalState(() => selectedRoute = val!),
               ),
@@ -184,14 +184,14 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 isExpanded: true,
                 dropdownColor: AppColors.surface,
                 items: ['1x daily', '2x daily', '1x weekly', '2x weekly', '3x weekly']
-                    .map((f) => DropdownMenuItem(value: f, child: Text(f, style: TextStyle(color: Colors.white))))
+                    .map((f) => DropdownMenuItem(value: f, child: Text(f, style: TextStyle(color: AppColors.textLight))))
                     .toList(),
                 onChanged: (val) => setModalState(() => selectedFrequency = val!),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: weeksController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textLight),
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: 'Duration (weeks)',
@@ -313,7 +313,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: durationController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textLight),
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Duration (weeks)',

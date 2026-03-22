@@ -94,7 +94,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('All values must be greater than 0'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
           duration: Duration(seconds: 2),
         ),
       );
@@ -106,7 +106,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Vial size seems unusually high (>1000mg)'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
           duration: Duration(seconds: 2),
         ),
       );
@@ -117,7 +117,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Draw volume seems unusually high (>10ml)'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
           duration: Duration(seconds: 2),
         ),
       );
@@ -226,7 +226,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill in all required fields'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -238,7 +238,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('All dose amounts must be greater than 0'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -249,7 +249,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Ramp up start dose cannot be negative'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -259,7 +259,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Ramp up increment cannot be negative'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -269,7 +269,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Ramp up duration must be at least 1 day'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -279,7 +279,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Plateau dose cannot be negative'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -289,7 +289,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Plateau duration must be at least 1 day'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -299,7 +299,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Ramp down decrement cannot be negative'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -309,7 +309,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Ramp down duration must be at least 1 day'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -320,7 +320,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('End date cannot be before start date'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;
@@ -331,7 +331,7 @@ class _CycleSetupFormState extends State<CycleSetupForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('No doses generated. Check ramp/plateau settings'),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
         ),
       );
       return;

@@ -14,7 +14,7 @@ class ScanlineOverlay extends StatelessWidget {
     required this.child,
     this.spacing = 2.0,
     this.opacity = 0.03,
-    this.lineColor = const Color(0xFF00FFFF),
+    this.lineColor = AppColors.primary,
   }) : super(key: key);
 
   @override
@@ -52,7 +52,7 @@ class _ScanlinesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = (lineColor == const Color(0xFF00FFFF) ? AppColors.primary : lineColor).withOpacity(opacity)
+      ..color = (lineColor == AppColors.primary ? AppColors.primary : lineColor).withOpacity(opacity)
       ..strokeWidth = 1;
 
     for (double y = 0; y < size.height; y += spacing) {

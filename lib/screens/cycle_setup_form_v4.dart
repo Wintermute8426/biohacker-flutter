@@ -395,7 +395,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   Widget _buildCRTCard({
     required String sectionTitle,
     required List<Widget> children,
-    Color borderColor = const Color(0xFFFF9800),
+    Color borderColor = AppColors.amber,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -580,7 +580,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMsg),
-          backgroundColor: Color(0xFFFF0040),
+          backgroundColor: AppColors.error,
           duration: const Duration(seconds: 3),
         ),
       );
@@ -673,12 +673,12 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.flash_on, color: const Color(0xFFFF9800).withOpacity(0.7), size: 14),
+                        Icon(Icons.flash_on, color: AppColors.amber.withOpacity(0.7), size: 14),
                         const SizedBox(width: 4),
                         Text(
                           'PROTOCOL SETUP',
                           style: TextStyle(
-                            color: const Color(0xFFFF9800).withOpacity(0.7),
+                            color: AppColors.amber.withOpacity(0.7),
                             fontSize: 9,
                             fontFamily: 'monospace',
                           ),
@@ -689,7 +689,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                     Text(
                       'NEW ENHANCEMENT CYCLE',
                       style: TextStyle(
-                        color: const Color(0xFFFF9800),
+                        color: AppColors.amber,
                         fontSize: 18,
                         fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
@@ -701,13 +701,13 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.8), width: 1),
+                    border: Border.all(color: AppColors.amber.withOpacity(0.8), width: 1),
                     borderRadius: BorderRadius.circular(2),
                   ),
                   child: Text(
                     'ROGUE-2',
                     style: TextStyle(
-                      color: const Color(0xFFFF9800).withOpacity(0.9),
+                      color: AppColors.amber.withOpacity(0.9),
                       fontSize: 8,
                       fontFamily: 'monospace',
                       fontWeight: FontWeight.bold,
@@ -747,35 +747,35 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   controller: _totalPeptideController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   style: TextStyle(
-                    color: const Color(0xFFFF9800).withOpacity(0.9),
+                    color: AppColors.amber.withOpacity(0.9),
                     fontSize: 14,
                     fontFamily: 'monospace',
                   ),
                   decoration: InputDecoration(
                     labelText: 'VIAL SIZE (mg)',
                     labelStyle: TextStyle(
-                      color: const Color(0xFFFF9800).withOpacity(0.5),
+                      color: AppColors.amber.withOpacity(0.5),
                       fontSize: 12,
                       fontFamily: 'monospace',
                     ),
                     hintText: 'e.g., 10',
                     helperText: '5-500mg recommended',
                     helperStyle: TextStyle(color: AppColors.textMid.withOpacity(0.6), fontSize: 10),
-                    prefixIcon: Icon(Icons.science, color: const Color(0xFFFF9800), size: 18),
+                    prefixIcon: Icon(Icons.science, color: AppColors.amber, size: 18),
                     errorText: _fieldErrors['vialSize'],
                     errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
                     filled: true,
                     fillColor: Colors.black,
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: const Color(0xFFFF9800).withOpacity(0.4),
+                        color: AppColors.amber.withOpacity(0.4),
                         width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: const Color(0xFFFF9800).withOpacity(0.8),
+                        color: AppColors.amber.withOpacity(0.8),
                         width: 2,
                       ),
                       borderRadius: BorderRadius.circular(4),
@@ -800,35 +800,35 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   controller: _desiredDosageController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   style: TextStyle(
-                    color: const Color(0xFFFF9800).withOpacity(0.9),
+                    color: AppColors.amber.withOpacity(0.9),
                     fontSize: 14,
                     fontFamily: 'monospace',
                   ),
                   decoration: InputDecoration(
                     labelText: 'DESIRED DOSAGE PER INJECTION (mg)',
                     labelStyle: TextStyle(
-                      color: const Color(0xFFFF9800).withOpacity(0.5),
+                      color: AppColors.amber.withOpacity(0.5),
                       fontSize: 12,
                       fontFamily: 'monospace',
                     ),
                     hintText: 'e.g., 1',
                     helperText: '0.1-10mg recommended',
                     helperStyle: TextStyle(color: AppColors.textMid.withOpacity(0.6), fontSize: 10),
-                    suffixIcon: Icon(Icons.science, color: const Color(0xFFFF9800), size: 18),
+                    suffixIcon: Icon(Icons.science, color: AppColors.amber, size: 18),
                     errorText: _fieldErrors['desiredDose'],
                     errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
                     filled: true,
                     fillColor: Colors.black,
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: const Color(0xFFFF9800).withOpacity(0.4),
+                        color: AppColors.amber.withOpacity(0.4),
                         width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: const Color(0xFFFF9800).withOpacity(0.8),
+                        color: AppColors.amber.withOpacity(0.8),
                         width: 2,
                       ),
                       borderRadius: BorderRadius.circular(4),
@@ -855,35 +855,35 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   controller: _concentrationMlController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   style: TextStyle(
-                    color: const Color(0xFFFF9800).withOpacity(0.9),
+                    color: AppColors.amber.withOpacity(0.9),
                     fontSize: 14,
                     fontFamily: 'monospace',
                   ),
                   decoration: InputDecoration(
                     labelText: 'DRAW PER INJECTION (ml)',
                     labelStyle: TextStyle(
-                      color: const Color(0xFFFF9800).withOpacity(0.5),
+                      color: AppColors.amber.withOpacity(0.5),
                       fontSize: 12,
                       fontFamily: 'monospace',
                     ),
                     hintText: '0.1',
                     helperText: '0.05-1.0ml recommended',
                     helperStyle: TextStyle(color: AppColors.textMid.withOpacity(0.6), fontSize: 10),
-                    suffixIcon: Icon(Icons.water_drop, color: const Color(0xFFFF9800), size: 18),
+                    suffixIcon: Icon(Icons.water_drop, color: AppColors.amber, size: 18),
                     errorText: _fieldErrors['draw'],
                     errorStyle: TextStyle(color: AppColors.error, fontSize: 11),
                     filled: true,
                     fillColor: Colors.black,
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: const Color(0xFFFF9800).withOpacity(0.4),
+                        color: AppColors.amber.withOpacity(0.4),
                         width: 1.5,
                       ),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                        color: const Color(0xFFFF9800).withOpacity(0.8),
+                        color: AppColors.amber.withOpacity(0.8),
                         width: 2,
                       ),
                       borderRadius: BorderRadius.circular(4),
@@ -913,19 +913,19 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0d0600),
-                    border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.6)),
+                    border: Border.all(color: AppColors.amber.withOpacity(0.6)),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('RECONSTITUTION INSTRUCTIONS', style: TextStyle(color: const Color(0xFFFF9800), fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.bold)),
+                      Text('RECONSTITUTION INSTRUCTIONS', style: TextStyle(color: AppColors.amber, fontSize: 11, letterSpacing: 1, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('Add BAC (sterile water):', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
-                          Text('${_bacRequired!.toStringAsFixed(1)}ml', style: TextStyle(color: const Color(0xFFFF9800), fontSize: 14, fontWeight: FontWeight.bold)),
+                          Text('${_bacRequired!.toStringAsFixed(1)}ml', style: TextStyle(color: AppColors.amber, fontSize: 14, fontWeight: FontWeight.bold)),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -941,7 +941,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                             height: 70,
                             decoration: BoxDecoration(
                               color: AppColors.textMid,
-                              border: Border.all(color: const Color(0xFFFF9800), width: 1),
+                              border: Border.all(color: AppColors.amber, width: 1),
                               borderRadius: BorderRadius.circular(2),
                             ),
                             child: Column(
@@ -951,7 +951,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                                   width: 12,
                                   height: 8,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFF9800),
+                                    color: AppColors.amber,
                                     borderRadius: const BorderRadius.only(topLeft: Radius.circular(1), topRight: Radius.circular(1)),
                                   ),
                                 ),
@@ -968,7 +968,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                                 Container(
                                   height: 70,
                                   decoration: BoxDecoration(
-                                    border: Border.all(color: const Color(0xFFFF9800), width: 2),
+                                    border: Border.all(color: AppColors.amber, width: 2),
                                     borderRadius: const BorderRadius.only(
                                       topRight: Radius.circular(6),
                                       bottomRight: Radius.circular(6),
@@ -980,7 +980,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                                   height: 70,
                                   width: ((_concentrationMl ?? 0) / 1.0) * (MediaQuery.of(context).size.width - 100),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFF9800).withOpacity(0.15),
+                                    color: AppColors.amber.withOpacity(0.15),
                                     borderRadius: const BorderRadius.only(
                                       topRight: Radius.circular(4),
                                       bottomRight: Radius.circular(4),
@@ -995,7 +995,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text('0', style: TextStyle(color: AppColors.textMid, fontSize: 8, fontWeight: FontWeight.bold)),
-                                        Text('${_concentrationMl?.toStringAsFixed(3) ?? '0.0'}ml', style: TextStyle(color: const Color(0xFFFF9800), fontSize: 9, fontWeight: FontWeight.bold)),
+                                        Text('${_concentrationMl?.toStringAsFixed(3) ?? '0.0'}ml', style: TextStyle(color: AppColors.amber, fontSize: 9, fontWeight: FontWeight.bold)),
                                         Text('1.0', style: TextStyle(color: AppColors.textMid, fontSize: 8, fontWeight: FontWeight.bold)),
                                       ],
                                     ),
@@ -1010,14 +1010,14 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                             width: 3,
                             height: 70,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFF9800),
+                              color: AppColors.amber,
                               borderRadius: BorderRadius.circular(1.5),
                             ),
                           ),
                           Container(
                             width: 1,
                             height: 70,
-                            color: const Color(0xFFFF9800),
+                            color: AppColors.amber,
                           ),
                         ],
                       ),
@@ -1037,24 +1037,24 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                 decoration: InputDecoration(
                   labelText: 'INJECTION ROUTE',
                   labelStyle: TextStyle(
-                    color: const Color(0xFFFF9800).withOpacity(0.5),
+                    color: AppColors.amber.withOpacity(0.5),
                     fontSize: 12,
                     fontFamily: 'monospace',
                   ),
                   filled: true,
                   fillColor: Colors.black,
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1.5),
+                    borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                    borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
                 dropdownColor: Colors.black,
-                style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
+                style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
                 items: _routeMap.keys.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
                 onChanged: (value) => setState(() => _selectedRoute = value),
               ),
@@ -1064,24 +1064,24 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                 decoration: InputDecoration(
                   labelText: 'FREQUENCY',
                   labelStyle: TextStyle(
-                    color: const Color(0xFFFF9800).withOpacity(0.5),
+                    color: AppColors.amber.withOpacity(0.5),
                     fontSize: 12,
                     fontFamily: 'monospace',
                   ),
                   filled: true,
                   fillColor: Colors.black,
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1.5),
+                    borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                    borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
                 dropdownColor: Colors.black,
-                style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
+                style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
                 items: ['Daily', '3x/week', '1x/week'].map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
                 onChanged: (value) {
                   setState(() => _injectionFrequency = value);
@@ -1099,14 +1099,14 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                 controller: _cycleDurationController,
                 keyboardType: TextInputType.number,
                 style: TextStyle(
-                  color: const Color(0xFFFF9800).withOpacity(0.9),
+                  color: AppColors.amber.withOpacity(0.9),
                   fontSize: 14,
                   fontFamily: 'monospace',
                 ),
                 decoration: InputDecoration(
                   labelText: 'DURATION (weeks)',
                   labelStyle: TextStyle(
-                    color: const Color(0xFFFF9800).withOpacity(0.5),
+                    color: AppColors.amber.withOpacity(0.5),
                     fontSize: 12,
                     fontFamily: 'monospace',
                   ),
@@ -1119,14 +1119,14 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   fillColor: Colors.black,
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: const Color(0xFFFF9800).withOpacity(0.4),
+                      color: AppColors.amber.withOpacity(0.4),
                       width: 1.5,
                     ),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: const Color(0xFFFF9800).withOpacity(0.8),
+                      color: AppColors.amber.withOpacity(0.8),
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(4),
@@ -1154,14 +1154,14 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0d0600),
-                    border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1),
+                    border: Border.all(color: AppColors.amber.withOpacity(0.4), width: 1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Total duration: $cycleDays days ($_cycleDurationWeeks weeks)',
-                        style: TextStyle(color: const Color(0xFFFF9800), fontSize: 12, fontWeight: FontWeight.bold)),
+                        style: TextStyle(color: AppColors.amber, fontSize: 12, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       Text('START: ${DateFormat('MMM d, yyyy').format(_startDate!)}',
                         style: TextStyle(color: AppColors.textMid, fontSize: 11)),
@@ -1173,7 +1173,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                         onTap: () => setState(() => _showDateEditor = !_showDateEditor),
                         child: Text(
                           _showDateEditor ? 'Hide date editor' : 'Edit dates',
-                          style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.7), fontSize: 11),
+                          style: TextStyle(color: AppColors.amber.withOpacity(0.7), fontSize: 11),
                         ),
                       ),
                     ],
@@ -1184,9 +1184,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   const SizedBox(height: 12),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(Icons.calendar_today, color: const Color(0xFFFF9800), size: 18),
+                    leading: Icon(Icons.calendar_today, color: AppColors.amber, size: 18),
                     title: Text('START DATE', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
-                    trailing: Text(DateFormat('MMM d').format(_startDate!), style: TextStyle(color: const Color(0xFFFF9800), fontWeight: FontWeight.bold)),
+                    trailing: Text(DateFormat('MMM d').format(_startDate!), style: TextStyle(color: AppColors.amber, fontWeight: FontWeight.bold)),
                     onTap: () async {
                       final date = await showDatePicker(context: context, initialDate: _startDate!, firstDate: DateTime.now(), lastDate: DateTime.now().add(const Duration(days: 365)));
                       if (date != null) {
@@ -1208,9 +1208,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             children: [
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.access_time, color: const Color(0xFFFF9800), size: 18),
+                leading: Icon(Icons.access_time, color: AppColors.amber, size: 18),
                 title: Text('TIME', style: TextStyle(color: AppColors.textMid, fontSize: 12)),
-                trailing: Text(_scheduledTime ?? '08:00', style: TextStyle(color: const Color(0xFFFF9800), fontWeight: FontWeight.bold)),
+                trailing: Text(_scheduledTime ?? '08:00', style: TextStyle(color: AppColors.amber, fontWeight: FontWeight.bold)),
                 onTap: () async {
                   final time = await showTimePicker(context: context, initialTime: TimeOfDay.fromDateTime(DateTime.parse('2000-01-01 ${_scheduledTime ?? "08:00"}')));
                   if (time != null) {
@@ -1232,7 +1232,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                     child: _buildCRTButton(
                       label: '↗ TAPER UP',
                       icon: Icons.trending_up,
-                      color: const Color(0xFFFF9800),
+                      color: AppColors.amber,
                       onPressed: () => _addPhase('taper_up'),
                     ),
                   ),
@@ -1241,7 +1241,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                     child: _buildCRTButton(
                       label: '↘ TAPER DOWN',
                       icon: Icons.trending_down,
-                      color: const Color(0xFFFF9800),
+                      color: AppColors.amber,
                       onPressed: () => _addPhase('taper_down'),
                     ),
                   ),
@@ -1256,7 +1256,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0d0600),
-                    border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.3), width: 1),
+                    border: Border.all(color: AppColors.amber.withOpacity(0.3), width: 1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Center(child: Text('No phases added. Click above to add one.', style: TextStyle(color: AppColors.textMid, fontSize: 12))),
@@ -1284,7 +1284,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               _buildCRTButton(
                 label: '+ ADD PLATEAU PHASE',
                 icon: Icons.add,
-                color: const Color(0xFFFF9800),
+                color: AppColors.amber,
                 onPressed: () => _addPhase('plateau'),
               ),
             ],
@@ -1299,7 +1299,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   child: _buildCRTButton(
                     label: 'CANCEL',
                     icon: Icons.close,
-                    color: const Color(0xFF666666),
+                    color: AppColors.textDim,
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -1309,7 +1309,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                   child: _buildCRTButton(
                     label: _isFormValid() ? 'CREATE PROTOCOL' : 'COMPLETE FORM',
                     icon: Icons.rocket_launch,
-                    color: const Color(0xFFFF9800),
+                    color: AppColors.amber,
                     onPressed: _isFormValid() ? _submit : null,
                   ),
                 ),
@@ -1467,11 +1467,11 @@ class _PhaseCardState extends State<PhaseCard> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF0d0600),
-        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.6), width: 2),
+        border: Border.all(color: AppColors.amber.withOpacity(0.6), width: 2),
         borderRadius: BorderRadius.circular(4),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFF9800).withOpacity(0.2),
+            color: AppColors.amber.withOpacity(0.2),
             blurRadius: 8,
             spreadRadius: 1,
           ),
@@ -1483,10 +1483,10 @@ class _PhaseCardState extends State<PhaseCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Phase ${widget.phaseNumber} • $phaseLabel', style: TextStyle(color: const Color(0xFFFF9800), fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'monospace', letterSpacing: 1)),
+              Text('Phase ${widget.phaseNumber} • $phaseLabel', style: TextStyle(color: AppColors.amber, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'monospace', letterSpacing: 1)),
               GestureDetector(
                 onTap: widget.onRemove,
-                child: Icon(Icons.close, color: Color(0xFFFF0040), size: 18),
+                child: Icon(Icons.close, color: AppColors.error, size: 18),
               ),
             ],
           ),
@@ -1497,14 +1497,14 @@ class _PhaseCardState extends State<PhaseCard> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.black,
-              border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.3), width: 1),
+              border: Border.all(color: AppColors.amber.withOpacity(0.3), width: 1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Dates:', style: TextStyle(color: AppColors.textMid, fontSize: 11)),
-                Text(dateRange, style: TextStyle(color: const Color(0xFFFF9800), fontSize: 11, fontWeight: FontWeight.bold)),
+                Text(dateRange, style: TextStyle(color: AppColors.amber, fontSize: 11, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -1516,19 +1516,19 @@ class _PhaseCardState extends State<PhaseCard> {
             TextField(
               controller: _durationController,
               keyboardType: TextInputType.number,
-              style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 13, fontFamily: 'monospace'),
+              style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 13, fontFamily: 'monospace'),
               decoration: InputDecoration(
                 labelText: 'DURATION (days)',
-                labelStyle: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
+                labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
                 hintText: '7',
                 filled: true,
                 fillColor: Colors.black,
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1),
+                  borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                  borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -1556,7 +1556,7 @@ class _PhaseCardState extends State<PhaseCard> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.4)),
+                        border: Border.all(color: AppColors.amber.withOpacity(0.4)),
                         borderRadius: BorderRadius.circular(4),
                         color: Colors.black,
                       ),
@@ -1565,7 +1565,7 @@ class _PhaseCardState extends State<PhaseCard> {
                         children: [
                           Text('Dosage (mg)', style: TextStyle(color: AppColors.textMid, fontSize: 10)),
                           const SizedBox(height: 4),
-                          Text('${widget.phase.dosage}mg (Desired)', style: TextStyle(color: const Color(0xFFFF9800), fontSize: 12, fontWeight: FontWeight.bold)),
+                          Text('${widget.phase.dosage}mg (Desired)', style: TextStyle(color: AppColors.amber, fontSize: 12, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     )
@@ -1573,19 +1573,19 @@ class _PhaseCardState extends State<PhaseCard> {
                     TextField(
                       controller: _dosageController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 13, fontFamily: 'monospace'),
+                      style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 13, fontFamily: 'monospace'),
                       decoration: InputDecoration(
                         labelText: 'Dosage (mg)',
-                        labelStyle: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
+                        labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
                         hintText: '50',
                         filled: true,
                         fillColor: Colors.black,
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1),
+                          borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                          borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -1601,21 +1601,21 @@ class _PhaseCardState extends State<PhaseCard> {
                   initialValue: widget.phase.frequency,
                   decoration: InputDecoration(
                     labelText: 'Frequency',
-                    labelStyle: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
+                    labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
                     filled: true,
                     fillColor: Colors.black,
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1),
+                      borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                      borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                   ),
                   dropdownColor: Colors.black,
-                  style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 12, fontFamily: 'monospace'),
+                  style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 12, fontFamily: 'monospace'),
                   items: ['Daily', '3x/week', '1x/week'].map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
                   onChanged: (value) {
                     widget.onUpdate(widget.phase.copyWith(frequency: value));
@@ -1629,19 +1629,19 @@ class _PhaseCardState extends State<PhaseCard> {
           // NOTES
           TextField(
             controller: _notesController,
-            style: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.9), fontSize: 13, fontFamily: 'monospace'),
+            style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 13, fontFamily: 'monospace'),
             decoration: InputDecoration(
               labelText: 'Notes (optional)',
-              labelStyle: TextStyle(color: const Color(0xFFFF9800).withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
+              labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 10, fontFamily: 'monospace'),
               hintText: 'e.g., slowly increase...',
               filled: true,
               fillColor: Colors.black,
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.4), width: 1),
+                borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1),
                 borderRadius: BorderRadius.circular(4),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: const Color(0xFFFF9800).withOpacity(0.8), width: 2),
+                borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
                 borderRadius: BorderRadius.circular(4),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/colors.dart';
 
 enum CRTColor { amber, green, cyan, magenta }
 
@@ -27,13 +28,13 @@ class CRTCard extends StatelessWidget {
   Color get _getColor {
     switch (color) {
       case CRTColor.amber:
-        return Color(0xFFFF9800);
+        return AppColors.amber;
       case CRTColor.green:
         return Color(0xFF00FF00);
       case CRTColor.cyan:
-        return Color(0xFF00FFFF);
+        return AppColors.primary;
       case CRTColor.magenta:
-        return Color(0xFFFF00FF);
+        return AppColors.secondary;
     }
   }
 

@@ -104,19 +104,19 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Color(0xFFFF9800).withOpacity(0.15),
-                  border: Border.all(color: Color(0xFFFF9800).withOpacity(0.7), width: 1),
+                  color: AppColors.amber.withOpacity(0.15),
+                  border: Border.all(color: AppColors.amber.withOpacity(0.7), width: 1),
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.science, color: Color(0xFFFF9800).withOpacity(0.8), size: 10),
+                    Icon(Icons.science, color: AppColors.amber.withOpacity(0.8), size: 10),
                     SizedBox(width: 4),
                     Text(
                       protocolId,
                       style: TextStyle(
-                        color: Color(0xFFFF9800).withOpacity(0.85),
+                        color: AppColors.amber.withOpacity(0.85),
                         fontSize: 8,
                         fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
@@ -135,18 +135,18 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Color(0xFFFF9800).withOpacity(0.8), width: 1),
+                  border: Border.all(color: AppColors.amber.withOpacity(0.8), width: 1),
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.flash_on, color: Color(0xFFFF9800).withOpacity(0.8), size: 10),
+                    Icon(Icons.flash_on, color: AppColors.amber.withOpacity(0.8), size: 10),
                     SizedBox(width: 3),
                     Text(
                       'ROGUE-2',
                       style: TextStyle(
-                        color: Color(0xFFFF9800).withOpacity(0.9),
+                        color: AppColors.amber.withOpacity(0.9),
                         fontSize: 8,
                         fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
@@ -532,10 +532,10 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Color(0xFFFF9800).withOpacity(0.05),
+                    color: AppColors.amber.withOpacity(0.05),
                     border: Border(
                       top: BorderSide(
-                        color: Color(0xFFFF9800).withOpacity(0.3),
+                        color: AppColors.amber.withOpacity(0.3),
                         width: 1,
                       ),
                     ),
@@ -548,12 +548,12 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.calendar_today, color: Color(0xFFFF9800).withOpacity(0.4), size: 10),
+                          Icon(Icons.calendar_today, color: AppColors.amber.withOpacity(0.4), size: 10),
                           SizedBox(width: 6),
                           Text(
                             'START: ${widget.cycle.startDate.year}.${widget.cycle.startDate.month.toString().padLeft(2, '0')}.${widget.cycle.startDate.day.toString().padLeft(2, '0')}',
                             style: TextStyle(
-                              color: Color(0xFFFF9800).withOpacity(0.5),
+                              color: AppColors.amber.withOpacity(0.5),
                               fontSize: 8,
                               fontFamily: 'monospace',
                               decoration: TextDecoration.none,
@@ -566,12 +566,12 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.verified, color: Color(0xFFFF9800).withOpacity(0.4), size: 10),
+                          Icon(Icons.verified, color: AppColors.amber.withOpacity(0.4), size: 10),
                           SizedBox(width: 4),
                           Text(
                             'SELF-ADMIN',
                             style: TextStyle(
-                              color: Color(0xFFFF9800).withOpacity(0.45),
+                              color: AppColors.amber.withOpacity(0.45),
                               fontSize: 7,
                               fontFamily: 'monospace',
                               fontWeight: FontWeight.bold,
@@ -588,7 +588,7 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
                           Text(
                             '${widget.cycle.durationWeeks}W',
                             style: TextStyle(
-                              color: Color(0xFFFF9800).withOpacity(0.5),
+                              color: AppColors.amber.withOpacity(0.5),
                               fontSize: 8,
                               fontFamily: 'monospace',
                               fontWeight: FontWeight.bold,
@@ -596,7 +596,7 @@ class _ExpandableCycleCardState extends State<ExpandableCycleCard>
                             ),
                           ),
                           SizedBox(width: 6),
-                          Icon(Icons.qr_code, color: Color(0xFFFF9800).withOpacity(0.35), size: 12),
+                          Icon(Icons.qr_code, color: AppColors.amber.withOpacity(0.35), size: 12),
                         ],
                       ),
                     ],

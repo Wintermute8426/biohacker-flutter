@@ -91,19 +91,19 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Color(0xFFFF9800).withOpacity(0.15),
-                      border: Border.all(color: Color(0xFFFF9800).withOpacity(0.7), width: 1),
+                      color: AppColors.amber.withOpacity(0.15),
+                      border: Border.all(color: AppColors.amber.withOpacity(0.7), width: 1),
                       borderRadius: BorderRadius.circular(2),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.category, color: Color(0xFFFF9800).withOpacity(0.8), size: 10),
+                        Icon(Icons.category, color: AppColors.amber.withOpacity(0.8), size: 10),
                         SizedBox(width: 4),
                         Text(
                           peptide.category.toUpperCase(),
                           style: TextStyle(
-                            color: Color(0xFFFF9800).withOpacity(0.85),
+                            color: AppColors.amber.withOpacity(0.85),
                             fontSize: 8,
                             fontFamily: 'monospace',
                             fontWeight: FontWeight.bold,
@@ -122,18 +122,18 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Color(0xFFFF9800).withOpacity(0.8), width: 1),
+                      border: Border.all(color: AppColors.amber.withOpacity(0.8), width: 1),
                       borderRadius: BorderRadius.circular(2),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.science, color: Color(0xFFFF9800).withOpacity(0.8), size: 10),
+                        Icon(Icons.science, color: AppColors.amber.withOpacity(0.8), size: 10),
                         SizedBox(width: 3),
                         Text(
                           peptideId,
                           style: TextStyle(
-                            color: Color(0xFFFF9800).withOpacity(0.9),
+                            color: AppColors.amber.withOpacity(0.9),
                             fontSize: 8,
                             fontFamily: 'monospace',
                             fontWeight: FontWeight.bold,
@@ -151,7 +151,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   child: Text(
                     peptide.name.toUpperCase(),
                     style: TextStyle(
-                      color: const Color(0xFFFF9800),
+                      color: AppColors.amber,
                       fontSize: 18,
                       fontFamily: 'monospace',
                       fontWeight: FontWeight.bold,
@@ -174,7 +174,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                 color: AppColors.surface.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(4),
                 border: Border.all(
-                  color: const Color(0xFFFF9800).withOpacity(0.35),
+                  color: AppColors.amber.withOpacity(0.35),
                   width: 2,
                 ),
               ),
@@ -202,7 +202,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
 
           // Effects section - immediately after description
           if (peptide.effects.isNotEmpty)
-            _buildEffectsSection('EFFECTS', peptide.effects, const Color(0xFFFF9800)),
+            _buildEffectsSection('EFFECTS', peptide.effects, AppColors.amber),
 
           // Side effects inline (if any)
           if (peptide.sideEffects.isNotEmpty)
@@ -215,7 +215,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   color: AppColors.surface.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(4),
                   border: Border.all(
-                    color: const Color(0xFFFF9800).withOpacity(0.35),
+                    color: AppColors.amber.withOpacity(0.35),
                     width: 2,
                   ),
                 ),
@@ -225,7 +225,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     Text(
                       'POTENTIAL SIDE EFFECTS',
                       style: TextStyle(
-                        color: const Color(0xFFFF9800).withOpacity(0.7),
+                        color: AppColors.amber.withOpacity(0.7),
                         fontSize: 10,
                         fontFamily: 'monospace',
                         letterSpacing: 1,
@@ -283,7 +283,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
               decoration: BoxDecoration(
                 color: AppColors.surface.withOpacity(0.15),
                 border: Border.all(
-                  color: const Color(0xFFFF9800).withOpacity(0.25),
+                  color: AppColors.amber.withOpacity(0.25),
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(2),
@@ -294,7 +294,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   Text(
                     '0x${peptideId.hashCode.abs().toRadixString(16).toUpperCase().padLeft(8, '0')} • DATA CLASSIFIED • CORPO-ACCESS ONLY',
                     style: TextStyle(
-                      color: const Color(0xFFFF9800).withOpacity(0.5),
+                      color: AppColors.amber.withOpacity(0.5),
                       fontSize: 8,
                       fontFamily: 'monospace',
                       decoration: TextDecoration.none,
@@ -309,7 +309,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                       Text(
                         'REF: ${peptideId}',
                         style: TextStyle(
-                          color: const Color(0xFFFF9800).withOpacity(0.6),
+                          color: AppColors.amber.withOpacity(0.6),
                           fontSize: 9,
                           fontFamily: 'monospace',
                           decoration: TextDecoration.none,
@@ -318,7 +318,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                       Text(
                         '■ VERIFIED',
                         style: TextStyle(
-                          color: const Color(0xFF39FF14).withOpacity(0.7),
+                          color: AppColors.accent.withOpacity(0.7),
                           fontSize: 9,
                           fontFamily: 'monospace',
                           decoration: TextDecoration.none,
@@ -327,7 +327,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                       Text(
                         'v2.6.${DateTime.now().year}',
                         style: TextStyle(
-                          color: const Color(0xFFFF9800).withOpacity(0.6),
+                          color: AppColors.amber.withOpacity(0.6),
                           fontSize: 9,
                           fontFamily: 'monospace',
                           decoration: TextDecoration.none,
@@ -340,7 +340,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   Text(
                     '>>> END TRANSMISSION • LIBERATED: 2026 • SOVEREIGN ACCESS <<<',
                     style: TextStyle(
-                      color: const Color(0xFFFF9800).withOpacity(0.5),
+                      color: AppColors.amber.withOpacity(0.5),
                       fontSize: 8,
                       fontFamily: 'monospace',
                       decoration: TextDecoration.none,
@@ -366,13 +366,13 @@ class _ResearchScreenState extends State<ResearchScreen> {
     // Color based on rating
     Color scoreColor;
     if (rating == 'Excellent') {
-      scoreColor = const Color(0xFFFF9800); // Amber
+      scoreColor = AppColors.amber; // Amber
     } else if (rating == 'Good') {
       scoreColor = const Color(0xFFFFD740); // Yellow
     } else if (rating == 'Fair') {
-      scoreColor = const Color(0xFFFF0040); // Red/Magenta
+      scoreColor = AppColors.error; // Red/Magenta
     } else {
-      scoreColor = const Color(0xFFFF0040); // Red for Limited
+      scoreColor = AppColors.error; // Red for Limited
     }
 
     return Padding(
@@ -519,9 +519,9 @@ class _ResearchScreenState extends State<ResearchScreen> {
   }
 
   Color _getScoreColor(int score) {
-    if (score >= 80) return const Color(0xFF39FF14); // Green
+    if (score >= 80) return AppColors.accent; // Green
     if (score >= 60) return const Color(0xFFFFD740); // Yellow
-    return const Color(0xFFFF0040); // Red
+    return AppColors.error; // Red
   }
 
   Widget _buildEnhancedScoreMetric(String label, int score, int weight) {
@@ -589,7 +589,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
           color: AppColors.surface.withOpacity(0.2),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: const Color(0xFFFF9800).withOpacity(0.35),
+            color: AppColors.amber.withOpacity(0.35),
             width: 2,
           ),
         ),
@@ -606,12 +606,12 @@ class _ResearchScreenState extends State<ResearchScreen> {
               children: [
                 Row(
                   children: [
-                    Icon(icon, color: const Color(0xFFFF9800), size: 20),
+                    Icon(icon, color: AppColors.amber, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       title,
                       style: TextStyle(
-                        color: const Color(0xFFFF9800).withOpacity(0.7),
+                        color: AppColors.amber.withOpacity(0.7),
                         fontSize: 11,
                         fontFamily: 'monospace',
                         letterSpacing: 1,
@@ -629,7 +629,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                       Text(
                         '▸',
                         style: TextStyle(
-                          color: const Color(0xFFFF9800),
+                          color: AppColors.amber,
                           fontSize: 12,
                           decoration: TextDecoration.none,
                         ),
@@ -768,7 +768,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
               SnackBar(
                 content: Text('Link: ${study.url}'),
                 duration: const Duration(seconds: 1),
-                backgroundColor: const Color(0xFFFF9800).withOpacity(0.9),
+                backgroundColor: AppColors.amber.withOpacity(0.9),
               ),
             );
           },
@@ -778,7 +778,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
               color: AppColors.surface.withOpacity(0.2),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(
-                color: const Color(0xFFFF9800).withOpacity(0.35),
+                color: AppColors.amber.withOpacity(0.35),
                 width: 2,
               ),
             ),
@@ -797,7 +797,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     Text(
                       study.title,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textLight,
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.none,
@@ -809,7 +809,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                       children: [
                         Icon(
                           Icons.source,
-                          color: const Color(0xFFFF9800).withOpacity(0.7),
+                          color: AppColors.amber.withOpacity(0.7),
                           size: 14,
                         ),
                         const SizedBox(width: 6),
@@ -825,7 +825,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                         const SizedBox(width: 12),
                         Icon(
                           Icons.calendar_today,
-                          color: const Color(0xFFFF9800).withOpacity(0.7),
+                          color: AppColors.amber.withOpacity(0.7),
                           size: 14,
                         ),
                         const SizedBox(width: 6),
@@ -844,7 +844,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: const Color(0xFFFF9800).withOpacity(0.8),
+                              color: AppColors.amber.withOpacity(0.8),
                               width: 1,
                             ),
                             borderRadius: BorderRadius.circular(2),
@@ -854,14 +854,14 @@ class _ResearchScreenState extends State<ResearchScreen> {
                             children: [
                               Icon(
                                 Icons.link,
-                                color: const Color(0xFFFF9800),
+                                color: AppColors.amber,
                                 size: 12,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 'VIEW',
                                 style: TextStyle(
-                                  color: const Color(0xFFFF9800),
+                                  color: AppColors.amber,
                                   fontSize: 9,
                                   fontFamily: 'monospace',
                                   fontWeight: FontWeight.bold,
@@ -915,12 +915,12 @@ class _ResearchScreenState extends State<ResearchScreen> {
           _buildMetricExplanation(
             'PUBLICATION (25%)',
             'Peer-reviewed journal citations and mainstream scientific presence. Higher = more published research.',
-            Color(0xFFFF9800),
+            AppColors.amber,
           ),
           _buildMetricExplanation(
             'EVIDENCE (35%)',
             'Quality of human clinical data. Highest weight because real-world results matter most.',
-            Color(0xFFFF9800),
+            AppColors.amber,
           ),
           _buildMetricExplanation(
             'METHODOLOGY (25%)',
@@ -930,7 +930,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
           _buildMetricExplanation(
             'RELEVANCE (15%)',
             'Applicability to human biohacking and health optimization. Theory is great, but practical benefit matters.',
-            Color(0xFFFF9800),
+            AppColors.amber,
           ),
 
           const SizedBox(height: 24),
@@ -1126,7 +1126,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppColors.surface.withOpacity(0.15),
-          border: Border.all(color: Color(0xFFFF9800).withOpacity(0.2)),
+          border: Border.all(color: AppColors.amber.withOpacity(0.2)),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Column(
@@ -1235,7 +1235,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: TextField(
                 controller: _searchController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textLight),
                 onChanged: _onSearchChanged,
                 decoration: InputDecoration(
                   hintText: 'Search peptides...',
@@ -1312,13 +1312,13 @@ class _ResearchScreenState extends State<ResearchScreen> {
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Color(0xFFFF9800).withOpacity(0.15),
+                                        color: AppColors.amber.withOpacity(0.15),
                                         borderRadius: BorderRadius.circular(2),
                                       ),
                                       child: Text(
                                         peptide.category,
                                         style: TextStyle(
-                                          color: Color(0xFFFF9800),
+                                          color: AppColors.amber,
                                           fontSize: 10,
                                           decoration: TextDecoration.none,
                                         ),
@@ -1404,11 +1404,11 @@ class _ResearchScreenState extends State<ResearchScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
-              ? Color(0xFFFF9800).withOpacity(0.15)
+              ? AppColors.amber.withOpacity(0.15)
               : Colors.transparent,
           border: Border(
             bottom: BorderSide(
-              color: isSelected ? Color(0xFFFF9800).withOpacity(0.2) : Color(0xFFFF9800).withOpacity(0.2),
+              color: isSelected ? AppColors.amber.withOpacity(0.2) : AppColors.amber.withOpacity(0.2),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -1416,7 +1416,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Color(0xFFFF9800) : AppColors.textMid,
+            color: isSelected ? AppColors.amber : AppColors.textMid,
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             decoration: TextDecoration.none,
@@ -1436,17 +1436,17 @@ class _ResearchScreenState extends State<ResearchScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: isSelected
-                ? Color(0xFFFF9800).withOpacity(0.15)
+                ? AppColors.amber.withOpacity(0.15)
                 : AppColors.surface.withOpacity(0.15),
             border: Border.all(
-              color: isSelected ? Color(0xFFFF9800).withOpacity(0.2) : Color(0xFFFF9800).withOpacity(0.2),
+              color: isSelected ? AppColors.amber.withOpacity(0.2) : AppColors.amber.withOpacity(0.2),
             ),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? Color(0xFFFF9800) : AppColors.textMid,
+              color: isSelected ? AppColors.amber : AppColors.textMid,
               fontSize: 11,
               fontWeight: FontWeight.bold,
               decoration: TextDecoration.none,
@@ -1467,7 +1467,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
           color: AppColors.surface.withOpacity(0.2),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: const Color(0xFFFF9800).withOpacity(0.35),
+            color: AppColors.amber.withOpacity(0.35),
             width: 2,
           ),
         ),
@@ -1489,13 +1489,13 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.5), width: 1),
+                        border: Border.all(color: AppColors.amber.withOpacity(0.5), width: 1),
                         borderRadius: BorderRadius.circular(2),
                       ),
                       child: Text(
                         'PHARMA-SOURCED',
                         style: TextStyle(
-                          color: const Color(0xFFFF9800).withOpacity(0.7),
+                          color: AppColors.amber.withOpacity(0.7),
                           fontSize: 7,
                           fontFamily: 'monospace',
                           decoration: TextDecoration.none,
@@ -1505,13 +1505,13 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.5), width: 1),
+                        border: Border.all(color: AppColors.amber.withOpacity(0.5), width: 1),
                         borderRadius: BorderRadius.circular(2),
                       ),
                       child: Text(
                         'CORPO-INTEL',
                         style: TextStyle(
-                          color: const Color(0xFFFF9800).withOpacity(0.7),
+                          color: AppColors.amber.withOpacity(0.7),
                           fontSize: 7,
                           fontFamily: 'monospace',
                           decoration: TextDecoration.none,
@@ -1524,12 +1524,12 @@ class _ResearchScreenState extends State<ResearchScreen> {
                 // Header
                 Row(
                   children: [
-                    Icon(Icons.biotech, color: const Color(0xFFFF9800), size: 20),
+                    Icon(Icons.biotech, color: AppColors.amber, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'INTELLIGENCE',
                       style: TextStyle(
-                        color: const Color(0xFFFF9800).withOpacity(0.7),
+                        color: AppColors.amber.withOpacity(0.7),
                         fontSize: 11,
                         fontFamily: 'monospace',
                         letterSpacing: 1,
@@ -1540,13 +1540,13 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.8), width: 1),
+                        border: Border.all(color: AppColors.amber.withOpacity(0.8), width: 1),
                         borderRadius: BorderRadius.circular(2),
                       ),
                       child: Text(
                         '${peptide.studyLinks.length} SOURCES',
                         style: TextStyle(
-                          color: const Color(0xFFFF9800).withOpacity(0.9),
+                          color: AppColors.amber.withOpacity(0.9),
                           fontSize: 8,
                           fontFamily: 'monospace',
                           fontWeight: FontWeight.bold,
@@ -1572,7 +1572,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.3),
                         border: Border.all(
-                          color: const Color(0xFFFF9800).withOpacity(0.25),
+                          color: AppColors.amber.withOpacity(0.25),
                           width: 1,
                         ),
                         borderRadius: BorderRadius.circular(2),
@@ -1584,7 +1584,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                             children: [
                               Icon(
                                 Icons.link,
-                                color: const Color(0xFFFF9800).withOpacity(0.7),
+                                color: AppColors.amber.withOpacity(0.7),
                                 size: 12,
                               ),
                               const SizedBox(width: 6),
@@ -1592,7 +1592,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                                 child: Text(
                                   study.title,
                                   style: TextStyle(
-                                    color: const Color(0xFFFF9800).withOpacity(0.9),
+                                    color: AppColors.amber.withOpacity(0.9),
                                     fontSize: 11,
                                     fontFamily: 'monospace',
                                     decoration: TextDecoration.underline,
@@ -1625,13 +1625,13 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.5), width: 1),
+                        border: Border.all(color: AppColors.amber.withOpacity(0.5), width: 1),
                         borderRadius: BorderRadius.circular(2),
                       ),
                       child: Text(
                         'VERIFIED',
                         style: TextStyle(
-                          color: const Color(0xFFFF9800).withOpacity(0.7),
+                          color: AppColors.amber.withOpacity(0.7),
                           fontSize: 7,
                           fontFamily: 'monospace',
                           decoration: TextDecoration.none,
@@ -1641,13 +1641,13 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFFF9800).withOpacity(0.5), width: 1),
+                        border: Border.all(color: AppColors.amber.withOpacity(0.5), width: 1),
                         borderRadius: BorderRadius.circular(2),
                       ),
                       child: Text(
                         'LIBERATED: 2026',
                         style: TextStyle(
-                          color: const Color(0xFFFF9800).withOpacity(0.7),
+                          color: AppColors.amber.withOpacity(0.7),
                           fontSize: 7,
                           fontFamily: 'monospace',
                           decoration: TextDecoration.none,
@@ -1675,7 +1675,7 @@ class _ScanlinesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Color(0xFFFF9800).withOpacity(0.07)
+      ..color = AppColors.amber.withOpacity(0.07)
       ..strokeWidth = 1;
 
     for (double y = 0; y < size.height; y += 3) {

@@ -51,7 +51,7 @@ class _MarkMissedModalState extends State<MarkMissedModal> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('✓ ${widget.peptideName} marked as MISSED'),
-            backgroundColor: Color(0xFFFF0040),
+            backgroundColor: AppColors.error,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -121,7 +121,7 @@ class _MarkMissedModalState extends State<MarkMissedModal> {
             TextField(
               controller: _reasonController,
               maxLines: 3,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textLight),
               decoration: InputDecoration(
                 hintText: 'e.g., "Forgot", "Was traveling", "Felt sick"',
                 hintStyle: TextStyle(color: AppColors.textDim),
@@ -144,7 +144,7 @@ class _MarkMissedModalState extends State<MarkMissedModal> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _submitMissed,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFF0040),
+                  backgroundColor: AppColors.error,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: _isLoading
@@ -153,13 +153,13 @@ class _MarkMissedModalState extends State<MarkMissedModal> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.textLight),
                         ),
                       )
                     : Text(
                         'CONFIRM MISSED',
                         style: WintermmuteStyles.bodyStyle.copyWith(
-                          color: Colors.white,
+                          color: AppColors.textLight,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

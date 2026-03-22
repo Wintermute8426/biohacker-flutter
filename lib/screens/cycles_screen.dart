@@ -174,7 +174,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             const SizedBox(height: 8),
                             TextField(
                               controller: _doseController,
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: AppColors.textLight),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
@@ -222,7 +222,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                     value: value,
                                     child: Text(
                                       value,
-                                      style: const TextStyle(color: Colors.white),
+                                      style: const TextStyle(color: AppColors.textLight),
                                     ),
                                   );
                                 }).toList(),
@@ -434,7 +434,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _notesController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: AppColors.textLight),
                     maxLines: 4,
                     decoration: InputDecoration(
                       hintText: 'How did you feel? Any side effects? Results?',
@@ -554,7 +554,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _doseAmountController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textLight),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 labelText: 'Dose (mg)',
@@ -577,7 +577,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _notesController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textLight),
               maxLines: 2,
               decoration: InputDecoration(
                 labelText: 'Notes (optional)',
@@ -644,7 +644,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   items: SideEffectsDatabase.SYMPTOM_OPTIONS.map((s) {
                     return DropdownMenuItem<String>(
                       value: s,
-                      child: Text(s, style: const TextStyle(color: Colors.white)),
+                      child: Text(s, style: const TextStyle(color: AppColors.textLight)),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -674,7 +674,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                 const SizedBox(height: 16),
                 TextField(
                   controller: _sideEffectNotesController,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: AppColors.textLight),
                   maxLines: 3,
                   decoration: InputDecoration(
                     hintText: 'Notes (optional)',
@@ -785,7 +785,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             const SizedBox(height: 8),
                             TextField(
                               controller: _doseController,
-                              style: const TextStyle(color: Colors.white, fontSize: 16),
+                              style: const TextStyle(color: AppColors.textLight, fontSize: 16),
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               decoration: InputDecoration(
                                 hintText: '250',
@@ -836,7 +836,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                                     value: value,
                                     child: Text(
                                       value,
-                                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                                      style: const TextStyle(color: AppColors.textLight, fontSize: 12),
                                     ),
                                   );
                                 }).toList(),
@@ -916,7 +916,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _weeksController,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    style: const TextStyle(color: AppColors.textLight, fontSize: 16),
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       hintText: '8',
@@ -979,7 +979,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Please fill in peptide and dose'),
-                              backgroundColor: Color(0xFFFF0040),
+                              backgroundColor: AppColors.error,
                             ),
                           );
                           return;
@@ -1013,7 +1013,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Error creating cycle'),
-                                  backgroundColor: Color(0xFFFF0040),
+                                  backgroundColor: AppColors.error,
                                 ),
                               );
                             }
@@ -1035,7 +1035,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text('Exception: $e'),
-                                backgroundColor: Color(0xFFFF0040),
+                                backgroundColor: AppColors.error,
                               ),
                             );
                           }
@@ -1361,7 +1361,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: nameController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textLight),
                 decoration: InputDecoration(
                   hintText: 'e.g., "${cycle.peptideName} Recovery"',
                   hintStyle: TextStyle(color: AppColors.textDim),
@@ -1376,7 +1376,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: descController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: AppColors.textLight),
                 maxLines: 2,
                 decoration: InputDecoration(
                   hintText: 'Notes about this protocol...',
