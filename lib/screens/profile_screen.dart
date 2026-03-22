@@ -23,7 +23,7 @@ import '../utils/user_feedback.dart';
 import '../main.dart';
 import 'legal_screen.dart';
 import 'about_screen.dart';
-import 'onboarding_screen.dart';
+import 'onboarding/welcome_screen.dart';
 import '../assets/legal_documents.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -423,6 +423,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  String? _timezoneAbbreviation(String? timezone) {
+    if (timezone == null) return null;
+    const abbreviations = {
+      'America/New_York': {'std': 'EST', 'dst': 'EDT'},
+      'America/Chicago': {'std': 'CST', 'dst': 'CDT'},
+      'America/Denver': {'std': 'MST', 'dst': 'MDT'},
+      'America/Los_Angeles': {'std': 'PST', 'dst': 'PDT'},
+      'America/Anchorage': {'std': 'AKST', 'dst': 'AKDT'},
+      'Pacific/Honolulu': {'std': 'HST', 'dst': 'HST'},
+      'America/Phoenix': {'std': 'MST', 'dst': 'MST'},
+    };
+    final mapping = abbreviations[timezone];
+    if (mapping == null) return timezone.split('/').last.replaceAll('_', ' ');
+    final now = DateTime.now();
+    final utcNow = now.toUtc();
+    // Approximate DST: second Sunday in March to first Sunday in November (US)
+    final marchSecondSunday = DateTime(utcNow.year, 3, 8 + (7 - DateTime(utcNow.year, 3, 8).weekday) % 7, 2);
+    final novFirstSunday = DateTime(utcNow.year, 11, 1 + (7 - DateTime(utcNow.year, 11, 1).weekday) % 7, 2);
+    final isDst = utcNow.isAfter(marchSecondSunday) && utcNow.isBefore(novFirstSunday);
+    return isDst ? mapping['dst'] : mapping['std'];
+  }
+
   Future<void> _confirmResetOnboarding() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -479,7 +501,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+            MaterialPageRoute(builder: (_) => const WelcomeScreen()),
             (route) => false,
           );
         }
@@ -1488,7 +1510,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const Divider(height: 24, color: AppColors.textDim),
                 _buildActionTile(
                   'Timezone',
-                  _selectedTimezone?.split('/').last ?? 'Not set',
+                  _timezoneAbbreviation(_selectedTimezone) ?? 'Not set',
                   Icons.access_time,
                   null,
                   enabled: false,
