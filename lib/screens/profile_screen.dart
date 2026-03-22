@@ -1582,33 +1582,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
           const SizedBox(height: 16),
 
-          // EDIT PROFILE BUTTON
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
-            child: ElevatedButton.icon(
-              onPressed: _editGoals,
-              icon: Icon(Icons.edit, size: 16),
-              label: Text(
-                'EDIT PROFILE',
-                style: TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 12,
-                  letterSpacing: 1,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFF9800).withOpacity(0.15),
-                foregroundColor: Color(0xFFFF9800),
-                side: BorderSide(color: Color(0xFFFF9800).withOpacity(0.6), width: 2),
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                minimumSize: Size(double.infinity, 48),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
           // DANGER ZONE
           MatteCard(
             child: Column(
@@ -1658,7 +1631,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Column(
               children: [
                 _buildInfoRow('Email', user?.email ?? 'N/A'),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _editGoals,
+                    icon: Icon(Icons.edit, size: 16),
+                    label: Text(
+                      'EDIT PROFILE',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFFF9800).withOpacity(0.15),
+                      foregroundColor: Color(0xFFFF9800),
+                      side: BorderSide(color: Color(0xFFFF9800).withOpacity(0.6), width: 2),
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(

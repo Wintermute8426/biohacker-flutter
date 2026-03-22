@@ -313,27 +313,17 @@ class _CurrentStatusScreenState extends State<CurrentStatusScreen> {
                     isSelected: _cycleStatus == 'not_on_cycle',
                     borderColor: AppColors.textMid,
                     onTap: () => setState(() => _cycleStatus = 'not_on_cycle'),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.pause_circle_outline,
+                    child: Center(
+                      child: Text(
+                        'NOT ON CYCLE',
+                        style: WintermmuteStyles.bodyStyle.copyWith(
                           color: _cycleStatus == 'not_on_cycle'
                               ? AppColors.textLight
-                              : AppColors.textDim,
-                          size: 22,
+                              : AppColors.textMid,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'NOT ON CYCLE',
-                          style: WintermmuteStyles.tinyStyle.copyWith(
-                            color: _cycleStatus == 'not_on_cycle'
-                                ? AppColors.textLight
-                                : AppColors.textDim,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -343,27 +333,17 @@ class _CurrentStatusScreenState extends State<CurrentStatusScreen> {
                     isSelected: _cycleStatus == 'active_cycle',
                     borderColor: AppColors.accent,
                     onTap: () => setState(() => _cycleStatus = 'active_cycle'),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.play_circle_outline,
+                    child: Center(
+                      child: Text(
+                        'ACTIVE CYCLE',
+                        style: WintermmuteStyles.bodyStyle.copyWith(
                           color: _cycleStatus == 'active_cycle'
                               ? AppColors.accent
-                              : AppColors.textDim,
-                          size: 22,
+                              : AppColors.textMid,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'ACTIVE CYCLE',
-                          style: WintermmuteStyles.tinyStyle.copyWith(
-                            color: _cycleStatus == 'active_cycle'
-                                ? AppColors.accent
-                                : AppColors.textDim,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
