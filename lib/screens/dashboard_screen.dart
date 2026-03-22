@@ -619,18 +619,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       children: [
         Row(
           children: [
-            Icon(
-              Icons.medication_outlined,
-              color: AppColors.primary,
-              size: 20,
-            ),
+            Container(width: 3, height: 14, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Icon(Icons.medication_outlined, color: AppColors.primary, size: 14),
             const SizedBox(width: 8),
             Text(
-              'TODAY\'S DOSES',
-              style: WintermmuteStyles.bodyStyle.copyWith(
-                color: AppColors.primary,
+              '> TODAY\'S DOSES',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
+                color: AppColors.primary,
+                letterSpacing: 2,
               ),
             ),
           ],
@@ -1074,18 +1074,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.trending_up,
-              color: AppColors.secondary,
-              size: 20,
-            ),
+            Container(width: 3, height: 14, color: AppColors.secondary),
+            const SizedBox(width: 8),
+            Icon(Icons.trending_up, color: AppColors.secondary, size: 14),
             const SizedBox(width: 8),
             Text(
-              'CYCLE PROGRESS',
-              style: WintermmuteStyles.bodyStyle.copyWith(
-                color: AppColors.secondary,
+              '> CYCLE PROGRESS',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
+                color: AppColors.secondary,
+                letterSpacing: 2,
               ),
             ),
           ],
@@ -1110,12 +1110,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: AppColors.primary.withOpacity(0.3),
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(8),
-        color: AppColors.surface,
+        color: const Color(0xFF0A0A0A).withOpacity(0.85),
+        border: Border.all(color: AppColors.primary.withOpacity(0.25), width: 1),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         children: [
@@ -1156,12 +1153,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: progressColor.withOpacity(0.2),
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(8),
-        color: AppColors.surface,
+        color: const Color(0xFF0A0A0A).withOpacity(0.85),
+        border: Border.all(color: progressColor.withOpacity(0.25), width: 1),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1247,23 +1241,31 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildQuickActionsSection() {
-    return Column(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0A).withOpacity(0.85),
+        border: Border.all(color: AppColors.accent.withOpacity(0.25), width: 1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(
-              Icons.flash_on,
-              color: AppColors.accent,
-              size: 20,
-            ),
+            Container(width: 3, height: 14, color: AppColors.accent),
+            const SizedBox(width: 8),
+            Icon(Icons.flash_on, color: AppColors.accent, size: 14),
             const SizedBox(width: 8),
             Text(
-              'QUICK ACTIONS',
-              style: WintermmuteStyles.bodyStyle.copyWith(
-                color: AppColors.accent,
+              '> QUICK ACTIONS',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
+                color: AppColors.accent,
+                letterSpacing: 2,
               ),
             ),
           ],
@@ -1319,6 +1321,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ],
         ),
       ],
+      ),
     );
   }
 

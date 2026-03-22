@@ -231,32 +231,53 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: WintermmuteStyles.cardDecoration,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0A).withOpacity(0.85),
+        border: Border.all(color: AppColors.primary.withOpacity(0.25), width: 1),
+        borderRadius: BorderRadius.circular(4),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'WEIGHT TRACKER',
-                style: WintermmuteStyles.headerStyle.copyWith(fontSize: 14),
-              ),
-              ElevatedButton(
-                onPressed: _showLogWeightModal,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(3),
+              Row(
+                children: [
+                  Container(width: 3, height: 14, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  Icon(Icons.monitor_weight, color: AppColors.primary, size: 14),
+                  const SizedBox(width: 8),
+                  Text(
+                    '> WEIGHT TRACKER',
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      letterSpacing: 2,
+                    ),
                   ),
-                ),
-                child: Text(
-                  'LOG',
-                  style: TextStyle(
-                    color: AppColors.background,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
+                ],
+              ),
+              GestureDetector(
+                onTap: _showLogWeightModal,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withOpacity(0.1),
+                    border: Border.all(color: AppColors.accent.withOpacity(0.5), width: 1),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                  child: Text(
+                    'LOG',
+                    style: TextStyle(
+                      color: AppColors.accent,
+                      fontFamily: 'monospace',
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
                   ),
                 ),
               ),
@@ -299,7 +320,11 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
                   // Latest weight
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: WintermmuteStyles.cardDecoration,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF000000),
+                      border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 1),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -307,10 +332,12 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Latest',
+                              'LATEST',
                               style: TextStyle(
                                 color: AppColors.textDim,
-                                fontSize: 11,
+                                fontFamily: 'monospace',
+                                fontSize: 9,
+                                letterSpacing: 1,
                               ),
                             ),
                             Text(
@@ -352,12 +379,13 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
                   // Simple trend chart (if multiple entries)
                   if (logs.length > 1) ...[
                     Text(
-                      'TREND',
+                      '> TREND',
                       style: TextStyle(
                         color: AppColors.primary,
-                        fontSize: 11,
+                        fontFamily: 'monospace',
+                        fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
+                        letterSpacing: 1.5,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -367,11 +395,13 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
 
                   // Recent entries
                   Text(
-                    'HISTORY (${logs.length})',
+                    '> HISTORY (${logs.length})',
                     style: TextStyle(
                       color: AppColors.textDim,
-                      fontSize: 11,
+                      fontFamily: 'monospace',
+                      fontSize: 10,
                       fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
                     ),
                   ),
                   const SizedBox(height: 8),

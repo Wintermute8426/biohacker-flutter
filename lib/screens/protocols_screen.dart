@@ -497,6 +497,27 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
     _showStackDetail({});
   }
 
+  Widget _buildSectionHeader(String title, IconData icon, Color accentColor) {
+    return Row(
+      children: [
+        Container(width: 3, height: 14, color: accentColor),
+        const SizedBox(width: 8),
+        Icon(icon, color: accentColor, size: 14),
+        const SizedBox(width: 8),
+        Text(
+          '> $title',
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: accentColor,
+            letterSpacing: 2,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildStackCard(Map<String, dynamic> stack) {
     final peptides = stack['peptides'] as List<dynamic>;
     final peptideNames = peptides.map((p) => (p as Map<String, dynamic>)['name']).join(' + ');
@@ -505,7 +526,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       onTap: () => _showStackDetail(stack),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        decoration: WintermmuteStyles.cardDecoration,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A0A0A).withOpacity(0.85),
+          border: Border.all(color: AppColors.primary.withOpacity(0.25), width: 1),
+          borderRadius: BorderRadius.circular(4),
+        ),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -513,9 +538,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             Text(
               stack['name'] as String,
               style: TextStyle(
-                color: AppColors.textMid,
-                fontSize: 13,
+                color: AppColors.primary,
+                fontFamily: 'monospace',
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
+                letterSpacing: 1,
               ),
             ),
             const SizedBox(height: 6),
@@ -588,7 +615,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       onTap: () => _showProtocolDetail(protocol),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        decoration: WintermmuteStyles.cardDecoration,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A0A0A).withOpacity(0.85),
+          border: Border.all(color: AppColors.accent.withOpacity(0.25), width: 1),
+          borderRadius: BorderRadius.circular(4),
+        ),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -603,8 +634,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                       Text(
                         protocol.name,
                         style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 13,
+                          color: AppColors.accent,
+                          fontFamily: 'monospace',
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -756,19 +788,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Biohacker Protocols (Stacks)
-                            Text(
-                              'BIOHACKER PROTOCOL STACKS',
-                              style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
-                            ),
+                            _buildSectionHeader('BIOHACKER PROTOCOL STACKS', Icons.layers, AppColors.primary),
                             const SizedBox(height: 12),
                             ...getBiohackerProtocols().map((stack) => _buildStackCard(stack)),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 20),
 
                             // My Protocols
-                            Text(
-                              'MY PROTOCOLS',
-                              style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12, color: AppColors.accent),
-                            ),
+                            _buildSectionHeader('MY PROTOCOLS', Icons.person, AppColors.accent),
                             const SizedBox(height: 12),
                             if (myProtocols.isEmpty)
                               const Padding(
@@ -781,13 +807,10 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                               )
                             else
                               ...myProtocols.map((protocol) => _buildProtocolCard(protocol)),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 20),
 
                             // Community Protocols
-                            Text(
-                              'COMMUNITY PROTOCOLS',
-                              style: WintermmuteStyles.headerStyle.copyWith(fontSize: 12),
-                            ),
+                            _buildSectionHeader('COMMUNITY PROTOCOLS', Icons.people, AppColors.secondary),
                             const SizedBox(height: 12),
                             if (communityProtocols.isEmpty)
                               const Padding(

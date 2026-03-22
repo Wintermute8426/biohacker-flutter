@@ -380,29 +380,63 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     final dateRange =
         '${DateFormat('MMM dd').format(_weekStart)} – ${DateFormat('MMM dd, yyyy').format(weekEnd)}';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.chevron_left),
-              onPressed: _goToPreviousWeek,
-              color: AppColors.primary,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0A).withOpacity(0.85),
+        border: Border.all(color: AppColors.primary.withOpacity(0.25), width: 1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        children: [
+          Container(width: 3, height: 14, color: AppColors.primary),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: _goToPreviousWeek,
+            color: AppColors.primary,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            iconSize: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              dateRange.toUpperCase(),
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+                letterSpacing: 1.5,
+              ),
+              textAlign: TextAlign.center,
             ),
-            Text(
-              dateRange,
-              style: WintermmuteStyles.titleStyle.copyWith(fontSize: 16),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: _goToNextWeek,
+            color: AppColors.primary,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            iconSize: 20,
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: _goToToday,
+            child: Text(
+              'TODAY',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 9,
+                color: AppColors.primary.withOpacity(0.6),
+                letterSpacing: 1,
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.chevron_right),
-              onPressed: _goToNextWeek,
-              color: AppColors.primary,
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -410,29 +444,63 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
   Widget _buildMonthHeader() {
     final monthName = DateFormat('MMMM yyyy').format(_monthStart);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.chevron_left),
-              onPressed: _goToPreviousMonth,
-              color: AppColors.primary,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0A).withOpacity(0.85),
+        border: Border.all(color: AppColors.amber.withOpacity(0.25), width: 1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        children: [
+          Container(width: 3, height: 14, color: AppColors.amber),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: _goToPreviousMonth,
+            color: AppColors.amber,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            iconSize: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              monthName.toUpperCase(),
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                color: AppColors.amber,
+                letterSpacing: 1.5,
+              ),
+              textAlign: TextAlign.center,
             ),
-            Text(
-              monthName,
-              style: WintermmuteStyles.titleStyle.copyWith(fontSize: 16),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: _goToNextMonth,
+            color: AppColors.amber,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            iconSize: 20,
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: _goToToday,
+            child: Text(
+              'TODAY',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 9,
+                color: AppColors.amber.withOpacity(0.6),
+                letterSpacing: 1,
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.chevron_right),
-              onPressed: _goToNextMonth,
-              color: AppColors.primary,
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -744,29 +812,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             final isPast = date.isBefore(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
             final isFuture = date.isAfter(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
 
-            // NEW MODEL: Determine cell color based on new logic
-            Color cellColor = AppColors.surface;
-            debugPrint('🔴 [WEEK CELL] Cell color logic for ${date.year}-${date.month}-${date.day}:');
-            debugPrint('🔴   missed=$missed, completed=$completed, scheduled=$scheduled');
-            debugPrint('🔴   isPast=$isPast, isFuture=$isFuture, isToday=$isToday');
+            // Determine cell color based on status
+            Color cellColor = const Color(0xFF0A0A0A);
             if (missed > 0) {
-              // Bright red for explicitly missed doses
               cellColor = AppColors.error.withOpacity(0.15);
-              debugPrint('🔴   → Cell color: RED (missed=$missed doses)');
             } else if (isPast && dayDoses.isNotEmpty) {
-              // Green for past scheduled doses (assumed taken unless missed)
               cellColor = const Color(0xFF0D2E1F);
-              debugPrint('🔴   → Cell color: GREEN (past assumed taken)');
-            } else if (isFuture && dayDoses.isNotEmpty) {
-              // Cyan for future scheduled doses
-              cellColor = const Color(0xFF1E4620);
-              debugPrint('🔴   → Cell color: CYAN (future scheduled)');
-            } else if (isToday && dayDoses.isNotEmpty) {
-              // Cyan for today's scheduled doses
-              cellColor = const Color(0xFF1E4620);
-              debugPrint('🔴   → Cell color: CYAN (today scheduled)');
-            } else {
-              debugPrint('🔴   → Cell color: DEFAULT (no doses or no match)');
+            } else if ((isFuture || isToday) && dayDoses.isNotEmpty) {
+              cellColor = const Color(0xFF001A1F);
             }
 
             // Check if this date has a lab result
@@ -781,9 +834,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   : null,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: cellColor,
                   border: Border.all(
-                    color: isToday ? AppColors.primary : AppColors.textMid.withOpacity(0.4),
+                    color: isToday ? AppColors.primary : AppColors.primary.withOpacity(0.15),
                     width: isToday ? 2 : 1,
                   ),
                   borderRadius: BorderRadius.zero,
@@ -941,29 +994,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             final isPast = date.isBefore(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
             final isFuture = date.isAfter(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
 
-            // NEW MODEL: Determine cell color based on new logic
-            Color cellColor = AppColors.surface;
-            debugPrint('🔴 [MONTH CELL] Cell color logic for ${date.year}-${date.month}-${date.day}:');
-            debugPrint('🔴   missed=$missed, completed=$completed, scheduled=$scheduled');
-            debugPrint('🔴   isPast=$isPast, isFuture=$isFuture, isToday=$isToday');
+            // Determine cell color based on status
+            Color cellColor = const Color(0xFF0A0A0A);
             if (missed > 0) {
-              // Bright red for explicitly missed doses - more visible in month view
               cellColor = AppColors.error.withOpacity(0.15);
-              debugPrint('🔴   → Cell color: RED (missed=$missed doses)');
             } else if (isPast && dayDoses.isNotEmpty) {
-              // Green for past scheduled doses (assumed taken unless missed)
               cellColor = const Color(0xFF0D2E1F);
-              debugPrint('🔴   → Cell color: GREEN (past assumed taken)');
-            } else if (isFuture && dayDoses.isNotEmpty) {
-              // Cyan for future scheduled doses
-              cellColor = const Color(0xFF1E4620);
-              debugPrint('🔴   → Cell color: CYAN (future scheduled)');
-            } else if (isToday && dayDoses.isNotEmpty) {
-              // Cyan for today's scheduled doses
-              cellColor = const Color(0xFF1E4620);
-              debugPrint('🔴   → Cell color: CYAN (today scheduled)');
-            } else {
-              debugPrint('🔴   → Cell color: DEFAULT (no doses or no match)');
+            } else if ((isFuture || isToday) && dayDoses.isNotEmpty) {
+              cellColor = const Color(0xFF001A1F);
             }
 
             final hasLab = labDates.any((labDate) =>
@@ -977,9 +1015,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                   : null,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.background,
+                  color: cellColor,
                   border: Border.all(
-                    color: isToday ? AppColors.primary : AppColors.border.withOpacity(0.3),
+                    color: isToday ? AppColors.primary : AppColors.primary.withOpacity(0.12),
                     width: isToday ? 2 : 1,
                   ),
                   borderRadius: BorderRadius.zero,
