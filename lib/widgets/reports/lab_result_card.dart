@@ -47,60 +47,59 @@ class LabResultCard extends StatelessWidget {
                       )
                     : null,
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Date
-                  Text(
-                    dateFormat.format(lab.labDate),
-                    style: const TextStyle(
-                      fontFamily: 'JetBrains Mono',
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
+                  Row(
+                    children: [
+                      // Date
+                      Text(
+                        dateFormat.format(lab.labDate),
+                        style: const TextStyle(
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const Spacer(),
+                      // Marker count
+                      Text(
+                        '${lab.markerCount} MARKERS',
+                        style: const TextStyle(
+                          fontFamily: 'JetBrains Mono',
+                          fontSize: 10,
+                          color: AppColors.textDim,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Status summary
+                      _buildStatusSummary(),
+                      const SizedBox(width: 8),
+                      Icon(
+                        isExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        color: AppColors.textDim,
+                        size: 18,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  // Source
+                  // Source - below date
                   if (lab.labSource != null && lab.labSource != 'Lab Test')
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         lab.labSource!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontFamily: 'JetBrains Mono',
                           fontSize: 9,
-                          color: AppColors.textMid,
+                          color: AppColors.textDim,
                         ),
                       ),
                     ),
-                  const Spacer(),
-                  // Marker count
-                  Text(
-                    '${lab.markerCount} MARKERS',
-                    style: const TextStyle(
-                      fontFamily: 'JetBrains Mono',
-                      fontSize: 10,
-                      color: AppColors.textDim,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Status summary
-                  _buildStatusSummary(),
-                  const SizedBox(width: 8),
-                  Icon(
-                    isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: AppColors.textDim,
-                    size: 18,
-                  ),
                 ],
               ),
             ),
