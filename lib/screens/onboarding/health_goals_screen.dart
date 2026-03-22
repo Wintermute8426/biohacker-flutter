@@ -182,6 +182,7 @@ class _HealthGoalsScreenState extends State<HealthGoalsScreen> {
 
     return OnboardingCard(
       isSelected: isSelected,
+      expand: true,
       borderColor: color,
       onTap: () {
         setState(() {

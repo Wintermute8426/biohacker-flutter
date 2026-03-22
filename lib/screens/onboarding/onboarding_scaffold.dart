@@ -250,6 +250,7 @@ class OnboardingCard extends StatelessWidget {
   final Widget child;
   final Color borderColor;
   final bool isSelected;
+  final bool expand;
   final VoidCallback? onTap;
 
   const OnboardingCard({
@@ -257,6 +258,7 @@ class OnboardingCard extends StatelessWidget {
     required this.child,
     this.borderColor = AppColors.primary,
     this.isSelected = false,
+    this.expand = false,
     this.onTap,
   }) : super(key: key);
 
@@ -265,6 +267,7 @@ class OnboardingCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Stack(
+        fit: expand ? StackFit.expand : StackFit.loose,
         children: [
           Container(
             padding: const EdgeInsets.all(16),

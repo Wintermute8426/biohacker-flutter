@@ -1635,7 +1635,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: _editGoals,
+                    onPressed: () => setState(() => _isEditMode = true),
                     icon: Icon(Icons.edit, size: 16),
                     label: Text(
                       'EDIT PROFILE',
