@@ -13,6 +13,7 @@ class AppColors {
   static const Color textLight = Color(0xFFFFFFFF); // White
   static const Color textMid = Color(0xFFA0A0A0); // Gray
   static const Color textDim = Color(0xFF606060); // Dark gray
+  static const Color amber = Color(0xFFFFAA00); // Amber/Gold
   static const Color error = Color(0xFFFF0040); // Red
 
   // Glow effects (matte aesthetic)

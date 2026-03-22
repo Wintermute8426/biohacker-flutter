@@ -3,60 +3,93 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'user_profile_service.dart';
 
-/// OnboardingData holds all the information collected during onboarding
 class OnboardingData {
-  String experienceLevel;
-  List<String> healthGoals;
-  double? baselineWeight;
-  double? baselineBodyFat;
-  Map<String, dynamic>? baselineLabs;
+  // Screen 1 - Experience Level
+  String experienceLevel; // 'beginner', 'intermediate', 'advanced'
 
-  // Notification preferences
+  // Screen 2 - Health Goals
+  List<String> healthGoals;
+
+  // Screen 3 - Current Status
+  bool usedPeptidesBefore;
+  List<String> previousPeptides;
+  String peptideExperienceDuration; // '<3_months', '3-6_months', '6-12_months', '1+_years'
+  String cycleStatus; // 'not_on_cycle', 'active_cycle'
+  String trainingLevel; // 'sedentary', 'moderate', 'active', 'athlete'
+
+  // Screen 4 - Lab Work Habits
+  String bloodworkFrequency; // 'never', 'every_6_months', 'every_3_months', 'monthly'
+  String? lastLabDate;
+
+  // Screen 5 - Notifications
   bool doseRemindersEnabled;
-  int doseReminderMinutes;
-  String quietHoursStart;
-  String quietHoursEnd;
-  bool labAlertsEnabled;
-  bool weeklyProgressEnabled;
+  String doseReminderTime; // '06:00', '08:00', '12:00', '18:00', '22:00'
+  String labReminderFrequency; // 'never', 'every_6_months', 'every_3_months', 'monthly'
+  bool cycleMilestonesEnabled;
+  bool researchUpdatesEnabled;
+
+  // Screen 6 - Profile Details
+  String? displayName;
+  int? age;
+  double? weight;
+  int? heightFeet;
+  int? heightInches;
+  String? gender; // 'male', 'female', 'other', 'prefer_not_to_say'
 
   OnboardingData({
     this.experienceLevel = 'beginner',
     this.healthGoals = const [],
-    this.baselineWeight,
-    this.baselineBodyFat,
-    this.baselineLabs,
+    this.usedPeptidesBefore = false,
+    this.previousPeptides = const [],
+    this.peptideExperienceDuration = '',
+    this.cycleStatus = 'not_on_cycle',
+    this.trainingLevel = 'moderate',
+    this.bloodworkFrequency = 'never',
+    this.lastLabDate,
     this.doseRemindersEnabled = true,
-    this.doseReminderMinutes = 60,
-    this.quietHoursStart = '22:00',
-    this.quietHoursEnd = '08:00',
-    this.labAlertsEnabled = true,
-    this.weeklyProgressEnabled = true,
+    this.doseReminderTime = '08:00',
+    this.labReminderFrequency = 'every_3_months',
+    this.cycleMilestonesEnabled = true,
+    this.researchUpdatesEnabled = true,
+    this.displayName,
+    this.age,
+    this.weight,
+    this.heightFeet,
+    this.heightInches,
+    this.gender,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'experienceLevel': experienceLevel,
       'healthGoals': healthGoals,
-      'baselineWeight': baselineWeight,
-      'baselineBodyFat': baselineBodyFat,
-      'baselineLabs': baselineLabs,
+      'usedPeptidesBefore': usedPeptidesBefore,
+      'previousPeptides': previousPeptides,
+      'peptideExperienceDuration': peptideExperienceDuration,
+      'cycleStatus': cycleStatus,
+      'trainingLevel': trainingLevel,
+      'bloodworkFrequency': bloodworkFrequency,
+      'lastLabDate': lastLabDate,
       'doseRemindersEnabled': doseRemindersEnabled,
-      'doseReminderMinutes': doseReminderMinutes,
-      'quietHoursStart': quietHoursStart,
-      'quietHoursEnd': quietHoursEnd,
-      'labAlertsEnabled': labAlertsEnabled,
-      'weeklyProgressEnabled': weeklyProgressEnabled,
+      'doseReminderTime': doseReminderTime,
+      'labReminderFrequency': labReminderFrequency,
+      'cycleMilestonesEnabled': cycleMilestonesEnabled,
+      'researchUpdatesEnabled': researchUpdatesEnabled,
+      'displayName': displayName,
+      'age': age,
+      'weight': weight,
+      'heightFeet': heightFeet,
+      'heightInches': heightInches,
+      'gender': gender,
     };
   }
 }
 
-/// OnboardingService handles all onboarding-related operations
 class OnboardingService {
   final SupabaseClient _supabase;
 
   OnboardingService(this._supabase);
 
-  /// Check if user has completed onboarding
   Future<bool> isOnboardingCompleted(String userId) async {
     try {
       final response = await _supabase
@@ -65,10 +98,7 @@ class OnboardingService {
           .eq('id', userId)
           .maybeSingle();
 
-      if (response == null) {
-        return false;
-      }
-
+      if (response == null) return false;
       return response['onboarding_completed'] ?? false;
     } catch (e, stackTrace) {
       if (kDebugMode) {
@@ -79,7 +109,6 @@ class OnboardingService {
     }
   }
 
-  /// Save onboarding data to database
   Future<bool> completeOnboarding(String userId, OnboardingData data) async {
     try {
       if (kDebugMode) {
@@ -87,7 +116,28 @@ class OnboardingService {
         print('[OnboardingService] Data: ${data.toJson()}');
       }
 
-      // Step 1: Check if profile exists
+      final profileData = {
+        'experience_level': data.experienceLevel,
+        'health_goals': data.healthGoals,
+        'used_peptides_before': data.usedPeptidesBefore,
+        'previous_peptides': data.previousPeptides,
+        'peptide_experience_duration': data.peptideExperienceDuration,
+        'cycle_status': data.cycleStatus,
+        'training_level': data.trainingLevel,
+        'bloodwork_frequency': data.bloodworkFrequency,
+        'last_lab_date': data.lastLabDate,
+        'username': data.displayName,
+        'age': data.age,
+        'baseline_weight': data.weight,
+        'height_feet': data.heightFeet,
+        'height_inches': data.heightInches,
+        'gender': data.gender,
+        'timezone': 'America/New_York',
+        'onboarding_completed': true,
+        'onboarding_completed_at': DateTime.now().toIso8601String(),
+      };
+
+      // Upsert profile
       final existingProfile = await _supabase
           .from('user_profiles')
           .select('id')
@@ -95,38 +145,28 @@ class OnboardingService {
           .maybeSingle();
 
       if (existingProfile == null) {
-        if (kDebugMode) {
-          print('[OnboardingService] No profile found, creating new one...');
-        }
-        // Create profile first
         await _supabase.from('user_profiles').insert({
           'id': userId,
-          'experience_level': data.experienceLevel,
-          'health_goals': data.healthGoals,
-          'baseline_weight': data.baselineWeight,
-          'baseline_body_fat': data.baselineBodyFat,
-          'baseline_labs': data.baselineLabs,
-          'timezone': 'America/New_York', // Default timezone
-          'onboarding_completed': true,
-          'onboarding_completed_at': DateTime.now().toIso8601String(),
+          ...profileData,
         });
       } else {
-        if (kDebugMode) {
-          print('[OnboardingService] Profile exists, updating...');
-        }
-        // Update existing profile
-        await _supabase.from('user_profiles').update({
-          'experience_level': data.experienceLevel,
-          'health_goals': data.healthGoals,
-          'baseline_weight': data.baselineWeight,
-          'baseline_body_fat': data.baselineBodyFat,
-          'baseline_labs': data.baselineLabs,
-          'onboarding_completed': true,
-          'onboarding_completed_at': DateTime.now().toIso8601String(),
-        }).eq('id', userId);
+        await _supabase
+            .from('user_profiles')
+            .update(profileData)
+            .eq('id', userId);
       }
 
-      // Step 2: Save notification preferences
+      // Save notification preferences
+      final notifData = {
+        'dose_reminders_enabled': data.doseRemindersEnabled,
+        'dose_reminder_time': data.doseReminderTime,
+        'lab_reminder_frequency': data.labReminderFrequency,
+        'cycle_milestones_enabled': data.cycleMilestonesEnabled,
+        'research_updates_enabled': data.researchUpdatesEnabled,
+        'lab_alerts_enabled': true,
+        'weekly_progress_enabled': true,
+      };
+
       final existingPrefs = await _supabase
           .from('notification_preferences')
           .select('user_id')
@@ -134,52 +174,32 @@ class OnboardingService {
           .maybeSingle();
 
       if (existingPrefs == null) {
-        if (kDebugMode) {
-          print('[OnboardingService] Creating notification preferences...');
-        }
         await _supabase.from('notification_preferences').insert({
           'user_id': userId,
-          'dose_reminders_enabled': data.doseRemindersEnabled,
-          'dose_reminder_minutes': data.doseReminderMinutes,
-          'quiet_hours_start': data.quietHoursStart,
-          'quiet_hours_end': data.quietHoursEnd,
-          'lab_alerts_enabled': data.labAlertsEnabled,
-          'weekly_progress_enabled': data.weeklyProgressEnabled,
+          ...notifData,
         });
       } else {
-        if (kDebugMode) {
-          print('[OnboardingService] Updating notification preferences...');
-        }
-        await _supabase.from('notification_preferences').update({
-          'dose_reminders_enabled': data.doseRemindersEnabled,
-          'dose_reminder_minutes': data.doseReminderMinutes,
-          'quiet_hours_start': data.quietHoursStart,
-          'quiet_hours_end': data.quietHoursEnd,
-          'lab_alerts_enabled': data.labAlertsEnabled,
-          'weekly_progress_enabled': data.weeklyProgressEnabled,
-        }).eq('user_id', userId);
+        await _supabase
+            .from('notification_preferences')
+            .update(notifData)
+            .eq('user_id', userId);
       }
 
       if (kDebugMode) {
-        print('[OnboardingService] ✅ Onboarding completed successfully!');
+        print('[OnboardingService] Onboarding completed successfully');
       }
       return true;
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('[OnboardingService] ❌ Error completing onboarding: $e');
+        print('[OnboardingService] Error completing onboarding: $e');
         print('[OnboardingService] Stack trace: $stackTrace');
       }
       rethrow;
     }
   }
 
-  /// Skip onboarding (save defaults)
   Future<bool> skipOnboarding(String userId) async {
     try {
-      if (kDebugMode) {
-        print('[OnboardingService] Skipping onboarding for user: $userId');
-      }
-
       final defaultData = OnboardingData();
       return await completeOnboarding(userId, defaultData);
     } catch (e, stackTrace) {
@@ -198,11 +218,9 @@ final onboardingServiceProvider = Provider<OnboardingService>((ref) {
   return OnboardingService(supabase);
 });
 
-/// Provider to check if onboarding is completed
-/// This will be used in main.dart to determine initial route
 final isOnboardingCompletedProvider = FutureProvider<bool>((ref) async {
   final userId = ref.watch(currentUserIdProvider);
-  if (userId == null) return true; // If no user, don't show onboarding
+  if (userId == null) return true;
 
   final service = ref.watch(onboardingServiceProvider);
   return service.isOnboardingCompleted(userId);

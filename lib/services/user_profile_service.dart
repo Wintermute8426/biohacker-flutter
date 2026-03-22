@@ -29,6 +29,14 @@ class UserProfile {
   final String timezone;
   final bool onboardingCompleted;
   final DateTime? onboardingCompletedAt;
+  // Onboarding V2 fields
+  final bool usedPeptidesBefore;
+  final List<String> previousPeptides;
+  final String? peptideExperienceDuration;
+  final String? cycleStatus;
+  final String? trainingLevel;
+  final String? bloodworkFrequency;
+  final String? lastLabDate;
 
   UserProfile({
     required this.userId,
@@ -53,6 +61,13 @@ class UserProfile {
     required this.timezone,
     required this.onboardingCompleted,
     this.onboardingCompletedAt,
+    this.usedPeptidesBefore = false,
+    this.previousPeptides = const [],
+    this.peptideExperienceDuration,
+    this.cycleStatus,
+    this.trainingLevel,
+    this.bloodworkFrequency,
+    this.lastLabDate,
   });
 
   // Helper: Get height as formatted string (e.g., "5'11\"")
@@ -97,6 +112,15 @@ class UserProfile {
       onboardingCompletedAt: json['onboarding_completed_at'] != null
           ? DateTime.parse(json['onboarding_completed_at'])
           : null,
+      usedPeptidesBefore: json['used_peptides_before'] ?? false,
+      previousPeptides: json['previous_peptides'] != null
+          ? List<String>.from(json['previous_peptides'])
+          : [],
+      peptideExperienceDuration: json['peptide_experience_duration'],
+      cycleStatus: json['cycle_status'],
+      trainingLevel: json['training_level'],
+      bloodworkFrequency: json['bloodwork_frequency'],
+      lastLabDate: json['last_lab_date'],
     );
   }
 
@@ -124,6 +148,13 @@ class UserProfile {
       'timezone': timezone,
       'onboarding_completed': onboardingCompleted,
       'onboarding_completed_at': onboardingCompletedAt?.toIso8601String(),
+      'used_peptides_before': usedPeptidesBefore,
+      'previous_peptides': previousPeptides,
+      'peptide_experience_duration': peptideExperienceDuration,
+      'cycle_status': cycleStatus,
+      'training_level': trainingLevel,
+      'bloodwork_frequency': bloodworkFrequency,
+      'last_lab_date': lastLabDate,
     };
   }
 
@@ -149,6 +180,13 @@ class UserProfile {
     String? timezone,
     bool? onboardingCompleted,
     DateTime? onboardingCompletedAt,
+    bool? usedPeptidesBefore,
+    List<String>? previousPeptides,
+    String? peptideExperienceDuration,
+    String? cycleStatus,
+    String? trainingLevel,
+    String? bloodworkFrequency,
+    String? lastLabDate,
   }) {
     return UserProfile(
       userId: userId,
@@ -173,6 +211,13 @@ class UserProfile {
       timezone: timezone ?? this.timezone,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
       onboardingCompletedAt: onboardingCompletedAt ?? this.onboardingCompletedAt,
+      usedPeptidesBefore: usedPeptidesBefore ?? this.usedPeptidesBefore,
+      previousPeptides: previousPeptides ?? this.previousPeptides,
+      peptideExperienceDuration: peptideExperienceDuration ?? this.peptideExperienceDuration,
+      cycleStatus: cycleStatus ?? this.cycleStatus,
+      trainingLevel: trainingLevel ?? this.trainingLevel,
+      bloodworkFrequency: bloodworkFrequency ?? this.bloodworkFrequency,
+      lastLabDate: lastLabDate ?? this.lastLabDate,
     );
   }
 }
