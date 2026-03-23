@@ -74,12 +74,12 @@ class _ResearchScreenState extends State<ResearchScreen> {
     FullScreenModal.show(
       context: context,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 24, 12, 32),
+        padding: const EdgeInsets.only(bottom: 32),
         children: [
-          // Header section with badges (cycle card style)
+          // Header section
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+            decoration: const BoxDecoration(
               color: Colors.black,
             ),
             child: Stack(
@@ -164,126 +164,140 @@ class _ResearchScreenState extends State<ResearchScreen> {
             ),
           ),
 
-          // Description section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(
-                  color: AppColors.amber.withOpacity(0.35),
-                  width: 2,
+          const SizedBox(height: 8),
+
+          // ===== > OVERVIEW =====
+          _buildDetailSection('OVERVIEW', Icons.info_outline, AppColors.amber,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  peptide.description,
+                  style: const TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 13,
+                    height: 1.5,
+                    decoration: TextDecoration.none,
+                  ),
                 ),
-              ),
-              child: Stack(
-                children: [
-                  // Scanlines overlay
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _ScanlinesPainter(),
-                    ),
+                if (peptide.effects.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Container(width: 3, height: 11, color: AppColors.accent.withOpacity(0.6)),
+                      const SizedBox(width: 6),
+                      Text(
+                        'EFFECTS',
+                        style: TextStyle(color: AppColors.accent, fontSize: 10, fontFamily: 'monospace', fontWeight: FontWeight.bold, letterSpacing: 1, decoration: TextDecoration.none),
+                      ),
+                    ],
                   ),
-                  Text(
-                    peptide.description,
-                    style: TextStyle(
-                      color: AppColors.textLight,
-                      fontSize: 13,
-                      height: 1.5,
-                      decoration: TextDecoration.none,
+                  const SizedBox(height: 8),
+                  ...peptide.effects.map((item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(_getEffectIcon(item), color: AppColors.accent.withOpacity(0.7), size: 13),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(item, style: const TextStyle(color: AppColors.textLight, fontSize: 12, fontFamily: 'monospace', decoration: TextDecoration.none, height: 1.3)),
+                        ),
+                      ],
                     ),
-                  ),
+                  )),
                 ],
-              ),
+                if (peptide.sideEffects.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Container(width: 3, height: 11, color: AppColors.error.withOpacity(0.6)),
+                      const SizedBox(width: 6),
+                      Text(
+                        'POTENTIAL SIDE EFFECTS',
+                        style: TextStyle(color: AppColors.error.withOpacity(0.8), fontSize: 10, fontFamily: 'monospace', fontWeight: FontWeight.bold, letterSpacing: 1, decoration: TextDecoration.none),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  ...peptide.sideEffects.take(3).map((effect) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text('▸ $effect', style: TextStyle(color: AppColors.textMid, fontSize: 11, fontFamily: 'monospace', decoration: TextDecoration.none)),
+                  )),
+                ],
+              ],
             ),
           ),
 
-          // Effects section - immediately after description
-          if (peptide.effects.isNotEmpty)
-            _buildEffectsSection('EFFECTS', peptide.effects, AppColors.amber),
+          // ===== > QUALITY METRICS =====
+          _buildDetailSection('QUALITY METRICS', Icons.assessment, AppColors.amber,
+            _buildPepScoreContent(peptide),
+          ),
 
-          // Side effects inline (if any)
-          if (peptide.sideEffects.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.surface.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(
-                    color: AppColors.amber.withOpacity(0.35),
-                    width: 2,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // ===== > PROTOCOL DATA =====
+          _buildDetailSection('PROTOCOL DATA', Icons.medication, AppColors.amber,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Dosing
+                Row(
                   children: [
-                    Text(
-                      'POTENTIAL SIDE EFFECTS',
-                      style: TextStyle(
-                        color: AppColors.amber.withOpacity(0.7),
-                        fontSize: 10,
-                        fontFamily: 'monospace',
-                        letterSpacing: 1,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ...peptide.sideEffects.take(3).map((effect) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text(
-                        '▸ $effect',
-                        style: TextStyle(
-                          color: AppColors.textMid,
-                          fontSize: 11,
-                          fontFamily: 'monospace',
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    )),
+                    Container(width: 3, height: 11, color: AppColors.amber.withOpacity(0.6)),
+                    const SizedBox(width: 6),
+                    Text('DOSING', style: TextStyle(color: AppColors.amber, fontSize: 10, fontFamily: 'monospace', fontWeight: FontWeight.bold, letterSpacing: 1, decoration: TextDecoration.none)),
                   ],
                 ),
-              ),
+                const SizedBox(height: 8),
+                ...[
+                  '${peptide.commonDoseRange} ${peptide.unit}',
+                  'Timing: ${peptide.timing}',
+                  'Route: ${_getFullRouteName(peptide.route)}',
+                ].map((item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('▸', style: TextStyle(color: AppColors.amber, fontSize: 12, decoration: TextDecoration.none)),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text(item, style: const TextStyle(color: AppColors.textMid, fontSize: 12, fontFamily: 'monospace', height: 1.5, decoration: TextDecoration.none))),
+                    ],
+                  ),
+                )),
+                const SizedBox(height: 12),
+                // Safety
+                Row(
+                  children: [
+                    Container(width: 3, height: 11, color: AppColors.primary.withOpacity(0.6)),
+                    const SizedBox(width: 6),
+                    Text('SAFETY', style: TextStyle(color: AppColors.primary, fontSize: 10, fontFamily: 'monospace', fontWeight: FontWeight.bold, letterSpacing: 1, decoration: TextDecoration.none)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('▸', style: TextStyle(color: AppColors.primary, fontSize: 12, decoration: TextDecoration.none)),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(peptide.safetyNotes, style: const TextStyle(color: AppColors.textMid, fontSize: 12, fontFamily: 'monospace', height: 1.5, decoration: TextDecoration.none))),
+                  ],
+                ),
+              ],
             ),
-
-          // PepScore section
-          _buildEnhancedPepScoreSection(peptide),
-
-          // Suggested Dosing section
-          _buildFullWidthSection(
-            'SUGGESTED DOSING',
-            Icons.medication,
-            [
-              '${peptide.commonDoseRange} ${peptide.unit}',
-              'Timing: ${peptide.timing}',
-              'Route: ${_getFullRouteName(peptide.route)}',
-            ],
           ),
 
-          // Safety section
-          _buildFullWidthSection(
-            'SAFETY',
-            Icons.shield,
-            [peptide.safetyNotes],
-          ),
-
-          // INTELLIGENCE section - consolidated research
-          if (peptide.studyLinks.isNotEmpty) 
+          // ===== > INTELLIGENCE =====
+          if (peptide.studyLinks.isNotEmpty)
             _buildIntelligenceSection(peptide),
 
           // Footer with dystopian data strip
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.surface.withOpacity(0.15),
+                color: const Color(0xFF050505),
                 border: Border.all(
-                  color: AppColors.amber.withOpacity(0.25),
+                  color: AppColors.amber.withOpacity(0.15),
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(2),
@@ -357,164 +371,86 @@ class _ResearchScreenState extends State<ResearchScreen> {
   }
 
 
-  // Enhanced PepScore section with prominent display and color coding
-  Widget _buildEnhancedPepScoreSection(PeptideInfo peptide) {
+  // PepScore content (used inside > QUALITY METRICS section)
+  Widget _buildPepScoreContent(PeptideInfo peptide) {
     final score = peptide.pepScore;
     final overall = score.overallScore;
     final rating = score.rating;
 
-    // Color based on rating
     Color scoreColor;
     if (rating == 'Excellent') {
-      scoreColor = AppColors.amber; // Amber
+      scoreColor = AppColors.amber;
     } else if (rating == 'Good') {
-      scoreColor = const Color(0xFFFFD740); // Yellow
+      scoreColor = const Color(0xFFFFD740);
     } else if (rating == 'Fair') {
-      scoreColor = AppColors.error; // Red/Magenta
+      scoreColor = AppColors.error;
     } else {
-      scoreColor = AppColors.error; // Red for Limited
+      scoreColor = AppColors.error;
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: scoreColor.withOpacity(0.35),
-            width: 2,
-          ),
-        ),
-        child: Stack(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Rating badge + score
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Scanlines overlay
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _ScanlinesPainter(),
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
               children: [
-                // Header with icon
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.assessment, color: scoreColor, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          'RESEARCH QUALITY (PepScore)',
-                          style: TextStyle(
-                            color: scoreColor.withOpacity(0.9),
-                            fontSize: 11,
-                            fontFamily: 'monospace',
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: scoreColor.withOpacity(0.8), width: 1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Text(
-                        rating.toUpperCase(),
-                        style: TextStyle(
-                          color: scoreColor,
-                          fontSize: 8,
-                          fontFamily: 'monospace',
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Large score display
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      '$overall',
-                      style: TextStyle(
-                        color: scoreColor,
-                        fontSize: 36,
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                    Text(
-                      '/100',
-                      style: TextStyle(
-                        color: scoreColor.withOpacity(0.6),
-                        fontSize: 18,
-                        fontFamily: 'monospace',
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Progress bar
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(2),
-                  child: LinearProgressIndicator(
-                    value: overall / 100,
-                    minHeight: 8,
-                    backgroundColor: AppColors.surface.withOpacity(0.15),
-                    valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Score breakdown header
                 Text(
-                  'SCORE BREAKDOWN',
-                  style: TextStyle(
-                    color: AppColors.textMid,
-                    fontSize: 10,
-                    fontFamily: 'monospace',
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                    decoration: TextDecoration.none,
-                  ),
+                  '$overall',
+                  style: TextStyle(color: scoreColor, fontSize: 36, fontFamily: 'monospace', fontWeight: FontWeight.bold, decoration: TextDecoration.none),
                 ),
-                const SizedBox(height: 12),
-
-                // Component breakdown grid
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  childAspectRatio: 2.5,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  children: [
-                    _buildEnhancedScoreMetric('Publication', score.publication, 25),
-                    _buildEnhancedScoreMetric('Evidence', score.evidence, 35),
-                    _buildEnhancedScoreMetric('Methodology', score.methodology, 25),
-                    _buildEnhancedScoreMetric('Relevance', score.relevance, 15),
-                  ],
+                Text(
+                  '/100',
+                  style: TextStyle(color: scoreColor.withOpacity(0.6), fontSize: 18, fontFamily: 'monospace', decoration: TextDecoration.none),
                 ),
               ],
             ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                border: Border.all(color: scoreColor.withOpacity(0.8), width: 1),
+                borderRadius: BorderRadius.circular(2),
+              ),
+              child: Text(rating.toUpperCase(), style: TextStyle(color: scoreColor, fontSize: 8, fontFamily: 'monospace', fontWeight: FontWeight.bold, decoration: TextDecoration.none)),
+            ),
           ],
         ),
-      ),
+        const SizedBox(height: 12),
+
+        // Progress bar
+        ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: LinearProgressIndicator(
+            value: overall / 100,
+            minHeight: 6,
+            backgroundColor: const Color(0xFF1A1A1A),
+            valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        Text('SCORE BREAKDOWN', style: TextStyle(color: AppColors.textDim, fontSize: 10, fontFamily: 'monospace', fontWeight: FontWeight.bold, letterSpacing: 1, decoration: TextDecoration.none)),
+        const SizedBox(height: 12),
+
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: 2.5,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          children: [
+            _buildEnhancedScoreMetric('Publication', score.publication, 25),
+            _buildEnhancedScoreMetric('Evidence', score.evidence, 35),
+            _buildEnhancedScoreMetric('Methodology', score.methodology, 25),
+            _buildEnhancedScoreMetric('Relevance', score.relevance, 15),
+          ],
+        ),
+      ],
     );
   }
 
@@ -572,6 +508,50 @@ class _ResearchScreenState extends State<ResearchScreen> {
               fontFamily: 'monospace',
               decoration: TextDecoration.none,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===== PROFILE-STYLE SECTION CARD (terminal aesthetic) =====
+  Widget _buildDetailSection(String title, IconData icon, Color accentColor, Widget child) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0A),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: accentColor.withOpacity(0.25), width: 1),
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(child: CustomPaint(painter: _ScanlinesPainter())),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(width: 4, height: 14, color: accentColor.withOpacity(0.6)),
+                  const SizedBox(width: 8),
+                  Icon(icon, color: accentColor, size: 13),
+                  const SizedBox(width: 8),
+                  Text(
+                    '> $title',
+                    style: TextStyle(
+                      color: accentColor,
+                      fontSize: 11,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              child,
+            ],
           ),
         ],
       ),
@@ -1458,209 +1438,81 @@ class _ResearchScreenState extends State<ResearchScreen> {
   }
 
   Widget _buildIntelligenceSection(PeptideInfo peptide) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: AppColors.amber.withOpacity(0.35),
-            width: 2,
+    return _buildDetailSection('INTELLIGENCE', Icons.biotech, AppColors.amber,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Source count badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Wrap(
+                spacing: 6,
+                children: [
+                  _buildAmberTag('PHARMA-SOURCED'),
+                  _buildAmberTag('CORPO-INTEL'),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.amber.withOpacity(0.6), width: 1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Text('${peptide.studyLinks.length} SOURCES', style: TextStyle(color: AppColors.amber, fontSize: 8, fontFamily: 'monospace', fontWeight: FontWeight.bold, decoration: TextDecoration.none)),
+              ),
+            ],
           ),
-        ),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _ScanlinesPainter(),
+          const SizedBox(height: 12),
+          // Study list
+          ...peptide.studyLinks.map((study) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: GestureDetector(
+              onTap: () async {
+                final uri = Uri.parse(study.url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF050505),
+                  border: Border.all(color: AppColors.amber.withOpacity(0.2), width: 1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.link, color: AppColors.amber.withOpacity(0.7), size: 12),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(study.title, style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 11, fontFamily: 'monospace', decoration: TextDecoration.underline)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text('${study.source} • ${study.year}', style: TextStyle(color: AppColors.textDim, fontSize: 9, fontFamily: 'monospace', decoration: TextDecoration.none)),
+                  ],
+                ),
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top tags
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.amber.withOpacity(0.5), width: 1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Text(
-                        'PHARMA-SOURCED',
-                        style: TextStyle(
-                          color: AppColors.amber.withOpacity(0.7),
-                          fontSize: 7,
-                          fontFamily: 'monospace',
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.amber.withOpacity(0.5), width: 1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Text(
-                        'CORPO-INTEL',
-                        style: TextStyle(
-                          color: AppColors.amber.withOpacity(0.7),
-                          fontSize: 7,
-                          fontFamily: 'monospace',
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // Header
-                Row(
-                  children: [
-                    Icon(Icons.biotech, color: AppColors.amber, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'INTELLIGENCE',
-                      style: TextStyle(
-                        color: AppColors.amber.withOpacity(0.7),
-                        fontSize: 11,
-                        fontFamily: 'monospace',
-                        letterSpacing: 1,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.amber.withOpacity(0.8), width: 1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Text(
-                        '${peptide.studyLinks.length} SOURCES',
-                        style: TextStyle(
-                          color: AppColors.amber.withOpacity(0.9),
-                          fontSize: 8,
-                          fontFamily: 'monospace',
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Study list (compact, clickable)
-                ...peptide.studyLinks.map((study) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: GestureDetector(
-                    onTap: () async {
-                      final uri = Uri.parse(study.url);
-                      if (await canLaunchUrl(uri)) {
-                        await launchUrl(uri, mode: LaunchMode.externalApplication);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.3),
-                        border: Border.all(
-                          color: AppColors.amber.withOpacity(0.25),
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.link,
-                                color: AppColors.amber.withOpacity(0.7),
-                                size: 12,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  study.title,
-                                  style: TextStyle(
-                                    color: AppColors.amber.withOpacity(0.9),
-                                    fontSize: 11,
-                                    fontFamily: 'monospace',
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${study.source} • ${study.year}',
-                            style: TextStyle(
-                              color: AppColors.textMid,
-                              fontSize: 9,
-                              fontFamily: 'monospace',
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )),
-                const SizedBox(height: 12),
-                // Bottom tags
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.amber.withOpacity(0.5), width: 1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Text(
-                        'VERIFIED',
-                        style: TextStyle(
-                          color: AppColors.amber.withOpacity(0.7),
-                          fontSize: 7,
-                          fontFamily: 'monospace',
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.amber.withOpacity(0.5), width: 1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                      child: Text(
-                        'LIBERATED: 2026',
-                        style: TextStyle(
-                          color: AppColors.amber.withOpacity(0.7),
-                          fontSize: 7,
-                          fontFamily: 'monospace',
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
+          )),
+        ],
       ),
+    );
+  }
+
+  Widget _buildAmberTag(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.amber.withOpacity(0.4), width: 1),
+        borderRadius: BorderRadius.circular(2),
+      ),
+      child: Text(label, style: TextStyle(color: AppColors.amber.withOpacity(0.7), fontSize: 7, fontFamily: 'monospace', decoration: TextDecoration.none)),
     );
   }
 

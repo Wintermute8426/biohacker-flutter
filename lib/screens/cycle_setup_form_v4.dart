@@ -396,24 +396,18 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
     required String sectionTitle,
     required List<Widget> children,
     Color borderColor = AppColors.amber,
+    IconData icon = Icons.terminal,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(8),
+        color: const Color(0xFF0A0A0A),
+        borderRadius: BorderRadius.circular(4),
         border: Border.all(
-          color: borderColor.withOpacity(0.6),
-          width: 2,
+          color: borderColor.withOpacity(0.25),
+          width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: borderColor.withOpacity(0.3),
-            blurRadius: 15,
-            spreadRadius: 2,
-          ),
-        ],
       ),
       child: Stack(
         children: [
@@ -421,7 +415,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
           Positioned.fill(
             child: CustomPaint(
               painter: common.ScanlinesPainter(
-                opacity: 0.05,
+                opacity: 0.04,
                 spacing: 3.0,
               ),
             ),
@@ -429,17 +423,26 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section header
-              Text(
-                sectionTitle.toUpperCase(),
-                style: TextStyle(
-                  color: borderColor.withOpacity(0.7),
-                  fontSize: 11,
-                  fontFamily: 'monospace',
-                  letterSpacing: 1,
-                ),
+              // Section header (profile style)
+              Row(
+                children: [
+                  Container(width: 4, height: 14, color: borderColor.withOpacity(0.6)),
+                  const SizedBox(width: 8),
+                  Icon(icon, color: borderColor, size: 13),
+                  const SizedBox(width: 8),
+                  Text(
+                    '> ${sectionTitle.toUpperCase()}',
+                    style: TextStyle(
+                      color: borderColor,
+                      fontSize: 11,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               ...children,
             ],
           ),
@@ -657,13 +660,11 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header section with CRT styling
+          // Header section
           Container(
             padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.black, const Color(0xFF1a0d00), Colors.black],
-              ),
+            decoration: const BoxDecoration(
+              color: Colors.black,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -722,6 +723,8 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
           // ===== PEPTIDE =====
           _buildCRTCard(
             sectionTitle: 'Peptide Selection',
+            borderColor: AppColors.primary,
+            icon: Icons.biotech,
             children: [
               PeptideSelector(
                 initialValue: _selectedPeptide,
@@ -739,9 +742,11 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             ],
           ),
 
-          // ===== RECONSTITUTION =====
+          // ===== DOSING PROTOCOL =====
           _buildCRTCard(
-            sectionTitle: 'Reconstitution',
+            sectionTitle: 'Dosing Protocol',
+            borderColor: AppColors.amber,
+            icon: Icons.science,
             children: [
               TextField(
                   controller: _totalPeptideController,
@@ -912,8 +917,8 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0d0600),
-                    border: Border.all(color: AppColors.amber.withOpacity(0.6)),
+                    color: const Color(0xFF050505),
+                    border: Border.all(color: AppColors.amber.withOpacity(0.3)),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Column(
@@ -1031,6 +1036,8 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
           // ===== ROUTE & FREQUENCY =====
           _buildCRTCard(
             sectionTitle: 'Route & Frequency',
+            borderColor: AppColors.amber,
+            icon: Icons.route,
             children: [
               DropdownButtonFormField<String>(
                 initialValue: _selectedRoute,
@@ -1091,9 +1098,11 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             ],
           ),
 
-          // ===== CYCLE DURATION (IN WEEKS) =====
+          // ===== CYCLE TIMELINE =====
           _buildCRTCard(
-            sectionTitle: 'Cycle Duration',
+            sectionTitle: 'Cycle Timeline',
+            borderColor: AppColors.accent,
+            icon: Icons.timeline,
             children: [
               TextField(
                 controller: _cycleDurationController,
@@ -1153,8 +1162,8 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0d0600),
-                    border: Border.all(color: AppColors.amber.withOpacity(0.4), width: 1),
+                    color: const Color(0xFF050505),
+                    border: Border.all(color: AppColors.accent.withOpacity(0.25), width: 1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Column(
@@ -1202,9 +1211,11 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             ],
           ),
 
-          // ===== INJECTION TIME =====
+          // ===== INJECTION TIMING =====
           _buildCRTCard(
-            sectionTitle: 'Injection Time',
+            sectionTitle: 'Injection Timing',
+            borderColor: AppColors.accent,
+            icon: Icons.schedule,
             children: [
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -1221,9 +1232,11 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
             ],
           ),
 
-          // ===== DOSING PHASES (LIKE WEB APP) =====
+          // ===== ADVANCED DOSING =====
           _buildCRTCard(
-            sectionTitle: 'Multi-Phase Dosing (Optional)',
+            sectionTitle: 'Advanced Dosing',
+            borderColor: AppColors.secondary,
+            icon: Icons.layers,
             children: [
               // Quick add buttons
               Row(
@@ -1255,11 +1268,11 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0d0600),
-                    border: Border.all(color: AppColors.amber.withOpacity(0.3), width: 1),
+                    color: const Color(0xFF050505),
+                    border: Border.all(color: AppColors.secondary.withOpacity(0.2), width: 1),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: Center(child: Text('No phases added. Click above to add one.', style: TextStyle(color: AppColors.textMid, fontSize: 12))),
+                  child: Center(child: Text('No phases added. Click above to add one.', style: TextStyle(color: AppColors.textDim, fontSize: 12, fontFamily: 'monospace'))),
                 )
               else
                 Column(
@@ -1325,16 +1338,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.black,
-                  border: Border.all(color: AppColors.error.withOpacity(0.8), width: 2),
+                  color: const Color(0xFF0A0A0A),
+                  border: Border.all(color: AppColors.error.withOpacity(0.5), width: 1),
                   borderRadius: BorderRadius.circular(4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.error.withOpacity(0.2),
-                      blurRadius: 10,
-                      spreadRadius: 1,
-                    ),
-                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1466,16 +1472,9 @@ class _PhaseCardState extends State<PhaseCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF0d0600),
-        border: Border.all(color: AppColors.amber.withOpacity(0.6), width: 2),
+        color: const Color(0xFF0A0A0A),
+        border: Border.all(color: AppColors.secondary.withOpacity(0.3), width: 1),
         borderRadius: BorderRadius.circular(4),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.amber.withOpacity(0.2),
-            blurRadius: 8,
-            spreadRadius: 1,
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

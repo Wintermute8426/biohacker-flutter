@@ -20,7 +20,7 @@ class FullScreenModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black.withOpacity(0.7), // Dark backdrop
+      color: Colors.black.withOpacity(0.85),
       child: Center(
         child: Container(
           margin: const EdgeInsets.all(16),
@@ -29,8 +29,12 @@ class FullScreenModal extends StatelessWidget {
             maxWidth: MediaQuery.of(context).size.width - 32,
           ),
           decoration: BoxDecoration(
-            color: AppColors.surface.withOpacity(0.95), // Almost opaque for readability
-            borderRadius: BorderRadius.circular(8),
+            color: const Color(0xFF000000),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(
+              color: AppColors.amber.withOpacity(0.2),
+              width: 1,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -51,32 +55,32 @@ class FullScreenModal extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.surface.withOpacity(0.95),  // Match modal background
-            AppColors.surface.withOpacity(0.5),   // Fade to semi-transparent
-            Colors.transparent,                    // Fully transparent - no hard edge!
-          ],
-          stops: [0.0, 0.7, 1.0],
+        color: const Color(0xFF0A0A0A),
+        border: Border(
+          bottom: BorderSide(color: AppColors.amber.withOpacity(0.2), width: 1),
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title!.toUpperCase(),
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1,
-              decoration: TextDecoration.none,
+          Container(width: 4, height: 14, color: AppColors.amber.withOpacity(0.6)),
+          const SizedBox(width: 8),
+          Icon(Icons.science, color: AppColors.amber, size: 13),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '> ${title!.toUpperCase()}',
+              style: const TextStyle(
+                color: AppColors.amber,
+                fontSize: 11,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+                decoration: TextDecoration.none,
+              ),
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close),
+            icon: const Icon(Icons.close, size: 16),
             color: AppColors.textMid,
             onPressed: onClose ?? () => Navigator.pop(context),
             padding: EdgeInsets.zero,
