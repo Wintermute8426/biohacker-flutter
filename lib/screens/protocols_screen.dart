@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
@@ -248,13 +249,39 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
                     const SizedBox(height: 14),
 
-                    // Description
+                    // Protocol Intel section
+                    Row(
+                      children: [
+                        Container(width: 3, height: 12, color: AppColors.amber.withOpacity(0.8)),
+                        const SizedBox(width: 8),
+                        Text(
+                          '> PROTOCOL INTEL',
+                          style: TextStyle(
+                            color: AppColors.amber,
+                            fontSize: 10,
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
                     Container(
+                      width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: Colors.black,
-                        border: Border.all(color: AppColors.borderDim, width: 1),
-                        borderRadius: BorderRadius.circular(4),
+                        border: Border(
+                          left: BorderSide(color: AppColors.amber.withOpacity(0.7), width: 3),
+                          top: BorderSide(color: AppColors.borderDim, width: 1),
+                          right: BorderSide(color: AppColors.borderDim, width: 1),
+                          bottom: BorderSide(color: AppColors.borderDim, width: 1),
+                        ),
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(4),
+                          bottomRight: Radius.circular(4),
+                        ),
                       ),
                       child: Text(
                         stack['description'] as String,
@@ -391,12 +418,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
   void _showCreateProtocolModal() {
     final nameController = TextEditingController();
-    final descController = TextEditingController();
-    final doseController = TextEditingController();
+    final goalController = TextEditingController();
     final weeksController = TextEditingController(text: '8');
-    String selectedPeptide = PEPTIDE_LIST.first;
-    String selectedRoute = 'SC (subcutaneous)';
-    String selectedFrequency = '1x weekly';
+    final currentDoseController = TextEditingController();
+    String currentPeptide = PEPTIDE_LIST.first;
+    String currentRoute = 'SC (subcutaneous)';
+    String currentFrequency = '1x daily';
+    final List<Map<String, dynamic>> peptideStack = [];
     bool makePublic = false;
 
     showModalBottomSheet(
@@ -508,7 +536,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                       ),
                       const SizedBox(height: 12),
                       TextField(
-                        controller: descController,
+                        controller: goalController,
                         style: TextStyle(
                           color: AppColors.amber.withOpacity(0.9),
                           fontSize: 14,
@@ -535,7 +563,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   ),
                 ),
 
-                // ─── PEPTIDE SELECTION ───
+                // ─── PEPTIDE STACK ───
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   padding: const EdgeInsets.all(16),
@@ -554,7 +582,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           Icon(Icons.biotech, color: AppColors.primary, size: 13),
                           const SizedBox(width: 8),
                           Text(
-                            '> PEPTIDE SELECTION',
+                            '> PEPTIDE STACK',
                             style: TextStyle(
                               color: AppColors.primary,
                               fontSize: 11,
@@ -563,11 +591,106 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                               letterSpacing: 2,
                             ),
                           ),
+                          const Spacer(),
+                          if (peptideStack.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: AppColors.primary.withOpacity(0.4)),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              child: Text(
+                                '${peptideStack.length} ADDED',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 9,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                            ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 14),
+
+                      // Added peptides list
+                      if (peptideStack.isNotEmpty) ...[
+                        ...peptideStack.asMap().entries.map((entry) {
+                          final idx = entry.key;
+                          final p = entry.value;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                              border: Border(
+                                left: BorderSide(color: AppColors.primary.withOpacity(0.7), width: 2),
+                                top: BorderSide(color: AppColors.borderDim, width: 1),
+                                right: BorderSide(color: AppColors.borderDim, width: 1),
+                                bottom: BorderSide(color: AppColors.borderDim, width: 1),
+                              ),
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(4),
+                                bottomRight: Radius.circular(4),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        p['name'] as String,
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontSize: 12,
+                                          fontFamily: 'monospace',
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${p['dose']} · ${p['route']} · ${p['frequency']}',
+                                        style: TextStyle(
+                                          color: AppColors.textDim,
+                                          fontSize: 10,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () => setModalState(() => peptideStack.removeAt(idx)),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(4),
+                                    child: Icon(Icons.close, color: AppColors.textDim, size: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        Container(
+                          height: 1,
+                          margin: const EdgeInsets.only(bottom: 14),
+                          color: AppColors.borderDim,
+                        ),
+                      ],
+
+                      // Configure next peptide to add
+                      Text(
+                        peptideStack.isEmpty ? 'ADD FIRST PEPTIDE' : 'ADD ANOTHER PEPTIDE',
+                        style: TextStyle(
+                          color: AppColors.textDim,
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       DropdownButtonFormField<String>(
-                        value: selectedPeptide,
+                        value: currentPeptide,
                         dropdownColor: Colors.black,
                         style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
                         decoration: InputDecoration(
@@ -586,11 +709,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: PEPTIDE_LIST.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
-                        onChanged: (val) => setModalState(() => selectedPeptide = val!),
+                        onChanged: (val) => setModalState(() => currentPeptide = val!),
                       ),
                       const SizedBox(height: 12),
                       TextField(
-                        controller: doseController,
+                        controller: currentDoseController,
                         style: TextStyle(
                           color: AppColors.amber.withOpacity(0.9),
                           fontSize: 14,
@@ -613,43 +736,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                // ─── DOSING SCHEDULE ───
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0A0A0A),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.amber.withOpacity(0.25), width: 1),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(width: 4, height: 14, color: AppColors.amber.withOpacity(0.6)),
-                          const SizedBox(width: 8),
-                          Icon(Icons.schedule, color: AppColors.amber, size: 13),
-                          const SizedBox(width: 8),
-                          Text(
-                            '> DOSING SCHEDULE',
-                            style: TextStyle(
-                              color: AppColors.amber,
-                              fontSize: 11,
-                              fontFamily: 'monospace',
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 2,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
-                        value: selectedRoute,
+                        value: currentRoute,
                         dropdownColor: Colors.black,
                         style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
                         decoration: InputDecoration(
@@ -670,11 +759,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         items: ['SC (subcutaneous)', 'IM (intramuscular)', 'IV (intravenous)', 'Intranasal', 'Oral']
                             .map((r) => DropdownMenuItem(value: r, child: Text(r)))
                             .toList(),
-                        onChanged: (val) => setModalState(() => selectedRoute = val!),
+                        onChanged: (val) => setModalState(() => currentRoute = val!),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
-                        value: selectedFrequency,
+                        value: currentFrequency,
                         dropdownColor: Colors.black,
                         style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
                         decoration: InputDecoration(
@@ -695,33 +784,50 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         items: ['1x daily', '2x daily', '1x weekly', '2x weekly', '3x weekly']
                             .map((f) => DropdownMenuItem(value: f, child: Text(f)))
                             .toList(),
-                        onChanged: (val) => setModalState(() => selectedFrequency = val!),
+                        onChanged: (val) => setModalState(() => currentFrequency = val!),
                       ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: weeksController,
-                        style: TextStyle(
-                          color: AppColors.amber.withOpacity(0.9),
-                          fontSize: 14,
-                          fontFamily: 'monospace',
-                        ),
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'DURATION (weeks)',
-                          labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
-                          hintText: 'e.g., 8',
-                          hintStyle: TextStyle(color: AppColors.textDim),
-                          filled: true,
-                          fillColor: Colors.black,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
+                      const SizedBox(height: 14),
+
+                      // ADD PEPTIDE button
+                      GestureDetector(
+                        onTap: () {
+                          final dose = currentDoseController.text.trim();
+                          if (dose.isEmpty) return;
+                          setModalState(() {
+                            peptideStack.add({
+                              'name': currentPeptide,
+                              'dose': dose,
+                              'route': currentRoute,
+                              'frequency': currentFrequency,
+                            });
+                            currentDoseController.clear();
+                          });
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
                             borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: AppColors.primary.withOpacity(0.6), width: 1.5),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
-                            borderRadius: BorderRadius.circular(4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add, color: AppColors.primary, size: 16),
+                              const SizedBox(width: 6),
+                              Text(
+                                'ADD PEPTIDE',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 11,
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                            ],
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
                     ],
@@ -800,16 +906,22 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
                   child: GestureDetector(
                     onTap: () async {
-                      final dose = double.tryParse(doseController.text) ?? 1;
+                      if (nameController.text.trim().isEmpty || peptideStack.isEmpty) return;
                       final weeks = int.tryParse(weeksController.text) ?? 8;
+                      final firstPeptide = peptideStack.first;
+
+                      final peptidesJson = json.encode({
+                        'goal': goalController.text,
+                        'peptides': peptideStack,
+                      });
 
                       await protocolDb.saveProtocol(
                         name: nameController.text,
-                        description: descController.text.isEmpty ? null : descController.text,
-                        peptideName: selectedPeptide,
-                        dose: dose,
-                        route: selectedRoute,
-                        frequency: selectedFrequency,
+                        description: peptidesJson,
+                        peptideName: firstPeptide['name'] as String,
+                        dose: double.tryParse(firstPeptide['dose'].toString()) ?? 1.0,
+                        route: firstPeptide['route'] as String,
+                        frequency: firstPeptide['frequency'] as String,
                         durationWeeks: weeks,
                         isPublic: makePublic,
                       );
