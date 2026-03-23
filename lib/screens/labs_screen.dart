@@ -9,15 +9,12 @@ import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../models/lab_result.dart';
 import '../services/labs_database.dart';
-import '../services/bloodwork_service.dart';
 import '../services/android_file_picker.dart';
 import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/app_header.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/full_screen_modal.dart';
-import '../widgets/common/matte_card.dart';
-import '../widgets/common/scanlines_painter.dart' as common;
 
 class LabsScreen extends StatefulWidget {
   const LabsScreen({Key? key}) : super(key: key);
@@ -77,55 +74,74 @@ class _LabsScreenState extends State<LabsScreen> {
       final picker = ImagePicker();
       showModalBottomSheet(
         context: context,
-        backgroundColor: AppColors.surface,
-        builder: (context) => Padding(
-          padding: const EdgeInsets.all(16),
+        backgroundColor: const Color(0xFF0A0A0A),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+          side: BorderSide(color: Color(0xFF39FF14), width: 0),
+        ),
+        builder: (context) => Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A0A0A),
+            border: Border(top: BorderSide(color: AppColors.accent.withOpacity(0.4), width: 1)),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'UPLOAD LAB REPORT',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
-                ),
+              // Terminal header
+              Row(
+                children: [
+                  Container(width: 3, height: 14, color: AppColors.accent),
+                  const SizedBox(width: 8),
+                  Icon(Icons.upload_file, color: AppColors.accent, size: 14),
+                  const SizedBox(width: 8),
+                  Text(
+                    '> SELECT INPUT SOURCE',
+                    style: TextStyle(
+                      color: AppColors.accent,
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Take Photo'),
-                subtitle: const Text('Photograph your lab report'),
+              const SizedBox(height: 20),
+              _buildUploadOption(
+                context,
+                icon: Icons.camera_alt,
+                label: 'CAMERA CAPTURE',
+                sublabel: 'Photograph lab report',
                 onTap: () async {
                   Navigator.pop(context);
                   final image = await picker.pickImage(source: ImageSource.camera);
-                  if (image != null) {
-                    await _uploadImage(image);
-                  }
+                  if (image != null) await _uploadImage(image);
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Gallery'),
-                subtitle: const Text('Upload image from your device'),
+              const SizedBox(height: 8),
+              _buildUploadOption(
+                context,
+                icon: Icons.photo_library,
+                label: 'GALLERY IMPORT',
+                sublabel: 'Upload image from device',
                 onTap: () async {
                   Navigator.pop(context);
                   final image = await picker.pickImage(source: ImageSource.gallery);
-                  if (image != null) {
-                    await _uploadImage(image);
-                  }
+                  if (image != null) await _uploadImage(image);
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.picture_as_pdf),
-                title: const Text('PDF Lab Report'),
-                subtitle: const Text('Upload blood test PDF'),
+              const SizedBox(height: 8),
+              _buildUploadOption(
+                context,
+                icon: Icons.picture_as_pdf,
+                label: 'PDF DOCUMENT',
+                sublabel: 'Upload blood test PDF',
                 onTap: () async {
                   Navigator.pop(context);
                   final filePath = await AndroidFilePicker.pickPdfFile();
-                  if (filePath != null) {
-                    await _uploadPDF(File(filePath));
-                  }
+                  if (filePath != null) await _uploadPDF(File(filePath));
                 },
               ),
             ],
@@ -374,48 +390,37 @@ class _LabsScreenState extends State<LabsScreen> {
       );
     }
 
+    const Color labGreen = AppColors.accent;
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Upload section at top
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.primary.withOpacity(0.2)),
-            borderRadius: BorderRadius.circular(8),
-            color: AppColors.surface.withOpacity(0.15),
-          ),
-          child: Column(
+        // > UPLOAD NEW LAB
+        _buildLabSection(
+          '> UPLOAD NEW LAB',
+          Icons.upload_file,
+          labGreen,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.upload_file, size: 40, color: AppColors.primary),
-              const SizedBox(height: 12),
               Text(
-                'UPLOAD LAB REPORT',
+                'SUBMIT BLOODWORK PDF OR IMAGE FOR BIOMARKER EXTRACTION',
                 style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
+                  color: AppColors.textDim,
+                  fontSize: 9,
+                  fontFamily: 'monospace',
+                  letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Take a photo or upload an image of your lab report',
-                style: TextStyle(
-                  color: AppColors.textMid,
-                  fontSize: 11,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               GestureDetector(
                 onTap: _isUploading ? null : _handleUpload,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                   decoration: BoxDecoration(
+                    color: _isUploading ? Colors.transparent : labGreen.withOpacity(0.08),
                     border: Border.all(
-                      color: _isUploading ? AppColors.textMid : AppColors.primary.withOpacity(0.2),
+                      color: _isUploading ? AppColors.textDim : labGreen.withOpacity(0.5),
                       width: 1,
                     ),
                     borderRadius: BorderRadius.circular(4),
@@ -425,20 +430,24 @@ class _LabsScreenState extends State<LabsScreen> {
                     children: [
                       if (_isUploading) ...[
                         SizedBox(
-                          width: 14,
-                          height: 14,
+                          width: 12,
+                          height: 12,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                            valueColor: AlwaysStoppedAnimation(labGreen),
                           ),
                         ),
                         const SizedBox(width: 8),
+                      ] else ...[
+                        Icon(Icons.add, color: labGreen, size: 13),
+                        const SizedBox(width: 6),
                       ],
                       Text(
-                        _isUploading ? 'UPLOADING...' : '📤 UPLOAD NOW',
+                        _isUploading ? 'PROCESSING...' : 'UPLOAD REPORT',
                         style: TextStyle(
-                          color: _isUploading ? AppColors.textMid : AppColors.primary,
+                          color: _isUploading ? AppColors.textDim : labGreen,
                           fontSize: 11,
+                          fontFamily: 'monospace',
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
                         ),
@@ -450,25 +459,46 @@ class _LabsScreenState extends State<LabsScreen> {
             ],
           ),
         ),
+        const SizedBox(height: 16),
 
         if (_labResults.isEmpty) ...[
-          const SizedBox(height: 40),
+          const SizedBox(height: 24),
           const EmptyState(
             icon: Icons.science,
             title: 'No lab results yet',
             message: 'Upload your first lab report to start tracking biomarkers',
           ),
         ] else ...[
-          const SizedBox(height: 24),
-          Text(
-            '${_labResults.length} test dates • ${_getTotalMarkerCount()} total markers',
-            style: TextStyle(
-              color: AppColors.textMid,
-              fontSize: 11,
-              letterSpacing: 0.5,
-            ),
+          // > LAB HISTORY header
+          Row(
+            children: [
+              Container(width: 3, height: 14, color: labGreen),
+              const SizedBox(width: 8),
+              Icon(Icons.history, color: labGreen, size: 13),
+              const SizedBox(width: 8),
+              Text(
+                '> LAB HISTORY',
+                style: TextStyle(
+                  color: labGreen,
+                  fontFamily: 'monospace',
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${_labResults.length} DATES  ·  ${_getTotalMarkerCount()} MARKERS',
+                style: TextStyle(
+                  color: AppColors.textDim,
+                  fontSize: 9,
+                  fontFamily: 'monospace',
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           ..._labResults.map((lab) => _buildLabResultCard(lab)).toList(),
         ],
       ],
@@ -477,511 +507,221 @@ class _LabsScreenState extends State<LabsScreen> {
 
 
   Widget _buildLabResultCard(LabResult lab) {
-    final scanId = 'SCAN-${lab.uploadDate.millisecondsSinceEpoch.toString().substring(7)}';
-    
+    const Color labGreen = AppColors.accent;
+    final markerCount = lab.extractedData.length;
+    final outOfRangeCount = lab.extractedData.entries
+        .where((e) => _isOutOfRange(e.key, e.value))
+        .length;
+
     return GestureDetector(
       onTap: () => _showLabDetail(lab),
       child: Container(
-        height: 235,  // Taller for cyberpunk lab testing aesthetic with better spacing
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(8),
+          color: const Color(0xFF0A0A0A),
+          borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: AppColors.primary.withOpacity(0.7),  // Cyan for labs
-            width: 2,
+            color: outOfRangeCount > 0
+                ? AppColors.error.withOpacity(0.4)
+                : labGreen.withOpacity(0.25),
+            width: 1,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.3),
-              blurRadius: 15,
-              spreadRadius: 2,
-            ),
-          ],
         ),
-        child: Stack(
-          children: [
-            // Scanlines overlay
-            Positioned.fill(
-              child: CustomPaint(
-                painter: common.ScanlinesPainter(
-                  opacity: 0.05,
-                  spacing: 3.0,
-                ),
-              ),
-            ),
-            
-            // Top-left: SCAN ID badge
-            Positioned(
-              top: 8,
-              left: 8,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.15),
-                  border: Border.all(color: AppColors.primary.withOpacity(0.7), width: 1),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.biotech, color: AppColors.primary.withOpacity(0.8), size: 10),
-                    SizedBox(width: 4),
-                    Text(
-                      scanId,
-                      style: TextStyle(
-                        color: AppColors.primary.withOpacity(0.85),
-                        fontSize: 8,
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            // Top-right: ROGUE-3 callsign
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.primary.withOpacity(0.8), width: 1),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.flash_on, color: AppColors.primary.withOpacity(0.8), size: 10),
-                    SizedBox(width: 3),
-                    Text(
-                      'ROGUE-3',
-                      style: TextStyle(
-                        color: AppColors.primary.withOpacity(0.9),
-                        fontSize: 8,
-                        fontFamily: 'monospace',
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            // Bottom: Cyberpunk lab testing certification bar
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 32,
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.05),
-                  border: Border(
-                    top: BorderSide(
-                      color: AppColors.primary.withOpacity(0.3),
-                      width: 1,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Left side: Timestamp + QR codes
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.qr_code_2, color: AppColors.primary.withOpacity(0.4), size: 14),
-                        SizedBox(width: 6),
-                        Text(
-                          DateFormat('yyyy.MM.dd').format(lab.uploadDate),
-                          style: TextStyle(
-                            color: AppColors.primary.withOpacity(0.5),
-                            fontSize: 8,
-                            fontFamily: 'monospace',
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Icon(Icons.verified_outlined, color: AppColors.primary.withOpacity(0.4), size: 10),
-                      ],
-                    ),
-                    
-                    // Center: Multiple barcodes
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CustomPaint(
-                          size: Size(25, 10),
-                          painter: BarcodePainter(color: AppColors.primary),
-                        ),
-                        SizedBox(width: 6),
-                        Icon(Icons.qr_code_2, color: AppColors.primary.withOpacity(0.35), size: 12),
-                        SizedBox(width: 6),
-                        CustomPaint(
-                          size: Size(30, 10),
-                          painter: BarcodePainter(color: AppColors.primary),
-                        ),
-                      ],
-                    ),
-                    
-                    // Right side: Lab certification + serial
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.science_outlined, color: AppColors.primary.withOpacity(0.4), size: 10),
-                        SizedBox(width: 4),
-                        Text(
-                          'LAB-${lab.uploadDate.year}',
-                          style: TextStyle(
-                            color: AppColors.primary.withOpacity(0.45),
-                            fontSize: 7,
-                            fontFamily: 'monospace',
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                        SizedBox(width: 6),
-                        CustomPaint(
-                          size: Size(20, 10),
-                          painter: BarcodePainter(color: AppColors.primary),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            // Main content
-            Padding(
-              padding: EdgeInsets.fromLTRB(8, 35, 8, 44),  // More space for corner badges + bottom bar
-              child: Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header row
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Left accent bar
+                Container(width: 3, height: 14, color: labGreen),
+                const SizedBox(width: 8),
                 Text(
-                  DateFormat('M/d/yyyy').format(lab.uploadDate),
-                  style: TextStyle(
-                    color: AppColors.primary,
+                  DateFormat('MMM d, yyyy').format(lab.uploadDate).toUpperCase(),
+                  style: const TextStyle(
+                    color: AppColors.textLight,
+                    fontFamily: 'monospace',
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                    decoration: TextDecoration.none,
                   ),
                 ),
-                Row(
-                  children: [
-                    Text(
-                      '${lab.extractedData.length} markers',
-                      style: TextStyle(
-                        color: AppColors.textMid,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // DELETE BUTTON
-                    IconButton(
-                      icon: Icon(Icons.delete_outline, size: 18),
-                      color: AppColors.error.withOpacity(0.7),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      onPressed: () => _deleteLabResult(lab),
-                      tooltip: 'Delete report',
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.chevron_right, color: AppColors.primary, size: 18),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: (lab.extractedData.entries.toList()
-                ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
-              ).take(6).map((entry) {
-                final isOut = _isOutOfRange(entry.key, entry.value);
-                final displayValue = entry.value is Map
-                  ? (entry.value['value']?.toString() ?? 'N/A')
-                  : entry.value.toString();
-                final categoryColor = _getCategoryColor(entry.key);
-
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                const Spacer(),
+                // Marker count badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.black,
-                    border: Border.all(
-                      color: isOut ? AppColors.error.withOpacity(0.7) : categoryColor.withOpacity(0.7),
-                      width: 1,
-                    ),
+                    color: labGreen.withOpacity(0.08),
+                    border: Border.all(color: labGreen.withOpacity(0.3), width: 1),
                     borderRadius: BorderRadius.circular(2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: categoryColor.withOpacity(0.2),
-                        blurRadius: 4,
-                        spreadRadius: 1,
-                      ),
-                    ],
                   ),
                   child: Text(
-                    '${_beautifyBiomarkerName(entry.key)}: $displayValue${isOut ? ' [HIGH]' : ''}',
+                    '$markerCount MARKERS',
                     style: TextStyle(
-                      color: isOut ? AppColors.error : categoryColor,
-                      fontSize: 10,
+                      color: labGreen.withOpacity(0.9),
+                      fontSize: 9,
+                      fontFamily: 'monospace',
                       fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.none,
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-            if (lab.extractedData.length > 6) ...[
-              const SizedBox(height: 8),
-              Text(
-                '+ ${lab.extractedData.length - 6} more biomarkers',
-                style: TextStyle(
-                  color: AppColors.textMid,
-                  fontSize: 10,
-                  fontStyle: FontStyle.italic,
-                  decoration: TextDecoration.none,
                 ),
+                if (outOfRangeCount > 0) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withOpacity(0.1),
+                      border: Border.all(color: AppColors.error.withOpacity(0.5), width: 1),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    child: Text(
+                      '$outOfRangeCount OUT',
+                      style: TextStyle(
+                        color: AppColors.error,
+                        fontSize: 9,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(width: 8),
+                // Delete button
+                GestureDetector(
+                  onTap: () => _deleteLabResult(lab),
+                  child: Icon(Icons.delete_outline, color: AppColors.textDim, size: 16),
+                ),
+                const SizedBox(width: 8),
+                Icon(Icons.chevron_right, color: AppColors.textDim, size: 16),
+              ],
+            ),
+            if (markerCount > 0) ...[
+              const SizedBox(height: 12),
+              // Biomarker preview chips
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: (lab.extractedData.entries.toList()
+                  ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
+                ).take(6).map((entry) {
+                  final isOut = _isOutOfRange(entry.key, entry.value);
+                  final displayValue = entry.value is Map
+                    ? (entry.value['value']?.toString() ?? 'N/A')
+                    : entry.value.toString();
+                  final categoryColor = _getCategoryColor(entry.key);
+                  final chipColor = isOut ? AppColors.error : categoryColor;
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: chipColor.withOpacity(0.07),
+                      border: Border.all(color: chipColor.withOpacity(0.35), width: 1),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    child: Text(
+                      '${_beautifyBiomarkerName(entry.key)}: $displayValue${isOut ? ' ▲' : ''}',
+                      style: TextStyle(
+                        color: chipColor.withOpacity(0.9),
+                        fontSize: 9,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
+              if (markerCount > 6) ...[
+                const SizedBox(height: 6),
+                Text(
+                  '+ ${markerCount - 6} MORE BIOMARKERS',
+                  style: TextStyle(
+                    color: AppColors.textDim,
+                    fontSize: 9,
+                    fontFamily: 'monospace',
+                    letterSpacing: 0.5,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ],
             ],
           ],
         ),
-            ),  // Close Padding
-          ],  // Close Stack children
-        ),  // Close Stack
-      ),  // Close Container
-    );  // Close GestureDetector
+      ),
+    );
   }
 
   void _showLabDetail(LabResult lab) {
+    const Color labGreen = AppColors.accent;
+    final outOfRangeCount = lab.extractedData.entries
+        .where((e) => _isOutOfRange(e.key, e.value))
+        .length;
+
     FullScreenModal.show(
       context: context,
       child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 80),
         children: [
-          // Header section with CRT styling
-          Container(
-            // Extended padding at bottom to cover the gap and prevent underline
-            padding: const EdgeInsets.fromLTRB(20, 40, 20, 44),  // 20 + 24 extra = 44
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withOpacity(0.5),
-                  const Color(0xFF001a1a),
-                  const Color(0xFF001a1a).withOpacity(0.5),  // Fade to semi-transparent
-                  Colors.transparent,  // Fully transparent at bottom - no hard edge!
-                ],
-                stops: [0.0, 0.3, 0.7, 1.0],  // Control where each color appears
-              ),
-            ),
-            child: Column(
+          // > LAB OVERVIEW section
+          _buildLabSection(
+            '> LAB OVERVIEW',
+            Icons.biotech,
+            labGreen,
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.flash_on, color: AppColors.primary.withOpacity(0.7), size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      'BIOMETRIC ANALYSIS',
-                      style: TextStyle(
-                        color: AppColors.primary.withOpacity(0.7),
-                        fontSize: 9,
-                        fontFamily: 'monospace',
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
+                _buildDetailRow('DATE', DateFormat('MMM d, yyyy').format(lab.uploadDate).toUpperCase()),
+                _buildDetailRow('MARKERS', '${lab.extractedData.length}'),
+                if (outOfRangeCount > 0)
+                  _buildDetailRow('OUT OF RANGE', '$outOfRangeCount', valueColor: AppColors.error),
+                if (lab.notes != null && lab.notes!.isNotEmpty)
+                  _buildDetailRow('SOURCE', lab.notes!),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // > BIOMARKERS section header
+          if (lab.extractedData.isNotEmpty) ...[
+            Row(
+              children: [
+                Container(width: 3, height: 14, color: labGreen),
+                const SizedBox(width: 8),
+                Icon(Icons.science, color: labGreen, size: 13),
+                const SizedBox(width: 8),
                 Text(
-                  DateFormat('MMM d, yyyy').format(lab.uploadDate).toUpperCase(),
+                  '> BIOMARKERS',
                   style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 18,
+                    color: labGreen,
                     fontFamily: 'monospace',
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
+                    letterSpacing: 2,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${lab.extractedData.length} TOTAL',
+                  style: TextStyle(
+                    color: AppColors.textDim,
+                    fontSize: 9,
+                    fontFamily: 'monospace',
+                    letterSpacing: 0.5,
                     decoration: TextDecoration.none,
                   ),
                 ),
               ],
             ),
-          ),
+            const SizedBox(height: 12),
 
-          // Remove the gap - the header container now has extended padding to cover this space
-          // const SizedBox(height: 24),
-
-          // Lab metadata - SOURCE section with icon
-          if (lab.notes != null && lab.notes!.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.6),
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    // Scanlines
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: common.ScanlinesPainter(
-                          opacity: 0.05,
-                          spacing: 3.0,
-                        ),
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.source,
-                              color: AppColors.primary,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'SOURCE',
-                              style: TextStyle(
-                                color: AppColors.primary.withOpacity(0.7),
-                                fontSize: 11,
-                                fontFamily: 'monospace',
-                                letterSpacing: 1,
-                                decoration: TextDecoration.none,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          lab.notes!,
-                          style: TextStyle(
-                            color: AppColors.textMid,
-                            fontSize: 12,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-
-          // All biomarkers header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AppColors.primary.withOpacity(0.6),
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 15,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  // Scanlines
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: common.ScanlinesPainter(
-                        opacity: 0.05,
-                        spacing: 3.0,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.biotech,
-                            color: AppColors.primary,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'ALL BIOMARKERS',
-                            style: TextStyle(
-                              color: AppColors.primary.withOpacity(0.7),
-                              fontSize: 11,
-                              fontFamily: 'monospace',
-                              letterSpacing: 1,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.primary.withOpacity(0.8), width: 1),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                        child: Text(
-                          '${lab.extractedData.length} markers',
-                          style: TextStyle(
-                            color: AppColors.primary.withOpacity(0.9),
-                            fontSize: 8,
-                            fontFamily: 'monospace',
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Individual biomarker cards - SORTED BY PRIORITY
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Builder(
+            // Individual biomarker rows - sorted by priority
+            Builder(
               builder: (context) {
-                // Debug logging
                 print('[LabsScreen] Biomarkers in report: ${lab.extractedData.keys.toList()}');
                 print('[LabsScreen] After normalization: ${lab.extractedData.keys.map(_normalizeBiomarkerKey).toList()}');
 
@@ -989,92 +729,71 @@ class _LabsScreenState extends State<LabsScreen> {
                   children: (lab.extractedData.entries.toList()
                     ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
                   ).map((entry) {
-                final isOut = _isOutOfRange(entry.key, entry.value);
-                final displayValue = entry.value is Map
-                  ? (entry.value['value']?.toString() ?? 'N/A')
-                  : entry.value.toString();
-                final status = entry.value is Map
-                  ? (entry.value['status']?.toString() ?? 'NORMAL')
-                  : 'NORMAL';
-                final hint = _getBiomarkerHint(entry.key);
-                final icon = _getBiomarkerIcon(entry.key);
-                final statusColor = _getStatusColor(status);
-                final categoryColor = _getCategoryColor(entry.key);
+                    final isOut = _isOutOfRange(entry.key, entry.value);
+                    final displayValue = entry.value is Map
+                      ? (entry.value['value']?.toString() ?? 'N/A')
+                      : entry.value.toString();
+                    final status = entry.value is Map
+                      ? (entry.value['status']?.toString() ?? 'NORMAL')
+                      : 'NORMAL';
+                    final hint = _getBiomarkerHint(entry.key);
+                    final icon = _getBiomarkerIcon(entry.key);
+                    final statusColor = _getStatusColor(status);
+                    final categoryColor = _getCategoryColor(entry.key);
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: categoryColor.withOpacity(0.7),
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: categoryColor.withOpacity(0.3),
-                          blurRadius: 15,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        // Scanlines
-                        Positioned.fill(
-                          child: CustomPaint(
-                            painter: common.ScanlinesPainter(
-                              opacity: 0.05,
-                              spacing: 3.0,
-                            ),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0A0A0A),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: isOut
+                                ? AppColors.error.withOpacity(0.45)
+                                : categoryColor.withOpacity(0.2),
+                            width: 1,
                           ),
                         ),
-                        Row(
+                        child: Row(
                           children: [
-                            // Left side: Icon + Name + Description
+                            // Left accent bar colored by category
+                            Container(width: 3, height: 36, color: categoryColor.withOpacity(0.6)),
+                            const SizedBox(width: 10),
+                            // Icon
+                            Icon(icon, color: categoryColor.withOpacity(0.7), size: 16),
+                            const SizedBox(width: 10),
+                            // Name + hint
                             Expanded(
-                              child: Row(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    icon,
-                                    color: categoryColor,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          _beautifyBiomarkerName(entry.key),
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColors.textLight,
-                                            decoration: TextDecoration.none,
-                                                      ),
-                                        ),
-                                        if (hint.isNotEmpty) ...[
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            hint,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: AppColors.textMid,
-                                              decoration: TextDecoration.none,
-                                                          ),
-                                          ),
-                                        ],
-                                      ],
+                                  Text(
+                                    _beautifyBiomarkerName(entry.key),
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textLight,
+                                      fontFamily: 'monospace',
+                                      decoration: TextDecoration.none,
                                     ),
                                   ),
+                                  if (hint.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      hint,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: AppColors.textDim,
+                                        decoration: TextDecoration.none,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
-                            // Right side: Value + Unit + Status
+                            // Value + unit + status badge
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisSize: MainAxisSize.min,
@@ -1086,56 +805,55 @@ class _LabsScreenState extends State<LabsScreen> {
                                     Text(
                                       displayValue,
                                       style: TextStyle(
-                                        fontSize: 20,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                         color: statusColor,
+                                        fontFamily: 'monospace',
                                         decoration: TextDecoration.none,
-                                              ),
+                                      ),
                                     ),
-                                    const SizedBox(width: 4),
+                                    const SizedBox(width: 3),
                                     Text(
                                       _getUnitForBiomarker(entry.key),
                                       style: TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.textMid,
+                                        fontSize: 10,
+                                        color: AppColors.textDim,
                                         decoration: TextDecoration.none,
-                                              ),
+                                      ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 2),
-                                // Status badge
+                                const SizedBox(height: 3),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: statusColor.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(3),
+                                    color: statusColor.withOpacity(0.12),
+                                    border: Border.all(color: statusColor.withOpacity(0.4), width: 1),
+                                    borderRadius: BorderRadius.circular(2),
                                   ),
                                   child: Text(
                                     status.toUpperCase(),
                                     style: TextStyle(
-                                      fontSize: 9,
+                                      fontSize: 8,
                                       color: statusColor,
-                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'monospace',
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
                                       decoration: TextDecoration.none,
-                                          ),
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
+                      ),
+                    );
+                  }).toList(),
                 );
               },
             ),
-          ),
-
-          const SizedBox(height: 60),
+          ],
         ],
       ),
     );
@@ -1717,6 +1435,132 @@ class _LabsScreenState extends State<LabsScreen> {
 
     // CBC - Cyan (default)
     return AppColors.primary; // Cyan
+  }
+
+  // ==================== STYLING HELPERS ====================
+
+  Widget _buildLabSection(String title, IconData icon, Color accentColor, Widget child) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0A),
+        border: Border.all(color: accentColor.withOpacity(0.25), width: 1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(width: 3, height: 14, color: accentColor),
+              const SizedBox(width: 8),
+              Icon(icon, color: accentColor, size: 13),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: accentColor,
+                  letterSpacing: 2,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, {Color? valueColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 10,
+              color: AppColors.textDim,
+              letterSpacing: 1,
+              decoration: TextDecoration.none,
+            ),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 12,
+                color: valueColor ?? AppColors.textLight,
+                fontWeight: FontWeight.w500,
+                decoration: TextDecoration.none,
+              ),
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUploadOption(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String sublabel,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A0A0A),
+          border: Border.all(color: AppColors.accent.withOpacity(0.2), width: 1),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.accent.withOpacity(0.7), size: 18),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: AppColors.textLight,
+                    fontFamily: 'monospace',
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                Text(
+                  sublabel,
+                  style: const TextStyle(
+                    color: AppColors.textDim,
+                    fontFamily: 'monospace',
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Icon(Icons.chevron_right, color: AppColors.textDim, size: 16),
+          ],
+        ),
+      ),
+    );
   }
 }
 
