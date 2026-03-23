@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -20,7 +21,7 @@ class ProfilePhotoService {
 
       return File(pickedFile.path);
     } catch (e) {
-      print('[ProfilePhotoService] Error picking image: $e');
+      if (kDebugMode) print('[ProfilePhotoService] Error picking image: $e');
       rethrow;
     }
   }
@@ -42,10 +43,10 @@ class ProfilePhotoService {
           .from('profiles')
           .getPublicUrl(filePath);
 
-      print('[ProfilePhotoService] Upload success: $publicUrl');
+      if (kDebugMode) print('[ProfilePhotoService] Upload success: $publicUrl');
       return publicUrl;
     } catch (e) {
-      print('[ProfilePhotoService] Upload error: $e');
+      if (kDebugMode) print('[ProfilePhotoService] Upload error: $e');
       rethrow;
     }
   }
@@ -68,9 +69,9 @@ class ProfilePhotoService {
           .from('profiles')
           .remove([filePath]);
 
-      print('[ProfilePhotoService] Deleted old photo: $filePath');
+      if (kDebugMode) print('[ProfilePhotoService] Deleted old photo: $filePath');
     } catch (e) {
-      print('[ProfilePhotoService] Delete error: $e');
+      if (kDebugMode) print('[ProfilePhotoService] Delete error: $e');
       // Don't rethrow - deletion errors shouldn't block upload
     }
   }
@@ -83,9 +84,9 @@ class ProfilePhotoService {
           .update({'photo_url': photoUrl})
           .eq('id', userId);
 
-      print('[ProfilePhotoService] Updated user profile with photo URL');
+      if (kDebugMode) print('[ProfilePhotoService] Updated user profile with photo URL');
     } catch (e) {
-      print('[ProfilePhotoService] Update error: $e');
+      if (kDebugMode) print('[ProfilePhotoService] Update error: $e');
       rethrow;
     }
   }
@@ -110,7 +111,7 @@ class ProfilePhotoService {
 
       return photoUrl;
     } catch (e) {
-      print('[ProfilePhotoService] Full workflow error: $e');
+      if (kDebugMode) print('[ProfilePhotoService] Full workflow error: $e');
       rethrow;
     }
   }

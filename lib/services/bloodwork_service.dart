@@ -1,42 +1,54 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../models/lab_result.dart';
 
+// FUNC-003: This service is DISABLED until:
+//   1. BLOODWORK_AI_API_KEY is set in .env
+//   2. _readFile() has been verified against the actual file-source used
+// If the API key is absent, uploadLabPdf() throws a clear disabled error.
+
 class BloodworkService {
   static const String _apiUrl = 'https://api.bloodworkai.com/v1';
-  static const String _apiKey = 'YOUR_BLOODWORK_AI_API_KEY'; // TODO: Set from env
 
-  /// Upload PDF and extract biomarkers
-  /// Returns LabResult with extracted data
+  /// Upload PDF and extract biomarkers.
+  /// Returns LabResult with extracted data.
+  /// Throws if BLOODWORK_AI_API_KEY is not configured in .env.
   static Future<LabResult> uploadLabPdf({
     required String filePath,
     required String userId,
     String? cycleId,
     String? notes,
   }) async {
+    final apiKey = dotenv.env['BLOODWORK_AI_API_KEY'] ?? '';
+    if (apiKey.isEmpty) {
+      throw Exception(
+        'BloodworkAI is not configured. '
+        'Set BLOODWORK_AI_API_KEY in .env to enable this feature.',
+      );
+    }
+
     try {
-      // Read file bytes
-      final file = await _readFile(filePath);
-      
-      // Create multipart request
+      final fileBytes = await _readFile(filePath);
+
       var request = http.MultipartRequest(
         'POST',
         Uri.parse('$_apiUrl/extract'),
       );
 
-      request.headers['Authorization'] = 'Bearer $_apiKey';
+      request.headers['Authorization'] = 'Bearer $apiKey';
       request.fields['user_id'] = userId;
       if (cycleId != null) request.fields['cycle_id'] = cycleId;
       if (notes != null) request.fields['notes'] = notes;
 
       request.files.add(http.MultipartFile(
         'pdf_file',
-        Stream.value(file),
-        file.length,
+        Stream.value(fileBytes),
+        fileBytes.length,
         filename: filePath.split('/').last,
       ));
 
-      // Send request
       final streamedResponse = await request.send().timeout(
         const Duration(minutes: 2),
         onTimeout: () => throw Exception('Upload timeout - BloodworkAI API'),
@@ -46,11 +58,8 @@ class BloodworkService {
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
-        
-        // Parse extracted data
         final extractedData = _parseBloodworkResponse(jsonResponse);
-        
-        // Create LabResult
+
         return LabResult(
           id: jsonResponse['result_id'] ?? _generateId(),
           userId: userId,
@@ -78,62 +87,62 @@ class BloodworkService {
       'testosterone_status': response['biomarkers']?['testosterone']?['status'],
       'cortisol': response['biomarkers']?['cortisol']?['value'],
       'cortisol_status': response['biomarkers']?['cortisol']?['status'],
-      
+
       // Metabolic
       'glucose': response['biomarkers']?['glucose']?['value'],
       'glucose_status': response['biomarkers']?['glucose']?['status'],
       'insulin': response['biomarkers']?['insulin']?['value'],
       'hba1c': response['biomarkers']?['hba1c']?['value'],
-      
+
       // Lipids
       'total_cholesterol': response['biomarkers']?['cholesterol']?['total'],
       'ldl': response['biomarkers']?['cholesterol']?['ldl'],
       'hdl': response['biomarkers']?['cholesterol']?['hdl'],
       'triglycerides': response['biomarkers']?['cholesterol']?['triglycerides'],
-      
+
       // Thyroid
       'tsh': response['biomarkers']?['thyroid']?['tsh'],
       't3': response['biomarkers']?['thyroid']?['t3'],
       't4': response['biomarkers']?['thyroid']?['t4'],
       't4_free': response['biomarkers']?['thyroid']?['t4_free'],
-      
+
       // Liver/Kidney
       'ast': response['biomarkers']?['liver']?['ast'],
       'alt': response['biomarkers']?['liver']?['alt'],
       'creatinine': response['biomarkers']?['kidney']?['creatinine'],
-      
+
       // Inflammation
       'crp': response['biomarkers']?['inflammation']?['crp'],
       'esr': response['biomarkers']?['inflammation']?['esr'],
-      
+
       // Blood
       'hemoglobin': response['biomarkers']?['blood']?['hemoglobin'],
       'hematocrit': response['biomarkers']?['blood']?['hematocrit'],
       'wbc': response['biomarkers']?['blood']?['wbc'],
-      
+
       // Summary
       'overall_status': response['summary']?['overall_status'],
       'key_findings': List<String>.from(response['summary']?['key_findings'] ?? []),
       'recommendations': List<String>.from(response['summary']?['recommendations'] ?? []),
-      
-      // Extracted timestamp
+
       'extracted_at': response['processed_at'] ?? DateTime.now().toIso8601String(),
     };
   }
 
-  /// Read file as bytes
+  /// Read file bytes from device storage using dart:io
   static Future<List<int>> _readFile(String filePath) async {
-    // Implementation depends on file source (device storage, etc)
-    // For now, return empty bytes - will be implemented with actual file reading
-    return [];
+    final file = File(filePath);
+    if (!await file.exists()) {
+      throw Exception('File not found: $filePath');
+    }
+    return file.readAsBytes();
   }
 
-  /// Generate unique ID
   static String _generateId() {
     return 'lab_${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  /// Mock response for testing (when API key not set)
+  /// Mock response for testing (only used in debug/test contexts)
   static Map<String, dynamic> getMockResponse() {
     return {
       'result_id': _generateId(),

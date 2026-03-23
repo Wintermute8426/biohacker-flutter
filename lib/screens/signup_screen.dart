@@ -84,10 +84,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
 
     try {
+      // FUNC-006: trim whitespace from email and name before passing to signUp
       await ref.read(authProviderProvider).signUp(
-        _emailController.text,
+        _emailController.text.trim(),
         _passwordController.text,
-        _firstNameController.text,
+        _firstNameController.text.trim(),
       );
 
       if (mounted) {
@@ -340,11 +341,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.network(
-                              'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                              height: 20,
-                              width: 20,
-                            ),
+                            // SEC-004: local Google icon — no external CDN dependency
+                            _GoogleIcon(size: 20),
                             const SizedBox(width: 12),
                             const Text(
                               'CONTINUE WITH GOOGLE',
@@ -374,6 +372,36 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       ),
     ),
   );
+  }
+}
+
+/// Inline Google "G" icon — avoids external CDN dependency (SEC-004).
+/// Replace with a bundled SVG asset once the Google SVG is added to assets/.
+class _GoogleIcon extends StatelessWidget {
+  final double size;
+  const _GoogleIcon({this.size = 20});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(size / 5),
+      ),
+      child: Center(
+        child: Text(
+          'G',
+          style: TextStyle(
+            color: const Color(0xFF4285F4),
+            fontSize: size * 0.72,
+            fontWeight: FontWeight.bold,
+            height: 1,
+          ),
+        ),
+      ),
+    );
   }
 }
 

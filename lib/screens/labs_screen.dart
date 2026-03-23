@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
@@ -7,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
+import '../utils/user_feedback.dart';
 import '../models/lab_result.dart';
 import '../services/labs_database.dart';
 import '../services/android_file_picker.dart';
@@ -47,7 +50,7 @@ class _LabsScreenState extends State<LabsScreen> {
         });
       }
     } catch (e) {
-      print('Error loading labs: $e');
+      if (kDebugMode) print('Error loading labs: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -63,7 +66,10 @@ class _LabsScreenState extends State<LabsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(UserFeedback.getFriendlyErrorMessage(e)),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -150,7 +156,10 @@ class _LabsScreenState extends State<LabsScreen> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+        SnackBar(
+          content: Text(UserFeedback.getFriendlyErrorMessage(e)),
+          backgroundColor: AppColors.error,
+        ),
       );
     }
   }
@@ -158,19 +167,21 @@ class _LabsScreenState extends State<LabsScreen> {
   Future<void> _uploadImage(XFile image) async {
     setState(() => _isUploading = true);
     try {
-      final bytes = await image.readAsBytes();
-      print('Image upload started: ${image.name}');
+      if (kDebugMode) print('Image upload started: ${image.name}');
 
-      // TODO: Call real extraction API
-      // For now, just add to results without extracted data
+      // TODO: Call real extraction API once available.
+      // For now, save a stub record so the entry persists across app restarts.
       final result = LabResult(
         id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
         userId: _userId,
         pdfPath: image.name,
         uploadDate: DateTime.now(),
         notes: 'Image Upload - Pending Extraction',
-        extractedData: {}, // Empty until API extraction
+        extractedData: {}, // Empty until extraction API is integrated
       );
+
+      // Persist to database so the record survives app restarts (FUNC-001)
+      await _labsDb.saveLabResult(result);
 
       if (mounted) {
         setState(() {
@@ -181,8 +192,8 @@ class _LabsScreenState extends State<LabsScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Lab result added successfully'),
+          const SnackBar(
+            content: Text('Lab result added successfully'),
             backgroundColor: AppColors.accent,
           ),
         );
@@ -191,33 +202,43 @@ class _LabsScreenState extends State<LabsScreen> {
       if (mounted) {
         setState(() => _isUploading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(UserFeedback.getFriendlyErrorMessage(e)),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
   }
 
   Future<void> _uploadPDF(File pdfFile) async {
+    // SEC-001: PDF endpoint must be a production HTTPS URL.
+    // Set LAB_PDF_ENDPOINT in .env before enabling this feature in production.
+    // Never use a plaintext HTTP or private-IP endpoint in production.
+    final endpoint = dotenv.env['LAB_PDF_ENDPOINT'] ?? '';
+    if (endpoint.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('PDF upload is not yet available — coming soon'),
+          backgroundColor: AppColors.surface,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isUploading = true);
     try {
-      print('PDF upload started: ${pdfFile.path}');
+      if (kDebugMode) print('PDF upload started: ${pdfFile.path}');
 
       // Read PDF file
       final bytes = await pdfFile.readAsBytes();
       final fileName = pdfFile.path.split('/').last;
 
-      // Send to backend for extraction
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('http://100.71.64.116:9000/api/extract-lab-pdf'),
-      );
+      // Send to backend for extraction (HTTPS endpoint loaded from env)
+      final request = http.MultipartRequest('POST', Uri.parse(endpoint));
 
       request.files.add(
-        http.MultipartFile.fromBytes(
-          'file',
-          bytes,
-          filename: fileName,
-        ),
+        http.MultipartFile.fromBytes('file', bytes, filename: fileName),
       );
 
       final response = await request.send();
@@ -227,9 +248,8 @@ class _LabsScreenState extends State<LabsScreen> {
         final result = jsonDecode(responseData);
         final extractedBiomarkers = Map<String, dynamic>.from(result['biomarkers'] ?? {});
 
-        print('Extracted ${extractedBiomarkers.length} biomarkers from PDF');
+        if (kDebugMode) print('Extracted ${extractedBiomarkers.length} biomarkers from PDF');
 
-        // Save to database
         final labResult = LabResult(
           id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
           userId: _userId,
@@ -239,10 +259,9 @@ class _LabsScreenState extends State<LabsScreen> {
           extractedData: extractedBiomarkers,
         );
 
-        // Save to database
-        print('[Labs] Saving lab result to database...');
+        if (kDebugMode) print('[Labs] Saving lab result to database...');
         await _labsDb.saveLabResult(labResult);
-        print('[Labs] Lab result saved successfully');
+        if (kDebugMode) print('[Labs] Lab result saved successfully');
 
         if (mounted) {
           setState(() {
@@ -263,11 +282,14 @@ class _LabsScreenState extends State<LabsScreen> {
         throw Exception('Backend error: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error uploading PDF: $e');
+      if (kDebugMode) print('Error uploading PDF: $e');
       if (mounted) {
         setState(() => _isUploading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(UserFeedback.getFriendlyErrorMessage(e)),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -317,11 +339,11 @@ class _LabsScreenState extends State<LabsScreen> {
         );
       }
     } catch (e) {
-      print('Error deleting lab result: $e');
+      if (kDebugMode) print('Error deleting lab result: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting report: $e'),
+            content: Text(UserFeedback.getFriendlyErrorMessage(e)),
             backgroundColor: AppColors.error,
           ),
         );

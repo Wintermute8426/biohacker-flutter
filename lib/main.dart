@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/auth_provider.dart';
@@ -12,10 +14,14 @@ import 'theme/colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // Load environment variables from .env asset.
+  // Copy .env.example to .env and fill in values before running.
+  await dotenv.load(fileName: '.env');
+
   await Supabase.initialize(
-    url: 'https://dfiewtwbxqfrrmyiqhqo.supabase.co',
-    anonKey: 'sb_publishable_swGU8s8l_FgSo2GuKbGkfA_00Wd9zIV',
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
   // Initialize notification service and reschedule any pending notifications
@@ -101,7 +107,9 @@ class OnboardingCheck extends ConsumerWidget {
         ),
       ),
       error: (error, stack) {
-        print('[OnboardingCheck] Error checking onboarding status: $error');
+        if (kDebugMode) {
+          print('[OnboardingCheck] Error checking onboarding status: $error');
+        }
         // On error, assume onboarding is complete and show home screen
         return const HomeScreen();
       },

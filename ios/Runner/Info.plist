@@ -77,7 +77,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.example.biohacker</string>
+				<string>com.biohacker.app</string>
 			</array>
 		</dict>
 	</array>

@@ -24,7 +24,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   bool _showPassword = false;
   bool _isGoogleLoading = false;
   bool _isLoading = false;
-  bool _rememberMe = false;
   String? _error;
 
   // Boot sequence
@@ -220,79 +219,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     ),
                     const SizedBox(height: 12),
 
-                    // Remember me + Reset password row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: () =>
-                              setState(() => _rememberMe = !_rememberMe),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 16,
-                                height: 16,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: _rememberMe
-                                        ? AppColors.primary
-                                        : AppColors.textDim,
-                                    width: 1.5,
-                                  ),
-                                  color: _rememberMe
-                                      ? AppColors.primary.withOpacity(0.15)
-                                      : Colors.transparent,
-                                ),
-                                child: _rememberMe
-                                    ? const Icon(Icons.check,
-                                        color: AppColors.primary, size: 12)
-                                    : null,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'REMEMBER SESSION',
+                    // Reset password row
+                    // FUNC-002: "Remember Me" toggle removed — session persistence
+                    // not yet implemented. Supabase default session behaviour applies.
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: AppColors.surface,
+                              content: Text(
+                                '[SYS]: Password reset link sent to registered email',
                                 style: TextStyle(
-                                  color: AppColors.textMid,
-                                  fontSize: 11,
                                   fontFamily: 'JetBrains Mono',
-                                  letterSpacing: 0.5,
+                                  fontSize: 12,
+                                  color: AppColors.primary,
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                backgroundColor: AppColors.surface,
-                                content: Text(
-                                  '[SYS]: Password reset link sent to registered email',
-                                  style: TextStyle(
-                                    fontFamily: 'JetBrains Mono',
-                                    fontSize: 12,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            'RESET ACCESS',
-                            style: TextStyle(
-                              color: AppColors.primary.withOpacity(0.65),
-                              fontSize: 11,
-                              fontFamily: 'JetBrains Mono',
-                              letterSpacing: 0.5,
                             ),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'RESET ACCESS',
+                          style: TextStyle(
+                            color: AppColors.primary.withOpacity(0.65),
+                            fontSize: 11,
+                            fontFamily: 'JetBrains Mono',
+                            letterSpacing: 0.5,
                           ),
                         ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 20),
 
@@ -430,11 +392,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Image.network(
-                                    'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
-                                    height: 18,
-                                    width: 18,
-                                  ),
+                                  // SEC-004: local Google icon — no external CDN dependency
+                                  _GoogleIcon(size: 18),
                                   const SizedBox(width: 12),
                                   const Text(
                                     'OAUTH // GOOGLE',
@@ -609,6 +568,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             fontSize: 16,
             fontFamily: 'JetBrains Mono',
             letterSpacing: 2,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Inline Google "G" icon — avoids external CDN dependency (SEC-004).
+/// Replace with a bundled SVG asset once the Google SVG is added to assets/.
+class _GoogleIcon extends StatelessWidget {
+  final double size;
+  const _GoogleIcon({this.size = 20});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(size / 5),
+      ),
+      child: Center(
+        child: Text(
+          'G',
+          style: TextStyle(
+            color: const Color(0xFF4285F4),
+            fontSize: size * 0.72,
+            fontWeight: FontWeight.bold,
+            height: 1,
           ),
         ),
       ),

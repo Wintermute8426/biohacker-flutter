@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="biohacker_app"
+        android:label="Biohacker"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -30,7 +30,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="com.example.biohacker" android:host="login-callback" />
+                <data android:scheme="com.biohacker.app" android:host="login-callback" />
             </intent-filter>
         </activity>
         <!-- Reschedule notifications after device reboot -->

@@ -77,12 +77,13 @@ class AuthProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Sign in with Google using Supabase's OAuth
-      // The OAuth flow will redirect to com.example.biohacker://login-callback
-      // Deep linking is configured in AndroidManifest.xml and Info.plist
+      // Sign in with Google using Supabase's OAuth.
+      // Deep linking scheme com.biohacker.app is configured in AndroidManifest.xml
+      // and ios/Runner/Info.plist. Also register this URL in the Supabase dashboard
+      // under Authentication > URL Configuration > Redirect URLs.
       final response = await supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'com.example.biohacker://login-callback',
+        redirectTo: 'com.biohacker.app://login-callback',
       );
 
       // Note: OAuth flow is async and will complete via deep link callback

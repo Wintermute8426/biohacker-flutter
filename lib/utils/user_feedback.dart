@@ -289,8 +289,8 @@ class UserFeedback {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
+      builder: (context) => PopScope(
+        canPop: false,
         child: AlertDialog(
           backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
