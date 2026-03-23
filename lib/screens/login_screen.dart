@@ -182,56 +182,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     Center(
                       child: Image.asset(
                         'assets/logo/biohacker-neon-logo-vectorized.png',
-                        width: 220,
-                        height: 200,
+                        width: 280,
+                        height: 260,
                         fit: BoxFit.contain,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Terminal header card
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        border: Border.all(
-                          color: AppColors.primary.withOpacity(0.5),
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.08),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '> CLEARANCE VERIFICATION',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 15,
-                              fontFamily: 'JetBrains Mono',
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'BIOHACKER SOVEREIGN NETWORK v2.0',
-                            style: TextStyle(
-                              color: AppColors.textDim,
-                              fontSize: 10,
-                              fontFamily: 'JetBrains Mono',
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                     const SizedBox(height: 20),
