@@ -104,153 +104,435 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: const Color(0xFF0A0A0A),
       isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+        side: BorderSide(color: Color(0xFF39FF14), width: 0),
+      ),
       builder: (context) => ScanlineOverlay(
         child: StatefulBuilder(
           builder: (context, setModalState) => SingleChildScrollView(
             padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 16,
+              left: 0,
+              right: 0,
+              top: 0,
               bottom: MediaQuery.of(context).viewInsets.bottom + 20,
             ),
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'CREATE PROTOCOL',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: nameController,
-                style: const TextStyle(color: AppColors.textLight),
-                decoration: InputDecoration(
-                  labelText: 'Protocol Name',
-                  labelStyle: TextStyle(color: AppColors.primary),
-                  border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: descController,
-                style: const TextStyle(color: AppColors.textLight),
-                maxLines: 2,
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  labelStyle: TextStyle(color: AppColors.primary),
-                  border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              DropdownButton<String>(
-                value: selectedPeptide,
-                isExpanded: true,
-                dropdownColor: AppColors.surface,
-                items: PEPTIDE_LIST.map((p) => DropdownMenuItem(value: p, child: Text(p, style: TextStyle(color: AppColors.textLight)))).toList(),
-                onChanged: (val) => setModalState(() => selectedPeptide = val!),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: doseController,
-                style: const TextStyle(color: AppColors.textLight),
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Dose (mg)',
-                  labelStyle: TextStyle(color: AppColors.primary),
-                  border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              DropdownButton<String>(
-                value: selectedRoute,
-                isExpanded: true,
-                dropdownColor: AppColors.surface,
-                items: ['SC (subcutaneous)', 'IM (intramuscular)', 'IV (intravenous)', 'Intranasal', 'Oral']
-                    .map((r) => DropdownMenuItem(value: r, child: Text(r, style: TextStyle(color: AppColors.textLight))))
-                    .toList(),
-                onChanged: (val) => setModalState(() => selectedRoute = val!),
-              ),
-              const SizedBox(height: 12),
-              DropdownButton<String>(
-                value: selectedFrequency,
-                isExpanded: true,
-                dropdownColor: AppColors.surface,
-                items: ['1x daily', '2x daily', '1x weekly', '2x weekly', '3x weekly']
-                    .map((f) => DropdownMenuItem(value: f, child: Text(f, style: TextStyle(color: AppColors.textLight))))
-                    .toList(),
-                onChanged: (val) => setModalState(() => selectedFrequency = val!),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: weeksController,
-                style: const TextStyle(color: AppColors.textLight),
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Duration (weeks)',
-                  labelStyle: TextStyle(color: AppColors.primary),
-                  border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Checkbox(
-                    value: makePublic,
-                    onChanged: (val) => setModalState(() => makePublic = val ?? false),
-                    activeColor: AppColors.primary,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Modal header bar
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0A0A0A),
+                    border: Border(
+                      bottom: BorderSide(color: AppColors.accent.withOpacity(0.3), width: 1),
+                    ),
                   ),
-                  Text(
-                    'Share publicly (Community)',
-                    style: TextStyle(color: AppColors.textMid, fontSize: 12),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final dose = double.tryParse(doseController.text) ?? 1;
-                    final weeks = int.tryParse(weeksController.text) ?? 8;
-
-                    await protocolDb.saveProtocol(
-                      name: nameController.text,
-                      description: descController.text.isEmpty ? null : descController.text,
-                      peptideName: selectedPeptide,
-                      dose: dose,
-                      route: selectedRoute,
-                      frequency: selectedFrequency,
-                      durationWeeks: weeks,
-                      isPublic: makePublic,
-                    );
-
-                    Navigator.pop(context);
-                    _loadProtocols();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('✓ Protocol created: ${nameController.text}'),
-                        backgroundColor: AppColors.primary,
+                  child: Row(
+                    children: [
+                      Container(width: 4, height: 14, color: AppColors.accent),
+                      const SizedBox(width: 10),
+                      Icon(Icons.add_circle_outline, color: AppColors.accent, size: 14),
+                      const SizedBox(width: 8),
+                      Text(
+                        '> CREATE PROTOCOL',
+                        style: TextStyle(
+                          color: AppColors.accent,
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    ],
                   ),
-                  child: const Text('CREATE PROTOCOL', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
-              ),
-              const SizedBox(height: 20),
-            ],
+
+                const SizedBox(height: 12),
+
+                // ─── PROTOCOL INFO ───
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0A0A0A),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.accent.withOpacity(0.25), width: 1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(width: 4, height: 14, color: AppColors.accent.withOpacity(0.6)),
+                          const SizedBox(width: 8),
+                          Icon(Icons.info_outline, color: AppColors.accent, size: 13),
+                          const SizedBox(width: 8),
+                          Text(
+                            '> PROTOCOL INFO',
+                            style: TextStyle(
+                              color: AppColors.accent,
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: nameController,
+                        style: TextStyle(
+                          color: AppColors.amber.withOpacity(0.9),
+                          fontSize: 14,
+                          fontFamily: 'monospace',
+                        ),
+                        decoration: InputDecoration(
+                          labelText: 'PROTOCOL NAME',
+                          labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
+                          filled: true,
+                          fillColor: Colors.black,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: descController,
+                        style: TextStyle(
+                          color: AppColors.amber.withOpacity(0.9),
+                          fontSize: 14,
+                          fontFamily: 'monospace',
+                        ),
+                        maxLines: 2,
+                        decoration: InputDecoration(
+                          labelText: 'DESCRIPTION',
+                          labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
+                          filled: true,
+                          fillColor: Colors.black,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ─── PEPTIDE STACK ───
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0A0A0A),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.25), width: 1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(width: 4, height: 14, color: AppColors.primary.withOpacity(0.6)),
+                          const SizedBox(width: 8),
+                          Icon(Icons.biotech, color: AppColors.primary, size: 13),
+                          const SizedBox(width: 8),
+                          Text(
+                            '> PEPTIDE STACK',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        value: selectedPeptide,
+                        dropdownColor: Colors.black,
+                        style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
+                        decoration: InputDecoration(
+                          labelText: 'PEPTIDE',
+                          labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
+                          filled: true,
+                          fillColor: Colors.black,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                        items: PEPTIDE_LIST.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+                        onChanged: (val) => setModalState(() => selectedPeptide = val!),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: doseController,
+                        style: TextStyle(
+                          color: AppColors.amber.withOpacity(0.9),
+                          fontSize: 14,
+                          fontFamily: 'monospace',
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: InputDecoration(
+                          labelText: 'DOSE (mg)',
+                          labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
+                          filled: true,
+                          fillColor: Colors.black,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ─── DOSING SCHEDULE ───
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0A0A0A),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.amber.withOpacity(0.25), width: 1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(width: 4, height: 14, color: AppColors.amber.withOpacity(0.6)),
+                          const SizedBox(width: 8),
+                          Icon(Icons.schedule, color: AppColors.amber, size: 13),
+                          const SizedBox(width: 8),
+                          Text(
+                            '> DOSING SCHEDULE',
+                            style: TextStyle(
+                              color: AppColors.amber,
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        value: selectedRoute,
+                        dropdownColor: Colors.black,
+                        style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
+                        decoration: InputDecoration(
+                          labelText: 'INJECTION ROUTE',
+                          labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
+                          filled: true,
+                          fillColor: Colors.black,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                        items: ['SC (subcutaneous)', 'IM (intramuscular)', 'IV (intravenous)', 'Intranasal', 'Oral']
+                            .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                            .toList(),
+                        onChanged: (val) => setModalState(() => selectedRoute = val!),
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<String>(
+                        value: selectedFrequency,
+                        dropdownColor: Colors.black,
+                        style: TextStyle(color: AppColors.amber.withOpacity(0.9), fontSize: 14, fontFamily: 'monospace'),
+                        decoration: InputDecoration(
+                          labelText: 'FREQUENCY',
+                          labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
+                          filled: true,
+                          fillColor: Colors.black,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                        items: ['1x daily', '2x daily', '1x weekly', '2x weekly', '3x weekly']
+                            .map((f) => DropdownMenuItem(value: f, child: Text(f)))
+                            .toList(),
+                        onChanged: (val) => setModalState(() => selectedFrequency = val!),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: weeksController,
+                        style: TextStyle(
+                          color: AppColors.amber.withOpacity(0.9),
+                          fontSize: 14,
+                          fontFamily: 'monospace',
+                        ),
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'DURATION (weeks)',
+                          labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
+                          hintText: 'e.g., 8',
+                          hintStyle: TextStyle(color: AppColors.textDim),
+                          filled: true,
+                          fillColor: Colors.black,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      GestureDetector(
+                        onTap: () => setModalState(() => makePublic = !makePublic),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 18,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                color: makePublic ? AppColors.accent.withOpacity(0.15) : Colors.black,
+                                border: Border.all(
+                                  color: makePublic ? AppColors.accent : AppColors.textDim,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                              child: makePublic
+                                  ? Icon(Icons.check, color: AppColors.accent, size: 12)
+                                  : null,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'SHARE PUBLICLY',
+                              style: TextStyle(
+                                color: makePublic ? AppColors.accent : AppColors.textMid,
+                                fontSize: 11,
+                                fontFamily: 'monospace',
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ─── SUBMIT BUTTON ───
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+                  child: GestureDetector(
+                    onTap: () async {
+                      final dose = double.tryParse(doseController.text) ?? 1;
+                      final weeks = int.tryParse(weeksController.text) ?? 8;
+
+                      await protocolDb.saveProtocol(
+                        name: nameController.text,
+                        description: descController.text.isEmpty ? null : descController.text,
+                        peptideName: selectedPeptide,
+                        dose: dose,
+                        route: selectedRoute,
+                        frequency: selectedFrequency,
+                        durationWeeks: weeks,
+                        isPublic: makePublic,
+                      );
+
+                      Navigator.pop(context);
+                      _loadProtocols();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('✓ Protocol created: ${nameController.text}'),
+                          backgroundColor: AppColors.accent,
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: AppColors.accent.withOpacity(0.8),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.accent.withOpacity(0.2),
+                            blurRadius: 10,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.save_outlined, color: AppColors.accent, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'SAVE PROTOCOL',
+                            style: TextStyle(
+                              color: AppColors.accent,
+                              fontSize: 13,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+              ],
             ),
           ),
         ),
@@ -755,11 +1037,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
           ),
           Scaffold(
             backgroundColor: Colors.transparent,
-            floatingActionButton: FloatingActionButton(
-              onPressed: _showCreateProtocolModal,
-              backgroundColor: AppColors.accent,
-              child: const Icon(Icons.add),
-            ),
             body: Column(
             children: [
               // Header using reusable widget
@@ -768,6 +1045,53 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 iconColor: WintermmuteStyles.colorGreen,
                 title: 'PROTOCOLS',
               ),
+
+              // Terminal-style create button
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                child: GestureDetector(
+                  onTap: _showCreateProtocolModal,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: AppColors.accent.withOpacity(0.75),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.accent.withOpacity(0.12),
+                          blurRadius: 8,
+                          spreadRadius: 0,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(width: 4, height: 14, color: AppColors.accent),
+                        const SizedBox(width: 10),
+                        Icon(Icons.add_circle_outline, color: AppColors.accent, size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'CREATE PROTOCOL',
+                          style: TextStyle(
+                            color: AppColors.accent,
+                            fontSize: 12,
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
               // Content
               Expanded(
                 child: Stack(

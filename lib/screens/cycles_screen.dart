@@ -1092,11 +1092,6 @@ class _CyclesScreenState extends State<CyclesScreen> {
           ),
           Scaffold(
             backgroundColor: Colors.transparent,
-            floatingActionButton: FloatingActionButton(
-              onPressed: _showNewUnifiedCycleSetup,
-              backgroundColor: AppColors.primary,
-              child: const Icon(Icons.add),
-            ),
             body: Column(
               children: [
                 // Header using reusable widget
@@ -1104,6 +1099,52 @@ class _CyclesScreenState extends State<CyclesScreen> {
                   icon: Icons.autorenew,
                   iconColor: WintermmuteStyles.colorGreen,
                   title: 'CYCLES',
+                ),
+
+                // Terminal-style create button
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                  child: GestureDetector(
+                    onTap: _showNewUnifiedCycleSetup,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.75),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.15),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(width: 4, height: 14, color: AppColors.primary),
+                          const SizedBox(width: 10),
+                          Icon(Icons.add_circle_outline, color: AppColors.primary, size: 16),
+                          const SizedBox(width: 8),
+                          Text(
+                            'INITIATE NEW PROTOCOL',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
 
                 Expanded(

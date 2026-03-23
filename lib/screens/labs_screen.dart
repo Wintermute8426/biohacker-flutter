@@ -663,6 +663,8 @@ class _LabsScreenState extends State<LabsScreen> {
 
     FullScreenModal.show(
       context: context,
+      title: 'Lab Analysis',
+      borderColor: labGreen,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 80),
         children: [

@@ -9,16 +9,19 @@ class FullScreenModal extends StatelessWidget {
   final Widget child;
   final String? title;
   final VoidCallback? onClose;
+  final Color? borderColor;
 
   const FullScreenModal({
     super.key,
     required this.child,
     this.title,
     this.onClose,
+    this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveColor = borderColor ?? AppColors.amber;
     return Container(
       color: Colors.black.withOpacity(0.85),
       child: Center(
@@ -32,7 +35,7 @@ class FullScreenModal extends StatelessWidget {
             color: const Color(0xFF000000),
             borderRadius: BorderRadius.circular(4),
             border: Border.all(
-              color: AppColors.amber.withOpacity(0.2),
+              color: effectiveColor.withOpacity(0.2),
               width: 1,
             ),
           ),
@@ -40,7 +43,7 @@ class FullScreenModal extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (title != null)
-                _buildHeader(context),
+                _buildHeader(context, effectiveColor),
               Flexible(
                 child: child,
               ),
@@ -51,26 +54,26 @@ class FullScreenModal extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, Color accentColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: const Color(0xFF0A0A0A),
         border: Border(
-          bottom: BorderSide(color: AppColors.amber.withOpacity(0.2), width: 1),
+          bottom: BorderSide(color: accentColor.withOpacity(0.2), width: 1),
         ),
       ),
       child: Row(
         children: [
-          Container(width: 4, height: 14, color: AppColors.amber.withOpacity(0.6)),
+          Container(width: 4, height: 14, color: accentColor.withOpacity(0.6)),
           const SizedBox(width: 8),
-          Icon(Icons.science, color: AppColors.amber, size: 13),
+          Icon(Icons.science, color: accentColor, size: 13),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               '> ${title!.toUpperCase()}',
-              style: const TextStyle(
-                color: AppColors.amber,
+              style: TextStyle(
+                color: accentColor,
                 fontSize: 11,
                 fontFamily: 'monospace',
                 fontWeight: FontWeight.bold,
@@ -97,6 +100,7 @@ class FullScreenModal extends StatelessWidget {
     required Widget child,
     String? title,
     VoidCallback? onClose,
+    Color? borderColor,
   }) {
     return Navigator.push<T>(
       context,
@@ -105,6 +109,7 @@ class FullScreenModal extends StatelessWidget {
         builder: (context) => FullScreenModal(
           title: title,
           onClose: onClose,
+          borderColor: borderColor,
           child: child,
         ),
       ),
