@@ -24,56 +24,85 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
   List<ProtocolTemplate> communityProtocols = [];
   bool isLoading = true;
 
-  // Protocol stacks - each protocol contains multiple peptides
-  final Map<String, Map<String, dynamic>> protocolStacks = {
-    'bh-injury-recovery': {
-      'name': 'INJURY RECOVERY STACK',
-      'description': 'Complete injury recovery combining BPC-157 for tissue repair + TB-500 for regeneration. Synergistic stack for joint damage, muscle strains, and serious injuries.',
+  // 6 Sovereign Protocol Stacks
+  final List<Map<String, dynamic>> protocolStacks = [
+    {
+      'id': 'bh-muscle-recovery',
+      'name': 'MUSCLE RECOVERY',
+      'goal': 'Tissue repair, inflammation reduction',
+      'description': 'Post-workout repair stack combining BPC-157 for tissue healing and TB-500 for systemic regeneration. Synergistic approach to reducing recovery time and preventing re-injury.',
+      'duration': '4-6 WEEKS',
+      'accentColor': const Color(0xFF39FF14),
       'peptides': [
-        {'name': 'BPC-157', 'dose': 250, 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
-        {'name': 'TB-500', 'dose': 5, 'route': 'SC', 'frequency': '2x weekly', 'weeks': 12},
+        {'name': 'BPC-157', 'dose': 250.0, 'doseDisplay': '250mcg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 5},
+        {'name': 'TB-500', 'dose': 2.0, 'doseDisplay': '2mg', 'route': 'SC', 'frequency': '2x weekly', 'weeks': 5},
       ],
     },
-    'bh-hair-health': {
-      'name': 'HAIR HEALTH STACK',
-      'description': 'Hair growth optimization combining GHK-Cu for collagen synthesis + Semax for follicle activation. Best results over 12-16 weeks with consistent use.',
-      'peptides': [
-        {'name': 'GHK-Cu', 'dose': 5, 'route': 'SC', 'frequency': '1x daily', 'weeks': 16},
-        {'name': 'Semax', 'dose': 5, 'route': 'Intranasal', 'frequency': '2x daily', 'weeks': 16},
-      ],
-    },
-    'bh-longevity': {
+    {
+      'id': 'bh-longevity',
       'name': 'LONGEVITY STACK',
-      'description': 'Ultimate anti-aging combining Epitalon for telomere extension + thymic peptides for immune support. Comprehensive cellular rejuvenation protocol.',
+      'goal': 'Telomere protection, cellular regeneration',
+      'description': 'Anti-aging protocol targeting cellular longevity. Epitalon extends telomeres, GHK-Cu drives collagen and tissue renewal, NAD+ restores mitochondrial energy production.',
+      'duration': '8 WEEKS',
+      'accentColor': const Color(0xFF00FFFF),
       'peptides': [
-        {'name': 'Epitalon', 'dose': 1, 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
-        {'name': 'Thymosin Alpha-1', 'dose': 1.6, 'route': 'SC', 'frequency': '3x weekly', 'weeks': 12},
+        {'name': 'Epitalon', 'dose': 10.0, 'doseDisplay': '10mg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 8},
+        {'name': 'GHK-Cu', 'dose': 2.0, 'doseDisplay': '2mg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 8},
+        {'name': 'NAD+', 'dose': 100.0, 'doseDisplay': '100mg', 'route': 'SC', 'frequency': '2x weekly', 'weeks': 8},
       ],
     },
-    'bh-preventative-health': {
-      'name': 'PREVENTATIVE HEALTH STACK',
-      'description': 'Proactive immune optimization for year-round wellness. Thymosin Alpha-1 strengthens immune defenses before illness onset. Use seasonally or continuously.',
+    {
+      'id': 'bh-focus-cognition',
+      'name': 'FOCUS & COGNITION',
+      'goal': 'Neuroprotection, focus enhancement',
+      'description': 'Cognitive optimization stack for mental clarity and neuroprotection. Semax and Selank modulate BDNF and anxiety pathways. Cerebrolysin provides neurotrophic peptides for neuroplasticity.',
+      'duration': '4 WEEKS',
+      'accentColor': const Color(0xFFFFAA00),
       'peptides': [
-        {'name': 'Thymosin Alpha-1', 'dose': 1.6, 'route': 'SC', 'frequency': '3x weekly', 'weeks': 10},
+        {'name': 'Semax', 'dose': 300.0, 'doseDisplay': '300mcg', 'route': 'Intranasal', 'frequency': '1x daily', 'weeks': 4},
+        {'name': 'Selank', 'dose': 300.0, 'doseDisplay': '300mcg', 'route': 'Intranasal', 'frequency': '1x daily', 'weeks': 4},
+        {'name': 'Cerebrolysin', 'dose': 5.0, 'doseDisplay': '5ml', 'route': 'IM', 'frequency': '3x weekly', 'weeks': 4},
       ],
     },
-    'bh-skin-recovery': {
-      'name': 'SKIN RECOVERY STACK',
-      'description': 'Skin regeneration combining GHK-Cu for collagen + BPC-157 for tissue repair. Ideal for acne recovery, wound healing, and skin elasticity.',
+    {
+      'id': 'bh-acl-recovery',
+      'name': 'ACL SURGERY RECOVERY',
+      'goal': 'Tendon repair, collagen synthesis',
+      'description': 'Post-surgical healing protocol targeting tendon and ligament repair. High-dose BPC-157 accelerates tissue regeneration while TB-500 promotes systemic healing and GHK-Cu drives collagen formation.',
+      'duration': '8-12 WEEKS',
+      'accentColor': const Color(0xFFFF0040),
       'peptides': [
-        {'name': 'GHK-Cu', 'dose': 5, 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
-        {'name': 'BPC-157', 'dose': 250, 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
+        {'name': 'BPC-157', 'dose': 500.0, 'doseDisplay': '500mcg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 10},
+        {'name': 'TB-500', 'dose': 5.0, 'doseDisplay': '5mg', 'route': 'SC', 'frequency': '2x weekly', 'weeks': 10},
+        {'name': 'GHK-Cu', 'dose': 2.0, 'doseDisplay': '2mg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 10},
       ],
     },
-  };
-
-  // Convert protocol stacks to display format
-  List<Map<String, dynamic>> getBiohackerProtocols() {
-    return protocolStacks.entries.map((e) => {
-      'id': e.key,
-      ...e.value,
-    }).toList();
-  }
+    {
+      'id': 'bh-metabolic',
+      'name': 'METABOLIC OPTIMIZATION',
+      'goal': 'Fat loss, GH stimulation',
+      'description': 'Metabolic recomposition stack for body composition and insulin sensitivity. Semaglutide drives appetite regulation and fat loss while Tesamorelin stimulates growth hormone for visceral fat reduction.',
+      'duration': '12 WEEKS',
+      'accentColor': const Color(0xFFFF00FF),
+      'peptides': [
+        {'name': 'Semaglutide', 'dose': 0.5, 'doseDisplay': '0.5mg', 'route': 'SC', 'frequency': '1x weekly', 'weeks': 12},
+        {'name': 'Tesamorelin', 'dose': 1.0, 'doseDisplay': '1mg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
+      ],
+    },
+    {
+      'id': 'bh-performance',
+      'name': 'PERFORMANCE ENHANCEMENT',
+      'goal': 'GH release, recovery, endurance',
+      'description': 'Performance stack for strength and endurance athletes. Ipamorelin and CJC-1295 synergize for pulsatile GH release. BPC-157 accelerates recovery between sessions to maximize adaptation.',
+      'duration': '8 WEEKS',
+      'accentColor': const Color(0xFF39FF14),
+      'peptides': [
+        {'name': 'Ipamorelin', 'dose': 200.0, 'doseDisplay': '200mcg', 'route': 'SC', 'frequency': '2x daily', 'weeks': 8},
+        {'name': 'CJC-1295 no DAC', 'dose': 100.0, 'doseDisplay': '100mcg', 'route': 'SC', 'frequency': '2x daily', 'weeks': 8},
+        {'name': 'BPC-157', 'dose': 250.0, 'doseDisplay': '250mcg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 8},
+      ],
+    },
+  ];
 
   @override
   void initState() {
@@ -90,6 +119,274 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       communityProtocols = communityTemp;
       isLoading = false;
     });
+  }
+
+  Future<void> _initiateSovereignProtocol(Map<String, dynamic> stack) async {
+    final peptides = stack['peptides'] as List<dynamic>;
+    final protocolName = stack['name'] as String;
+
+    for (final pep in peptides) {
+      final peptide = pep as Map<String, dynamic>;
+      await cycleDb.saveCycle(
+        peptideName: peptide['name'] as String,
+        dose: (peptide['dose'] as num).toDouble(),
+        route: peptide['route'] as String,
+        frequency: peptide['frequency'] as String,
+        durationWeeks: peptide['weeks'] as int,
+        startDate: DateTime.now(),
+      );
+    }
+
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '✓ $protocolName initiated — ${peptides.length} cycle${peptides.length > 1 ? 's' : ''} created',
+          ),
+          backgroundColor: AppColors.accent,
+        ),
+      );
+    }
+  }
+
+  void _showProtocolDetail(Map<String, dynamic> stack) {
+    final peptides = stack['peptides'] as List<dynamic>;
+    final accentColor = stack['accentColor'] as Color;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF0A0A0A),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+      ),
+      builder: (context) => ScanlineOverlay(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header bar
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0A0A0A),
+                  border: Border(
+                    bottom: BorderSide(color: accentColor.withOpacity(0.3), width: 1),
+                    left: BorderSide(color: accentColor, width: 3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 10),
+                    Icon(Icons.biotech, color: accentColor, size: 14),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '> ${stack['name']}',
+                        style: TextStyle(
+                          color: accentColor,
+                          fontSize: 13,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: AppColors.textDim, size: 18),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Goal + duration row
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: accentColor.withOpacity(0.5)),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          child: Text(
+                            stack['duration'] as String,
+                            style: TextStyle(
+                              color: accentColor,
+                              fontSize: 10,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            stack['goal'] as String,
+                            style: TextStyle(
+                              color: AppColors.textMid,
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // Description
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        border: Border.all(color: AppColors.borderDim, width: 1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        stack['description'] as String,
+                        style: TextStyle(
+                          color: AppColors.textMid,
+                          fontSize: 12,
+                          height: 1.6,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Peptides section header
+                    Row(
+                      children: [
+                        Container(width: 3, height: 12, color: accentColor.withOpacity(0.6)),
+                        const SizedBox(width: 8),
+                        Text(
+                          '> PEPTIDE COMPOSITION',
+                          style: TextStyle(
+                            color: accentColor,
+                            fontSize: 10,
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Peptide cards
+                    ...peptides.map((pep) {
+                      final peptide = pep as Map<String, dynamic>;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          border: Border(
+                            left: BorderSide(color: accentColor.withOpacity(0.5), width: 2),
+                            top: BorderSide(color: AppColors.borderDim, width: 1),
+                            right: BorderSide(color: AppColors.borderDim, width: 1),
+                            bottom: BorderSide(color: AppColors.borderDim, width: 1),
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(4),
+                            bottomRight: Radius.circular(4),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                peptide['name'] as String,
+                                style: TextStyle(
+                                  color: accentColor,
+                                  fontSize: 12,
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              peptide['doseDisplay'] as String,
+                              style: TextStyle(color: AppColors.amber, fontSize: 11, fontFamily: 'monospace'),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              peptide['route'] as String,
+                              style: TextStyle(color: AppColors.textMid, fontSize: 11, fontFamily: 'monospace'),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              peptide['frequency'] as String,
+                              style: TextStyle(color: AppColors.textDim, fontSize: 10, fontFamily: 'monospace'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+
+                    const SizedBox(height: 20),
+
+                    // Initiate button
+                    GestureDetector(
+                      onTap: () => _initiateSovereignProtocol(stack),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: accentColor.withOpacity(0.8), width: 2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: accentColor.withOpacity(0.15),
+                              blurRadius: 12,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.play_arrow, color: accentColor, size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              'INITIATE PROTOCOL',
+                              style: TextStyle(
+                                color: accentColor,
+                                fontSize: 13,
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showCreateProtocolModal() {
@@ -140,7 +437,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                       Icon(Icons.add_circle_outline, color: AppColors.accent, size: 14),
                       const SizedBox(width: 8),
                       Text(
-                        '> CREATE PROTOCOL',
+                        '> DESIGN PROTOCOL',
                         style: TextStyle(
                           color: AppColors.accent,
                           fontSize: 12,
@@ -219,7 +516,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         ),
                         maxLines: 2,
                         decoration: InputDecoration(
-                          labelText: 'DESCRIPTION',
+                          labelText: 'GOAL / DESCRIPTION',
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
@@ -238,7 +535,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   ),
                 ),
 
-                // ─── PEPTIDE STACK ───
+                // ─── PEPTIDE SELECTION ───
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   padding: const EdgeInsets.all(16),
@@ -257,7 +554,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           Icon(Icons.biotech, color: AppColors.primary, size: 13),
                           const SizedBox(width: 8),
                           Text(
-                            '> PEPTIDE STACK',
+                            '> PEPTIDE SELECTION',
                             style: TextStyle(
                               color: AppColors.primary,
                               fontSize: 11,
@@ -301,7 +598,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         ),
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: InputDecoration(
-                          labelText: 'DOSE (mg)',
+                          labelText: 'DOSE (mg or mcg)',
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
@@ -427,6 +724,40 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+
+                // ─── SHARING OPTIONS ───
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0A0A0A),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.15), width: 1),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(width: 4, height: 14, color: AppColors.primary.withOpacity(0.4)),
+                          const SizedBox(width: 8),
+                          Icon(Icons.share, color: AppColors.primary.withOpacity(0.7), size: 13),
+                          const SizedBox(width: 8),
+                          Text(
+                            '> SHARING OPTIONS',
+                            style: TextStyle(
+                              color: AppColors.primary.withOpacity(0.7),
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 14),
                       GestureDetector(
                         onTap: () => setModalState(() => makePublic = !makePublic),
@@ -449,7 +780,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              'SHARE PUBLICLY',
+                              'SHARE WITH COMMUNITY',
                               style: TextStyle(
                                 color: makePublic ? AppColors.accent : AppColors.textMid,
                                 fontSize: 11,
@@ -487,7 +818,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                       _loadProtocols();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('✓ Protocol created: ${nameController.text}'),
+                          content: Text('✓ Protocol saved: ${nameController.text}'),
                           backgroundColor: AppColors.accent,
                         ),
                       );
@@ -545,7 +876,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: const Color(0xFF0A0A0A),
       isScrollControlled: true,
       builder: (context) => ScanlineOverlay(
         child: SingleChildScrollView(
@@ -556,59 +887,78 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             bottom: MediaQuery.of(context).viewInsets.bottom + 20,
           ),
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'START FROM PROTOCOL',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              protocol.name,
-              style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            if (protocol.description != null) ...[
-              const SizedBox(height: 8),
-              Text(protocol.description!, style: TextStyle(color: AppColors.textMid, fontSize: 12)),
-            ],
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: WintermmuteStyles.cardDecoration,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
                 children: [
-                  Text('${protocol.peptideName} • ${protocol.dose}mg',
-                    style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
-                  Text('Route: ${protocol.route}', style: TextStyle(color: AppColors.textMid, fontSize: 11)),
-                  Text('Frequency: ${protocol.frequency}', style: TextStyle(color: AppColors.textMid, fontSize: 11)),
+                  Container(width: 3, height: 14, color: AppColors.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    '> CLONE PROTOCOL',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 13,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: durationController,
-              style: const TextStyle(color: AppColors.textLight),
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Duration (weeks)',
-                labelStyle: TextStyle(color: AppColors.primary),
-                border: OutlineInputBorder(borderSide: BorderSide(color: AppColors.border)),
+              const SizedBox(height: 16),
+              Text(
+                protocol.name,
+                style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
               ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: ElevatedButton(
-                onPressed: () async {
+              if (protocol.description != null) ...[
+                const SizedBox(height: 8),
+                Text(protocol.description!, style: TextStyle(color: AppColors.textMid, fontSize: 12)),
+              ],
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  border: Border.all(color: AppColors.borderDim),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${protocol.peptideName} • ${protocol.dose}mg',
+                      style: TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                    ),
+                    const SizedBox(height: 6),
+                    Text('Route: ${protocol.route}', style: TextStyle(color: AppColors.textMid, fontSize: 11)),
+                    Text('Frequency: ${protocol.frequency}', style: TextStyle(color: AppColors.textMid, fontSize: 11)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: durationController,
+                style: const TextStyle(color: AppColors.textLight),
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Duration (weeks)',
+                  labelStyle: TextStyle(color: AppColors.primary),
+                  filled: true,
+                  fillColor: Colors.black,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primary.withOpacity(0.4)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primary),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () async {
                   final duration = int.tryParse(durationController.text) ?? protocol.durationWeeks;
 
                   await cycleDb.saveCycle(
@@ -631,152 +981,45 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                     ),
                   );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                ),
-                child: const Text('START CYCLE', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showStackDetail(Map<String, dynamic> stack) {
-    final peptides = stack['peptides'] as List<dynamic>;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surface,
-      isScrollControlled: true,
-      builder: (context) => ScanlineOverlay(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    (stack['name'] as String).toUpperCase(),
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.8), width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.12),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.play_arrow, color: AppColors.primary, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'START CYCLE',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 13,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  color: AppColors.textMid,
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Stack description
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: WintermmuteStyles.cardDecoration,
-              child: Text(
-                stack['description'] as String,
-                style: TextStyle(
-                  color: AppColors.textLight,
-                  fontSize: 12,
-                  height: 1.6,
-                ),
               ),
-            ),
-            const SizedBox(height: 20),
-
-            // Peptides in stack
-            Text(
-              'PEPTIDES IN STACK',
-              style: TextStyle(
-                color: AppColors.textMid,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(height: 12),
-            ...peptides.map((pep) {
-              final peptide = pep as Map<String, dynamic>;
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(10),
-                decoration: WintermmuteStyles.cardDecoration,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      peptide['name'] as String,
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('${peptide['dose']}mg', style: TextStyle(color: AppColors.textMid, fontSize: 11)),
-                        Text(peptide['route'] as String, style: TextStyle(color: AppColors.textMid, fontSize: 11)),
-                        Text(peptide['frequency'] as String, style: TextStyle(color: AppColors.textMid, fontSize: 11)),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            }),
-            const SizedBox(height: 20),
-
-            // Start button
-            SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('✓ Stack "${stack['name']}" — create individual cycles for each peptide'),
-                      backgroundColor: AppColors.primary,
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                ),
-                child: const Text('CREATE STACK', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),
     );
-  }
-
-  void _showProtocolDetail(ProtocolTemplate protocol) {
-    _showStackDetail({});
   }
 
   Widget _buildSectionHeader(String title, IconData icon, Color accentColor) {
@@ -802,89 +1045,143 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
   Widget _buildStackCard(Map<String, dynamic> stack) {
     final peptides = stack['peptides'] as List<dynamic>;
-    final peptideNames = peptides.map((p) => (p as Map<String, dynamic>)['name']).join(' + ');
+    final accentColor = stack['accentColor'] as Color;
 
     return GestureDetector(
-      onTap: () => _showStackDetail(stack),
+      onTap: () => _showProtocolDetail(stack),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFF0A0A0A).withOpacity(0.85),
-          border: Border.all(color: AppColors.primary.withOpacity(0.25), width: 1),
+          color: const Color(0xFF0A0A0A),
           borderRadius: BorderRadius.circular(4),
+          border: Border(
+            left: BorderSide(color: accentColor, width: 3),
+            top: BorderSide(color: accentColor.withOpacity(0.2), width: 1),
+            right: BorderSide(color: accentColor.withOpacity(0.2), width: 1),
+            bottom: BorderSide(color: accentColor.withOpacity(0.2), width: 1),
+          ),
         ),
-        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              stack['name'] as String,
-              style: TextStyle(
-                color: AppColors.primary,
-                fontFamily: 'monospace',
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Peptides: $peptideNames',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 11,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              stack['description'] as String,
-              style: TextStyle(
-                color: AppColors.textDim,
-                fontSize: 11,
-                fontStyle: FontStyle.italic,
-                decoration: TextDecoration.none,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _showStackDetail(stack),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+            // Top row: name + duration badge
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      stack['name'] as String,
+                      style: TextStyle(
+                        color: accentColor,
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: accentColor.withOpacity(0.4), width: 1),
+                      borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
-                      'DETAILS',
+                      stack['duration'] as String,
                       style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 10,
+                        color: accentColor.withOpacity(0.8),
+                        fontSize: 9,
+                        fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
+                ],
+              ),
+            ),
+
+            // Goal text
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+              child: Text(
+                stack['goal'] as String,
+                style: TextStyle(
+                  color: AppColors.textMid,
+                  fontSize: 11,
+                  fontFamily: 'monospace',
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _showStackDetail(stack),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.surface.withOpacity(0.15), // Matte style
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
+              ),
+            ),
+
+            // Peptide chips
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: peptides.map((pep) {
+                  final peptide = pep as Map<String, dynamic>;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: accentColor.withOpacity(0.08),
+                      border: Border.all(color: accentColor.withOpacity(0.3), width: 1),
+                      borderRadius: BorderRadius.circular(3),
                     ),
-                    child: Text(
-                      'START',
-                      style: TextStyle(
-                        color: AppColors.textLight,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.science, color: accentColor.withOpacity(0.7), size: 10),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${peptide['name']}  ${peptide['doseDisplay']}',
+                          style: TextStyle(
+                            color: accentColor.withOpacity(0.9),
+                            fontSize: 10,
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+
+            // Divider + action button
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: accentColor.withOpacity(0.2), width: 1),
+                ),
+              ),
+              child: GestureDetector(
+                onTap: () => _showProtocolDetail(stack),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.play_arrow, color: accentColor, size: 14),
+                      const SizedBox(width: 6),
+                      Text(
+                        'INITIATE PROTOCOL',
+                        style: TextStyle(
+                          color: accentColor,
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ],
         ),
@@ -892,22 +1189,26 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
     );
   }
 
-  Widget _buildProtocolCard(ProtocolTemplate protocol) {
-    return GestureDetector(
-      onTap: () => _showProtocolDetail(protocol),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0A0A0A).withOpacity(0.85),
-          border: Border.all(color: AppColors.accent.withOpacity(0.25), width: 1),
-          borderRadius: BorderRadius.circular(4),
+  Widget _buildCommunityProtocolCard(ProtocolTemplate protocol) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0A),
+        borderRadius: BorderRadius.circular(4),
+        border: Border(
+          left: BorderSide(color: AppColors.primary, width: 3),
+          top: BorderSide(color: AppColors.primary.withOpacity(0.2), width: 1),
+          right: BorderSide(color: AppColors.primary.withOpacity(0.2), width: 1),
+          bottom: BorderSide(color: AppColors.primary.withOpacity(0.2), width: 1),
         ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Column(
@@ -916,7 +1217,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                       Text(
                         protocol.name,
                         style: TextStyle(
-                          color: AppColors.accent,
+                          color: AppColors.primary,
                           fontFamily: 'monospace',
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -924,10 +1225,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${protocol.peptideName} • ${protocol.dose}mg • ${protocol.frequency}',
+                        '${protocol.peptideName}  ${protocol.dose}mg  •  ${protocol.frequency}',
                         style: TextStyle(
                           color: AppColors.textMid,
                           fontSize: 11,
+                          fontFamily: 'monospace',
                         ),
                       ),
                     ],
@@ -935,81 +1237,68 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 ),
                 if (protocol.usageCount > 0)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.surface.withOpacity(0.15),
-                      border: Border.all(
-                        color: AppColors.primary.withOpacity(0.2),
-                        width: 1,
-                      ),
+                      border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 1),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
-                      'Used ${protocol.usageCount}x',
+                      '${protocol.usageCount}x USED',
                       style: TextStyle(
-                        color: AppColors.textMid,
-                        fontSize: 10,
+                        color: AppColors.primary.withOpacity(0.7),
+                        fontSize: 9,
+                        fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
               ],
             ),
-            if (protocol.description != null) ...[
-              const SizedBox(height: 8),
-              Text(
+          ),
+          if (protocol.description != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+              child: Text(
                 protocol.description!,
                 style: TextStyle(
                   color: AppColors.textDim,
                   fontSize: 11,
                   fontStyle: FontStyle.italic,
-                  decoration: TextDecoration.none,
                 ),
               ),
-            ],
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => _showProtocolDetail(protocol),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-                    ),
-                    child: Text(
-                      'DETAILS',
+            ),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(color: AppColors.primary.withOpacity(0.2), width: 1),
+              ),
+            ),
+            child: GestureDetector(
+              onTap: () => _showStartFromProtocolModal(protocol),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.download_outlined, color: AppColors.primary, size: 14),
+                    const SizedBox(width: 6),
+                    Text(
+                      'CLONE PROTOCOL',
                       style: TextStyle(
                         color: AppColors.primary,
                         fontSize: 10,
+                        fontFamily: 'monospace',
                         fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _showStartFromProtocolModal(protocol),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.surface.withOpacity(0.15), // Matte style
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(3)),
-                    ),
-                    child: Text(
-                      'START',
-                      style: TextStyle(
-                        color: AppColors.textLight,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1038,133 +1327,117 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
           Scaffold(
             backgroundColor: Colors.transparent,
             body: Column(
-            children: [
-              // Header using reusable widget
-              AppHeader(
-                icon: Icons.list_alt,
-                iconColor: WintermmuteStyles.colorGreen,
-                title: 'PROTOCOLS',
-              ),
+              children: [
+                // Header
+                AppHeader(
+                  icon: Icons.biotech,
+                  iconColor: AppColors.accent,
+                  title: 'PROTOCOLS',
+                ),
 
-              // Terminal-style create button
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-                child: GestureDetector(
-                  onTap: _showCreateProtocolModal,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: AppColors.accent.withOpacity(0.75),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.accent.withOpacity(0.12),
-                          blurRadius: 8,
-                          spreadRadius: 0,
+                // Design Protocol button
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                  child: GestureDetector(
+                    onTap: _showCreateProtocolModal,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: AppColors.accent.withOpacity(0.75),
+                          width: 1.5,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(width: 4, height: 14, color: AppColors.accent),
-                        const SizedBox(width: 10),
-                        Icon(Icons.add_circle_outline, color: AppColors.accent, size: 16),
-                        const SizedBox(width: 8),
-                        Text(
-                          'CREATE PROTOCOL',
-                          style: TextStyle(
-                            color: AppColors.accent,
-                            fontSize: 12,
-                            fontFamily: 'monospace',
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.accent.withOpacity(0.12),
+                            blurRadius: 8,
+                            spreadRadius: 0,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(width: 4, height: 14, color: AppColors.accent),
+                          const SizedBox(width: 10),
+                          Icon(Icons.add_circle_outline, color: AppColors.accent, size: 16),
+                          const SizedBox(width: 8),
+                          Text(
+                            'DESIGN PROTOCOL',
+                            style: TextStyle(
+                              color: AppColors.accent,
+                              fontSize: 12,
+                              fontFamily: 'monospace',
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              // Content
-              Expanded(
-                child: Stack(
-                  children: [
-                    SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                // Content
+                Expanded(
+                  child: Stack(
                     children: [
-                      if (isLoading)
-                        Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                          ),
-                        )
-                      else
-                        Column(
+                      SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Biohacker Protocols (Stacks)
-                            _buildSectionHeader('BIOHACKER PROTOCOL STACKS', Icons.layers, AppColors.primary),
-                            const SizedBox(height: 12),
-                            ...getBiohackerProtocols().map((stack) => _buildStackCard(stack)),
-                            const SizedBox(height: 20),
-
-                            // My Protocols
-                            _buildSectionHeader('MY PROTOCOLS', Icons.person, AppColors.accent),
-                            const SizedBox(height: 12),
-                            if (myProtocols.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 20),
-                                child: EmptyState(
-                                  icon: Icons.add_circle_outline,
-                                  title: 'No custom protocols',
-                                  message: 'Create your own protocol templates',
+                            if (isLoading)
+                              Center(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                                 ),
                               )
                             else
-                              ...myProtocols.map((protocol) => _buildProtocolCard(protocol)),
-                            const SizedBox(height: 20),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // ── SOVEREIGN PROTOCOLS ──
+                                  _buildSectionHeader('SOVEREIGN PROTOCOLS', Icons.shield, AppColors.accent),
+                                  const SizedBox(height: 12),
+                                  ...protocolStacks.map((stack) => _buildStackCard(stack)),
+                                  const SizedBox(height: 24),
 
-                            // Community Protocols
-                            _buildSectionHeader('COMMUNITY PROTOCOLS', Icons.people, AppColors.secondary),
-                            const SizedBox(height: 12),
-                            if (communityProtocols.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 20),
-                                child: EmptyState(
-                                  icon: Icons.people_outline,
-                                  title: 'No community protocols',
-                                  message: 'Check back later for shared protocols',
-                                ),
-                              )
-                            else
-                              ...communityProtocols.map((protocol) => _buildProtocolCard(protocol)),
+                                  // ── COMMUNITY INTEL ──
+                                  _buildSectionHeader('COMMUNITY INTEL', Icons.people, AppColors.primary),
+                                  const SizedBox(height: 12),
+                                  if (communityProtocols.isEmpty)
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 20),
+                                      child: EmptyState(
+                                        icon: Icons.people_outline,
+                                        title: 'No community intel yet',
+                                        message: 'Design a protocol and share it to contribute',
+                                      ),
+                                    )
+                                  else
+                                    ...communityProtocols.map((p) => _buildCommunityProtocolCard(p)),
+                                ],
+                              ),
                           ],
                         ),
-                    ],
-                  ),
-                    ),
-                    // Scanlines overlay
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: CustomPaint(
-                          painter: _ScanlinesPainter(),
+                      ),
+                      // Scanlines overlay
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: CustomPaint(
+                            painter: _ScanlinesPainter(),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
           ),
         ],
       ),

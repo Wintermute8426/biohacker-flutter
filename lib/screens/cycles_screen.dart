@@ -1132,7 +1132,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           Icon(Icons.add_circle_outline, color: AppColors.primary, size: 16),
                           const SizedBox(width: 8),
                           Text(
-                            'INITIATE NEW PROTOCOL',
+                            'INITIATE NEW CYCLE',
                             style: TextStyle(
                               color: AppColors.primary,
                               fontSize: 12,
