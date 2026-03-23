@@ -259,6 +259,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               _buildMenuItem(
                 context,
+                icon: Icons.biotech,
+                iconColor: WintermmuteStyles.colorGreen,
+                label: 'Protocols',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProtocolsScreen()),
+                  );
+                },
+              ),
+              _buildMenuItem(
+                context,
                 icon: Icons.info,
                 iconColor: WintermmuteStyles.colorMagenta,
                 label: 'About',
