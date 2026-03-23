@@ -237,6 +237,8 @@ class _LabsScreenState extends State<LabsScreen> {
       // Send to backend for extraction (HTTPS endpoint loaded from env)
       final request = http.MultipartRequest('POST', Uri.parse(endpoint));
 
+      request.headers['Authorization'] = 'Bearer ${dotenv.env['LAB_PDF_API_KEY'] ?? ''}';
+
       request.files.add(
         http.MultipartFile.fromBytes('file', bytes, filename: fileName),
       );
