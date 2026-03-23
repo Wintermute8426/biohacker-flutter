@@ -1289,6 +1289,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const SizedBox(height: 12),
 
+          // ===== DEBUG: NOTIFICATION TESTING =====
+          if (kDebugMode)
+            _buildSection(
+              'DEBUG TESTING',
+              Icons.science,
+              Colors.red,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      'FIRE IMMEDIATELY — NO SCHEDULING',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 10,
+                        color: Colors.red.withOpacity(0.7),
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildDebugNotifButton('Dose Reminder', 'dose_reminder'),
+                      _buildDebugNotifButton('Missed Dose', 'missed_dose'),
+                      _buildDebugNotifButton('Cycle Start', 'cycle_start'),
+                      _buildDebugNotifButton('Cycle Midpoint', 'cycle_mid'),
+                      _buildDebugNotifButton('Cycle Ending', 'cycle_ending'),
+                      _buildDebugNotifButton('Cycle Complete', 'cycle_complete'),
+                      _buildDebugNotifButton('Lab Reminder', 'lab_reminder'),
+                      _buildDebugNotifButton('Side Effect Check', 'side_effect'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          if (kDebugMode) const SizedBox(height: 12),
+
           // ===== APP SETTINGS =====
           _buildSection(
             'APP SETTINGS',
@@ -2330,6 +2370,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDebugNotifButton(String label, String type) {
+    return OutlinedButton(
+      onPressed: () async {
+        await NotificationService().showDebugNotification(type);
+        if (mounted) UserFeedback.showSuccess(context, '$label sent');
+      },
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.red,
+        side: const BorderSide(color: Colors.red, width: 1),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
       ),
     );
   }

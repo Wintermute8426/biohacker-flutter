@@ -370,6 +370,98 @@ class NotificationService {
     );
   }
 
+  // ─── Immediate: Debug ────────────────────────────────────────────────────────
+
+  /// Fire an immediate notification for [type]. Debug builds only.
+  /// type: 'dose_reminder' | 'missed_dose' | 'cycle_start' | 'cycle_mid' |
+  ///       'cycle_ending' | 'cycle_complete' | 'lab_reminder' | 'side_effect'
+  Future<void> showDebugNotification(String type) async {
+    if (!_initialized) await initialize();
+
+    late final String title;
+    late final String body;
+    late final String channelId;
+    late final String channelName;
+    Importance importance = Importance.defaultImportance;
+    Priority priority = Priority.defaultPriority;
+
+    switch (type) {
+      case 'dose_reminder':
+        title = '⚗️ PROTOCOL ACTIVE';
+        body = 'BPC-157 • 5.0mg SubQ • 08:00';
+        channelId = _doseChannel;
+        channelName = 'Dose Reminders';
+        importance = Importance.high;
+        priority = Priority.high;
+        break;
+      case 'missed_dose':
+        title = '⚠️ PROTOCOL BREACH';
+        body = 'BPC-157 dose missed • Log now?';
+        channelId = _doseChannel;
+        channelName = 'Dose Reminders';
+        importance = Importance.max;
+        priority = Priority.max;
+        break;
+      case 'cycle_start':
+        title = '⚗️ PROTOCOL INITIATED';
+        body = 'BPC-157 Cycle • 84d protocol online';
+        channelId = _milestonesChannel;
+        channelName = 'Cycle Milestones';
+        break;
+      case 'cycle_mid':
+        title = '📊 PROTOCOL MIDPOINT';
+        body = 'BPC-157 • Day 42 • Consider bloodwork assessment';
+        channelId = _milestonesChannel;
+        channelName = 'Cycle Milestones';
+        break;
+      case 'cycle_ending':
+        title = '⏱️ PROTOCOL ENDING';
+        body = 'BPC-157 • 3 days remaining in cycle';
+        channelId = _milestonesChannel;
+        channelName = 'Cycle Milestones';
+        break;
+      case 'cycle_complete':
+        title = '✅ PROTOCOL COMPLETE';
+        body = 'BPC-157 84d cycle finished • Log results?';
+        channelId = _milestonesChannel;
+        channelName = 'Cycle Milestones';
+        break;
+      case 'lab_reminder':
+        title = '🔬 DIAGNOSTIC WINDOW';
+        body = 'Bloodwork due this cycle • Schedule your diagnostic';
+        channelId = _labChannel;
+        channelName = 'Lab Reminders';
+        break;
+      case 'side_effect':
+        title = '🩺 PROTOCOL STATUS CHECK';
+        body = 'BPC-157 • Week 4 • Any adverse effects this week?';
+        channelId = _milestonesChannel;
+        channelName = 'Cycle Milestones';
+        importance = Importance.low;
+        priority = Priority.low;
+        break;
+      default:
+        return;
+    }
+
+    await _plugin.show(
+      _id('debug_$type'),
+      title,
+      body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          channelName,
+          channelDescription: 'Debug test notification',
+          importance: importance,
+          priority: priority,
+        ),
+        iOS: const DarwinNotificationDetails(sound: 'default'),
+      ),
+      payload: 'debug:$type',
+    );
+  }
+
   // ─── Cancel ──────────────────────────────────────────────────────────────────
 
   /// Cancel the dose reminder AND missed dose alert for [cycleId] on [date].
