@@ -32,11 +32,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       'name': 'MUSCLE RECOVERY',
       'goal': 'Tissue repair, inflammation reduction',
       'description': 'Post-workout repair stack combining BPC-157 for tissue healing and TB-500 for systemic regeneration. Synergistic approach to reducing recovery time and preventing re-injury.',
-      'duration': '4-6 WEEKS',
+      'duration': '4 WEEKS',
       'accentColor': const Color(0xFF39FF14),
       'peptides': [
-        {'name': 'BPC-157', 'dose': 250.0, 'doseDisplay': '250mcg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 5},
-        {'name': 'TB-500', 'dose': 2.0, 'doseDisplay': '2mg', 'route': 'SC', 'frequency': '2x weekly', 'weeks': 5},
+        {'name': 'BPC-157', 'dose': 250.0, 'doseDisplay': '250mcg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 4},
+        {'name': 'TB-500', 'dose': 2.0, 'doseDisplay': '2mg', 'route': 'SC', 'frequency': '2x weekly', 'weeks': 4},
       ],
     },
     {
@@ -44,10 +44,10 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       'name': 'LONGEVITY STACK',
       'goal': 'Telomere protection, cellular regeneration',
       'description': 'Anti-aging protocol targeting cellular longevity. Epitalon extends telomeres, GHK-Cu drives collagen and tissue renewal, NAD+ restores mitochondrial energy production.',
-      'duration': '8 WEEKS',
+      'duration': '2–8 WEEKS',
       'accentColor': const Color(0xFF00FFFF),
       'peptides': [
-        {'name': 'Epitalon', 'dose': 10.0, 'doseDisplay': '10mg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 8},
+        {'name': 'Epitalon', 'dose': 10.0, 'doseDisplay': '10mg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 2},
         {'name': 'GHK-Cu', 'dose': 2.0, 'doseDisplay': '2mg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 8},
         {'name': 'NAD+', 'dose': 100.0, 'doseDisplay': '100mg', 'route': 'SC', 'frequency': '2x weekly', 'weeks': 8},
       ],
@@ -70,12 +70,12 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       'name': 'ACL SURGERY RECOVERY',
       'goal': 'Tendon repair, collagen synthesis',
       'description': 'Post-surgical healing protocol targeting tendon and ligament repair. High-dose BPC-157 accelerates tissue regeneration while TB-500 promotes systemic healing and GHK-Cu drives collagen formation.',
-      'duration': '8-12 WEEKS',
+      'duration': '12 WEEKS',
       'accentColor': const Color(0xFFFF0040),
       'peptides': [
-        {'name': 'BPC-157', 'dose': 500.0, 'doseDisplay': '500mcg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 10},
-        {'name': 'TB-500', 'dose': 5.0, 'doseDisplay': '5mg', 'route': 'SC', 'frequency': '2x weekly', 'weeks': 10},
-        {'name': 'GHK-Cu', 'dose': 2.0, 'doseDisplay': '2mg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 10},
+        {'name': 'BPC-157', 'dose': 500.0, 'doseDisplay': '500mcg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
+        {'name': 'TB-500', 'dose': 5.0, 'doseDisplay': '5mg', 'route': 'SC', 'frequency': '2x weekly', 'weeks': 12},
+        {'name': 'GHK-Cu', 'dose': 2.0, 'doseDisplay': '2mg', 'route': 'SC', 'frequency': '1x daily', 'weeks': 12},
       ],
     },
     {
@@ -333,32 +333,22 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                             bottomRight: Radius.circular(4),
                           ),
                         ),
-                        child: Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text(
-                                peptide['name'] as String,
-                                style: TextStyle(
-                                  color: accentColor,
-                                  fontSize: 12,
-                                  fontFamily: 'monospace',
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            Text(
+                              peptide['name'] as String,
+                              style: TextStyle(
+                                color: accentColor,
+                                fontSize: 12,
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
+                            const SizedBox(height: 4),
                             Text(
-                              peptide['doseDisplay'] as String,
-                              style: TextStyle(color: AppColors.amber, fontSize: 11, fontFamily: 'monospace'),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              peptide['route'] as String,
-                              style: TextStyle(color: AppColors.textMid, fontSize: 11, fontFamily: 'monospace'),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              peptide['frequency'] as String,
-                              style: TextStyle(color: AppColors.textDim, fontSize: 10, fontFamily: 'monospace'),
+                              '${peptide['doseDisplay']} ${peptide['route']} • ${peptide['frequency']} • ${peptide['weeks']} weeks',
+                              style: TextStyle(color: AppColors.textMid, fontSize: 10, fontFamily: 'monospace'),
                             ),
                           ],
                         ),
@@ -419,8 +409,8 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
   void _showCreateProtocolModal() {
     final nameController = TextEditingController();
     final goalController = TextEditingController();
-    final weeksController = TextEditingController(text: '8');
     final currentDoseController = TextEditingController();
+    final currentPeptideWeeksController = TextEditingController(text: '8');
     String currentPeptide = PEPTIDE_LIST.first;
     String currentRoute = 'SC (subcutaneous)';
     String currentFrequency = '1x daily';
@@ -650,7 +640,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        '${p['dose']} · ${p['route']} · ${p['frequency']}',
+                                        '${p['dose']} · ${p['route']} · ${p['frequency']} · ${p['weeks'] ?? 8}w',
                                         style: TextStyle(
                                           color: AppColors.textDim,
                                           fontSize: 10,
@@ -786,6 +776,31 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                             .toList(),
                         onChanged: (val) => setModalState(() => currentFrequency = val!),
                       ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: currentPeptideWeeksController,
+                        style: TextStyle(
+                          color: AppColors.amber.withOpacity(0.9),
+                          fontSize: 14,
+                          fontFamily: 'monospace',
+                        ),
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'DURATION (weeks)',
+                          labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
+                          filled: true,
+                          fillColor: Colors.black,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                      ),
                       const SizedBox(height: 14),
 
                       // ADD PEPTIDE button
@@ -793,14 +808,17 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         onTap: () {
                           final dose = currentDoseController.text.trim();
                           if (dose.isEmpty) return;
+                          final weeks = int.tryParse(currentPeptideWeeksController.text.trim()) ?? 8;
                           setModalState(() {
                             peptideStack.add({
                               'name': currentPeptide,
                               'dose': dose,
                               'route': currentRoute,
                               'frequency': currentFrequency,
+                              'weeks': weeks,
                             });
                             currentDoseController.clear();
+                            currentPeptideWeeksController.text = '8';
                           });
                         },
                         child: Container(
@@ -907,7 +925,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   child: GestureDetector(
                     onTap: () async {
                       if (nameController.text.trim().isEmpty || peptideStack.isEmpty) return;
-                      final weeks = int.tryParse(weeksController.text) ?? 8;
+                      final weeks = peptideStack
+                          .map((p) => (p['weeks'] as int?) ?? 8)
+                          .reduce((a, b) => a > b ? a : b);
                       final firstPeptide = peptideStack.first;
 
                       final peptidesJson = json.encode({
@@ -1248,7 +1268,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         Icon(Icons.science, color: accentColor.withOpacity(0.7), size: 10),
                         const SizedBox(width: 4),
                         Text(
-                          '${peptide['name']}  ${peptide['doseDisplay']}',
+                          '${peptide['name']}  ${peptide['doseDisplay']}  ${peptide['weeks']}w',
                           style: TextStyle(
                             color: accentColor.withOpacity(0.9),
                             fontSize: 10,
@@ -1498,7 +1518,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   child: Stack(
                     children: [
                       SingleChildScrollView(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
