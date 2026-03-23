@@ -149,7 +149,7 @@ class WintermmuteStyles {
 
   // Standard card: Matte dark background, subtle cyan border (Wintermute dashboard style)
   static BoxDecoration cardDecoration = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.2), // Slightly brighter
+    color: const Color(0xFF0A0A0A),
     border: Border.all(
       color: colorCyan.withOpacity(0.35), // Brighter, more visible border
       width: 2,
@@ -159,7 +159,7 @@ class WintermmuteStyles {
 
   // Glowing card: Standard card with very subtle glow
   static BoxDecoration cardDecorationGlow = BoxDecoration(
-    color: AppColors.surface.withOpacity(0.2),
+    color: const Color(0xFF0A0A0A),
     border: Border.all(
       color: colorCyan.withOpacity(0.35), // Brighter, more visible border
       width: 2,
