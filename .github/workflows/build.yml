@@ -51,7 +51,12 @@ jobs:
         run: flutter analyze --no-fatal-infos || true
       
       - name: Build APK (split-per-abi for testing on your phone)
-        run: flutter build apk --split-per-abi --release
+        run: |
+          flutter build apk --split-per-abi --release \
+            --dart-define=SUPABASE_URL=https://dfiewtwbxqfrrmyiqhqo.supabase.co \
+            --dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaWV3dHdieHFmcnJteWlxaHFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ3MTYzNTQsImV4cCI6MjA1MDI5MjM1NH0.4VYr5nKHQnMDzG1tJ17D7M8VyiUv7nPBrXa1HN2zV3U \
+            --dart-define=LAB_PDF_ENDPOINT= \
+            --dart-define=BLOODWORK_AI_API_KEY=
       
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
