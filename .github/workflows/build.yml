@@ -2,6 +2,7 @@
 #   SUPABASE_URL         - Your Supabase project URL
 #   SUPABASE_ANON_KEY    - Your Supabase anonymous/public key
 #   LAB_PDF_ENDPOINT     - (optional) Lab PDF processing endpoint
+#   LAB_PDF_API_KEY      - (optional) Lab PDF API authentication key
 #   BLOODWORK_AI_API_KEY - (optional) Bloodwork AI API key
 
 name: Build APK
@@ -62,6 +63,7 @@ jobs:
             --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
             --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }} \
             --dart-define=LAB_PDF_ENDPOINT=${{ secrets.LAB_PDF_ENDPOINT }} \
+            --dart-define=LAB_PDF_API_KEY=${{ secrets.LAB_PDF_API_KEY }} \
             --dart-define=BLOODWORK_AI_API_KEY=${{ secrets.BLOODWORK_AI_API_KEY }}
       
       - name: Upload APK artifacts
