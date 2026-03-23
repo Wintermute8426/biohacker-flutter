@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'notification_scheduler.dart';
 
 class DoseLog {
   final String id;
@@ -232,10 +233,26 @@ class DoseLogsService {
   // Mark dose as COMPLETED
   Future<bool> markAsCompleted(String doseLogId) async {
     try {
+      final rows = await _supabase
+          .from('dose_logs')
+          .select('cycle_id, logged_at')
+          .eq('id', doseLogId);
+
       await _supabase
           .from('dose_logs')
           .update({'status': 'COMPLETED'})
           .eq('id', doseLogId);
+
+      // Cancel that day's dose reminder + missed dose alert
+      if (rows.isNotEmpty) {
+        final row = Map<String, dynamic>.from(rows.first as Map);
+        final cycleId = row['cycle_id'] as String? ?? '';
+        final loggedAt = DateTime.tryParse(row['logged_at'] as String? ?? '');
+        if (cycleId.isNotEmpty && loggedAt != null) {
+          await NotificationScheduler().onDoseLogged(cycleId, loggedAt);
+        }
+      }
+
       return true;
     } catch (e, stackTrace) {
       if (kDebugMode) {

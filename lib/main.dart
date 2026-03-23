@@ -6,6 +6,8 @@ import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding/welcome_screen.dart';
 import 'services/onboarding_service.dart';
+import 'services/notification_service.dart';
+import 'services/notification_scheduler.dart';
 import 'theme/colors.dart';
 
 void main() async {
@@ -15,6 +17,11 @@ void main() async {
     url: 'https://dfiewtwbxqfrrmyiqhqo.supabase.co',
     anonKey: 'sb_publishable_swGU8s8l_FgSo2GuKbGkfA_00Wd9zIV',
   );
+
+  // Initialize notification service and reschedule any pending notifications
+  await NotificationService().initialize();
+  await NotificationService().requestPermissions();
+  // Reschedule runs after auth is resolved (see OnboardingCheck)
 
   runApp(
     const ProviderScope(
@@ -77,6 +84,8 @@ class OnboardingCheck extends ConsumerWidget {
 
     return onboardingStatus.when(
       data: (isCompleted) {
+        // Reschedule notifications for authenticated users
+        NotificationScheduler().rescheduleAll();
         if (isCompleted) {
           return const HomeScreen();
         } else {

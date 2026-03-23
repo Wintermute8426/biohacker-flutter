@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import '../services/user_profile_service.dart';
 import '../services/cycles_database.dart';
+import '../services/notification_service.dart';
+import '../services/notification_scheduler.dart';
 import '../services/labs_database.dart';
 import '../services/dose_logs_database.dart';
 import '../theme/colors.dart';
@@ -63,13 +65,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   // Health goals
   List<String> _healthGoalsFromOnboarding = [];
 
-  // Notification preferences
-  bool _doseReminders = true;
+  // Legacy email/sms/push toggle (kept for profile update API compat)
   final Map<String, bool> _notificationPreferences = {
     'email': true,
     'push': false,
     'sms': false,
   };
+
+  // Local notification preferences (from notification_preferences table)
+  bool _doseReminders = true;
+  String _doseReminderTime = '08:00';
+  bool _cycleMilestones = true;
+  bool _sideEffectsEnabled = true;
+  bool _researchUpdates = true;
+  String _labReminderFrequency = 'every_3_months';
 
   // State
   bool _isLoading = true;
@@ -124,9 +133,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       setState(() {
-        _doseReminders = prefs.getBool('dose_reminders') ?? true;
         _goalsController.text = prefs.getString('user_goals') ?? '';
       });
+
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId != null) {
+        final notifPrefs =
+            await NotificationScheduler().loadPrefs(userId);
+        setState(() {
+          _doseReminders = notifPrefs.doseRemindersEnabled;
+          _doseReminderTime = notifPrefs.doseReminderTime;
+          _cycleMilestones = notifPrefs.cycleMilestonesEnabled;
+          _sideEffectsEnabled = notifPrefs.sideEffectsEnabled;
+          _researchUpdates = notifPrefs.researchUpdatesEnabled;
+          _labReminderFrequency = notifPrefs.labReminderFrequency;
+        });
+      }
     } catch (e) {
       print('[ProfileScreen] Error loading settings: $e');
     }
@@ -468,21 +490,67 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  // ==================== DOSE REMINDERS ====================
+  // ==================== NOTIFICATION SETTINGS ====================
 
-  Future<void> _saveDoseReminders(bool value) async {
+  Future<void> _saveNotificationPrefs() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('dose_reminders', value);
-      setState(() => _doseReminders = value);
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final prefs = NotificationPrefs(
+        doseRemindersEnabled: _doseReminders,
+        doseReminderTime: _doseReminderTime,
+        cycleMilestonesEnabled: _cycleMilestones,
+        sideEffectsEnabled: _sideEffectsEnabled,
+        researchUpdatesEnabled: _researchUpdates,
+        labReminderFrequency: _labReminderFrequency,
+      );
+
+      await NotificationScheduler().savePrefs(userId, prefs);
+      await NotificationScheduler().rescheduleAll();
+
       if (mounted) {
-        UserFeedback.showSuccess(context, 'Dose reminders ${value ? 'enabled' : 'disabled'}');
+        UserFeedback.showSuccess(context, 'Notification settings saved');
       }
     } catch (e) {
-      print('[ProfileScreen] Error saving dose reminders: $e');
+      print('[ProfileScreen] Error saving notification prefs: $e');
       if (mounted) {
-        UserFeedback.showError(context, 'Failed to save setting');
+        UserFeedback.showError(context, 'Failed to save notification settings');
       }
+    }
+  }
+
+  Future<void> _pickDoseReminderTime() async {
+    final parts = _doseReminderTime.split(':');
+    final initial = TimeOfDay(
+      hour: int.tryParse(parts[0]) ?? 8,
+      minute: parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0,
+    );
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (ctx, child) => Theme(
+        data: ThemeData.dark().copyWith(
+          colorScheme: ColorScheme.dark(
+            primary: AppColors.primary,
+            onPrimary: Colors.black,
+            surface: AppColors.surface,
+          ),
+          dialogTheme: const DialogThemeData(
+            backgroundColor: AppColors.surface,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _doseReminderTime =
+            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      });
+      await _saveNotificationPrefs();
     }
   }
 
@@ -1140,12 +1208,84 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             'NOTIFICATION SETTINGS',
             Icons.notifications,
             AppColors.primary,
-            _buildInteractiveToggle(
-              'Dose Reminders',
-              'Get notified when it\'s time to take your doses',
-              _doseReminders,
-              (value) => _saveDoseReminders(value),
-            ),
+            Column(children: [
+              _buildInteractiveToggle(
+                'Dose Reminders',
+                'Alert at scheduled dose time',
+                _doseReminders,
+                (v) {
+                  setState(() => _doseReminders = v);
+                  _saveNotificationPrefs();
+                },
+              ),
+              if (_doseReminders) ...[
+                const Divider(height: 20, color: Color(0xFF1A1A1A)),
+                _buildNotifActionRow(
+                  'Reminder Time',
+                  _doseReminderTime,
+                  Icons.access_time,
+                  _pickDoseReminderTime,
+                ),
+              ],
+              const Divider(height: 20, color: Color(0xFF1A1A1A)),
+              _buildInteractiveToggle(
+                'Cycle Milestones',
+                'Start, midpoint, pre-end, and completion alerts',
+                _cycleMilestones,
+                (v) {
+                  setState(() => _cycleMilestones = v);
+                  _saveNotificationPrefs();
+                },
+              ),
+              const Divider(height: 20, color: Color(0xFF1A1A1A)),
+              _buildInteractiveToggle(
+                'Side Effect Check-ins',
+                'Weekly protocol status prompts during active cycles',
+                _sideEffectsEnabled,
+                (v) {
+                  setState(() => _sideEffectsEnabled = v);
+                  _saveNotificationPrefs();
+                },
+              ),
+              const Divider(height: 20, color: Color(0xFF1A1A1A)),
+              _buildNotifDropdownRow(
+                'Lab Reminders',
+                _labReminderFrequency,
+                {
+                  'never': 'Never',
+                  'monthly': 'Monthly',
+                  'every_3_months': 'Every 3 Months',
+                  'every_6_months': 'Every 6 Months',
+                },
+                (v) {
+                  setState(() => _labReminderFrequency = v!);
+                  _saveNotificationPrefs();
+                },
+              ),
+              const Divider(height: 20, color: Color(0xFF1A1A1A)),
+              _buildInteractiveToggle(
+                'Research Updates',
+                'New peptide studies and intelligence updates',
+                _researchUpdates,
+                (v) {
+                  setState(() => _researchUpdates = v);
+                  _saveNotificationPrefs();
+                },
+              ),
+              const Divider(height: 20, color: Color(0xFF1A1A1A)),
+              _buildActionTile(
+                'Test Notification',
+                'Fire a test notification to verify setup',
+                Icons.bug_report,
+                () async {
+                  await NotificationService().showTestNotification();
+                  if (mounted) {
+                    UserFeedback.showSuccess(
+                        context, 'Test notification sent');
+                  }
+                },
+              ),
+            ]),
           ),
           const SizedBox(height: 12),
 
@@ -2068,6 +2208,92 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             letterSpacing: 1,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildNotifActionRow(
+      String label, String value, IconData icon, VoidCallback onTap) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label,
+                        style: TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 14,
+                            color: AppColors.textLight,
+                            fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              ),
+              Row(
+                children: [
+                  Text(value,
+                      style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 14,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 8),
+                  Icon(icon, color: AppColors.primary, size: 18),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotifDropdownRow(
+    String label,
+    String currentValue,
+    Map<String, String> options,
+    ValueChanged<String?> onChanged,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label,
+                style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 14,
+                    color: AppColors.textLight,
+                    fontWeight: FontWeight.w500)),
+          ),
+          DropdownButton<String>(
+            value: currentValue,
+            dropdownColor: AppColors.surface,
+            style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 12,
+                color: AppColors.primary),
+            underline: const SizedBox(),
+            items: options.entries
+                .map((e) => DropdownMenuItem(
+                      value: e.key,
+                      child: Text(e.value,
+                          style: TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 12,
+                              color: AppColors.primary)),
+                    ))
+                .toList(),
+            onChanged: onChanged,
+          ),
+        ],
       ),
     );
   }
