@@ -88,6 +88,11 @@ const List<String> PEPTIDE_LIST = [
   "FGL",
   "Adipotide",
   "5-Amino-1MQ",
+  
+  // Blends & Protocols
+  "GLOW Protocol",
+  "KLOW Protocol",
+  "CJC-1295 (no DAC) + Ipamorelin",
 ];
 
 // Common dosing ranges (in mg)
@@ -112,6 +117,9 @@ const Map<String, String> PEPTIDE_DOSES = {
   "Follistatin-344": "100-200",
   "IGF-1 LR3": "20-50",
   "MGF (Mechano Growth Factor)": "100-200",
+  "GLOW Protocol": "1-2",
+  "KLOW Protocol": "1-2",
+  "CJC-1295 (no DAC) + Ipamorelin": "100-200 each",
 };
 
 List<String> searchPeptides(String query) {
