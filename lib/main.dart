@@ -33,6 +33,12 @@ void main() async {
   final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ??
       const String.fromEnvironment('SUPABASE_ANON_KEY');
 
+  // Debug logging
+  print('[BIOHACKER INIT] Supabase URL present: ${supabaseUrl.isNotEmpty}');
+  print('[BIOHACKER INIT] Supabase key present: ${supabaseAnonKey.isNotEmpty}');
+  print('[BIOHACKER INIT] URL length: ${supabaseUrl.length}');
+  print('[BIOHACKER INIT] Key length: ${supabaseAnonKey.length}');
+
   if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
     _initError =
         'Missing Supabase credentials.\n\nFor development: add .env to pubspec assets and ensure SUPABASE_URL and SUPABASE_ANON_KEY are set.\n\nFor release builds: pass --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...';
