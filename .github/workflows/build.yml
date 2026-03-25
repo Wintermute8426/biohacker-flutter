@@ -65,6 +65,13 @@ jobs:
           LAB_PDF_API_KEY: ${{ secrets.LAB_PDF_API_KEY }}
           BLOODWORK_AI_API_KEY: ${{ secrets.BLOODWORK_AI_API_KEY }}
         run: |
+          # Trim whitespace from secrets
+          SUPABASE_URL=$(echo "${SUPABASE_URL}" | tr -d '\n' | xargs)
+          SUPABASE_ANON_KEY=$(echo "${SUPABASE_ANON_KEY}" | tr -d '\n' | xargs)
+          LAB_PDF_ENDPOINT=$(echo "${LAB_PDF_ENDPOINT}" | tr -d '\n' | xargs)
+          LAB_PDF_API_KEY=$(echo "${LAB_PDF_API_KEY}" | tr -d '\n' | xargs)
+          BLOODWORK_AI_API_KEY=$(echo "${BLOODWORK_AI_API_KEY}" | tr -d '\n' | xargs)
+          
           flutter build apk --split-per-abi --release \
             --dart-define=SUPABASE_URL="${SUPABASE_URL}" \
             --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY}" \
