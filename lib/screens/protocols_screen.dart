@@ -411,8 +411,8 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             padding: EdgeInsets.only(
               left: 0,
               right: 0,
-              top: 24,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 32,
+              top: 32,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 40,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

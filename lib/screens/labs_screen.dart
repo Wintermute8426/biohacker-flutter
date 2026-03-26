@@ -658,7 +658,7 @@ class _LabsScreenState extends State<LabsScreen> {
       title: 'Lab Analysis',
       borderColor: labCyan,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(0, 32, 0, 80),
+        padding: const EdgeInsets.fromLTRB(0, 32, 0, 40),
         children: [
           // > STATUS section (matching cycle form card pattern)
           Container(

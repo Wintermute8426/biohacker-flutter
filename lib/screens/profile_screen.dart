@@ -1144,6 +1144,156 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           const SizedBox(height: 12),
 
+          // ===== SECURITY & PRIVACY =====
+          _buildSection(
+            'SECURITY & PRIVACY',
+            Icons.security,
+            AppColors.amber,
+            Column(
+              children: [
+                if (_biometricSupported) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'BIOMETRIC AUTH',
+                              style: TextStyle(fontFamily: 'monospace', fontSize: 10, color: AppColors.textDim, letterSpacing: 1),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _biometricEnabled ? 'ENABLED' : 'DISABLED',
+                              style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: _biometricEnabled ? AppColors.accent : AppColors.textLight, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        _biometricType.toUpperCase(),
+                        style: TextStyle(fontFamily: 'monospace', fontSize: 10, color: AppColors.textMid),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                _buildDataRow('SESSION TIMEOUT', '30 minutes'),
+                const SizedBox(height: 12),
+                _buildDataRow('DATA ENCRYPTION', 'AES-256 at rest'),
+                const SizedBox(height: 12),
+                _buildDataRow('TRANSPORT SECURITY', 'TLS 1.3 in transit'),
+                const SizedBox(height: 16),
+                // HIPAA Compliance Notice
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.amber.withOpacity(0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.shield, color: AppColors.amber, size: 14),
+                          const SizedBox(width: 8),
+                          Text(
+                            'HIPAA COMPLIANCE',
+                            style: TextStyle(
+                              color: AppColors.amber,
+                              fontFamily: 'monospace',
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Your health data is protected under HIPAA-aligned security practices. All data is encrypted at rest (AES-256) and in transit (TLS 1.3). Sessions auto-logout after 30 minutes of inactivity.',
+                        style: TextStyle(
+                          color: AppColors.textMid,
+                          fontSize: 11,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Contact info
+                      Row(
+                        children: [
+                          Icon(Icons.email_outlined, color: AppColors.textDim, size: 12),
+                          const SizedBox(width: 6),
+                          Text(
+                            'privacy@biohacker.systems',
+                            style: TextStyle(
+                              color: AppColors.textLight,
+                              fontFamily: 'monospace',
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.security, color: AppColors.textDim, size: 12),
+                          const SizedBox(width: 6),
+                          Text(
+                            'security@biohacker.systems',
+                            style: TextStyle(
+                              color: AppColors.textLight,
+                              fontFamily: 'monospace',
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => LegalScreen(
+                              title: 'HIPAA NOTICE',
+                              content: LegalDocuments.privacyPolicy, // Reuse privacy policy for now
+                            ),
+                          ),
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.amber.withOpacity(0.4)),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.description, color: AppColors.amber, size: 12),
+                              const SizedBox(width: 6),
+                              Text(
+                                'VIEW FULL HIPAA NOTICE',
+                                style: TextStyle(
+                                  color: AppColors.amber,
+                                  fontFamily: 'monospace',
+                                  fontSize: 9,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
           // ===== ACCOUNT =====
           _buildSection(
             'ACCOUNT',
@@ -1348,37 +1498,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           if (kDebugMode) const SizedBox(height: 12),
 
           // ===== APP SETTINGS =====
-          // ===== SECURITY SETTINGS =====
-          _buildSection(
-            'SECURITY',
-            Icons.security,
-            AppColors.primary,
-            Column(
-              children: [
-                if (_biometricSupported) ...[
-                  _buildSwitchTile(
-                    'Biometric Authentication',
-                    'Use $_biometricType to unlock the app',
-                    Icons.fingerprint,
-                    _biometricEnabled,
-                    (value) => _toggleBiometric(value),
-                  ),
-                  const Divider(height: 24, color: Color(0xFF1A1A1A)),
-                ],
-                _buildDataRow('SESSION TIMEOUT', '30 minutes'),
-                const SizedBox(height: 8),
-                Text(
-                  'Auto-logout after 30 minutes of inactivity',
-                  style: TextStyle(
-                    color: AppColors.textMid,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-
           _buildSection(
             'APP SETTINGS',
             Icons.settings,
