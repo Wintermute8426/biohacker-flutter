@@ -117,7 +117,7 @@ class _HipaaNoticeScreenState extends State<HipaaNoticeScreen> {
                       Text(
                         'Last updated: March 26, 2026\nVersion: 1.0',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: AppColors.textMid,
                           fontSize: 12,
                         ),
                       ),

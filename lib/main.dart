@@ -238,7 +238,7 @@ class _OnboardingCheckState extends ConsumerState<OnboardingCheck> {
               Text(
                 _checkingBiometric ? 'Authenticating...' : 'Loading...',
                 style: TextStyle(
-                  color: AppColors.textSecondary,
+                  color: AppColors.textMid,
                   fontSize: 14,
                 ),
               ),
