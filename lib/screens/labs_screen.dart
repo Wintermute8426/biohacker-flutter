@@ -441,7 +441,6 @@ class _LabsScreenState extends State<LabsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                   decoration: BoxDecoration(
                     color: _isUploading ? Colors.transparent : labGreen.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -536,9 +535,8 @@ class _LabsScreenState extends State<LabsScreen> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0A0A0A),
-          borderRadius: BorderRadius.circular(4),
+        decoration: const BoxDecoration(
+          color: Color(0xFF0A0A0A),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -566,7 +564,6 @@ class _LabsScreenState extends State<LabsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: labGreen.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(2),
                   ),
                   child: Text(
                     '$markerCount MARKERS',
@@ -585,7 +582,6 @@ class _LabsScreenState extends State<LabsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppColors.error.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(2),
                     ),
                     child: Text(
                       '$outOfRangeCount OUT',
@@ -629,7 +625,6 @@ class _LabsScreenState extends State<LabsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
                       color: chipColor.withOpacity(0.07),
-                      borderRadius: BorderRadius.circular(2),
                     ),
                     child: Text(
                       '${_beautifyBiomarkerName(entry.key)}: $displayValue${isOut ? ' ▲' : ''}',
@@ -681,9 +676,8 @@ class _LabsScreenState extends State<LabsScreen> {
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0A0A0A),
-              borderRadius: BorderRadius.zero,
+            decoration: const BoxDecoration(
+              color: Color(0xFF0A0A0A),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -724,9 +718,8 @@ class _LabsScreenState extends State<LabsScreen> {
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0A0A0A),
-                borderRadius: BorderRadius.zero,
+              decoration: const BoxDecoration(
+                color: Color(0xFF0A0A0A),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -790,9 +783,8 @@ class _LabsScreenState extends State<LabsScreen> {
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.black,
-                                borderRadius: BorderRadius.circular(4),
                               ),
                               child: Row(
                                 children: [
@@ -867,7 +859,6 @@ class _LabsScreenState extends State<LabsScreen> {
                                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                         decoration: BoxDecoration(
                                           color: statusColor.withOpacity(0.12),
-                                          borderRadius: BorderRadius.circular(2),
                                         ),
                                         child: Text(
                                           status.toUpperCase(),
@@ -1563,9 +1554,8 @@ class _LabsScreenState extends State<LabsScreen> {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0A0A0A),
-          borderRadius: BorderRadius.circular(4),
+        decoration: const BoxDecoration(
+          color: Color(0xFF0A0A0A),
         ),
         child: Row(
           children: [
