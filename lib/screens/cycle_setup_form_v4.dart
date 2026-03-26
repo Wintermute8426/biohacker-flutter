@@ -403,11 +403,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF0A0A0A),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: borderColor.withOpacity(0.25),
-          width: 1,
-        ),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Stack(
         children: [
@@ -653,7 +649,7 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       padding: EdgeInsets.only(
         left: 0,
         right: 0,
-        top: 0,
+        top: 24,
         bottom: MediaQuery.of(context).viewInsets.bottom + 60,
       ),
       child: Column(

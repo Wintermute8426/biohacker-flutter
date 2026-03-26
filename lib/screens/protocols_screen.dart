@@ -431,8 +431,8 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             padding: EdgeInsets.only(
               left: 0,
               right: 0,
-              top: 0,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              top: 24,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 32,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,12 +472,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
                 // ─── PROTOCOL INFO ───
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0A0A0A),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.accent.withOpacity(0.25), width: 1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -555,12 +554,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
                 // ─── PEPTIDE STACK ───
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0A0A0A),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.25), width: 1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -854,12 +852,11 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
                 // ─── SHARING OPTIONS ───
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0A0A0A),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.15), width: 1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

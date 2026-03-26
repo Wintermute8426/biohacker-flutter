@@ -74,7 +74,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
     FullScreenModal.show(
       context: context,
       child: ListView(
-        padding: const EdgeInsets.only(bottom: 32),
+        padding: const EdgeInsets.fromLTRB(0, 24, 0, 32),
         children: [
           // Header section
           Container(
@@ -517,12 +517,11 @@ class _ResearchScreenState extends State<ResearchScreen> {
   // ===== PROFILE-STYLE SECTION CARD (terminal aesthetic) =====
   Widget _buildDetailSection(String title, IconData icon, Color accentColor, Widget child) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF0A0A0A),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: accentColor.withOpacity(0.25), width: 1),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Stack(
         children: [
