@@ -178,7 +178,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF0A0A0A),
                   border: Border(
-                    bottom: BorderSide(color: accentColor.withOpacity(0.3), width: 1),
+                    bottom: BorderSide(color: accentColor.withOpacity(0.25), width: 1),
                     left: BorderSide(color: accentColor, width: 3),
                   ),
                 ),
@@ -220,7 +220,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            border: Border.all(color: accentColor.withOpacity(0.5)),
+                            border: Border.all(color: accentColor.withOpacity(0.25)),
                             borderRadius: BorderRadius.circular(3),
                           ),
                           child: Text(
@@ -273,7 +273,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                       decoration: BoxDecoration(
                         color: Colors.black,
                         border: Border(
-                          left: BorderSide(color: AppColors.amber.withOpacity(0.7), width: 3),
+                          left: BorderSide(color: AppColors.amber.withOpacity(0.6), width: 3),
                           top: BorderSide(color: AppColors.borderDim, width: 1),
                           right: BorderSide(color: AppColors.borderDim, width: 1),
                           bottom: BorderSide(color: AppColors.borderDim, width: 1),
@@ -323,7 +323,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         decoration: BoxDecoration(
                           color: Colors.black,
                           border: Border(
-                            left: BorderSide(color: accentColor.withOpacity(0.5), width: 2),
+                            left: BorderSide(color: accentColor.withOpacity(0.6), width: 2),
                             top: BorderSide(color: AppColors.borderDim, width: 1),
                             right: BorderSide(color: AppColors.borderDim, width: 1),
                             bottom: BorderSide(color: AppColors.borderDim, width: 1),
@@ -366,7 +366,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         decoration: BoxDecoration(
                           color: Colors.black,
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: accentColor.withOpacity(0.8), width: 2),
+                          border: Border.all(color: accentColor.withOpacity(0.25), width: 1),
                           boxShadow: [
                             BoxShadow(
                               color: accentColor.withOpacity(0.15),
@@ -445,7 +445,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF0A0A0A),
                     border: Border(
-                      bottom: BorderSide(color: AppColors.accent.withOpacity(0.3), width: 1),
+                      bottom: BorderSide(color: AppColors.accent.withOpacity(0.25), width: 1),
                     ),
                   ),
                   child: Row(
@@ -586,7 +586,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.primary.withOpacity(0.4)),
+                                border: Border.all(color: AppColors.primary.withOpacity(0.25)),
                                 borderRadius: BorderRadius.circular(3),
                               ),
                               child: Text(
@@ -613,7 +613,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                             decoration: BoxDecoration(
                               color: Colors.black,
                               border: Border(
-                                left: BorderSide(color: AppColors.primary.withOpacity(0.7), width: 2),
+                                left: BorderSide(color: AppColors.primary.withOpacity(0.6), width: 2),
                                 top: BorderSide(color: AppColors.borderDim, width: 1),
                                 right: BorderSide(color: AppColors.borderDim, width: 1),
                                 bottom: BorderSide(color: AppColors.borderDim, width: 1),

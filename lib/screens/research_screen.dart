@@ -92,7 +92,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
                       color: AppColors.amber.withOpacity(0.15),
-                      border: Border.all(color: AppColors.amber.withOpacity(0.7), width: 1),
+                      border: Border.all(color: AppColors.amber.withOpacity(0.25), width: 1),
                       borderRadius: BorderRadius.circular(2),
                     ),
                     child: Row(
@@ -122,7 +122,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.amber.withOpacity(0.8), width: 1),
+                      border: Border.all(color: AppColors.amber.withOpacity(0.25), width: 1),
                       borderRadius: BorderRadius.circular(2),
                     ),
                     child: Row(
@@ -412,7 +412,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
               decoration: BoxDecoration(
-                border: Border.all(color: scoreColor.withOpacity(0.8), width: 1),
+                border: Border.all(color: scoreColor.withOpacity(0.25), width: 1),
                 borderRadius: BorderRadius.circular(2),
               ),
               child: Text(rating.toUpperCase(), style: TextStyle(color: scoreColor, fontSize: 8, fontFamily: 'monospace', fontWeight: FontWeight.bold, decoration: TextDecoration.none)),
@@ -427,7 +427,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
           child: LinearProgressIndicator(
             value: overall / 100,
             minHeight: 6,
-            backgroundColor: const Color(0xFF1A1A1A),
+            backgroundColor: const Color(0xFF0A0A0A),
             valueColor: AlwaysStoppedAnimation<Color>(scoreColor),
           ),
         ),
@@ -467,7 +467,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.3),
-        border: Border.all(color: metricColor.withOpacity(0.3), width: 1),
+        border: Border.all(color: metricColor.withOpacity(0.25), width: 1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
@@ -1221,8 +1221,14 @@ class _ResearchScreenState extends State<ResearchScreen> {
                   hintText: 'Search peptides...',
                   hintStyle: TextStyle(color: AppColors.textDim),
                   prefixIcon: Icon(Icons.search, color: AppColors.textMid),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.border),
+                  filled: true,
+                  fillColor: Colors.black,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -1456,7 +1462,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.amber.withOpacity(0.6), width: 1),
+                  border: Border.all(color: AppColors.amber.withOpacity(0.25), width: 1),
                   borderRadius: BorderRadius.circular(2),
                 ),
                 child: Text('${peptide.studyLinks.length} SOURCES', style: TextStyle(color: AppColors.amber, fontSize: 8, fontFamily: 'monospace', fontWeight: FontWeight.bold, decoration: TextDecoration.none)),
@@ -1509,7 +1515,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.amber.withOpacity(0.4), width: 1),
+        border: Border.all(color: AppColors.amber.withOpacity(0.25), width: 1),
         borderRadius: BorderRadius.circular(2),
       ),
       child: Text(label, style: TextStyle(color: AppColors.amber.withOpacity(0.7), fontSize: 7, fontFamily: 'monospace', decoration: TextDecoration.none)),

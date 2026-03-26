@@ -88,7 +88,7 @@ class _LabsScreenState extends State<LabsScreen> {
         builder: (context) => Container(
           decoration: BoxDecoration(
             color: const Color(0xFF0A0A0A),
-            border: Border(top: BorderSide(color: AppColors.accent.withOpacity(0.4), width: 1)),
+            border: Border(top: BorderSide(color: AppColors.accent.withOpacity(0.25), width: 1)),
           ),
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
           child: Column(
@@ -444,7 +444,7 @@ class _LabsScreenState extends State<LabsScreen> {
                   decoration: BoxDecoration(
                     color: _isUploading ? Colors.transparent : labGreen.withOpacity(0.08),
                     border: Border.all(
-                      color: _isUploading ? AppColors.textDim : labGreen.withOpacity(0.5),
+                      color: _isUploading ? AppColors.textDim : labGreen.withOpacity(0.25),
                       width: 1,
                     ),
                     borderRadius: BorderRadius.circular(4),
@@ -598,7 +598,7 @@ class _LabsScreenState extends State<LabsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppColors.error.withOpacity(0.1),
-                      border: Border.all(color: AppColors.error.withOpacity(0.5), width: 1),
+                      border: Border.all(color: AppColors.error.withOpacity(0.25), width: 1),
                       borderRadius: BorderRadius.circular(2),
                     ),
                     child: Text(
@@ -643,7 +643,7 @@ class _LabsScreenState extends State<LabsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
                       color: chipColor.withOpacity(0.07),
-                      border: Border.all(color: chipColor.withOpacity(0.35), width: 1),
+                      border: Border.all(color: chipColor.withOpacity(0.25), width: 1),
                       borderRadius: BorderRadius.circular(2),
                     ),
                     child: Text(
@@ -854,7 +854,7 @@ class _LabsScreenState extends State<LabsScreen> {
                                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: statusColor.withOpacity(0.12),
-                                    border: Border.all(color: statusColor.withOpacity(0.4), width: 1),
+                                    border: Border.all(color: statusColor.withOpacity(0.25), width: 1),
                                     borderRadius: BorderRadius.circular(2),
                                   ),
                                   child: Text(
