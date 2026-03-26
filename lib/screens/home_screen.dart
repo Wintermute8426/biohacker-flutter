@@ -151,81 +151,146 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         // City background
         Positioned.fill(
-          child: CityBackground(enabled: true, opacity: 0.2),
+          child: CityBackground(enabled: true, opacity: 0.3),
         ),
         // Rain effect
         Positioned.fill(
-          child: CyberpunkRain(enabled: true, opacity: 0.15),
+          child: CyberpunkRain(enabled: true, opacity: 0.2),
+        ),
+        // Scanlines overlay
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: _ScanlinesPainter(),
+            ),
+          ),
         ),
         // Content
         SafeArea(
           child: Column(
             children: [
-              // Header with app branding and profile pic - CRT styled
+              // Header with logo and terminal-style user info
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
+                  color: AppColors.background.withOpacity(0.9),
                   border: Border(
                     bottom: BorderSide(
-                      color: AppColors.primary.withOpacity(0.5),
+                      color: AppColors.primary.withOpacity(0.6),
                       width: 2,
+                    ),
+                    left: BorderSide(
+                      color: AppColors.primary,
+                      width: 4,
                     ),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.1),
-                      blurRadius: 8,
+                      color: AppColors.primary.withOpacity(0.2),
+                      blurRadius: 12,
                     ),
                   ],
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Profile picture with initials
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: AppColors.primary.withOpacity(0.15),
-                      backgroundImage: _profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty
-                        ? (_profilePhotoUrl!.startsWith('http') 
-                            ? NetworkImage(_profilePhotoUrl!) as ImageProvider
-                            : FileImage(File(_profilePhotoUrl!)) as ImageProvider)
-                        : null,
-                      child: _profilePhotoUrl == null || _profilePhotoUrl!.isEmpty
-                        ? Text(
-                            _getInitials(_userName),
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'monospace',
+                    // Logo row
+                    Row(
+                      children: [
+                        Image.asset(
+                          'assets/logo/biohacker_logo.png',
+                          height: 48,
+                          width: 48,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '> BIOHACKER',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                                fontFamily: 'monospace',
+                              ),
                             ),
-                          )
-                        : null,
+                            Text(
+                              'SYSTEM V2.0',
+                              style: TextStyle(
+                                color: AppColors.primary.withOpacity(0.6),
+                                fontSize: 10,
+                                letterSpacing: 1.5,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 16),
+                    // Terminal-style user info
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0A0A0A),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
                         children: [
-                          Text(
-                            'BIOHACKER',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 2,
-                              fontFamily: 'monospace',
-                            ),
+                          // Profile picture with initials
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: AppColors.primary.withOpacity(0.15),
+                            backgroundImage: _profilePhotoUrl != null && _profilePhotoUrl!.isNotEmpty
+                              ? (_profilePhotoUrl!.startsWith('http') 
+                                  ? NetworkImage(_profilePhotoUrl!) as ImageProvider
+                                  : FileImage(File(_profilePhotoUrl!)) as ImageProvider)
+                              : null,
+                            child: _profilePhotoUrl == null || _profilePhotoUrl!.isEmpty
+                              ? Text(
+                                  _getInitials(_userName),
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'monospace',
+                                  ),
+                                )
+                              : null,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            userEmail ?? 'Loading...',
-                            style: TextStyle(
-                              color: AppColors.textMid,
-                              fontSize: 12,
-                              fontFamily: 'monospace',
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '> ${_userName.isNotEmpty ? _userName.toUpperCase() : "USER"}',
+                                  style: TextStyle(
+                                    color: AppColors.textLight,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  userEmail ?? 'Loading...',
+                                  style: TextStyle(
+                                    color: AppColors.textMid,
+                                    fontSize: 11,
+                                    fontFamily: 'monospace',
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
@@ -233,120 +298,269 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              // Menu items
-              _buildMenuItem(
-                context,
-                icon: Icons.person,
-                iconColor: AppColors.primary,
-                label: 'Profile & Settings',
-                onTap: () async {
-                  Navigator.pop(context);
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                  );
-                  // Reload both name and photo after returning from profile screen
-                  _loadUserName();
-                  _loadProfilePhoto();
-                },
+              const SizedBox(height: 20),
+              
+              // Menu sections with terminal-style PREFIX
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    // NAVIGATION section
+                    _buildSectionHeader('NAVIGATION'),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.dashboard,
+                      iconColor: WintermmuteStyles.colorCyan,
+                      label: 'Dashboard',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.autorenew,
+                      iconColor: WintermmuteStyles.colorGreen,
+                      label: 'Cycles',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.science,
+                      iconColor: WintermmuteStyles.colorOrange,
+                      label: 'Labs',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.biotech,
+                      iconColor: WintermmuteStyles.colorGreen,
+                      label: 'Protocols',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ProtocolsScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.article,
+                      iconColor: WintermmuteStyles.colorOrange,
+                      label: 'Research',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ResearchScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.person,
+                      iconColor: AppColors.primary,
+                      label: 'Profile',
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                        );
+                        _loadUserName();
+                        _loadProfilePhoto();
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // TOOLS section
+                    _buildSectionHeader('TOOLS'),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.calendar_month,
+                      iconColor: WintermmuteStyles.colorCyan,
+                      label: 'Calendar',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.analytics,
+                      iconColor: WintermmuteStyles.colorMagenta,
+                      label: 'Reports',
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.settings,
+                      iconColor: AppColors.textMid,
+                      label: 'Settings',
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                        );
+                        _loadUserName();
+                        _loadProfilePhoto();
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // LEGAL section
+                    _buildSectionHeader('LEGAL'),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.security,
+                      iconColor: AppColors.textMid,
+                      label: 'Privacy Policy',
+                      onTap: () {
+                        Navigator.pop(context);
+                        // TODO: Navigate to privacy policy
+                      },
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.description,
+                      iconColor: AppColors.textMid,
+                      label: 'Terms of Service',
+                      onTap: () {
+                        Navigator.pop(context);
+                        // TODO: Navigate to terms
+                      },
+                    ),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.info,
+                      iconColor: WintermmuteStyles.colorMagenta,
+                      label: 'About',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AboutScreen()),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
-              _buildMenuItem(
-                context,
-                icon: Icons.science,
-                iconColor: WintermmuteStyles.colorOrange,
-                label: 'Research',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ResearchScreen()),
-                  );
-                },
-              ),
-              _buildMenuItem(
-                context,
-                icon: Icons.biotech,
-                iconColor: WintermmuteStyles.colorGreen,
-                label: 'Protocols',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ProtocolsScreen()),
-                  );
-                },
-              ),
-              _buildMenuItem(
-                context,
-                icon: Icons.info,
-                iconColor: WintermmuteStyles.colorMagenta,
-                label: 'About',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const AboutScreen()),
-                  );
-                },
-              ),
-              const Spacer(),
-              // Divider before logout - cyan line
+              
+              // Divider before logout
               Container(
                 height: 2,
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                color: AppColors.primary.withOpacity(0.4),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      AppColors.error.withOpacity(0.5),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
               ),
+              
               // Logout button
-              _buildMenuItem(
-                context,
-                icon: _isLoggingOut ? null : Icons.logout,
-                iconColor: AppColors.error,
-                label: _isLoggingOut ? 'Logging out...' : 'Logout',
-                isLoading: _isLoggingOut,
-                isDanger: true,
-                enabled: !_isLoggingOut,
-                onTap: () async {
-                  if (_isLoggingOut) return;
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _buildMenuItem(
+                  context,
+                  icon: _isLoggingOut ? null : Icons.logout,
+                  iconColor: AppColors.error,
+                  label: _isLoggingOut ? 'Logging out...' : 'Logout',
+                  isLoading: _isLoggingOut,
+                  isDanger: true,
+                  enabled: !_isLoggingOut,
+                  onTap: () async {
+                    if (_isLoggingOut) return;
 
-                  setState(() => _isLoggingOut = true);
-                  Navigator.pop(context);
+                    setState(() => _isLoggingOut = true);
+                    Navigator.pop(context);
 
-                  // Logout logic with error handling
-                  try {
-                    await Supabase.instance.client.auth.signOut();
-                  } catch (e) {
-                    if (mounted) {
-                      setState(() => _isLoggingOut = false);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Failed to logout: ${e.toString()}'),
-                          backgroundColor: AppColors.error,
-                        ),
-                      );
+                    try {
+                      await Supabase.instance.client.auth.signOut();
+                    } catch (e) {
+                      if (mounted) {
+                        setState(() => _isLoggingOut = false);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to logout: ${e.toString()}'),
+                            backgroundColor: AppColors.error,
+                          ),
+                        );
+                      }
                     }
-                  }
-                },
+                  },
+                ),
               ),
               const SizedBox(height: 16),
-              // Footer
-              Padding(
+              
+              // Footer with version info
+              Container(
                 padding: const EdgeInsets.all(16),
-                child: Text(
-                  'BIOHACKER V2 • 2026',
-                  style: TextStyle(
-                    color: AppColors.textDim,
-                    fontSize: 10,
-                    fontFamily: 'monospace',
-                    letterSpacing: 1,
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: AppColors.primary.withOpacity(0.3),
+                      width: 1,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '◆ SOVEREIGN PROTOCOL ◆',
+                      style: TextStyle(
+                        color: AppColors.primary.withOpacity(0.6),
+                        fontSize: 10,
+                        fontFamily: 'monospace',
+                        letterSpacing: 1.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'BIOHACKER V2.0 • BUILD 2026',
+                      style: TextStyle(
+                        color: AppColors.textDim,
+                        fontSize: 9,
+                        fontFamily: 'monospace',
+                        letterSpacing: 1,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+  
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8, top: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 12,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '> $title',
+            style: TextStyle(
+              color: AppColors.primary.withOpacity(0.8),
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+              fontFamily: 'monospace',
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -361,64 +575,81 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     bool enabled = true,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: enabled ? onTap : null,
           borderRadius: BorderRadius.zero,
+          splashColor: (isDanger ? AppColors.error : iconColor).withOpacity(0.1),
+          highlightColor: (isDanger ? AppColors.error : iconColor).withOpacity(0.05),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: isDanger
-                    ? AppColors.error.withOpacity(0.7)
-                    : AppColors.primary.withOpacity(0.5),
-                width: 2,
-              ),
-              borderRadius: BorderRadius.zero,
-              color: AppColors.background,
-              boxShadow: [
-                BoxShadow(
-                  color: isDanger 
-                      ? AppColors.error.withOpacity(0.15)
-                      : AppColors.primary.withOpacity(0.1),
-                  blurRadius: 6,
-                  spreadRadius: 1,
+              color: const Color(0xFF0A0A0A).withOpacity(0.7),
+              border: Border(
+                left: BorderSide(
+                  color: isDanger ? AppColors.error : iconColor,
+                  width: 4,
                 ),
-              ],
+                top: BorderSide(
+                  color: (isDanger ? AppColors.error : iconColor).withOpacity(0.15),
+                  width: 1,
+                ),
+                bottom: BorderSide(
+                  color: (isDanger ? AppColors.error : iconColor).withOpacity(0.15),
+                  width: 1,
+                ),
+                right: BorderSide(
+                  color: (isDanger ? AppColors.error : iconColor).withOpacity(0.15),
+                  width: 1,
+                ),
+              ),
             ),
             child: Row(
               children: [
+                Text(
+                  '>',
+                  style: TextStyle(
+                    color: (isDanger ? AppColors.error : iconColor).withOpacity(0.8),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                const SizedBox(width: 12),
                 if (isLoading)
                   SizedBox(
-                    width: 24,
-                    height: 24,
+                    width: 20,
+                    height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation(iconColor),
                     ),
                   )
                 else if (icon != null)
-                  Icon(icon, color: iconColor, size: 24),
-                const SizedBox(width: 16),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: isDanger ? AppColors.error : AppColors.textLight,
-                    fontSize: 15,
-                    fontFamily: 'monospace',
-                    letterSpacing: 0.5,
+                  Icon(icon, color: iconColor.withOpacity(0.9), size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label.toUpperCase(),
+                    style: TextStyle(
+                      color: isDanger ? AppColors.error : AppColors.textLight,
+                      fontSize: 13,
+                      fontFamily: 'monospace',
+                      letterSpacing: 0.8,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-                const Spacer(),
                 if (!isLoading)
-                  Icon(
-                    Icons.chevron_right,
-                    color: isDanger
-                        ? AppColors.error.withOpacity(0.5)
-                        : AppColors.textDim,
-                    size: 20,
+                  Text(
+                    '→',
+                    style: TextStyle(
+                      color: (isDanger ? AppColors.error : iconColor).withOpacity(0.5),
+                      fontSize: 16,
+                      fontFamily: 'monospace',
+                    ),
                   ),
               ],
             ),

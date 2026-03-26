@@ -9,6 +9,8 @@ import '../widgets/common/empty_state.dart';
 import '../widgets/reports/dystopian_trend_chart.dart';
 import '../widgets/reports/lab_result_card.dart';
 import '../widgets/reports/cycle_timeline.dart';
+import '../widgets/city_background.dart';
+import '../widgets/cyberpunk_rain.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({Key? key}) : super(key: key);
@@ -170,30 +172,53 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      body: Stack(
+    return SafeArea(
+      child: Stack(
         children: [
-          Column(
-            children: [
-              AppHeader(
-                icon: Icons.assessment,
-                iconColor: AppColors.primary,
-                title: 'REPORTS',
-              ),
-              _buildTabSelector(),
-              Expanded(
-                child: _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      )
-                    : _buildTabContent(),
-              ),
-            ],
+          // City background layer
+          const Positioned.fill(
+            child: CityBackground(
+              enabled: true,
+              animateLights: true,
+              opacity: 0.3,
+            ),
           ),
-          const ScanlinesOverlay(opacity: 0.05),
+          // Rain effect layer
+          const Positioned.fill(
+            child: CyberpunkRain(
+              enabled: true,
+              particleCount: 40,
+              opacity: 0.25,
+            ),
+          ),
+          // Main scaffold content
+          Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Stack(
+              children: [
+                Column(
+                  children: [
+                    AppHeader(
+                      icon: Icons.analytics,
+                      iconColor: WintermmuteStyles.colorMagenta,
+                      title: 'REPORTS',
+                    ),
+                    _buildTabSelector(),
+                    Expanded(
+                      child: _isLoading
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                              ),
+                            )
+                          : _buildTabContent(),
+                    ),
+                  ],
+                ),
+                const ScanlinesOverlay(opacity: 0.05),
+              ],
+            ),
+          ),
         ],
       ),
     );
