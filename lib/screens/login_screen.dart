@@ -5,8 +5,7 @@ import '../main.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../theme/wintermute_background.dart';
-import '../widgets/cyberpunk_rain.dart';
-import '../widgets/city_background.dart';
+import '../widgets/cyberpunk_background.dart';
 import '../utils/user_feedback.dart';
 import 'signup_screen.dart';
 
@@ -148,28 +147,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return WintermmuteBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SafeArea(
-          child: Stack(
-            children: [
-              // City background layer
-              const Positioned.fill(
-                child: CityBackground(
-                  enabled: true,
-                  animateLights: true,
-                  opacity: 0.5,
-                ),
-              ),
-              // Rain effect layer
-              const Positioned.fill(
-                child: CyberpunkRain(
-                  enabled: true,
-                  particleCount: 60,
-                  opacity: 0.35,
-                ),
-              ),
-              SingleChildScrollView(
+      child: CyberpunkBackground(
+        cityOpacity: 0.5,
+        rainOpacity: 0.35,
+        rainParticleCount: 60,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,7 +167,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     // Logo
                     Center(
                       child: Image.asset(
-                        'assets/logo/biohacker-neon-logo-vectorized.png',
+                        'assets/images/biohacker_logo.png',
                         width: 280,
                         height: 260,
                         fit: BoxFit.contain,
@@ -412,16 +399,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     const SizedBox(height: 28),
                   ],
                 ),
-              ),
-              // Scanlines overlay
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: CustomPaint(
-                    painter: _ScanlinesPainter(),
+                // Scanlines overlay
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: _ScanlinesPainter(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

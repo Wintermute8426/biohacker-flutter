@@ -14,8 +14,7 @@ import '../services/labs_database.dart';
 import '../services/dose_logs_database.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
-import '../widgets/cyberpunk_rain.dart';
-import '../widgets/city_background.dart';
+import '../widgets/cyberpunk_background.dart';
 import '../widgets/app_header.dart';
 import '../utils/user_feedback.dart';
 import '../main.dart';
@@ -971,41 +970,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
     }
 
-    return SafeArea(
-      child: Stack(
-        children: [
-          const Positioned.fill(
-            child: CityBackground(enabled: true, animateLights: true, opacity: 0.3),
-          ),
-          const Positioned.fill(
-            child: CyberpunkRain(enabled: true, particleCount: 40, opacity: 0.25),
-          ),
-          Scaffold(
-            backgroundColor: Colors.transparent,
-            body: Column(
-              children: [
-                AppHeader(
-                  icon: Icons.person,
-                  iconColor: WintermmuteStyles.colorOrange,
-                  title: 'PROFILE',
-                ),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      _isEditMode ? _buildEditView() : _buildDisplayView(),
-                      // Scanlines overlay
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: CustomPaint(painter: _ScanlinesPainter()),
-                        ),
+    return CyberpunkBackground(
+      cityOpacity: 0.3,
+      rainOpacity: 0.25,
+      rainParticleCount: 40,
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Column(
+            children: [
+              AppHeader(
+                icon: Icons.person,
+                iconColor: WintermmuteStyles.colorOrange,
+                title: 'PROFILE',
+              ),
+              Expanded(
+                child: Stack(
+                  children: [
+                    _isEditMode ? _buildEditView() : _buildDisplayView(),
+                    // Scanlines overlay
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: CustomPaint(painter: _ScanlinesPainter()),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

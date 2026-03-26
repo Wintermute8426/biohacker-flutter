@@ -4,8 +4,7 @@ import '../main.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../theme/wintermute_background.dart';
-import '../widgets/cyberpunk_rain.dart';
-import '../widgets/city_background.dart';
+import '../widgets/cyberpunk_background.dart';
 import '../utils/user_feedback.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
@@ -125,37 +124,25 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return WintermmuteBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-        title: const Text('CREATE ACCOUNT'),
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // City background layer
-            const Positioned.fill(
-              child: CityBackground(
-                enabled: true,
-                animateLights: true,
-                opacity: 0.5,
-              ),
+      child: CyberpunkBackground(
+        cityOpacity: 0.5,
+        rainOpacity: 0.35,
+        rainParticleCount: 60,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: const Text('CREATE ACCOUNT'),
+            backgroundColor: AppColors.background,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+              onPressed: () => Navigator.pop(context),
             ),
-            // Rain effect layer
-            const Positioned.fill(
-              child: CyberpunkRain(
-                enabled: true,
-                particleCount: 60,
-                opacity: 0.35,
-              ),
-            ),
-            SingleChildScrollView(
+          ),
+          body: SafeArea(
+            child: Stack(
+              children: [
+                SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
@@ -357,21 +344,21 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         ),
                 ),
               ),
-            ],
+                  ],
+                ),
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: _ScanlinesPainter(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-            Positioned.fill(
-              child: IgnorePointer(
-                child: CustomPaint(
-                  painter: _ScanlinesPainter(),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
-    ),
-  );
+    );
   }
 }
 

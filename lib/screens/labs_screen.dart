@@ -13,8 +13,7 @@ import '../utils/user_feedback.dart';
 import '../models/lab_result.dart';
 import '../services/labs_database.dart';
 import '../services/android_file_picker.dart';
-import '../widgets/city_background.dart';
-import '../widgets/cyberpunk_rain.dart';
+import '../widgets/cyberpunk_background.dart';
 import '../widgets/app_header.dart';
 import '../widgets/common/empty_state.dart';
 import '../widgets/full_screen_modal.dart';
@@ -353,27 +352,13 @@ class _LabsScreenState extends State<LabsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
-        children: [
-          // City background layer
-          const Positioned.fill(
-            child: CityBackground(
-              enabled: true,
-              animateLights: true,
-              opacity: 0.3,
-            ),
-          ),
-          // Rain effect layer
-          const Positioned.fill(
-            child: CyberpunkRain(
-              enabled: true,
-              particleCount: 40,
-              opacity: 0.25,
-            ),
-          ),
-          Scaffold(
-            backgroundColor: Colors.transparent,
+    return CyberpunkBackground(
+      cityOpacity: 0.3,
+      rainOpacity: 0.25,
+      rainParticleCount: 40,
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
             body: Column(
               children: [
                 // Header using reusable widget
@@ -400,7 +385,7 @@ class _LabsScreenState extends State<LabsScreen> {
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
