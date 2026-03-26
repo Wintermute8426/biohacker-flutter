@@ -1128,6 +1128,10 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFF0A0A0A),
           borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: accentColor.withOpacity(0.15),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
