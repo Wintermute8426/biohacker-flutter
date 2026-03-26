@@ -690,7 +690,7 @@ class _LabsScreenState extends State<LabsScreen> {
       title: 'Lab Analysis',
       borderColor: labGreen,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 32, 16, 80),
+        padding: const EdgeInsets.fromLTRB(8, 32, 8, 80),
         children: [
           // > LAB OVERVIEW section
           _buildLabSection(
@@ -774,12 +774,6 @@ class _LabsScreenState extends State<LabsScreen> {
                         decoration: BoxDecoration(
                           color: const Color(0xFF0A0A0A),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                            color: isOut
-                                ? AppColors.error.withOpacity(0.45)
-                                : categoryColor.withOpacity(0.2),
-                            width: 1,
-                          ),
                         ),
                         child: Row(
                           children: [

@@ -291,7 +291,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
 
           // Footer with dystopian data strip
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
             child: Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -467,7 +467,6 @@ class _ResearchScreenState extends State<ResearchScreen> {
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.3),
-        border: Border.all(color: metricColor.withOpacity(0.25), width: 1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
@@ -517,7 +516,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
   // ===== PROFILE-STYLE SECTION CARD (terminal aesthetic) =====
   Widget _buildDetailSection(String title, IconData icon, Color accentColor, Widget child) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      margin: const EdgeInsets.fromLTRB(8, 0, 8, 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF0A0A0A),

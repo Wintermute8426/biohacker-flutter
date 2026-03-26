@@ -210,7 +210,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
               ),
 
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -472,7 +472,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
                 // ─── PROTOCOL INFO ───
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0A0A0A),
@@ -512,14 +512,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -537,14 +532,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -554,7 +544,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
                 // ─── PEPTIDE STACK ───
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0A0A0A),
@@ -686,14 +676,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: PEPTIDE_LIST.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
@@ -713,14 +698,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -734,14 +714,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: ['SC (subcutaneous)', 'IM (intramuscular)', 'IV (intravenous)', 'Intranasal', 'Oral']
@@ -759,14 +734,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: ['1x daily', '2x daily', '1x weekly', '2x weekly', '3x weekly']
@@ -788,14 +758,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.4), width: 1.5),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.8), width: 2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -852,7 +817,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
                 // ─── SHARING OPTIONS ───
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0A0A0A),
@@ -918,7 +883,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
 
                 // ─── SUBMIT BUTTON ───
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+                  padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
                   child: GestureDetector(
                     onTap: () async {
                       if (nameController.text.trim().isEmpty || peptideStack.isEmpty) return;
@@ -1075,14 +1040,9 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   labelStyle: TextStyle(color: AppColors.primary),
                   filled: true,
                   fillColor: Colors.black,
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary.withOpacity(0.4)),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primary),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
                 ),
               ),
               const SizedBox(height: 20),
