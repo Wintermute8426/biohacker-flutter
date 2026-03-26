@@ -8,6 +8,7 @@ import '../theme/wintermute_styles.dart';
 import '../services/user_profile_service.dart';
 import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
+import '../main.dart';
 import 'onboarding_screen.dart';
 import 'dashboard_screen.dart';
 import 'cycles_screen.dart';
@@ -52,6 +53,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     _loadUserName();
     _loadProfilePhoto();
+  }
+
+  /// Record user activity for session timeout tracking
+  void _recordActivity() {
+    final authProvider = ref.read(authProviderProvider);
+    authProvider.recordActivity();
   }
 
   Future<void> _loadUserName() async {
@@ -433,8 +440,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return const OnboardingScreen();
         }
         
-        // Show main app
-        return Scaffold(
+        // Show main app wrapped in GestureDetector for activity tracking
+        return GestureDetector(
+          onTap: _recordActivity,
+          onPanUpdate: (_) => _recordActivity(),
+          behavior: HitTestBehavior.translucent,
+          child: Scaffold(
           appBar: AppBar(
             backgroundColor: AppColors.background,
             elevation: 0,
@@ -532,6 +543,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 label: 'Calendar',
               ),
             ],
+          ),
           ),
         );
       },

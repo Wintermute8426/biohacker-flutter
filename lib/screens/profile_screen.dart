@@ -12,6 +12,7 @@ import '../services/notification_service.dart';
 import '../services/notification_scheduler.dart';
 import '../services/labs_database.dart';
 import '../services/dose_logs_database.dart';
+import '../services/biometric_auth_service.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../widgets/cyberpunk_background.dart';
@@ -89,6 +90,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String _heightDisplay = 'Not set';
   String? _profilePhotoUrl;
 
+  // Security settings
+  bool _biometricEnabled = false;
+  bool _biometricSupported = false;
+  String _biometricType = 'Biometric';
+  final BiometricAuthService _biometricAuth = BiometricAuthService();
+
   // Original values for cancel/discard
   Map<String, dynamic> _originalValues = {};
 
@@ -114,6 +121,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _goalsController = TextEditingController();
     _loadSettings();
     _loadProfile();
+    _loadBiometricSettings();
+  }
+
+  Future<void> _loadBiometricSettings() async {
+    final supported = await _biometricAuth.isDeviceSupported();
+    final enabled = await _biometricAuth.isBiometricEnabled();
+    final types = await _biometricAuth.getAvailableBiometrics();
+    final typeName = _biometricAuth.getBiometricTypeName(types);
+
+    if (mounted) {
+      setState(() {
+        _biometricSupported = supported;
+        _biometricEnabled = enabled;
+        _biometricType = typeName;
+      });
+    }
   }
 
   @override
@@ -1325,6 +1348,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           if (kDebugMode) const SizedBox(height: 12),
 
           // ===== APP SETTINGS =====
+          // ===== SECURITY SETTINGS =====
+          _buildSection(
+            'SECURITY',
+            Icons.security,
+            AppColors.primary,
+            Column(
+              children: [
+                if (_biometricSupported) ...[
+                  _buildSwitchTile(
+                    'Biometric Authentication',
+                    'Use $_biometricType to unlock the app',
+                    Icons.fingerprint,
+                    _biometricEnabled,
+                    (value) => _toggleBiometric(value),
+                  ),
+                  const Divider(height: 24, color: Color(0xFF1A1A1A)),
+                ],
+                _buildDataRow('SESSION TIMEOUT', '30 minutes'),
+                const SizedBox(height: 8),
+                Text(
+                  'Auto-logout after 30 minutes of inactivity',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
           _buildSection(
             'APP SETTINGS',
             Icons.settings,
@@ -2421,6 +2475,65 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildSwitchTile(String title, String subtitle, IconData icon, bool value, ValueChanged<bool> onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primary, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(fontFamily: 'monospace', fontSize: 14, color: AppColors.textLight, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 2),
+                Text(subtitle, style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: AppColors.textMid)),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: AppColors.primary,
+            activeTrackColor: AppColors.primary.withOpacity(0.3),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _toggleBiometric(bool enabled) async {
+    if (enabled) {
+      // Test biometric authentication before enabling
+      final authenticated = await _biometricAuth.authenticate(
+        localizedReason: 'Verify your identity to enable biometric login',
+      );
+
+      if (authenticated) {
+        await _biometricAuth.enableBiometric();
+        setState(() {
+          _biometricEnabled = true;
+        });
+        if (mounted) {
+          UserFeedback.showSuccess(context, 'Biometric authentication enabled');
+        }
+      } else {
+        if (mounted) {
+          UserFeedback.showError(context, 'Biometric verification failed');
+        }
+      }
+    } else {
+      await _biometricAuth.disableBiometric();
+      setState(() {
+        _biometricEnabled = false;
+      });
+      if (mounted) {
+        UserFeedback.showSuccess(context, 'Biometric authentication disabled');
+      }
+    }
   }
 }
 

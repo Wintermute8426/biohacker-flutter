@@ -81,5 +81,8 @@
 			</array>
 		</dict>
 	</array>
+	<!-- Biometric authentication (Face ID / Touch ID) -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>Biohacker uses Face ID to securely authenticate your identity and protect your health data.</string>
 </dict>
 </plist>

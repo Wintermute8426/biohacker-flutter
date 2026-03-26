@@ -7,9 +7,12 @@ import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding/welcome_screen.dart';
+import 'screens/hipaa_notice_screen.dart';
 import 'services/onboarding_service.dart';
 import 'services/notification_service.dart';
 import 'services/notification_scheduler.dart';
+import 'services/secure_storage_service.dart';
+import 'services/biometric_auth_service.dart';
 import 'theme/colors.dart';
 
 String? _initError;
@@ -154,12 +157,110 @@ class MyApp extends ConsumerWidget {
   }
 }
 
-/// OnboardingCheck determines whether to show onboarding or home screen
-class OnboardingCheck extends ConsumerWidget {
+/// OnboardingCheck determines whether to show HIPAA notice, onboarding, or home screen
+class OnboardingCheck extends ConsumerStatefulWidget {
   const OnboardingCheck({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OnboardingCheck> createState() => _OnboardingCheckState();
+}
+
+class _OnboardingCheckState extends ConsumerState<OnboardingCheck> {
+  final SecureStorageService _secureStorage = SecureStorageService();
+  final BiometricAuthService _biometricAuth = BiometricAuthService();
+  bool _checkingHipaa = true;
+  bool _hipaaAcknowledged = false;
+  bool _checkingBiometric = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkHipaaAcknowledgment();
+  }
+
+  Future<void> _checkHipaaAcknowledgment() async {
+    final acknowledged = await _secureStorage.getHipaaAcknowledged();
+    setState(() {
+      _hipaaAcknowledged = acknowledged;
+      _checkingHipaa = false;
+    });
+
+    // If HIPAA acknowledged, check for biometric authentication
+    if (acknowledged && mounted) {
+      _checkBiometricAuth();
+    }
+  }
+
+  Future<void> _checkBiometricAuth() async {
+    final biometricEnabled = await _biometricAuth.isBiometricEnabled();
+    
+    if (biometricEnabled) {
+      setState(() {
+        _checkingBiometric = true;
+      });
+
+      final authenticated = await _biometricAuth.authenticate(
+        localizedReason: 'Verify your identity to access Biohacker',
+      );
+
+      if (!authenticated && mounted) {
+        // Biometric failed - logout user
+        final authProvider = ref.read(authProviderProvider);
+        await authProvider.signOut();
+        return;
+      }
+
+      setState(() {
+        _checkingBiometric = false;
+      });
+    }
+
+    // Initialize session manager after successful authentication
+    if (mounted) {
+      final authProvider = ref.read(authProviderProvider);
+      authProvider.initializeSessionManager(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_checkingHipaa || _checkingBiometric) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                color: AppColors.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _checkingBiometric ? 'Authenticating...' : 'Loading...',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show HIPAA notice if not acknowledged
+    if (!_hipaaAcknowledged) {
+      return HipaaNoticeScreen(
+        onAcknowledged: () {
+          setState(() {
+            _hipaaAcknowledged = true;
+          });
+          _checkBiometricAuth();
+        },
+      );
+    }
+
+    // Check onboarding status
     final onboardingStatus = ref.watch(isOnboardingCompletedProvider);
 
     return onboardingStatus.when(
