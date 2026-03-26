@@ -503,8 +503,13 @@ class _ResearchScreenState extends State<ResearchScreen> {
     return Container(
       margin: const EdgeInsets.fromLTRB(8, 0, 8, 16),
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0A0A0A),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A0A0A),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: accentColor.withOpacity(0.15),
+          width: 1,
+        ),
       ),
       child: Stack(
         children: [
@@ -549,6 +554,11 @@ class _ResearchScreenState extends State<ResearchScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.surface.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: AppColors.amber.withOpacity(0.15),
+            width: 1,
+          ),
         ),
         child: Stack(
           children: [
