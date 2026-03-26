@@ -83,12 +83,10 @@ class _LabsScreenState extends State<LabsScreen> {
         backgroundColor: const Color(0xFF0A0A0A),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
-          side: BorderSide(color: Color(0xFF39FF14), width: 0),
         ),
         builder: (context) => Container(
           decoration: BoxDecoration(
             color: const Color(0xFF0A0A0A),
-            border: Border(top: BorderSide(color: AppColors.accent.withOpacity(0.25), width: 1)),
           ),
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
           child: Column(
@@ -443,10 +441,6 @@ class _LabsScreenState extends State<LabsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                   decoration: BoxDecoration(
                     color: _isUploading ? Colors.transparent : labGreen.withOpacity(0.08),
-                    border: Border.all(
-                      color: _isUploading ? AppColors.textDim : labGreen.withOpacity(0.25),
-                      width: 1,
-                    ),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(
@@ -545,12 +539,6 @@ class _LabsScreenState extends State<LabsScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFF0A0A0A),
           borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: outOfRangeCount > 0
-                ? AppColors.error.withOpacity(0.4)
-                : labGreen.withOpacity(0.25),
-            width: 1,
-          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -578,7 +566,6 @@ class _LabsScreenState extends State<LabsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: labGreen.withOpacity(0.08),
-                    border: Border.all(color: labGreen.withOpacity(0.3), width: 1),
                     borderRadius: BorderRadius.circular(2),
                   ),
                   child: Text(
@@ -598,7 +585,6 @@ class _LabsScreenState extends State<LabsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: AppColors.error.withOpacity(0.1),
-                      border: Border.all(color: AppColors.error.withOpacity(0.25), width: 1),
                       borderRadius: BorderRadius.circular(2),
                     ),
                     child: Text(
@@ -643,7 +629,6 @@ class _LabsScreenState extends State<LabsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
                       color: chipColor.withOpacity(0.07),
-                      border: Border.all(color: chipColor.withOpacity(0.25), width: 1),
                       borderRadius: BorderRadius.circular(2),
                     ),
                     child: Text(
@@ -848,7 +833,6 @@ class _LabsScreenState extends State<LabsScreen> {
                                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: statusColor.withOpacity(0.12),
-                                    border: Border.all(color: statusColor.withOpacity(0.25), width: 1),
                                     borderRadius: BorderRadius.circular(2),
                                   ),
                                   child: Text(
@@ -1544,7 +1528,6 @@ class _LabsScreenState extends State<LabsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: const Color(0xFF0A0A0A),
-          border: Border.all(color: AppColors.accent.withOpacity(0.2), width: 1),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Row(

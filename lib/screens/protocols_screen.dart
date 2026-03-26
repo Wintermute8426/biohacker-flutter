@@ -177,10 +177,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   color: const Color(0xFF0A0A0A),
-                  border: Border(
-                    bottom: BorderSide(color: accentColor.withOpacity(0.25), width: 1),
-                    left: BorderSide(color: accentColor, width: 3),
-                  ),
                 ),
                 child: Row(
                   children: [
@@ -220,7 +216,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            border: Border.all(color: accentColor.withOpacity(0.25)),
                             borderRadius: BorderRadius.circular(3),
                           ),
                           child: Text(
@@ -272,12 +267,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: Colors.black,
-                        border: Border(
-                          left: BorderSide(color: AppColors.amber.withOpacity(0.6), width: 3),
-                          top: BorderSide(color: AppColors.borderDim, width: 1),
-                          right: BorderSide(color: AppColors.borderDim, width: 1),
-                          bottom: BorderSide(color: AppColors.borderDim, width: 1),
-                        ),
                         borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(4),
                           bottomRight: Radius.circular(4),
@@ -322,12 +311,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
                           color: Colors.black,
-                          border: Border(
-                            left: BorderSide(color: accentColor.withOpacity(0.6), width: 2),
-                            top: BorderSide(color: AppColors.borderDim, width: 1),
-                            right: BorderSide(color: AppColors.borderDim, width: 1),
-                            bottom: BorderSide(color: AppColors.borderDim, width: 1),
-                          ),
                           borderRadius: const BorderRadius.only(
                             topRight: Radius.circular(4),
                             bottomRight: Radius.circular(4),
@@ -366,7 +349,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                         decoration: BoxDecoration(
                           color: Colors.black,
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: accentColor.withOpacity(0.25), width: 1),
                           boxShadow: [
                             BoxShadow(
                               color: accentColor.withOpacity(0.15),
@@ -423,7 +405,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
-        side: BorderSide(color: Color(0xFF39FF14), width: 0),
       ),
       builder: (context) => ScanlineOverlay(
         child: StatefulBuilder(
@@ -444,9 +425,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0A0A0A),
-                    border: Border(
-                      bottom: BorderSide(color: AppColors.accent.withOpacity(0.25), width: 1),
-                    ),
                   ),
                   child: Row(
                     children: [
@@ -512,9 +490,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -532,9 +507,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -574,7 +546,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                border: Border.all(color: AppColors.primary.withOpacity(0.25)),
                                 borderRadius: BorderRadius.circular(3),
                               ),
                               child: Text(
@@ -600,12 +571,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
                               color: Colors.black,
-                              border: Border(
-                                left: BorderSide(color: AppColors.primary.withOpacity(0.6), width: 2),
-                                top: BorderSide(color: AppColors.borderDim, width: 1),
-                                right: BorderSide(color: AppColors.borderDim, width: 1),
-                                bottom: BorderSide(color: AppColors.borderDim, width: 1),
-                              ),
                               borderRadius: const BorderRadius.only(
                                 topRight: Radius.circular(4),
                                 bottomRight: Radius.circular(4),
@@ -676,9 +641,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: PEPTIDE_LIST.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
@@ -698,9 +660,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -714,9 +673,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: ['SC (subcutaneous)', 'IM (intramuscular)', 'IV (intravenous)', 'Intranasal', 'Oral']
@@ -734,9 +690,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: ['1x daily', '2x daily', '1x weekly', '2x weekly', '3x weekly']
@@ -758,9 +711,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -790,7 +740,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           decoration: BoxDecoration(
                             color: Colors.black,
                             borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: AppColors.primary.withOpacity(0.6), width: 1.5),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -854,10 +803,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                               height: 18,
                               decoration: BoxDecoration(
                                 color: makePublic ? AppColors.accent.withOpacity(0.15) : Colors.black,
-                                border: Border.all(
-                                  color: makePublic ? AppColors.accent : AppColors.textDim,
-                                  width: 1.5,
-                                ),
                                 borderRadius: BorderRadius.circular(2),
                               ),
                               child: makePublic
@@ -923,10 +868,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: AppColors.accent.withOpacity(0.8),
-                          width: 2,
-                        ),
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.accent.withOpacity(0.2),
@@ -1014,7 +955,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.black,
-                  border: Border.all(color: AppColors.borderDim),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Column(
@@ -1040,9 +980,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   labelStyle: TextStyle(color: AppColors.primary),
                   filled: true,
                   fillColor: Colors.black,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
                 ),
               ),
               const SizedBox(height: 20),
@@ -1076,7 +1013,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   decoration: BoxDecoration(
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.8), width: 2),
                     boxShadow: [
                       BoxShadow(
                         color: AppColors.primary.withOpacity(0.12),
@@ -1143,12 +1079,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFF0A0A0A),
           borderRadius: BorderRadius.circular(4),
-          border: Border(
-            left: BorderSide(color: accentColor, width: 3),
-            top: BorderSide(color: accentColor.withOpacity(0.2), width: 1),
-            right: BorderSide(color: accentColor.withOpacity(0.2), width: 1),
-            bottom: BorderSide(color: accentColor.withOpacity(0.2), width: 1),
-          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1174,7 +1104,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
-                      border: Border.all(color: accentColor.withOpacity(0.4), width: 1),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
@@ -1216,7 +1145,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: accentColor.withOpacity(0.08),
-                      border: Border.all(color: accentColor.withOpacity(0.3), width: 1),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Row(
@@ -1244,9 +1172,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: accentColor.withOpacity(0.2), width: 1),
-                ),
               ),
               child: GestureDetector(
                 onTap: () => _showProtocolDetail(stack),
@@ -1284,12 +1209,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF0A0A0A),
         borderRadius: BorderRadius.circular(4),
-        border: Border(
-          left: BorderSide(color: AppColors.primary, width: 3),
-          top: BorderSide(color: AppColors.primary.withOpacity(0.2), width: 1),
-          right: BorderSide(color: AppColors.primary.withOpacity(0.2), width: 1),
-          bottom: BorderSide(color: AppColors.primary.withOpacity(0.2), width: 1),
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1328,7 +1247,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 1),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
@@ -1359,9 +1277,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: AppColors.primary.withOpacity(0.2), width: 1),
-              ),
             ),
             child: GestureDetector(
               onTap: () => _showStartFromProtocolModal(protocol),
@@ -1435,10 +1350,6 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: AppColors.accent.withOpacity(0.75),
-                          width: 1.5,
-                        ),
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.accent.withOpacity(0.12),
