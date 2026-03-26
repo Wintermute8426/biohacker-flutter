@@ -1370,7 +1370,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Text(
                   'Auto-logout after 30 minutes of inactivity',
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: AppColors.textMid,
                     fontSize: 12,
                   ),
                 ),
