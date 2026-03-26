@@ -925,6 +925,10 @@ class _ResearchScreenState extends State<ResearchScreen> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppColors.surface.withOpacity(0.15),
+          border: Border.all(
+            color: color.withOpacity(0.15),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

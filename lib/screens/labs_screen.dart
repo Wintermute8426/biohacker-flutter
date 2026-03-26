@@ -680,8 +680,12 @@ class _LabsScreenState extends State<LabsScreen> {
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Color(0xFF0A0A0A),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0A0A0A),
+              border: Border.all(
+                color: labCyan.withOpacity(0.15),
+                width: 1,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -722,8 +726,12 @@ class _LabsScreenState extends State<LabsScreen> {
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Color(0xFF0A0A0A),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A0A0A),
+                border: Border.all(
+                  color: labCyan.withOpacity(0.15),
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
