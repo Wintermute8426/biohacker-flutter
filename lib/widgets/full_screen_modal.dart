@@ -31,13 +31,8 @@ class FullScreenModal extends StatelessWidget {
             maxHeight: MediaQuery.of(context).size.height - 32,
             maxWidth: MediaQuery.of(context).size.width - 32,
           ),
-          decoration: BoxDecoration(
-            color: const Color(0xFF000000),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(
-              color: effectiveColor.withOpacity(0.2),
-              width: 1,
-            ),
+          decoration: const BoxDecoration(
+            color: Color(0xFF000000),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -57,11 +52,8 @@ class FullScreenModal extends StatelessWidget {
   Widget _buildHeader(BuildContext context, Color accentColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0A0A0A),
-        border: Border(
-          bottom: BorderSide(color: accentColor.withOpacity(0.2), width: 1),
-        ),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0A0A0A),
       ),
       child: Row(
         children: [
