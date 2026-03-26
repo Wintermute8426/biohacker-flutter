@@ -82,7 +82,7 @@ class _LabsScreenState extends State<LabsScreen> {
         context: context,
         backgroundColor: const Color(0xFF0A0A0A),
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+          borderRadius: BorderRadius.zero,
         ),
         builder: (context) => Container(
           decoration: BoxDecoration(

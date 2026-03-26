@@ -160,7 +160,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       backgroundColor: const Color(0xFF0A0A0A),
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+        borderRadius: BorderRadius.zero,
       ),
       builder: (context) => ScanlineOverlay(
         child: SingleChildScrollView(
@@ -404,7 +404,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       backgroundColor: const Color(0xFF0A0A0A),
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+        borderRadius: BorderRadius.zero,
       ),
       builder: (context) => ScanlineOverlay(
         child: StatefulBuilder(
