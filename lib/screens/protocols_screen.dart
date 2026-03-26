@@ -490,6 +490,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
+                          border: InputBorder.none,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.2)),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.6)),
+                          ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -507,6 +514,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
+                          border: InputBorder.none,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.2)),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.6)),
+                          ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -641,6 +655,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
+                          border: InputBorder.none,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.2)),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.6)),
+                          ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: PEPTIDE_LIST.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
@@ -660,6 +681,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
+                          border: InputBorder.none,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.2)),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.6)),
+                          ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),
@@ -673,6 +701,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
+                          border: InputBorder.none,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.2)),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.6)),
+                          ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: ['SC (subcutaneous)', 'IM (intramuscular)', 'IV (intravenous)', 'Intranasal', 'Oral']
@@ -690,6 +725,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
+                          border: InputBorder.none,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.2)),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.6)),
+                          ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                         items: ['1x daily', '2x daily', '1x weekly', '2x weekly', '3x weekly']
@@ -711,6 +753,13 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                           labelStyle: TextStyle(color: AppColors.amber.withOpacity(0.5), fontSize: 12, fontFamily: 'monospace'),
                           filled: true,
                           fillColor: Colors.black,
+                          border: InputBorder.none,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.2)),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: AppColors.amber.withOpacity(0.6)),
+                          ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         ),
                       ),

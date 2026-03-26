@@ -459,7 +459,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Column(

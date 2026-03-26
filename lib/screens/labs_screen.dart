@@ -665,7 +665,7 @@ class _LabsScreenState extends State<LabsScreen> {
   }
 
   void _showLabDetail(LabResult lab) {
-    const Color labGreen = AppColors.accent;
+    const Color labCyan = AppColors.accent;
     final outOfRangeCount = lab.extractedData.entries
         .where((e) => _isOutOfRange(e.key, e.value))
         .length;
@@ -673,18 +673,42 @@ class _LabsScreenState extends State<LabsScreen> {
     FullScreenModal.show(
       context: context,
       title: 'Lab Analysis',
-      borderColor: labGreen,
+      borderColor: labCyan,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(8, 32, 8, 80),
+        padding: const EdgeInsets.fromLTRB(0, 32, 0, 80),
         children: [
-          // > LAB OVERVIEW section
-          _buildLabSection(
-            '> LAB OVERVIEW',
-            Icons.biotech,
-            labGreen,
-            Column(
+          // > STATUS section (matching cycle form card pattern)
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0A0A0A),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Terminal header with 4px accent bar
+                Row(
+                  children: [
+                    Container(width: 4, height: 14, color: labCyan.withOpacity(0.6)),
+                    const SizedBox(width: 8),
+                    Icon(Icons.biotech, color: labCyan, size: 13),
+                    const SizedBox(width: 8),
+                    Text(
+                      '> LAB OVERVIEW',
+                      style: TextStyle(
+                        color: labCyan,
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 _buildDetailRow('DATE', DateFormat('MMM d, yyyy').format(lab.uploadDate).toUpperCase()),
                 _buildDetailRow('MARKERS', '${lab.extractedData.length}'),
                 if (outOfRangeCount > 0)
@@ -694,168 +718,181 @@ class _LabsScreenState extends State<LabsScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
 
-          // > BIOMARKERS section header
+          // > BIOMARKERS section
           if (lab.extractedData.isNotEmpty) ...[
-            Row(
-              children: [
-                Container(width: 3, height: 14, color: labGreen),
-                const SizedBox(width: 8),
-                Icon(Icons.science, color: labGreen, size: 13),
-                const SizedBox(width: 8),
-                Text(
-                  '> BIOMARKERS',
-                  style: TextStyle(
-                    color: labGreen,
-                    fontFamily: 'monospace',
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${lab.extractedData.length} TOTAL',
-                  style: TextStyle(
-                    color: AppColors.textDim,
-                    fontSize: 9,
-                    fontFamily: 'monospace',
-                    letterSpacing: 0.5,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Individual biomarker rows - sorted by priority
-            Builder(
-              builder: (context) {
-                print('[LabsScreen] Biomarkers in report: ${lab.extractedData.keys.toList()}');
-                print('[LabsScreen] After normalization: ${lab.extractedData.keys.map(_normalizeBiomarkerKey).toList()}');
-
-                return Column(
-                  children: (lab.extractedData.entries.toList()
-                    ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
-                  ).map((entry) {
-                    final isOut = _isOutOfRange(entry.key, entry.value);
-                    final displayValue = entry.value is Map
-                      ? (entry.value['value']?.toString() ?? 'N/A')
-                      : entry.value.toString();
-                    final status = entry.value is Map
-                      ? (entry.value['status']?.toString() ?? 'NORMAL')
-                      : 'NORMAL';
-                    final hint = _getBiomarkerHint(entry.key);
-                    final icon = _getBiomarkerIcon(entry.key);
-                    final statusColor = _getStatusColor(status);
-                    final categoryColor = _getCategoryColor(entry.key);
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0A0A0A),
-                          borderRadius: BorderRadius.circular(4),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A0A0A),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Terminal header
+                  Row(
+                    children: [
+                      Container(width: 4, height: 14, color: labCyan.withOpacity(0.6)),
+                      const SizedBox(width: 8),
+                      Icon(Icons.science, color: labCyan, size: 13),
+                      const SizedBox(width: 8),
+                      Text(
+                        '> BIOMARKERS',
+                        style: TextStyle(
+                          color: labCyan,
+                          fontFamily: 'monospace',
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                          decoration: TextDecoration.none,
                         ),
-                        child: Row(
-                          children: [
-                            // Left accent bar colored by category
-                            Container(width: 3, height: 36, color: categoryColor.withOpacity(0.6)),
-                            const SizedBox(width: 10),
-                            // Icon
-                            Icon(icon, color: categoryColor.withOpacity(0.7), size: 16),
-                            const SizedBox(width: 10),
-                            // Name + hint
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${lab.extractedData.length} TOTAL',
+                        style: TextStyle(
+                          color: AppColors.textDim,
+                          fontSize: 9,
+                          fontFamily: 'monospace',
+                          letterSpacing: 0.5,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Individual biomarker rows (matte cards, no borders)
+                  Builder(
+                    builder: (context) {
+                      print('[LabsScreen] Biomarkers in report: ${lab.extractedData.keys.toList()}');
+                      print('[LabsScreen] After normalization: ${lab.extractedData.keys.map(_normalizeBiomarkerKey).toList()}');
+
+                      return Column(
+                        children: (lab.extractedData.entries.toList()
+                          ..sort((a, b) => _getBiomarkerPriority(a.key).compareTo(_getBiomarkerPriority(b.key)))
+                        ).map((entry) {
+                          final isOut = _isOutOfRange(entry.key, entry.value);
+                          final displayValue = entry.value is Map
+                            ? (entry.value['value']?.toString() ?? 'N/A')
+                            : entry.value.toString();
+                          final status = entry.value is Map
+                            ? (entry.value['status']?.toString() ?? 'NORMAL')
+                            : 'NORMAL';
+                          final hint = _getBiomarkerHint(entry.key);
+                          final icon = _getBiomarkerIcon(entry.key);
+                          final statusColor = _getStatusColor(status);
+                          final categoryColor = _getCategoryColor(entry.key);
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    _beautifyBiomarkerName(entry.key),
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textLight,
-                                      fontFamily: 'monospace',
-                                      decoration: TextDecoration.none,
+                                  // Left accent bar
+                                  Container(width: 3, height: 36, color: categoryColor.withOpacity(0.6)),
+                                  const SizedBox(width: 10),
+                                  // Icon
+                                  Icon(icon, color: categoryColor.withOpacity(0.7), size: 16),
+                                  const SizedBox(width: 10),
+                                  // Name + hint
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          _beautifyBiomarkerName(entry.key),
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.textLight,
+                                            fontFamily: 'monospace',
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                        if (hint.isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            hint,
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: AppColors.textDim,
+                                              decoration: TextDecoration.none,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
-                                  if (hint.isNotEmpty) ...[
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      hint,
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: AppColors.textDim,
-                                        decoration: TextDecoration.none,
+                                  // Value + unit + status badge
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                                        textBaseline: TextBaseline.alphabetic,
+                                        children: [
+                                          Text(
+                                            displayValue,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: statusColor,
+                                              fontFamily: 'monospace',
+                                              decoration: TextDecoration.none,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 3),
+                                          Text(
+                                            _getUnitForBiomarker(entry.key),
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: AppColors.textDim,
+                                              decoration: TextDecoration.none,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(height: 3),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: statusColor.withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                        child: Text(
+                                          status.toUpperCase(),
+                                          style: TextStyle(
+                                            fontSize: 8,
+                                            color: statusColor,
+                                            fontFamily: 'monospace',
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.5,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
-                            // Value + unit + status badge
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                                  textBaseline: TextBaseline.alphabetic,
-                                  children: [
-                                    Text(
-                                      displayValue,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: statusColor,
-                                        fontFamily: 'monospace',
-                                        decoration: TextDecoration.none,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 3),
-                                    Text(
-                                      _getUnitForBiomarker(entry.key),
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: AppColors.textDim,
-                                        decoration: TextDecoration.none,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 3),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: statusColor.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                  child: Text(
-                                    status.toUpperCase(),
-                                    style: TextStyle(
-                                      fontSize: 8,
-                                      color: statusColor,
-                                      fontFamily: 'monospace',
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
-              },
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ],
