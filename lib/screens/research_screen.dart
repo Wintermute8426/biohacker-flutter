@@ -1132,8 +1132,8 @@ class _ResearchScreenState extends State<ResearchScreen> {
       child: SafeArea(
         child: Scaffold(
           backgroundColor: Colors.transparent,
-            body: Column(
-              children: [
+          body: Column(
+            children: [
                 // Header using reusable widget
                 AppHeader(
             icon: Icons.biotech,
@@ -1322,8 +1322,7 @@ class _ResearchScreenState extends State<ResearchScreen> {
                     ],
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

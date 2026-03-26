@@ -157,10 +157,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             child: Stack(
               children: [
                 SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     SizedBox(
                         height: MediaQuery.of(context).size.height * 0.03),
 
@@ -399,6 +399,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     const SizedBox(height: 28),
                   ],
                 ),
+              ),
                 // Scanlines overlay
                 Positioned.fill(
                   child: IgnorePointer(

@@ -143,9 +143,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             child: Stack(
               children: [
                 SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
               // First Name Field
               TextField(
                 controller: _firstNameController,
@@ -346,6 +346,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               ),
                   ],
                 ),
+              ),
                 Positioned.fill(
                   child: IgnorePointer(
                     child: CustomPaint(

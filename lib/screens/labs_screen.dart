@@ -359,8 +359,8 @@ class _LabsScreenState extends State<LabsScreen> {
       child: SafeArea(
         child: Scaffold(
           backgroundColor: Colors.transparent,
-            body: Column(
-              children: [
+          body: Column(
+            children: [
                 // Header using reusable widget
                 AppHeader(
                   icon: Icons.science,
@@ -382,8 +382,7 @@ class _LabsScreenState extends State<LabsScreen> {
                     ],
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

@@ -1077,8 +1077,8 @@ class _CyclesScreenState extends State<CyclesScreen> {
       child: SafeArea(
         child: Scaffold(
           backgroundColor: Colors.transparent,
-            body: Column(
-              children: [
+          body: Column(
+            children: [
                 // Header using reusable widget
                 const AppHeader(
                   icon: Icons.autorenew,
@@ -1191,8 +1191,7 @@ class _CyclesScreenState extends State<CyclesScreen> {
                     ],
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

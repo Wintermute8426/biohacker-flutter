@@ -1376,8 +1376,8 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
       child: SafeArea(
         child: Scaffold(
           backgroundColor: Colors.transparent,
-            body: Column(
-              children: [
+          body: Column(
+            children: [
                 // Header
                 AppHeader(
                   icon: Icons.biotech,
@@ -1482,8 +1482,7 @@ class _ProtocolsScreenState extends State<ProtocolsScreen> {
                     ],
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
