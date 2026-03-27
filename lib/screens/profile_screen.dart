@@ -1305,7 +1305,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             FutureBuilder<SubscriptionStatus?>(
               future: SubscriptionService().getSubscriptionStatus(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData || snapshot.data == null) {
+                // Add error state handling
+                if (snapshot.hasError) {
+                  print('[Profile] Subscription error: ${snapshot.error}');
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Error loading subscription',
+                        style: TextStyle(
+                          color: AppColors.error,
+                          fontSize: 12,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        snapshot.error.toString(),
+                        style: TextStyle(
+                          color: AppColors.textDim,
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                
+                // Show loading spinner only when actually waiting
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(
                     child: SizedBox(
                       width: 20,
@@ -1318,7 +1346,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   );
                 }
                 
+                // Handle null/empty data state
+                if (!snapshot.hasData || snapshot.data == null) {
+                  print('[Profile] Subscription status: null/empty');
+                  print('[Profile] Snapshot state: ${snapshot.connectionState}');
+                  print('[Profile] Has data: ${snapshot.hasData}');
+                  
+                  return Text(
+                    'No subscription data',
+                    style: TextStyle(
+                      color: AppColors.textMid,
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                    ),
+                  );
+                }
+                
                 final status = snapshot.data!;
+                print('[Profile] Subscription status: ${status.tier}');
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

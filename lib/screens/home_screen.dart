@@ -64,9 +64,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _loadUserName() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      // First try to get from Supabase auth metadata
+      final user = Supabase.instance.client.auth.currentUser;
+      String? displayName;
+      
+      if (user != null) {
+        // Try first_name from metadata
+        displayName = user.userMetadata?['first_name']?.toString();
+        
+        // Fallback to email prefix
+        if (displayName == null || displayName.isEmpty) {
+          displayName = user.email?.split('@')[0].toUpperCase();
+        }
+        
+        print('[Drawer] User: ${user.email}, DisplayName: $displayName');
+      }
+      
+      // Fallback to SharedPreferences if Supabase doesn't have it
+      if (displayName == null || displayName.isEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        displayName = prefs.getString('user_name') ?? '';
+      }
+      
       setState(() {
-        _userName = prefs.getString('user_name') ?? '';
+        _userName = displayName ?? '';
       });
     } catch (e) {
       print('[HomeScreen] Error loading user name: $e');
