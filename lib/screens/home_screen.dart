@@ -67,28 +67,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId == null) return;
       
-      // Fetch callsign from users table
+      // Fetch username from user_profiles table
       final response = await Supabase.instance.client
-          .from('users')
-          .select('callsign')
+          .from('user_profiles')
+          .select('username')
           .eq('id', userId)
           .maybeSingle();
       
-      String? displayName = response?['callsign']?.toString().toUpperCase();
+      String? displayName = response?['username']?.toString().toUpperCase();
       
-      // Fallback to email prefix if callsign not set
+      // Fallback to email prefix if username not set
       if (displayName == null || displayName.isEmpty) {
         final user = Supabase.instance.client.auth.currentUser;
         displayName = user?.email?.split('@')[0].toUpperCase();
       }
       
-      print('[Drawer] User ID: $userId, Callsign: $displayName');
+      print('[Drawer] User ID: $userId, Username: $displayName');
       
       setState(() {
         _userName = displayName ?? 'OPERATOR';
       });
     } catch (e) {
-      print('[HomeScreen] Error loading callsign: $e');
+      print('[HomeScreen] Error loading username: $e');
       setState(() {
         _userName = 'OPERATOR';
       });
