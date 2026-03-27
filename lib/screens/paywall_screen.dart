@@ -92,8 +92,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       child: Text(
                         'Restore Purchases',
                         style: TextStyle(
-                          color: AppColors.accent.withOpacity(0.7),
+                          color: AppColors.primary.withOpacity(0.7),
                           fontSize: 14,
+                          fontFamily: 'monospace',
                         ),
                       ),
                     ),
@@ -115,14 +116,33 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
-                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                          color: const Color(0xFF0A0A0A),
+                          border: Border.all(
+                            color: AppColors.error.withOpacity(0.3),
+                            width: 1,
+                          ),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
-                          subscriptionService.error!,
-                          style: const TextStyle(color: Colors.red, fontSize: 12),
-                          textAlign: TextAlign.center,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 4,
+                              height: 12,
+                              color: AppColors.error.withOpacity(0.6),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                subscriptionService.error!,
+                                style: TextStyle(
+                                  color: AppColors.error,
+                                  fontSize: 12,
+                                  fontFamily: 'monospace',
+                                ),
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -139,37 +159,30 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F0F17),
-        border: Border.all(color: AppColors.accent.withOpacity(0.3), width: 2),
+        color: const Color(0xFF0A0A0A),
+        border: Border.all(
+          color: AppColors.amber.withOpacity(0.15),
+          width: 1,
+        ),
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.accent.withOpacity(0.1),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(
-                '> ',
-                style: TextStyle(
-                  color: AppColors.accent,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'monospace',
-                ),
+              Container(
+                width: 4,
+                height: 20,
+                color: AppColors.amber.withOpacity(0.6),
               ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'UPGRADE_REQUIRED',
+                  '> UPGRADE_REQUIRED',
                   style: TextStyle(
-                    color: AppColors.accent,
-                    fontSize: 24,
+                    color: AppColors.amber,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'monospace',
                     letterSpacing: 2,
@@ -206,22 +219,32 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'PREMIUM_FEATURES',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'monospace',
-            letterSpacing: 1.5,
-          ),
+        Row(
+          children: [
+            Container(
+              width: 4,
+              height: 14,
+              color: AppColors.primary.withOpacity(0.6),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '> PREMIUM_FEATURES',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'monospace',
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         ...features.map((feature) => Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Row(
             children: [
-              Icon(Icons.check_circle, color: AppColors.accent, size: 20),
+              Icon(Icons.check_circle, color: AppColors.primary, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -245,23 +268,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F0F17),
+        color: const Color(0xFF0A0A0A),
         border: Border.all(
           color: isRecommended
-              ? AppColors.primary
-              : AppColors.accent.withOpacity(0.3),
-          width: isRecommended ? 3 : 2,
+              ? AppColors.amber.withOpacity(0.3)
+              : AppColors.primary.withOpacity(0.15),
+          width: 1,
         ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: isRecommended
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.2),
-                  blurRadius: 20,
-                  spreadRadius: 2,
-                ),
-              ]
-            : [],
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [
@@ -271,18 +285,18 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
                 color: isRecommended
-                    ? AppColors.primary
-                    : AppColors.accent,
+                    ? AppColors.amber.withOpacity(0.15)
+                    : AppColors.primary.withOpacity(0.15),
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
+                  topLeft: Radius.circular(7),
+                  topRight: Radius.circular(7),
                 ),
               ),
               child: Text(
                 savings ?? 'RECOMMENDED',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.black,
+                style: TextStyle(
+                  color: isRecommended ? AppColors.amber : AppColors.primary,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'monospace',
@@ -308,8 +322,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 const SizedBox(height: 8),
                 Text(
                   product.price,
-                  style: const TextStyle(
-                    color: AppColors.accent,
+                  style: TextStyle(
+                    color: isRecommended ? AppColors.amber : AppColors.primary,
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                   ),
@@ -327,35 +341,50 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isProcessing ? null : () => _subscribe(product),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isRecommended
-                          ? AppColors.primary
-                          : AppColors.accent,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      border: Border.all(
+                        color: (isRecommended ? AppColors.amber : AppColors.primary)
+                            .withOpacity(0.5),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _isProcessing ? null : () => _subscribe(product),
                         borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          alignment: Alignment.center,
+                          child: _isProcessing
+                              ? SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: isRecommended
+                                        ? AppColors.amber
+                                        : AppColors.primary,
+                                  ),
+                                )
+                              : Text(
+                                  'SUBSCRIBE',
+                                  style: TextStyle(
+                                    color: isRecommended
+                                        ? AppColors.amber
+                                        : AppColors.primary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'monospace',
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                        ),
                       ),
                     ),
-                    child: _isProcessing
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.black,
-                            ),
-                          )
-                        : const Text(
-                            'SUBSCRIBE',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
                   ),
                 ),
               ],

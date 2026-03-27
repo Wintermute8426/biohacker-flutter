@@ -64,53 +64,54 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F0F17),
+        color: const Color(0xFF0A0A0A),
         border: Border.all(
           color: isPremium
-              ? AppColors.primary
+              ? AppColors.amber.withOpacity(0.3)
               : isTrial
-                  ? AppColors.accent
-                  : AppColors.textLight.withOpacity(0.3),
-          width: 2,
+                  ? AppColors.primary.withOpacity(0.3)
+                  : AppColors.textLight.withOpacity(0.15),
+          width: 1,
         ),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: isPremium
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.2),
-                  blurRadius: 20,
-                  spreadRadius: 2,
-                ),
-              ]
-            : [],
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [
           Row(
             children: [
+              Container(
+                width: 4,
+                height: 24,
+                color: isPremium
+                    ? AppColors.amber.withOpacity(0.6)
+                    : isTrial
+                        ? AppColors.primary.withOpacity(0.6)
+                        : AppColors.textLight.withOpacity(0.3),
+              ),
+              const SizedBox(width: 12),
               Icon(
                 isPremium ? Icons.workspace_premium : Icons.access_time,
-                color: isPremium ? AppColors.primary : AppColors.accent,
-                size: 32,
+                color: isPremium ? AppColors.amber : AppColors.primary,
+                size: 28,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       isPremium
-                          ? 'PREMIUM'
+                          ? '> PREMIUM'
                           : isTrial
-                              ? 'FREE TRIAL'
-                              : 'FREE',
+                              ? '> FREE TRIAL'
+                              : '> FREE',
                       style: TextStyle(
                         color: isPremium
-                            ? AppColors.primary
+                            ? AppColors.amber
                             : isTrial
-                                ? AppColors.accent
+                                ? AppColors.primary
                                 : AppColors.textLight,
-                        fontSize: 24,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'monospace',
                         letterSpacing: 1.5,
@@ -134,13 +135,22 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                color: const Color(0xFF0A0A0A),
+                border: Border.all(
+                  color: AppColors.amber.withOpacity(0.3),
+                  width: 1,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning, color: Colors.orange, size: 20),
+                  Container(
+                    width: 4,
+                    height: 20,
+                    color: AppColors.amber.withOpacity(0.6),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(Icons.warning, color: AppColors.amber, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -166,22 +176,35 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F0F17),
-        border: Border.all(color: AppColors.accent.withOpacity(0.3), width: 1),
+        color: const Color(0xFF0A0A0A),
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.15),
+          width: 1,
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'PLAN_DETAILS',
-            style: TextStyle(
-              color: AppColors.accent,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'monospace',
-              letterSpacing: 1.2,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 14,
+                color: AppColors.primary.withOpacity(0.6),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '> PLAN_DETAILS',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'monospace',
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           _buildDetailRow('Status', status.isActive ? 'Active' : 'Inactive'),
@@ -233,66 +256,102 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (!isPremium)
-          ElevatedButton(
-            onPressed: () => _showPaywall(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.black,
+              border: Border.all(
+                color: AppColors.amber.withOpacity(0.5),
+                width: 1,
               ),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text(
-              'UPGRADE TO PREMIUM',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.5,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _showPaywall(context, ref),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'UPGRADE TO PREMIUM',
+                    style: TextStyle(
+                      color: AppColors.amber,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'monospace',
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
         
         const SizedBox(height: 12),
 
-        OutlinedButton(
-          onPressed: () => _restorePurchases(context, ref),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.accent,
-            side: BorderSide(color: AppColors.accent.withOpacity(0.5)),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+            border: Border.all(
+              color: AppColors.primary.withOpacity(0.5),
+              width: 1,
             ),
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: const Text(
-            'RESTORE PURCHASES',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _restorePurchases(context, ref),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                alignment: Alignment.center,
+                child: Text(
+                  'RESTORE PURCHASES',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'monospace',
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
 
         if (isPremium) ...[
           const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: _manageSubscriptionInPlayStore,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.textLight,
-              side: BorderSide(color: AppColors.textLight.withOpacity(0.3)),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.black,
+              border: Border.all(
+                color: AppColors.textLight.withOpacity(0.3),
+                width: 1,
               ),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: const Text(
-              'MANAGE IN GOOGLE PLAY',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _manageSubscriptionInPlayStore,
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'MANAGE IN GOOGLE PLAY',
+                    style: TextStyle(
+                      color: AppColors.textMid,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'monospace',
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -316,7 +375,70 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showPaywall(BuildContext context) {
+  Future<void> _showPaywall(BuildContext context, WidgetRef ref) async {
+    final subscriptionService = ref.read(subscriptionServiceProvider);
+    
+    // Check if products are loaded
+    if (subscriptionService.products.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: const Color(0xFF0A0A0A),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(
+              color: AppColors.primary.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          title: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 14,
+                color: AppColors.primary.withOpacity(0.6),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '> SETUP REQUIRED',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontFamily: 'monospace',
+                  fontSize: 16,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Subscription products are not configured yet. '
+            'Please complete Google Play Console setup.',
+            style: TextStyle(
+              color: AppColors.textMid,
+              fontSize: 14,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.amber,
+              ),
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    
+    // Navigate to paywall if products exist
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => const PaywallScreen(canDismiss: true),
