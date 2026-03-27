@@ -98,7 +98,7 @@ class SubscriptionService with ChangeNotifier {
       }
 
       final response = await supabase
-          .from('users')
+          .from('user_profiles')
           .select('subscription_tier, subscription_starts_at, subscription_ends_at, user_number')
           .eq('id', userId)
           .single();
@@ -119,7 +119,7 @@ class SubscriptionService with ChangeNotifier {
       final now = DateTime.now();
       final trialEnd = now.add(const Duration(days: 30));
 
-      await supabase.from('users').update({
+      await supabase.from('user_profiles').update({
         'subscription_tier': 'trial',
         'subscription_starts_at': now.toIso8601String(),
         'subscription_ends_at': trialEnd.toIso8601String(),
@@ -233,7 +233,7 @@ class SubscriptionService with ChangeNotifier {
             ? now.add(const Duration(days: 365))
             : now.add(const Duration(days: 30));
 
-        await supabase.from('users').update({
+        await supabase.from('user_profiles').update({
           'subscription_tier': 'premium',
           'subscription_starts_at': now.toIso8601String(),
           'subscription_ends_at': endDate.toIso8601String(),
