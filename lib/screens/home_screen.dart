@@ -271,7 +271,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '> ${_userName.isNotEmpty ? _userName.toUpperCase() : "USER"}',
+                                  _userName.isNotEmpty ? _userName.toUpperCase() : "USER",
                                   style: TextStyle(
                                     color: AppColors.textLight,
                                     fontSize: 13,
@@ -306,29 +306,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    // NAVIGATION section
-                    _buildSectionHeader('NAVIGATION'),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.dashboard,
-                      iconColor: WintermmuteStyles.colorCyan,
-                      label: 'Dashboard',
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.autorenew,
-                      iconColor: WintermmuteStyles.colorGreen,
-                      label: 'Cycles',
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.science,
-                      iconColor: WintermmuteStyles.colorOrange,
-                      label: 'Labs',
-                      onTap: () => Navigator.pop(context),
-                    ),
                     _buildMenuItem(
                       context,
                       icon: Icons.biotech,
@@ -368,63 +345,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         );
                         _loadUserName();
                         _loadProfilePhoto();
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // TOOLS section
-                    _buildSectionHeader('TOOLS'),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.calendar_month,
-                      iconColor: WintermmuteStyles.colorCyan,
-                      label: 'Calendar',
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.analytics,
-                      iconColor: WintermmuteStyles.colorMagenta,
-                      label: 'Reports',
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.settings,
-                      iconColor: AppColors.textMid,
-                      label: 'Settings',
-                      onTap: () async {
-                        Navigator.pop(context);
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                        );
-                        _loadUserName();
-                        _loadProfilePhoto();
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // LEGAL section
-                    _buildSectionHeader('LEGAL'),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.security,
-                      iconColor: AppColors.textMid,
-                      label: 'Privacy Policy',
-                      onTap: () {
-                        Navigator.pop(context);
-                        // TODO: Navigate to privacy policy
-                      },
-                    ),
-                    _buildMenuItem(
-                      context,
-                      icon: Icons.description,
-                      iconColor: AppColors.textMid,
-                      label: 'Terms of Service',
-                      onTap: () {
-                        Navigator.pop(context);
-                        // TODO: Navigate to terms
                       },
                     ),
                     _buildMenuItem(

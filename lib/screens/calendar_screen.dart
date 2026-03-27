@@ -184,54 +184,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             backgroundColor: Colors.transparent,
             body: Column(
               children: [
-                // Header using reusable widget with view toggle
+                // Header using reusable widget
                 AppHeader(
                   icon: Icons.calendar_month,
-                  iconColor: WintermmuteStyles.colorCyan,
-                  title: 'DOSE CALENDAR',
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // CRT-styled view toggle button
-                      Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.zero,
-                          border: Border.all(
-                            color: AppColors.primary,
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.3),
-                              blurRadius: 8,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _showMonthView = !_showMonthView;
-                            });
-                          },
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                          ),
-                          child: Text(
-                            _showMonthView ? 'MONTH' : 'WEEK',
-                            style: WintermmuteStyles.bodyStyle.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  iconColor: AppColors.accent,
+                  title: 'CALENDAR',
                 ),
                 Expanded(
                   child: Stack(

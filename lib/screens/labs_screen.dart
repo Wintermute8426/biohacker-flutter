@@ -425,6 +425,10 @@ class _LabsScreenState extends State<LabsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                   decoration: BoxDecoration(
                     color: _isUploading ? Colors.transparent : labGreen.withOpacity(0.08),
+                    border: Border.all(
+                      color: AppColors.accent.withOpacity(0.15),
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
