@@ -25,13 +25,13 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
         title: Text(
           'SUBSCRIPTION',
           style: TextStyle(
-            color: AppColors.neonCyan,
+            color: AppColors.accent,
             fontFamily: 'monospace',
             letterSpacing: 2,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.neonCyan),
+          icon: const Icon(Icons.arrow_back, color: AppColors.accent),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -40,7 +40,7 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
           const ScanlineOverlay(),
           SafeArea(
             child: status == null
-                ? const Center(child: CircularProgressIndicator(color: AppColors.neonCyan))
+                ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
                     child: Column(
@@ -70,17 +70,17 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
         color: const Color(0xFF0F0F17),
         border: Border.all(
           color: isPremium
-              ? AppColors.electricPurple
+              ? AppColors.primary
               : isTrial
-                  ? AppColors.neonCyan
-                  : AppColors.matteWhite.withOpacity(0.3),
+                  ? AppColors.accent
+                  : AppColors.textLight.withOpacity(0.3),
           width: 2,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: isPremium
             ? [
                 BoxShadow(
-                  color: AppColors.electricPurple.withOpacity(0.2),
+                  color: AppColors.primary.withOpacity(0.2),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -93,7 +93,7 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
             children: [
               Icon(
                 isPremium ? Icons.workspace_premium : Icons.access_time,
-                color: isPremium ? AppColors.electricPurple : AppColors.neonCyan,
+                color: isPremium ? AppColors.primary : AppColors.accent,
                 size: 32,
               ),
               const SizedBox(width: 16),
@@ -109,10 +109,10 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
                               : 'FREE',
                       style: TextStyle(
                         color: isPremium
-                            ? AppColors.electricPurple
+                            ? AppColors.primary
                             : isTrial
-                                ? AppColors.neonCyan
-                                : AppColors.matteWhite,
+                                ? AppColors.accent
+                                : AppColors.textLight,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'monospace',
@@ -123,7 +123,7 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
                       Text(
                         '${status.trialDaysRemaining} days remaining',
                         style: TextStyle(
-                          color: AppColors.matteWhite.withOpacity(0.7),
+                          color: AppColors.textLight.withOpacity(0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -149,7 +149,7 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
                     child: Text(
                       'Your trial is ending soon! Upgrade to keep access.',
                       style: TextStyle(
-                        color: AppColors.matteWhite.withOpacity(0.9),
+                        color: AppColors.textLight.withOpacity(0.9),
                         fontSize: 13,
                       ),
                     ),
@@ -170,7 +170,7 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: const Color(0xFF0F0F17),
-        border: Border.all(color: AppColors.neonCyan.withOpacity(0.3), width: 1),
+        border: Border.all(color: AppColors.accent.withOpacity(0.3), width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -179,7 +179,7 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
           Text(
             'PLAN_DETAILS',
             style: TextStyle(
-              color: AppColors.neonCyan,
+              color: AppColors.accent,
               fontSize: 14,
               fontWeight: FontWeight.bold,
               fontFamily: 'monospace',
@@ -211,14 +211,14 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
           Text(
             label,
             style: TextStyle(
-              color: AppColors.matteWhite.withOpacity(0.6),
+              color: AppColors.textLight.withOpacity(0.6),
               fontSize: 14,
             ),
           ),
           Text(
             value,
             style: TextStyle(
-              color: AppColors.matteWhite.withOpacity(0.9),
+              color: AppColors.textLight.withOpacity(0.9),
               fontSize: 14,
               fontWeight: FontWeight.w500,
             ),
@@ -239,7 +239,7 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () => _showPaywall(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.electricPurple,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.black,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -261,8 +261,8 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
         OutlinedButton(
           onPressed: () => _restorePurchases(context, ref),
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.neonCyan,
-            side: BorderSide(color: AppColors.neonCyan.withOpacity(0.5)),
+            foregroundColor: AppColors.accent,
+            side: BorderSide(color: AppColors.accent.withOpacity(0.5)),
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -283,8 +283,8 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
           OutlinedButton(
             onPressed: _manageSubscriptionInPlayStore,
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.matteWhite,
-              side: BorderSide(color: AppColors.matteWhite.withOpacity(0.3)),
+              foregroundColor: AppColors.textLight,
+              side: BorderSide(color: AppColors.textLight.withOpacity(0.3)),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -310,7 +310,7 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
                   ? 'Upgrade before trial ends to maintain access to all features.'
                   : 'Subscribe to unlock all premium features.',
           style: TextStyle(
-            color: AppColors.matteWhite.withOpacity(0.5),
+            color: AppColors.textLight.withOpacity(0.5),
             fontSize: 12,
           ),
           textAlign: TextAlign.center,
@@ -338,7 +338,7 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Purchases restored successfully'),
-            backgroundColor: AppColors.neonCyan,
+            backgroundColor: AppColors.accent,
           ),
         );
       }
