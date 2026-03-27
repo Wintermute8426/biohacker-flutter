@@ -79,6 +79,14 @@ class SubscriptionService with ChangeNotifier {
     }
   }
 
+  /// Get current subscription status (with lazy load)
+  Future<SubscriptionStatus?> getSubscriptionStatus() async {
+    if (_status == null) {
+      await refreshStatus();
+    }
+    return _status;
+  }
+
   /// Refresh subscription status from Supabase
   Future<void> refreshStatus() async {
     try {
