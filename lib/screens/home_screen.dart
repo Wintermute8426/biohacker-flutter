@@ -64,33 +64,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _loadUserName() async {
     try {
-      // First try to get from Supabase auth metadata
-      final user = Supabase.instance.client.auth.currentUser;
-      String? displayName;
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) return;
       
-      if (user != null) {
-        // Try first_name from metadata
-        displayName = user.userMetadata?['first_name']?.toString();
-        
-        // Fallback to email prefix
-        if (displayName == null || displayName.isEmpty) {
-          displayName = user.email?.split('@')[0].toUpperCase();
-        }
-        
-        print('[Drawer] User: ${user.email}, DisplayName: $displayName');
-      }
+      // Fetch callsign from users table
+      final response = await Supabase.instance.client
+          .from('users')
+          .select('callsign')
+          .eq('id', userId)
+          .maybeSingle();
       
-      // Fallback to SharedPreferences if Supabase doesn't have it
+      String? displayName = response?['callsign']?.toString().toUpperCase();
+      
+      // Fallback to email prefix if callsign not set
       if (displayName == null || displayName.isEmpty) {
-        final prefs = await SharedPreferences.getInstance();
-        displayName = prefs.getString('user_name') ?? '';
+        final user = Supabase.instance.client.auth.currentUser;
+        displayName = user?.email?.split('@')[0].toUpperCase();
       }
+      
+      print('[Drawer] User ID: $userId, Callsign: $displayName');
       
       setState(() {
-        _userName = displayName ?? '';
+        _userName = displayName ?? 'OPERATOR';
       });
     } catch (e) {
-      print('[HomeScreen] Error loading user name: $e');
+      print('[HomeScreen] Error loading callsign: $e');
+      setState(() {
+        _userName = 'OPERATOR';
+      });
     }
   }
 
