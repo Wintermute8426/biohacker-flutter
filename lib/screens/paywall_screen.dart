@@ -35,13 +35,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       onWillPop: () async => widget.canDismiss,
       child: Scaffold(
         backgroundColor: const Color(0xFF0A0A0F),
-        body: Stack(
-          children: [
-            // Scanline overlay
-            const ScanlineOverlay(),
-
-            // Main content
-            SafeArea(
+        body: ScanlineOverlay(
+          child: SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: Column(
@@ -51,7 +46,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       Align(
                         alignment: Alignment.topRight,
                         child: IconButton(
-                          icon: const Icon(Icons.close, color: AppColors.neonCyan),
+                          icon: const Icon(Icons.close, color: AppColors.accent),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ),
@@ -86,7 +81,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         ),
                     ] else
                       const Center(
-                        child: CircularProgressIndicator(color: AppColors.neonCyan),
+                        child: CircularProgressIndicator(color: AppColors.accent),
                       ),
 
                     const SizedBox(height: 24),
@@ -97,7 +92,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       child: Text(
                         'Restore Purchases',
                         style: TextStyle(
-                          color: AppColors.neonCyan.withOpacity(0.7),
+                          color: AppColors.accent.withOpacity(0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -109,7 +104,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     Text(
                       'Subscription auto-renews unless canceled. Cancel anytime in Google Play.',
                       style: TextStyle(
-                        color: AppColors.matteWhite.withOpacity(0.5),
+                        color: AppColors.textLight.withOpacity(0.5),
                         fontSize: 11,
                       ),
                       textAlign: TextAlign.center,
@@ -135,7 +130,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 ),
               ),
             ),
-          ],
         ),
       ),
     );
@@ -146,11 +140,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: const Color(0xFF0F0F17),
-        border: Border.all(color: AppColors.neonCyan.withOpacity(0.3), width: 2),
+        border: Border.all(color: AppColors.accent.withOpacity(0.3), width: 2),
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: AppColors.neonCyan.withOpacity(0.1),
+            color: AppColors.accent.withOpacity(0.1),
             blurRadius: 20,
             spreadRadius: 2,
           ),
@@ -164,7 +158,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               Text(
                 '> ',
                 style: TextStyle(
-                  color: AppColors.neonCyan,
+                  color: AppColors.accent,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'monospace',
@@ -174,7 +168,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 child: Text(
                   'UPGRADE_REQUIRED',
                   style: TextStyle(
-                    color: AppColors.neonCyan,
+                    color: AppColors.accent,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'monospace',
@@ -188,7 +182,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           Text(
             'Your trial has ended. Upgrade to premium to continue optimizing your biohacking protocols.',
             style: TextStyle(
-              color: AppColors.matteWhite.withOpacity(0.8),
+              color: AppColors.textLight.withOpacity(0.8),
               fontSize: 14,
               height: 1.5,
             ),
@@ -215,7 +209,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         Text(
           'PREMIUM_FEATURES',
           style: TextStyle(
-            color: AppColors.electricPurple,
+            color: AppColors.primary,
             fontSize: 16,
             fontWeight: FontWeight.bold,
             fontFamily: 'monospace',
@@ -227,13 +221,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           padding: const EdgeInsets.only(bottom: 12),
           child: Row(
             children: [
-              Icon(Icons.check_circle, color: AppColors.neonCyan, size: 20),
+              Icon(Icons.check_circle, color: AppColors.accent, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   feature,
                   style: TextStyle(
-                    color: AppColors.matteWhite.withOpacity(0.9),
+                    color: AppColors.textLight.withOpacity(0.9),
                     fontSize: 14,
                   ),
                 ),
@@ -254,15 +248,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         color: const Color(0xFF0F0F17),
         border: Border.all(
           color: isRecommended
-              ? AppColors.electricPurple
-              : AppColors.neonCyan.withOpacity(0.3),
+              ? AppColors.primary
+              : AppColors.accent.withOpacity(0.3),
           width: isRecommended ? 3 : 2,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: isRecommended
             ? [
                 BoxShadow(
-                  color: AppColors.electricPurple.withOpacity(0.2),
+                  color: AppColors.primary.withOpacity(0.2),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -277,8 +271,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
                 color: isRecommended
-                    ? AppColors.electricPurple
-                    : AppColors.neonCyan,
+                    ? AppColors.primary
+                    : AppColors.accent,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(10),
                   topRight: Radius.circular(10),
@@ -305,7 +299,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       ? 'MONTHLY'
                       : 'ANNUAL',
                   style: TextStyle(
-                    color: AppColors.matteWhite.withOpacity(0.7),
+                    color: AppColors.textLight.withOpacity(0.7),
                     fontSize: 14,
                     fontFamily: 'monospace',
                     letterSpacing: 1.2,
@@ -315,7 +309,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 Text(
                   product.price,
                   style: const TextStyle(
-                    color: AppColors.neonCyan,
+                    color: AppColors.accent,
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                   ),
@@ -326,7 +320,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       ? 'per month'
                       : 'per year',
                   style: TextStyle(
-                    color: AppColors.matteWhite.withOpacity(0.6),
+                    color: AppColors.textLight.withOpacity(0.6),
                     fontSize: 12,
                   ),
                 ),
@@ -337,8 +331,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     onPressed: _isProcessing ? null : () => _subscribe(product),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isRecommended
-                          ? AppColors.electricPurple
-                          : AppColors.neonCyan,
+                          ? AppColors.primary
+                          : AppColors.accent,
                       foregroundColor: Colors.black,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -410,7 +404,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Purchases restored successfully'),
-            backgroundColor: AppColors.neonCyan,
+            backgroundColor: AppColors.accent,
           ),
         );
         

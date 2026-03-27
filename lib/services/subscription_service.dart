@@ -134,15 +134,15 @@ class SubscriptionService with ChangeNotifier {
 
   /// Purchase monthly subscription
   Future<void> purchaseMonthlySubscription() async {
-    await _purchaseSubscription(monthlySubId);
+    await _initiatePurchase(monthlySubId);
   }
 
   /// Purchase annual subscription
   Future<void> purchaseAnnualSubscription() async {
-    await _purchaseSubscription(annualSubId);
+    await _initiatePurchase(annualSubId);
   }
 
-  Future<void> _purchaseSubscription(String productId) async {
+  Future<void> _initiatePurchase(String productId) async {
     try {
       final product = _products.firstWhere(
         (p) => p.id == productId,

@@ -68,20 +68,20 @@ class _SubscriptionBannerState extends ConsumerState<SubscriptionBanner> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.electricPurple.withOpacity(0.2),
-            AppColors.neonCyan.withOpacity(0.2),
+            AppColors.primary.withOpacity(0.2),
+            AppColors.accent.withOpacity(0.2),
           ],
         ),
         border: Border.all(
           color: status.isTrialExpiringSoon
               ? Colors.orange
-              : AppColors.electricPurple.withOpacity(0.5),
+              : AppColors.primary.withOpacity(0.5),
           width: 2,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: (status.isTrialExpiringSoon ? Colors.orange : AppColors.electricPurple)
+            color: (status.isTrialExpiringSoon ? Colors.orange : AppColors.primary)
                 .withOpacity(0.1),
             blurRadius: 20,
           ),
@@ -91,7 +91,7 @@ class _SubscriptionBannerState extends ConsumerState<SubscriptionBanner> {
         children: [
           Icon(
             status.isTrialExpiringSoon ? Icons.warning : Icons.workspace_premium,
-            color: status.isTrialExpiringSoon ? Colors.orange : AppColors.electricPurple,
+            color: status.isTrialExpiringSoon ? Colors.orange : AppColors.primary,
             size: 28,
           ),
           const SizedBox(width: 16),
@@ -104,7 +104,7 @@ class _SubscriptionBannerState extends ConsumerState<SubscriptionBanner> {
                       ? 'Trial: ${status.trialDaysRemaining} days left'
                       : 'Trial expired',
                   style: TextStyle(
-                    color: AppColors.matteWhite,
+                    color: AppColors.textLight,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -115,7 +115,7 @@ class _SubscriptionBannerState extends ConsumerState<SubscriptionBanner> {
                       ? 'Upgrade now to keep your data & features'
                       : 'Upgrade to continue using Biohacker',
                   style: TextStyle(
-                    color: AppColors.matteWhite.withOpacity(0.8),
+                    color: AppColors.textLight.withOpacity(0.8),
                     fontSize: 13,
                   ),
                 ),
@@ -128,7 +128,7 @@ class _SubscriptionBannerState extends ConsumerState<SubscriptionBanner> {
               ElevatedButton(
                 onPressed: () => _showPaywall(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.electricPurple,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
@@ -149,7 +149,7 @@ class _SubscriptionBannerState extends ConsumerState<SubscriptionBanner> {
                 child: Text(
                   'Later',
                   style: TextStyle(
-                    color: AppColors.matteWhite.withOpacity(0.6),
+                    color: AppColors.textLight.withOpacity(0.6),
                     fontSize: 11,
                   ),
                 ),

@@ -35,10 +35,8 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Stack(
-        children: [
-          const ScanlineOverlay(),
-          SafeArea(
+      body: ScanlineOverlay(
+          child: SafeArea(
             child: status == null
                 ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
                 : SingleChildScrollView(
@@ -55,7 +53,6 @@ class SubscriptionSettingsScreen extends ConsumerWidget {
                     ),
                   ),
           ),
-        ],
       ),
     );
   }

@@ -1322,14 +1322,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDataRow('STATUS', status.isPremium ? 'PREMIUM' : 'TRIAL'),
-                    if (!status.isPremium && status.daysRemaining >= 0) ...[
+                    _buildDataRow('STATUS', status.tier == 'premium' ? 'PREMIUM' : status.tier.toUpperCase()),
+                    if (status.tier == 'trial' && status.trialDaysRemaining != null && status.trialDaysRemaining! >= 0) ...[
                       const SizedBox(height: 12),
-                      _buildDataRow('TRIAL ENDS', '${status.daysRemaining} DAYS'),
+                      _buildDataRow('TRIAL ENDS', '${status.trialDaysRemaining} DAYS'),
                     ],
-                    if (status.isPremium && status.expiryDate != null) ...[
+                    if (status.tier == 'premium' && status.subscriptionEndsAt != null) ...[
                       const SizedBox(height: 12),
-                      _buildDataRow('NEXT BILLING', status.expiryDate!.toString().split(' ')[0]),
+                      _buildDataRow('NEXT BILLING', status.subscriptionEndsAt!.toString().split(' ')[0]),
                     ],
                     const SizedBox(height: 16),
                     GestureDetector(
