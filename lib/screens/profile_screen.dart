@@ -1302,10 +1302,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             'SUBSCRIPTION',
             Icons.card_membership,
             AppColors.primary,
-            FutureBuilder<SubscriptionStatus>(
+            FutureBuilder<SubscriptionStatus?>(
               future: SubscriptionService().getSubscriptionStatus(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
+                if (!snapshot.hasData || snapshot.data == null) {
                   return Center(
                     child: SizedBox(
                       width: 20,

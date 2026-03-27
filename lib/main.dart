@@ -316,7 +316,7 @@ class _SubscriptionGateState extends State<_SubscriptionGate> {
     try {
       final status = await SubscriptionService().getSubscriptionStatus();
       setState(() {
-        _shouldShowPaywall = status.isExpired && !status.hasPremiumAccess;
+        _shouldShowPaywall = status?.isExpired == true && status?.hasPremiumAccess != true;
         _checkingSubscription = false;
       });
     } catch (e) {
