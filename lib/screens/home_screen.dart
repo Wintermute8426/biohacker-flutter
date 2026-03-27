@@ -8,6 +8,7 @@ import '../theme/wintermute_styles.dart';
 import '../services/user_profile_service.dart';
 import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
+import '../widgets/subscription_banner.dart';
 import '../main.dart';
 import 'onboarding_screen.dart';
 import 'dashboard_screen.dart';
@@ -704,14 +705,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ],
           ),
-          body: Stack(
+          body: Column(
             children: [
-              _screens[_selectedIndex],
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: CustomPaint(
-                    painter: _ScanlinesPainter(),
-                  ),
+              SubscriptionBanner(),
+              Expanded(
+                child: Stack(
+                  children: [
+                    _screens[_selectedIndex],
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: CustomPaint(
+                          painter: _ScanlinesPainter(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

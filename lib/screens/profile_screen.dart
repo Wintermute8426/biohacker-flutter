@@ -13,6 +13,8 @@ import '../services/notification_scheduler.dart';
 import '../services/labs_database.dart';
 import '../services/dose_logs_database.dart';
 import '../services/biometric_auth_service.dart';
+import '../services/subscription_service.dart';
+import '../models/subscription_status.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../widgets/cyberpunk_background.dart';
@@ -22,6 +24,7 @@ import '../main.dart';
 import 'legal_screen.dart';
 import 'about_screen.dart';
 import 'onboarding/welcome_screen.dart';
+import 'subscription_settings_screen.dart';
 import '../assets/legal_documents.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -1290,6 +1293,79 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // ===== SUBSCRIPTION =====
+          _buildSection(
+            'SUBSCRIPTION',
+            Icons.card_membership,
+            AppColors.primary,
+            FutureBuilder<SubscriptionStatus>(
+              future: SubscriptionService().getSubscriptionStatus(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      ),
+                    ),
+                  );
+                }
+                
+                final status = snapshot.data!;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDataRow('STATUS', status.isPremium ? 'PREMIUM' : 'TRIAL'),
+                    if (!status.isPremium && status.daysRemaining >= 0) ...[
+                      const SizedBox(height: 12),
+                      _buildDataRow('TRIAL ENDS', '${status.daysRemaining} DAYS'),
+                    ],
+                    if (status.isPremium && status.expiryDate != null) ...[
+                      const SizedBox(height: 12),
+                      _buildDataRow('NEXT BILLING', status.expiryDate!.toString().split(' ')[0]),
+                    ],
+                    const SizedBox(height: 16),
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => SubscriptionSettingsScreen()),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          border: Border.all(color: AppColors.primary.withOpacity(0.5)),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.settings, color: AppColors.primary, size: 14),
+                            const SizedBox(width: 8),
+                            Text(
+                              'MANAGE SUBSCRIPTION',
+                              style: TextStyle(
+                                fontFamily: 'monospace',
+                                fontSize: 11,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
           const SizedBox(height: 12),

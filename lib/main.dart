@@ -13,6 +13,8 @@ import 'services/notification_service.dart';
 import 'services/notification_scheduler.dart';
 import 'services/secure_storage_service.dart';
 import 'services/biometric_auth_service.dart';
+import 'services/subscription_service.dart';
+import 'screens/paywall_screen.dart';
 import 'theme/colors.dart';
 
 String? _initError;
@@ -268,7 +270,7 @@ class _OnboardingCheckState extends ConsumerState<OnboardingCheck> {
         // Reschedule notifications for authenticated users
         NotificationScheduler().rescheduleAll();
         if (isCompleted) {
-          return const HomeScreen();
+          return const _SubscriptionGate();
         } else {
           return const WelcomeScreen();
         }
@@ -289,5 +291,62 @@ class _OnboardingCheckState extends ConsumerState<OnboardingCheck> {
         return const HomeScreen();
       },
     );
+  }
+}
+
+/// _SubscriptionGate checks subscription status and shows paywall if trial expired
+class _SubscriptionGate extends StatefulWidget {
+  const _SubscriptionGate({Key? key}) : super(key: key);
+
+  @override
+  State<_SubscriptionGate> createState() => _SubscriptionGateState();
+}
+
+class _SubscriptionGateState extends State<_SubscriptionGate> {
+  bool _checkingSubscription = true;
+  bool _shouldShowPaywall = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSubscription();
+  }
+
+  Future<void> _checkSubscription() async {
+    try {
+      final status = await SubscriptionService().getSubscriptionStatus();
+      setState(() {
+        _shouldShowPaywall = status.isExpired && !status.isPremium;
+        _checkingSubscription = false;
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('[SubscriptionGate] Error checking subscription: $e');
+      }
+      // On error, let user proceed (fail open)
+      setState(() {
+        _checkingSubscription = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_checkingSubscription) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
+        ),
+      );
+    }
+
+    if (_shouldShowPaywall) {
+      return PaywallScreen();
+    }
+
+    return const HomeScreen();
   }
 }
