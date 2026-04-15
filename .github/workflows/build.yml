@@ -63,8 +63,8 @@ jobs:
         run: |
           if [ -n "${KEYSTORE_BASE64}" ]; then
             mkdir -p android/app/keystore
-            echo "${KEYSTORE_BASE64}" | base64 -d > android/app/keystore/biohacker-release.jks
-            echo "Keystore restored to: $(pwd)/android/app/keystore/biohacker-release.jks"
+            echo "${KEYSTORE_BASE64}" | base64 -d > android/app/keystore/biohacker-release-v2.jks
+            echo "Keystore restored to: $(pwd)/android/app/keystore/biohacker-release-v2.jks"
             ls -lh android/app/keystore/
           else
             echo "Warning: KEYSTORE_BASE64 secret not set — build will be unsigned"
@@ -80,7 +80,7 @@ jobs:
           KEY_ALIAS: biohacker
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          KEYSTORE_PATH: android/app/keystore/biohacker-release.jks
+          KEYSTORE_PATH: keystore/biohacker-release-v2.jks
         run: |
           # Trim whitespace from secrets
           SUPABASE_URL=$(echo "${SUPABASE_URL}" | tr -d '\n' | xargs)
