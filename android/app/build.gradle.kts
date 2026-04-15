@@ -42,10 +42,18 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = keyProperties["keyAlias"] as String
-            keyPassword = keyProperties["keyPassword"] as String
-            storeFile = file(keyProperties["storeFile"] as String)
-            storePassword = keyProperties["storePassword"] as String
+            // Support both key.properties file (local) and env vars (CI/GitHub Actions)
+            val alias = System.getenv("KEY_ALIAS") ?: keyProperties["keyAlias"]?.toString()
+            val keyPass = System.getenv("KEY_PASSWORD") ?: keyProperties["keyPassword"]?.toString()
+            val storePass = System.getenv("STORE_PASSWORD") ?: keyProperties["storePassword"]?.toString()
+            val keystorePath = System.getenv("KEYSTORE_PATH") ?: keyProperties["storeFile"]?.toString()
+
+            if (alias != null && keyPass != null && storePass != null && keystorePath != null) {
+                keyAlias = alias
+                keyPassword = keyPass
+                storeFile = file(keystorePath)
+                storePassword = storePass
+            }
         }
     }
 
