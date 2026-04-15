@@ -206,10 +206,8 @@ class _OnboardingCheckState extends ConsumerState<OnboardingCheck> {
       );
 
       if (!authenticated && mounted) {
-        // Biometric failed - logout user
-        final authProvider = ref.read(authProviderProvider);
-        await authProvider.signOut();
-        return;
+        // Biometric failed or cancelled - just skip biometric, don't log out
+        if (kDebugMode) print('[OnboardingCheck] Biometric failed/cancelled, proceeding without biometric');
       }
 
       setState(() {
