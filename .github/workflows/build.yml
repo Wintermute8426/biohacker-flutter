@@ -80,7 +80,7 @@ jobs:
           KEY_ALIAS: biohacker
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
-          KEYSTORE_PATH: keystore/biohacker-release.jks
+          KEYSTORE_PATH: android/app/keystore/biohacker-release.jks
         run: |
           # Trim whitespace from secrets
           SUPABASE_URL=$(echo "${SUPABASE_URL}" | tr -d '\n' | xargs)
