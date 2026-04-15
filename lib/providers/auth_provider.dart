@@ -86,12 +86,19 @@ class AuthProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      await supabase.auth.signInWithPassword(
+      final response = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
 
+      // Explicitly set user from response to guarantee navigation
+      _user = response.user;
       _isLoading = false;
+      
+      if (response.session?.accessToken != null) {
+        await _secureStorage.setSessionToken(response.session!.accessToken);
+      }
+      
       notifyListeners();
     } catch (e) {
       _isLoading = false;
