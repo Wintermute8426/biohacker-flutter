@@ -181,7 +181,15 @@ class _OnboardingCheckState extends ConsumerState<OnboardingCheck> {
   }
 
   Future<void> _checkHipaaAcknowledgment() async {
-    final acknowledged = await _secureStorage.getHipaaAcknowledged();
+    bool acknowledged = false;
+    try {
+      acknowledged = await _secureStorage.getHipaaAcknowledged();
+    } catch (e) {
+      // flutter_secure_storage can throw PlatformException on some Android
+      // devices on first use. Default to false (show HIPAA notice).
+      if (kDebugMode) print('[OnboardingCheck] SecureStorage error reading HIPAA ack: $e');
+    }
+    if (!mounted) return;
     setState(() {
       _hipaaAcknowledged = acknowledged;
       _checkingHipaa = false;
@@ -194,25 +202,32 @@ class _OnboardingCheckState extends ConsumerState<OnboardingCheck> {
   }
 
   Future<void> _checkBiometricAuth() async {
-    final biometricEnabled = await _biometricAuth.isBiometricEnabled();
+    try {
+      final biometricEnabled = await _biometricAuth.isBiometricEnabled();
     
-    if (biometricEnabled) {
-      setState(() {
-        _checkingBiometric = true;
-      });
+      if (biometricEnabled && mounted) {
+        setState(() {
+          _checkingBiometric = true;
+        });
 
-      final authenticated = await _biometricAuth.authenticate(
-        localizedReason: 'Verify your identity to access Biohacker',
-      );
+        final authenticated = await _biometricAuth.authenticate(
+          localizedReason: 'Verify your identity to access Biohacker',
+        );
 
-      if (!authenticated && mounted) {
-        // Biometric failed or cancelled - just skip biometric, don't log out
-        if (kDebugMode) print('[OnboardingCheck] Biometric failed/cancelled, proceeding without biometric');
+        if (!authenticated && mounted) {
+          // Biometric failed or cancelled - just skip biometric, don't log out
+          if (kDebugMode) print('[OnboardingCheck] Biometric failed/cancelled, proceeding without biometric');
+        }
+
+        if (mounted) {
+          setState(() {
+            _checkingBiometric = false;
+          });
+        }
       }
-
-      setState(() {
-        _checkingBiometric = false;
-      });
+    } catch (e) {
+      if (kDebugMode) print('[OnboardingCheck] Biometric check error (non-fatal): $e');
+      if (mounted) setState(() { _checkingBiometric = false; });
     }
 
     // Initialize session manager after successful authentication

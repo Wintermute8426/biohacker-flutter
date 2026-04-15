@@ -108,8 +108,9 @@ class SessionManager with WidgetsBindingObserver {
     _warningTimer?.cancel();
     _isActive = false;
 
-    // Clear secure storage
-    _secureStorage.clearAll();
+    // Clear session-specific secure storage (preserve HIPAA ack + biometric prefs)
+    _secureStorage.clearSessionToken();
+    _secureStorage.clearLastActivityTimestamp();
 
     // Call logout callback
     _onSessionExpired?.call();

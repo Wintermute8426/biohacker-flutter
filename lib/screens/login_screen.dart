@@ -137,7 +137,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       _completeBootSequence(true);
       _failedAttempts = 0;
       _isLockedOut = false;
-      // Success is handled by navigation in main.dart via auth state change
+      // Reset loading state — navigation is driven by MyApp watching auth state
+      if (mounted) setState(() { _isLoading = false; });
     } catch (e) {
       _completeBootSequence(false);
       final friendlyMessage = UserFeedback.getFriendlyErrorMessage(e);

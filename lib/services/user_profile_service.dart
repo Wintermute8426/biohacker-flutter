@@ -533,7 +533,15 @@ final userProfileServiceProvider = Provider<UserProfileService>((ref) {
   return UserProfileService(supabase);
 });
 
+/// Auth stream provider that reacts to Supabase auth state changes.
+/// This is used to make other providers reactive to login/logout.
+final authStateStreamProvider = StreamProvider<AuthState>((ref) {
+  return Supabase.instance.client.auth.onAuthStateChange;
+});
+
 final currentUserIdProvider = Provider<String?>((ref) {
+  // Watch auth stream changes so this provider recomputes on login/logout
+  ref.watch(authStateStreamProvider);
   return Supabase.instance.client.auth.currentUser?.id;
 });
 

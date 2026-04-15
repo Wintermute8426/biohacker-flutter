@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -13,6 +14,7 @@ class AuthProvider with ChangeNotifier {
   
   User? _user;
   bool _isLoading = true;
+  StreamSubscription<AuthState>? _authSubscription;
 
   User? get user => _user;
   bool get isLoading => _isLoading;
@@ -34,8 +36,7 @@ class AuthProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
 
-      supabase.auth.onAuthStateChange.listen((data) {
-        final previousUser = _user;
+      _authSubscription = supabase.auth.onAuthStateChange.listen((data) {
         _user = data.session?.user;
         
         if (kDebugMode) {
@@ -47,10 +48,8 @@ class AuthProvider with ChangeNotifier {
           _secureStorage.setSessionToken(data.session!.accessToken);
         }
         
-        // Always notify — even if user appears unchanged, state may have updated
-        if (previousUser?.id != _user?.id || data.event == AuthChangeEvent.signedIn) {
-          notifyListeners();
-        }
+        // Always notify on any auth state change so the UI stays in sync
+        notifyListeners();
       });
     } catch (e) {
       if (kDebugMode) {
@@ -95,11 +94,13 @@ class AuthProvider with ChangeNotifier {
       _user = response.user;
       _isLoading = false;
       
-      if (response.session?.accessToken != null) {
-        await _secureStorage.setSessionToken(response.session!.accessToken);
-      }
-      
+      // Notify immediately so navigation happens before storage operations
       notifyListeners();
+      
+      // Store token in background (don't block navigation on this)
+      if (response.session?.accessToken != null) {
+        _secureStorage.setSessionToken(response.session!.accessToken);
+      }
     } catch (e) {
       _isLoading = false;
       notifyListeners();
@@ -142,8 +143,9 @@ class AuthProvider with ChangeNotifier {
       // Clear session manager
       _sessionManager.dispose();
       
-      // Clear all secure storage
-      await _secureStorage.clearAll();
+      // Clear session-specific secure storage (preserve HIPAA ack + biometric prefs)
+      await _secureStorage.clearSessionToken();
+      await _secureStorage.clearLastActivityTimestamp();
       
       // Sign out from Supabase and Google
       await supabase.auth.signOut();
@@ -173,4 +175,11 @@ class AuthProvider with ChangeNotifier {
   
   /// Get session manager instance
   SessionManager get sessionManager => _sessionManager;
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    _sessionManager.dispose();
+    super.dispose();
+  }
 }
