@@ -62,8 +62,10 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
           if [ -n "${KEYSTORE_BASE64}" ]; then
+            mkdir -p android/app/keystore
             echo "${KEYSTORE_BASE64}" | base64 -d > android/app/keystore/biohacker-release.jks
-            echo "Keystore restored from secret"
+            echo "Keystore restored to: $(pwd)/android/app/keystore/biohacker-release.jks"
+            ls -lh android/app/keystore/
           else
             echo "Warning: KEYSTORE_BASE64 secret not set — build will be unsigned"
           fi
