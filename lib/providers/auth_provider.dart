@@ -35,14 +35,22 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
 
       supabase.auth.onAuthStateChange.listen((data) {
+        final previousUser = _user;
         _user = data.session?.user;
+        
+        if (kDebugMode) {
+          print('[AuthProvider] Auth state changed: event=${data.event}, user=${_user?.email}');
+        }
         
         // Update secure storage with new session token
         if (data.session?.accessToken != null) {
           _secureStorage.setSessionToken(data.session!.accessToken);
         }
         
-        notifyListeners();
+        // Always notify — even if user appears unchanged, state may have updated
+        if (previousUser?.id != _user?.id || data.event == AuthChangeEvent.signedIn) {
+          notifyListeners();
+        }
       });
     } catch (e) {
       if (kDebugMode) {

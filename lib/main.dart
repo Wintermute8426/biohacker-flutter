@@ -54,9 +54,6 @@ void main() async {
     await Supabase.initialize(
       url: supabaseUrl,
       anonKey: supabaseAnonKey,
-      authOptions: FlutterAuthClientOptions(
-        authFlowType: AuthFlowType.pkce,
-      ),
     );
   } catch (e) {
     _initError = 'Failed to initialize Supabase: $e';
