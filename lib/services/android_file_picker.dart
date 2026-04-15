@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 class AndroidFilePicker {
   static const platform = MethodChannel('com.biohacker.biohacker_app/file_picker');
@@ -9,7 +10,9 @@ class AndroidFilePicker {
       final String? result = await platform.invokeMethod('pickPdf');
       return result;
     } on PlatformException catch (e) {
-      print("Error picking PDF: ${e.message}");
+      if (kDebugMode) {
+        print("Error picking PDF: ${e.message}");
+      }
       return null;
     }
   }

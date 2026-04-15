@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/dose_schedule_service.dart';
+import 'package:flutter/foundation.dart';
 
 class DoseScheduleForm extends ConsumerStatefulWidget {
   final String cycleId;
@@ -149,7 +150,9 @@ class _DoseScheduleFormState extends ConsumerState<DoseScheduleForm> {
       'notes': _notes,
     };
 
-    print('[DEBUG FORM] Saving schedule data: $data');
+    if (kDebugMode) {
+      print('[DEBUG FORM] Saving schedule data: $data');
+    }
     Navigator.pop(context, data);
   }
 

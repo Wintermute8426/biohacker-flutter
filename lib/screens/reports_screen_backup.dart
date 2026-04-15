@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../theme/colors.dart';
 import '../services/reports_service.dart';
+import 'package:flutter/foundation.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({Key? key}) : super(key: key);
@@ -66,7 +67,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
         });
       }
     } catch (e) {
-      print('Error loading reports data: $e');
+      if (kDebugMode) {
+        print('Error loading reports data: $e');
+      }
       if (mounted) {
         setState(() => _isLoading = false);
         _showError('Failed to load reports: $e');

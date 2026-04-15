@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/auth_provider.dart';
@@ -17,32 +16,32 @@ import 'services/subscription_service.dart';
 import 'screens/paywall_screen.dart';
 import 'theme/colors.dart';
 
+/// Global navigator key for notification tap routing
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 String? _initError;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Try loading .env asset; fall back to dart-define values for release builds.
-  // To build for release: flutter build apk --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
-  try {
-    await dotenv.load(fileName: '.env');
-  } catch (e) {
-    if (kDebugMode) {
-      print('[main] .env not found as asset, falling back to dart-define: $e');
-    }
-  }
-
-  // Resolve values: .env takes priority, then dart-define compile-time constants.
-  final supabaseUrl = dotenv.env['SUPABASE_URL'] ??
-      const String.fromEnvironment('SUPABASE_URL');
-  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ??
-      const String.fromEnvironment('SUPABASE_ANON_KEY');
+  // Credentials injected at build time via --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
+  // Never bundled as assets. See FIXES_APPLIED.md for the correct build command.
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
   // Debug logging
-  print('[BIOHACKER INIT] Supabase URL present: ${supabaseUrl.isNotEmpty}');
-  print('[BIOHACKER INIT] Supabase key present: ${supabaseAnonKey.isNotEmpty}');
-  print('[BIOHACKER INIT] URL length: ${supabaseUrl.length}');
-  print('[BIOHACKER INIT] Key length: ${supabaseAnonKey.length}');
+  if (kDebugMode) {
+    print('[BIOHACKER INIT] Supabase URL present: ${supabaseUrl.isNotEmpty}');
+  }
+  if (kDebugMode) {
+    print('[BIOHACKER INIT] Supabase key present: ${supabaseAnonKey.isNotEmpty}');
+  }
+  if (kDebugMode) {
+    print('[BIOHACKER INIT] URL length: ${supabaseUrl.length}');
+  }
+  if (kDebugMode) {
+    print('[BIOHACKER INIT] Key length: ${supabaseAnonKey.length}');
+  }
 
   if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
     _initError =
@@ -130,6 +129,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       title: 'Biohacker',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,

@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class ProtocolTemplate {
   final String? id;
@@ -91,7 +92,9 @@ class ProtocolTemplatesDatabase {
 
       return ProtocolTemplate.fromJson(response);
     } catch (e) {
-      print('Error saving protocol template: $e');
+      if (kDebugMode) {
+        print('Error saving protocol template: $e');
+      }
       rethrow;
     }
   }
@@ -111,7 +114,9 @@ class ProtocolTemplatesDatabase {
 
       return (response as List).map((e) => ProtocolTemplate.fromJson(e)).toList();
     } catch (e) {
-      print('Error fetching protocols: $e');
+      if (kDebugMode) {
+        print('Error fetching protocols: $e');
+      }
       return [];
     }
   }
@@ -131,7 +136,9 @@ class ProtocolTemplatesDatabase {
 
       return (response as List).map((e) => ProtocolTemplate.fromJson(e)).toList();
     } catch (e) {
-      print('Error fetching community protocols: $e');
+      if (kDebugMode) {
+        print('Error fetching community protocols: $e');
+      }
       return [];
     }
   }
@@ -155,7 +162,9 @@ class ProtocolTemplatesDatabase {
           .eq('id', templateId)
           .eq('user_id', user.id);
     } catch (e) {
-      print('Error incrementing usage: $e');
+      if (kDebugMode) {
+        print('Error incrementing usage: $e');
+      }
     }
   }
 
@@ -173,7 +182,9 @@ class ProtocolTemplatesDatabase {
 
       return true;
     } catch (e) {
-      print('Error deleting protocol: $e');
+      if (kDebugMode) {
+        print('Error deleting protocol: $e');
+      }
       return false;
     }
   }

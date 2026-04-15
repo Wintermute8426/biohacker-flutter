@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
@@ -21,7 +23,33 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _showPassword = false;
   bool _isGoogleLoading = false;
+  bool _disclaimerAcknowledged = false;
   String? _error;
+
+  // Rate limiting
+  int _failedAttempts = 0;
+  bool _isLockedOut = false;
+  int _lockoutSecondsRemaining = 0;
+  Timer? _lockoutTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDisclaimerState();
+  }
+
+  Future<void> _loadDisclaimerState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final acknowledged = prefs.getBool('personal_use_acknowledged') ?? false;
+    if (acknowledged && mounted) {
+      setState(() => _disclaimerAcknowledged = true);
+    }
+  }
+
+  Future<void> _saveDisclaimerAcknowledged() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('personal_use_acknowledged', true);
+  }
 
   @override
   void dispose() {
@@ -29,7 +57,25 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _lockoutTimer?.cancel();
     super.dispose();
+  }
+
+  void _startLockout() {
+    _lockoutSecondsRemaining = 30;
+    _isLockedOut = true;
+    _lockoutTimer?.cancel();
+    _lockoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) { timer.cancel(); return; }
+      setState(() {
+        _lockoutSecondsRemaining--;
+        if (_lockoutSecondsRemaining <= 0) {
+          _isLockedOut = false;
+          _failedAttempts = 0;
+          timer.cancel();
+        }
+      });
+    });
   }
 
   Future<void> _handleSignUp() async {
@@ -45,7 +91,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
 
     // Validate email format with regex
-    final email = _emailController.text.trim();
+    final email = _emailController.text.trim().toLowerCase();
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
       setState(() => _error = 'Please enter a valid email address');
       return;
@@ -82,14 +128,21 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       return;
     }
 
+    if (!_disclaimerAcknowledged) {
+      setState(() => _error = 'You must acknowledge the personal use disclaimer to continue');
+      return;
+    }
+
     try {
+      await _saveDisclaimerAcknowledged();
       // FUNC-006: trim whitespace from email and name before passing to signUp
       await ref.read(authProviderProvider).signUp(
-        _emailController.text.trim(),
+        _emailController.text.trim().toLowerCase(),
         _passwordController.text,
         _firstNameController.text.trim(),
       );
 
+      _failedAttempts = 0;
       if (mounted) {
         UserFeedback.showSuccess(
           context,
@@ -99,8 +152,80 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       }
     } catch (e) {
       final friendlyMessage = UserFeedback.getFriendlyErrorMessage(e);
-      setState(() => _error = friendlyMessage);
+      setState(() {
+        _error = friendlyMessage;
+        _failedAttempts++;
+        if (_failedAttempts >= 5) _startLockout();
+      });
     }
+  }
+
+  Widget _buildDisclaimerBox() {
+    const amber = Color(0xFFFFB300);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1200),
+        border: Border.all(color: amber, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '⚠ PERSONAL USE ONLY',
+            style: TextStyle(
+              color: amber,
+              fontFamily: 'monospace',
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'This app is a personal health tracking tool, not a medical device or clinical service. It is not HIPAA-covered software and should not be used to store clinical or insurance-related health records.\n\nBy continuing, you confirm this app is for your own personal biometric tracking only.',
+            style: TextStyle(
+              color: amber.withOpacity(0.85),
+              fontFamily: 'monospace',
+              fontSize: 11,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () => setState(() => _disclaimerAcknowledged = !_disclaimerAcknowledged),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: amber, width: 1.5),
+                    color: _disclaimerAcknowledged ? amber : Colors.transparent,
+                  ),
+                  child: _disclaimerAcknowledged
+                      ? const Icon(Icons.check, color: Colors.black, size: 14)
+                      : null,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'I understand this is for personal use only',
+                    style: TextStyle(
+                      color: amber,
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _handleGoogleSignIn() async {
@@ -232,6 +357,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               ),
               const SizedBox(height: 24),
 
+              // Compliance Disclaimer
+              _buildDisclaimerBox(),
+              const SizedBox(height: 20),
+
               // Error Message
               if (_error != null)
                 Container(
@@ -253,22 +382,32 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: _handleSignUp,
+                  onPressed: _isLockedOut ? null : _handleSignUp,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: _isLockedOut ? AppColors.error.withOpacity(0.3) : AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    'CREATE ACCOUNT',
-                    style: TextStyle(
-                      color: AppColors.background,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      letterSpacing: 1,
-                    ),
-                  ),
+                  child: _isLockedOut
+                      ? Text(
+                          'TRY AGAIN IN ${_lockoutSecondsRemaining}s',
+                          style: const TextStyle(
+                            color: AppColors.error,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            letterSpacing: 1,
+                          ),
+                        )
+                      : const Text(
+                          'CREATE ACCOUNT',
+                          style: TextStyle(
+                            color: AppColors.background,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            letterSpacing: 1,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 32),

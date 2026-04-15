@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 class DashboardSnapshot {
   final String id;
@@ -76,7 +77,9 @@ class DashboardInsightsService {
 
       return DashboardSnapshot.fromJson(response as Map<String, dynamic>);
     } catch (e) {
-      print('[ERROR] Failed to fetch snapshot: $e');
+      if (kDebugMode) {
+        print('[ERROR] Failed to fetch snapshot: $e');
+      }
       return null;
     }
   }
@@ -94,7 +97,9 @@ class DashboardInsightsService {
           .map((item) => DashboardSnapshot.fromJson(item as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      print('[ERROR] Failed to fetch snapshots: $e');
+      if (kDebugMode) {
+        print('[ERROR] Failed to fetch snapshots: $e');
+      }
       return [];
     }
   }
@@ -141,7 +146,9 @@ class DashboardInsightsService {
 
       return DashboardSnapshot.fromJson(response as Map<String, dynamic>);
     } catch (e) {
-      print('[ERROR] Failed to upsert snapshot: $e');
+      if (kDebugMode) {
+        print('[ERROR] Failed to upsert snapshot: $e');
+      }
       return null;
     }
   }

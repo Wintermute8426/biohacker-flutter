@@ -6,7 +6,7 @@ import '../config/hipaa_config.dart';
 /// HIPAA-compliant session timeout manager
 /// Automatically logs out users after 30 minutes of inactivity
 /// Shows warning dialog at 28 minutes
-class SessionManager {
+class SessionManager with WidgetsBindingObserver {
   static final SessionManager _instance = SessionManager._internal();
   factory SessionManager() => _instance;
   SessionManager._internal();
@@ -25,6 +25,7 @@ class SessionManager {
   DateTime? _lastActivity;
   VoidCallback? _onSessionExpired;
   BuildContext? _context;
+  DateTime? _backgroundedAt;
 
   /// Initialize session manager with logout callback
   void initialize({
@@ -35,6 +36,7 @@ class SessionManager {
     _context = context;
     _isActive = true;
     resetActivity();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   /// Record user activity (tap, scroll, navigation)
@@ -113,13 +115,36 @@ class SessionManager {
     _onSessionExpired?.call();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden) {
+      _backgroundedAt = DateTime.now();
+    } else if (state == AppLifecycleState.resumed) {
+      if (_backgroundedAt != null && _isActive) {
+        final elapsed = DateTime.now().difference(_backgroundedAt!);
+        _backgroundedAt = null;
+        if (elapsed >= _sessionTimeout) {
+          // Session expired while app was backgrounded — force logout
+          _handleSessionTimeout();
+        } else {
+          // Adjust timers to account for elapsed background time
+          resetActivity();
+        }
+      }
+    }
+  }
+
   /// Stop session tracking (on logout)
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _sessionTimer?.cancel();
     _warningTimer?.cancel();
     _isActive = false;
     _lastActivity = null;
     _context = null;
+    _backgroundedAt = null;
     _secureStorage.clearLastActivityTimestamp();
   }
 

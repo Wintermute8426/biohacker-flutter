@@ -7,6 +7,7 @@ import '../widgets/peptide_selector.dart';
 import '../widgets/common/matte_card.dart';
 import '../widgets/common/cyber_button.dart';
 import '../widgets/common/scanlines_painter.dart' as common;
+import 'package:flutter/foundation.dart';
 
 class CycleSetupFormV4 extends StatefulWidget {
   final String? defaultPeptideName;
@@ -282,7 +283,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       defaultDosage = desiredDose / 2;
     }
     
-    print('[ADD PHASE] Adding phase: type=$phaseType, dosage=$defaultDosage, desired=$desiredDose');
+    if (kDebugMode) {
+      print('[ADD PHASE] Adding phase: type=$phaseType, dosage=$defaultDosage, desired=$desiredDose');
+    }
     
     setState(() {
       _phases.add(DosePhase(
@@ -300,7 +303,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       final hasPlateau = _phases.any((p) => p.type == 'plateau');
       
       if (hasRampUp && hasRampDown && !hasPlateau) {
-        print('[AUTO PLATEAU] Both ramp phases detected - auto-adding plateau');
+        if (kDebugMode) {
+          print('[AUTO PLATEAU] Both ramp phases detected - auto-adding plateau');
+        }
         _phases.add(DosePhase(
           type: 'plateau',
           startDate: _startDate,
@@ -316,7 +321,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
 
   void _recalculatePhaseDates() {
     if (_phases.isEmpty) {
-      print('[RECALC] Skipping - no phases');
+      if (kDebugMode) {
+        print('[RECALC] Skipping - no phases');
+      }
       return;
     }
     
@@ -324,22 +331,30 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
     DateTime cycleStart = _startDate ?? DateTime.now();
     DateTime cycleEnd = _endDate ?? cycleStart.add(Duration(days: (_cycleDurationWeeks ?? 4) * 7 - 1));
     
-    print('[RECALC] Working with cycleStart=$cycleStart, cycleEnd=$cycleEnd');
+    if (kDebugMode) {
+      print('[RECALC] Working with cycleStart=$cycleStart, cycleEnd=$cycleEnd');
+    }
     
     // Update form dates if they were null
     if (_startDate == null) _startDate = cycleStart;
     if (_endDate == null) _endDate = cycleEnd;
 
-    print('[RECALC] Recalculating ${_phases.length} phases');
+    if (kDebugMode) {
+      print('[RECALC] Recalculating ${_phases.length} phases');
+    }
     final cycleDays = cycleEnd.difference(cycleStart).inDays + 1;
-    print('[RECALC] Cycle: $cycleStart to $cycleEnd ($cycleDays days)');
+    if (kDebugMode) {
+      print('[RECALC] Cycle: $cycleStart to $cycleEnd ($cycleDays days)');
+    }
 
     // Find ramp up and ramp down phases and their actual durations
     final rampUpIndex = _phases.indexWhere((p) => p.type == 'taper_up');
     final rampDownIndex = _phases.indexWhere((p) => p.type == 'taper_down');
     final plateauIndex = _phases.indexWhere((p) => p.type == 'plateau');
 
-    print('[RECALC] Indices - RampUp: $rampUpIndex, RampDown: $rampDownIndex, Plateau: $plateauIndex');
+    if (kDebugMode) {
+      print('[RECALC] Indices - RampUp: $rampUpIndex, RampDown: $rampDownIndex, Plateau: $plateauIndex');
+    }
 
     // Allocate Ramp Up from START
     if (rampUpIndex >= 0) {
@@ -349,7 +364,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       final rampUpStart = cycleStart;
       final rampUpEnd = cycleStart.add(Duration(days: rampUpDays - 1));
       _phases[rampUpIndex] = phase.copyWith(startDate: rampUpStart, endDate: rampUpEnd);
-      print('[RECALC] RampUp: $rampUpStart to $rampUpEnd ($rampUpDays days) [user-defined: ${phase.userDefinedDurationDays}]');
+      if (kDebugMode) {
+        print('[RECALC] RampUp: $rampUpStart to $rampUpEnd ($rampUpDays days) [user-defined: ${phase.userDefinedDurationDays}]');
+      }
     }
 
     // Allocate Ramp Down to END
@@ -360,7 +377,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
       final rampDownEnd = cycleEnd;
       final rampDownStart = cycleEnd.subtract(Duration(days: rampDownDays - 1));
       _phases[rampDownIndex] = phase.copyWith(startDate: rampDownStart, endDate: rampDownEnd);
-      print('[RECALC] RampDown: $rampDownStart to $rampDownEnd ($rampDownDays days) [user-defined: ${phase.userDefinedDurationDays}]');
+      if (kDebugMode) {
+        print('[RECALC] RampDown: $rampDownStart to $rampDownEnd ($rampDownDays days) [user-defined: ${phase.userDefinedDurationDays}]');
+      }
     }
 
     // Plateau fills middle
@@ -375,7 +394,9 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
 
       if (plateauStart.isBefore(plateauEnd) || plateauStart.isAtSameMomentAs(plateauEnd)) {
         _phases[plateauIndex] = phase.copyWith(startDate: plateauStart, endDate: plateauEnd);
-        print('[RECALC] Plateau: $plateauStart to $plateauEnd');
+        if (kDebugMode) {
+          print('[RECALC] Plateau: $plateauStart to $plateauEnd');
+        }
       }
     }
   }
@@ -496,35 +517,53 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
   }
 
   List<Map<String, dynamic>> _generateDoseSchedule() {
-    print('[DOSE GEN] Starting dose generation for ${_phases.length} phases');
+    if (kDebugMode) {
+      print('[DOSE GEN] Starting dose generation for ${_phases.length} phases');
+    }
     final doses = <Map<String, dynamic>>[];
     
     for (int phaseIdx = 0; phaseIdx < _phases.length; phaseIdx++) {
       final phase = _phases[phaseIdx];
-      print('[DOSE GEN] Phase $phaseIdx (${phase.type}): startDate=${phase.startDate}, endDate=${phase.endDate}');
+      if (kDebugMode) {
+        print('[DOSE GEN] Phase $phaseIdx (${phase.type}): startDate=${phase.startDate}, endDate=${phase.endDate}');
+      }
       
       if (phase.startDate == null || phase.endDate == null) {
-        print('[DOSE GEN]   Skipping - null dates');
+        if (kDebugMode) {
+          print('[DOSE GEN]   Skipping - null dates');
+        }
         continue;
       }
       
       final daysDiff = phase.endDate!.difference(phase.startDate!).inDays;
-      print('[DOSE GEN]   Duration: $daysDiff days');
+      if (kDebugMode) {
+        print('[DOSE GEN]   Duration: $daysDiff days');
+      }
       
       // Determine dose for this phase
       double phaseDose = phase.dosage;
-      print('[DOSE GEN]   Phase type: ${phase.type}, phase.dosage: ${phase.dosage}, _desiredDosageMg: $_desiredDosageMg');
+      if (kDebugMode) {
+        print('[DOSE GEN]   Phase type: ${phase.type}, phase.dosage: ${phase.dosage}, _desiredDosageMg: $_desiredDosageMg');
+      }
       
       if (phase.type == 'plateau') {
         // Plateau uses DESIRED DOSE, not phase dosage
         phaseDose = _desiredDosageMg ?? phase.dosage;
-        print('[DOSE GEN]   ✓ PLATEAU detected: Using desired dose: $phaseDose mg (phase dosage was ${phase.dosage})');
+        if (kDebugMode) {
+          print('[DOSE GEN]   ✓ PLATEAU detected: Using desired dose: $phaseDose mg (phase dosage was ${phase.dosage})');
+        }
       } else if (phase.type == 'taper_up') {
-        print('[DOSE GEN]   Taper UP: Using phase dosage: $phaseDose mg');
+        if (kDebugMode) {
+          print('[DOSE GEN]   Taper UP: Using phase dosage: $phaseDose mg');
+        }
       } else if (phase.type == 'taper_down') {
-        print('[DOSE GEN]   Taper DOWN: Using phase dosage: $phaseDose mg');
+        if (kDebugMode) {
+          print('[DOSE GEN]   Taper DOWN: Using phase dosage: $phaseDose mg');
+        }
       } else {
-        print('[DOSE GEN]   Unknown phase type: Using phase dosage: $phaseDose mg');
+        if (kDebugMode) {
+          print('[DOSE GEN]   Unknown phase type: Using phase dosage: $phaseDose mg');
+        }
       }
       
       // Generate doses based on phase configuration
@@ -558,10 +597,14 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
           phaseDoseCount++;
         }
       }
-      print('[DOSE GEN]   Generated $phaseDoseCount injection days');
+      if (kDebugMode) {
+        print('[DOSE GEN]   Generated $phaseDoseCount injection days');
+      }
     }
 
-    print('[DOSE GEN] Total doses generated: ${doses.length}');
+    if (kDebugMode) {
+      print('[DOSE GEN] Total doses generated: ${doses.length}');
+    }
     return doses;
   }
 
@@ -590,33 +633,63 @@ class _CycleSetupFormV4State extends State<CycleSetupFormV4> {
     _recalculatePhaseDates();
     
     // DEBUG: Check form state before generating schedule
-    print('[SUBMIT DEBUG] =======================================================');
-    print('[SUBMIT DEBUG] desiredDosageMg: $_desiredDosageMg');
-    print('[SUBMIT DEBUG] totalPeptideMg: $_totalPeptideMg');
-    print('[SUBMIT DEBUG] concentrationMl: $_concentrationMl');
-    print('[SUBMIT DEBUG] Phases count: ${_phases.length}');
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG] =======================================================');
+    }
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG] desiredDosageMg: $_desiredDosageMg');
+    }
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG] totalPeptideMg: $_totalPeptideMg');
+    }
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG] concentrationMl: $_concentrationMl');
+    }
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG] Phases count: ${_phases.length}');
+    }
     for (int i = 0; i < _phases.length; i++) {
       final p = _phases[i];
-      print('[SUBMIT DEBUG] 🔹 Phase $i: type=${p.type}, dosage=${p.dosage}mg, userDefined=${p.userDefinedDurationDays}, dates=${p.startDate?.toString().split(' ')[0]} to ${p.endDate?.toString().split(' ')[0]}, freq=${p.frequency}');
+      if (kDebugMode) {
+        print('[SUBMIT DEBUG] 🔹 Phase $i: type=${p.type}, dosage=${p.dosage}mg, userDefined=${p.userDefinedDurationDays}, dates=${p.startDate?.toString().split(' ')[0]} to ${p.endDate?.toString().split(' ')[0]}, freq=${p.frequency}');
+      }
     }
-    print('[SUBMIT DEBUG] =======================================================');
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG] =======================================================');
+    }
     
     final schedule = _generateDoseSchedule();
-    print('[SUBMIT DEBUG] Generated schedule with ${schedule.length} doses');
-    print('[SUBMIT DEBUG] Doses by phase:');
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG] Generated schedule with ${schedule.length} doses');
+    }
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG] Doses by phase:');
+    }
     
     final rampUpDoses = schedule.where((d) => d['phase'] == 'taper_up').toList();
     final plateauDoses = schedule.where((d) => d['phase'] == 'plateau').toList();
     final rampDownDoses = schedule.where((d) => d['phase'] == 'taper_down').toList();
     
-    print('[SUBMIT DEBUG]   Ramp Up: ${rampUpDoses.length} doses at ${rampUpDoses.isNotEmpty ? rampUpDoses.first['dose'] : 'N/A'}mg');
-    print('[SUBMIT DEBUG]   Plateau: ${plateauDoses.length} doses at ${plateauDoses.isNotEmpty ? plateauDoses.first['dose'] : 'N/A'}mg');
-    print('[SUBMIT DEBUG]   Ramp Down: ${rampDownDoses.length} doses at ${rampDownDoses.isNotEmpty ? rampDownDoses.first['dose'] : 'N/A'}mg');
-    print('[SUBMIT DEBUG] Sample doses:');
-    for (final dose in schedule.take(10)) {
-      print('[SUBMIT DEBUG]   ${dose['dose']}mg (${dose['phase']})');
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG]   Ramp Up: ${rampUpDoses.length} doses at ${rampUpDoses.isNotEmpty ? rampUpDoses.first['dose'] : 'N/A'}mg');
     }
-    print('[SUBMIT DEBUG] =======================================================');
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG]   Plateau: ${plateauDoses.length} doses at ${plateauDoses.isNotEmpty ? plateauDoses.first['dose'] : 'N/A'}mg');
+    }
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG]   Ramp Down: ${rampDownDoses.length} doses at ${rampDownDoses.isNotEmpty ? rampDownDoses.first['dose'] : 'N/A'}mg');
+    }
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG] Sample doses:');
+    }
+    for (final dose in schedule.take(10)) {
+      if (kDebugMode) {
+        print('[SUBMIT DEBUG]   ${dose['dose']}mg (${dose['phase']})');
+      }
+    }
+    if (kDebugMode) {
+      print('[SUBMIT DEBUG] =======================================================');
+    }
     
     final routeShort = _routeMap[_selectedRoute] ?? 'SC';
     final cycleDays = (_cycleDurationWeeks ?? 0) * 7;

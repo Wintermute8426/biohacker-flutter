@@ -1,6 +1,10 @@
 class LegalDocuments {
   static const String privacyPolicy = '''# PRIVACY POLICY
 
+## DATA STORAGE NOTICE
+
+Your health data is stored on Supabase infrastructure. This app is intended for personal use only and is not covered by HIPAA as a healthcare provider or covered entity. Do not use this app to store clinically-sensitive records.
+
 **Effective Date:** March 18, 2026
 
 Biohacker ("we," "our," or "us") is committed to protecting your privacy and ensuring the security of your personal and health information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Biohacker mobile application (the "App").

@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
@@ -171,7 +170,7 @@ class _LabsScreenState extends State<LabsScreen> {
       final result = LabResult(
         id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
         userId: _userId,
-        pdfPath: image.name,
+        pdfPath: image.path.isNotEmpty ? image.path : (image.name.isNotEmpty ? image.name : 'image_${DateTime.now().millisecondsSinceEpoch}'),
         uploadDate: DateTime.now(),
         notes: 'Image Upload - Pending Extraction',
         extractedData: {}, // Empty until extraction API is integrated
@@ -195,13 +194,23 @@ class _LabsScreenState extends State<LabsScreen> {
           ),
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[LabsScreen] _uploadImage ERROR: $e');
+        print('[LabsScreen] Stack trace: $stackTrace');
+        print('[LabsScreen] userId: \'$_userId\'');
+      }
       if (mounted) {
         setState(() => _isUploading = false);
+        // Show real error in debug mode; friendly message in production
+        final errorMsg = kDebugMode
+            ? 'Upload failed: $e'
+            : UserFeedback.getFriendlyErrorMessage(e);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(UserFeedback.getFriendlyErrorMessage(e)),
+            content: Text(errorMsg),
             backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 8),
           ),
         );
       }
@@ -210,9 +219,9 @@ class _LabsScreenState extends State<LabsScreen> {
 
   Future<void> _uploadPDF(File pdfFile) async {
     // SEC-001: PDF endpoint must be a production HTTPS URL.
-    // Set LAB_PDF_ENDPOINT in .env before enabling this feature in production.
+    // Set via --dart-define=LAB_PDF_ENDPOINT=... at build time.
     // Never use a plaintext HTTP or private-IP endpoint in production.
-    final endpoint = dotenv.env['LAB_PDF_ENDPOINT'] ?? '';
+    const endpoint = String.fromEnvironment('LAB_PDF_ENDPOINT');
     if (endpoint.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -234,7 +243,7 @@ class _LabsScreenState extends State<LabsScreen> {
       // Send to backend for extraction (HTTPS endpoint loaded from env)
       final request = http.MultipartRequest('POST', Uri.parse(endpoint));
 
-      request.headers['Authorization'] = 'Bearer ${dotenv.env['LAB_PDF_API_KEY'] ?? ''}';
+      request.headers['Authorization'] = 'Bearer ${const String.fromEnvironment('LAB_PDF_API_KEY')}';
 
       request.files.add(
         http.MultipartFile.fromBytes('file', bytes, filename: fileName),
@@ -280,14 +289,21 @@ class _LabsScreenState extends State<LabsScreen> {
       } else {
         throw Exception('Backend error: ${response.statusCode}');
       }
-    } catch (e) {
-      if (kDebugMode) print('Error uploading PDF: $e');
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[LabsScreen] _uploadPDF ERROR: $e');
+        print('[LabsScreen] Stack trace: $stackTrace');
+      }
       if (mounted) {
         setState(() => _isUploading = false);
+        final errorMsg = kDebugMode
+            ? 'PDF upload failed: $e'
+            : UserFeedback.getFriendlyErrorMessage(e);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(UserFeedback.getFriendlyErrorMessage(e)),
+            content: Text(errorMsg),
             backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 8),
           ),
         );
       }
@@ -760,8 +776,12 @@ class _LabsScreenState extends State<LabsScreen> {
                   // Individual biomarker rows (matte cards, no borders)
                   Builder(
                     builder: (context) {
-                      print('[LabsScreen] Biomarkers in report: ${lab.extractedData.keys.toList()}');
-                      print('[LabsScreen] After normalization: ${lab.extractedData.keys.map(_normalizeBiomarkerKey).toList()}');
+                      if (kDebugMode) {
+                        print('[LabsScreen] Biomarkers in report: ${lab.extractedData.keys.toList()}');
+                      }
+                      if (kDebugMode) {
+                        print('[LabsScreen] After normalization: ${lab.extractedData.keys.map(_normalizeBiomarkerKey).toList()}');
+                      }
 
                       return Column(
                         children: (lab.extractedData.entries.toList()

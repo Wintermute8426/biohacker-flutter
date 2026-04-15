@@ -11,6 +11,7 @@ import '../widgets/reports/lab_result_card.dart';
 import '../widgets/reports/cycle_timeline.dart';
 import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
+import 'package:flutter/foundation.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({Key? key}) : super(key: key);
@@ -103,7 +104,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
         });
       }
     } catch (e) {
-      print('Error loading reports data: $e');
+      if (kDebugMode) {
+        print('Error loading reports data: $e');
+      }
       if (mounted) {
         setState(() => _isLoading = false);
       }

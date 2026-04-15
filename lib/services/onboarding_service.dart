@@ -103,7 +103,9 @@ class OnboardingService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[OnboardingService] Error checking onboarding status: $e');
-        print('[OnboardingService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[OnboardingService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -113,7 +115,9 @@ class OnboardingService {
     try {
       if (kDebugMode) {
         print('[OnboardingService] Starting onboarding completion for user: $userId');
-        print('[OnboardingService] Data: ${data.toJson()}');
+        if (kDebugMode) {
+          print('[OnboardingService] Data: ${data.toJson()}');
+        }
       }
 
       final profileData = {
@@ -190,7 +194,9 @@ class OnboardingService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[OnboardingService] Error completing onboarding: $e');
-        print('[OnboardingService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[OnboardingService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -203,7 +209,9 @@ class OnboardingService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[OnboardingService] Error skipping onboarding: $e');
-        print('[OnboardingService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[OnboardingService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }

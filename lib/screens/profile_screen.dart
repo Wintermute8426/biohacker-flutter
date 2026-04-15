@@ -176,7 +176,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         });
       }
     } catch (e) {
-      print('[ProfileScreen] Error loading settings: $e');
+      if (kDebugMode) {
+        print('[ProfileScreen] Error loading settings: $e');
+      }
     }
   }
 
@@ -254,12 +256,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           setState(() => _latestWeight = weight);
         }
       } catch (e) {
-        print('[ProfileScreen] Weight loading error: $e');
+        if (kDebugMode) {
+          print('[ProfileScreen] Weight loading error: $e');
+        }
       }
 
       setState(() => _isLoading = false);
     } catch (e) {
-      print('[ProfileScreen] Error loading profile: $e');
+      if (kDebugMode) {
+        print('[ProfileScreen] Error loading profile: $e');
+      }
       setState(() {
         _isLoading = false;
         _isEditMode = true;
@@ -456,7 +462,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         UserFeedback.showSuccess(context, 'Profile saved successfully');
       }
     } catch (e) {
-      print('[ProfileScreen] Error saving profile: $e');
+      if (kDebugMode) {
+        print('[ProfileScreen] Error saving profile: $e');
+      }
       setState(() => _isSaving = false);
       if (mounted) {
         UserFeedback.showError(context, UserFeedback.getFriendlyErrorMessage(e));
@@ -507,7 +515,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         UserFeedback.showSuccess(context, 'Profile photo updated successfully');
       }
     } catch (e) {
-      print('[ProfileScreen] Error uploading photo: $e');
+      if (kDebugMode) {
+        print('[ProfileScreen] Error uploading photo: $e');
+      }
       if (mounted) {
         UserFeedback.showError(context, UserFeedback.getFriendlyErrorMessage(e));
       }
@@ -539,7 +549,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         UserFeedback.showSuccess(context, 'Notification settings saved');
       }
     } catch (e) {
-      print('[ProfileScreen] Error saving notification prefs: $e');
+      if (kDebugMode) {
+        print('[ProfileScreen] Error saving notification prefs: $e');
+      }
       if (mounted) {
         UserFeedback.showError(context, 'Failed to save notification settings');
       }
@@ -655,7 +667,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         UserFeedback.showSuccess(context, 'Data exported successfully');
       }
     } catch (e) {
-      print('[ProfileScreen] Error exporting data: $e');
+      if (kDebugMode) {
+        print('[ProfileScreen] Error exporting data: $e');
+      }
       Navigator.pop(context);
       if (mounted) {
         UserFeedback.showError(context, 'Failed to export data: ${e.toString()}');
@@ -665,56 +679,211 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   // ==================== DIALOGS ====================
 
+  Future<void> _deleteAllUserData(String userId) async {
+    final client = Supabase.instance.client;
+
+    // Delete from all PHI tables explicitly (FK CASCADE handles children, but be explicit)
+    final tables = [
+      'notification_preferences',
+      'cycle_expenses',
+      'peptide_inventory',
+      'cycle_reviews',
+      'health_goals',
+      'labs_results',
+      'weight_logs',
+      'side_effects_log',
+      'dose_schedules',
+      'dose_logs',
+      'cycles',
+      'user_profiles',
+    ];
+
+    for (final table in tables) {
+      try {
+        await client.from(table).delete().eq('user_id', userId);
+      } catch (e) {
+        if (kDebugMode) print('[DeleteAccount] Error deleting from $table: $e');
+        // Continue with other tables even if one fails
+      }
+    }
+
+    // Delete storage files if any
+    try {
+      final files = await client.storage.from('user-uploads').list(path: userId);
+      if (files.isNotEmpty) {
+        final paths = files.map((f) => '$userId/\${f.name}').toList();
+        await client.storage.from('user-uploads').remove(paths);
+      }
+    } catch (e) {
+      if (kDebugMode) print('[DeleteAccount] Error deleting storage: $e');
+    }
+  }
+
   Future<void> _confirmDeleteAccount() async {
+    // First confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text(
-          'DELETE ACCOUNT?',
-          style: TextStyle(
-            color: AppColors.error,
-            fontFamily: 'monospace',
-            letterSpacing: 1,
-          ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: BorderSide(color: AppColors.error.withOpacity(0.6), width: 1),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              'DELETE ACCOUNT?',
+              style: TextStyle(
+                color: AppColors.error,
+                fontFamily: 'JetBrains Mono',
+                fontSize: 14,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
         ),
         content: Text(
+          '⚠️ IRREVERSIBLE ACTION\n\n'
           'This will permanently delete:\n\n'
-          '- All your cycles\n'
-          '- All lab reports\n'
-          '- All dose logs\n'
-          '- Your account\n\n'
-          'This action cannot be undone.',
-          style: TextStyle(color: AppColors.textLight, fontFamily: 'monospace', fontSize: 12),
+          '• All protocol cycles\n'
+          '• All dose logs & schedules\n'
+          '• All lab results\n'
+          '• All weight & side effect logs\n'
+          '• All health goals & reviews\n'
+          '• Your account credentials\n\n'
+          'This action CANNOT be undone.',
+          style: TextStyle(
+            color: AppColors.textLight,
+            fontFamily: 'JetBrains Mono',
+            fontSize: 12,
+            height: 1.5,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('CANCEL', style: TextStyle(color: AppColors.textMid, fontFamily: 'monospace')),
+            child: Text(
+              'CANCEL',
+              style: TextStyle(color: AppColors.textMid, fontFamily: 'JetBrains Mono'),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('DELETE EVERYTHING', style: TextStyle(color: AppColors.error, fontFamily: 'monospace', fontWeight: FontWeight.bold)),
+            child: Text(
+              'DELETE EVERYTHING',
+              style: TextStyle(
+                color: AppColors.error,
+                fontFamily: 'JetBrains Mono',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
     );
 
-    if (confirmed == true) {
-      try {
-        UserFeedback.showLoadingDialog(context, message: 'Deleting account...');
-        final userId = Supabase.instance.client.auth.currentUser?.id;
-        if (userId != null) {
-          await Supabase.instance.client.auth.signOut();
-        }
-        if (mounted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        }
-      } catch (e) {
-        Navigator.pop(context);
-        if (mounted) {
-          UserFeedback.showError(context, 'Failed to delete account: ${e.toString()}');
-        }
+    if (confirmed != true) return;
+
+    // Second confirmation — type DELETE
+    final TextEditingController confirmController = TextEditingController();
+    final doubleConfirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: BorderSide(color: AppColors.error, width: 1),
+        ),
+        title: Text(
+          'CONFIRM DELETION',
+          style: TextStyle(
+            color: AppColors.error,
+            fontFamily: 'JetBrains Mono',
+            fontSize: 14,
+            letterSpacing: 1,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Type DELETE to confirm:',
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontFamily: 'JetBrains Mono',
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: confirmController,
+              autofocus: true,
+              style: TextStyle(
+                color: AppColors.error,
+                fontFamily: 'JetBrains Mono',
+                fontWeight: FontWeight.bold,
+              ),
+              decoration: InputDecoration(
+                hintText: 'DELETE',
+                hintStyle: TextStyle(color: AppColors.textDim, fontFamily: 'JetBrains Mono'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: AppColors.error.withOpacity(0.6)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: AppColors.error),
+                ),
+                filled: true,
+                fillColor: AppColors.error.withOpacity(0.05),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('CANCEL', style: TextStyle(color: AppColors.textMid, fontFamily: 'JetBrains Mono')),
+          ),
+          TextButton(
+            onPressed: () {
+              if (confirmController.text.trim().toUpperCase() == 'DELETE') {
+                Navigator.pop(context, true);
+              }
+            },
+            child: Text(
+              'CONFIRM DELETE',
+              style: TextStyle(color: AppColors.error, fontFamily: 'JetBrains Mono', fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    confirmController.dispose();
+    if (doubleConfirmed != true) return;
+
+    try {
+      if (!mounted) return;
+      UserFeedback.showLoadingDialog(context, message: 'Deleting all data...');
+
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId != null) {
+        await _deleteAllUserData(userId);
+      }
+
+      await Supabase.instance.client.auth.signOut();
+
+      if (mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e) {
+      if (mounted) Navigator.pop(context); // dismiss loading dialog
+      if (mounted) {
+        UserFeedback.showError(context, 'Failed to delete account: ${e.toString()}');
       }
     }
   }
@@ -1307,7 +1476,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               builder: (context, snapshot) {
                 // Add error state handling
                 if (snapshot.hasError) {
-                  print('[Profile] Subscription error: ${snapshot.error}');
+                  if (kDebugMode) {
+                    print('[Profile] Subscription error: ${snapshot.error}');
+                  }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1348,9 +1519,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 
                 // Handle null/empty data state
                 if (!snapshot.hasData || snapshot.data == null) {
-                  print('[Profile] Subscription status: null/empty');
-                  print('[Profile] Snapshot state: ${snapshot.connectionState}');
-                  print('[Profile] Has data: ${snapshot.hasData}');
+                  if (kDebugMode) {
+                    print('[Profile] Subscription status: null/empty');
+                  }
+                  if (kDebugMode) {
+                    print('[Profile] Snapshot state: ${snapshot.connectionState}');
+                  }
+                  if (kDebugMode) {
+                    print('[Profile] Has data: ${snapshot.hasData}');
+                  }
                   
                   return Text(
                     'No subscription data',
@@ -1363,7 +1540,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 }
                 
                 final status = snapshot.data!;
-                print('[Profile] Subscription status: ${status.tier}');
+                if (kDebugMode) {
+                  print('[Profile] Subscription status: ${status.tier}');
+                }
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

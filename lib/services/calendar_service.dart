@@ -353,7 +353,9 @@ class CalendarService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[CalendarService] Error fetching calendar events: $e');
-        print('[CalendarService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[CalendarService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -369,7 +371,9 @@ class CalendarService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[CalendarService] Error fetching week events: $e');
-        print('[CalendarService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[CalendarService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }

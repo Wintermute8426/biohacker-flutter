@@ -10,15 +10,27 @@ class LabsDatabase {
   /// Save lab result to Supabase
   Future<LabResult?> saveLabResult(LabResult result) async {
     try {
+      if (kDebugMode) {
+        print('[LabsDatabase] saveLabResult: inserting id=${result.id} user_id=${result.userId}');
+        print('[LabsDatabase] Current auth uid: ${supabase.auth.currentUser?.id}');
+        print('[LabsDatabase] Payload: ${result.toJson()}');
+      }
       final response = await supabase
           .from('labs_results')
           .insert(result.toJson())
           .select()
           .single();
 
+      if (kDebugMode) print('[LabsDatabase] saveLabResult SUCCESS: ${response['id']}');
       return LabResult.fromJson(response);
-    } catch (e) {
-      throw Exception('Failed to save lab result: $e');
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('[LabsDatabase] saveLabResult FAILED: $e');
+        print('[LabsDatabase] Error type: ${e.runtimeType}');
+        print('[LabsDatabase] Stack: $stackTrace');
+      }
+      // Re-throw with original error preserved (not wrapped) so callers see real message
+      rethrow;
     }
   }
 
@@ -66,13 +78,17 @@ class LabsDatabase {
     } on TimeoutException catch (e, stackTrace) {
       if (kDebugMode) {
         print('[LabsDatabase] TIMEOUT: $e');
-        print('[LabsDatabase] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[LabsDatabase] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[LabsDatabase] Error: $e');
-        print('[LabsDatabase] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[LabsDatabase] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -155,7 +171,9 @@ class LabsDatabase {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[LabsDatabase] Failed to get latest lab result: $e');
-        print('[LabsDatabase] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[LabsDatabase] Stack trace: $stackTrace');
+        }
       }
       return null;
     }

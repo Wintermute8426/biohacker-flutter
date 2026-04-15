@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/user_profile_service.dart';
+import 'package:flutter/foundation.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -89,7 +90,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       var profile = await service.getUserProfile(userId);
 
       if (profile == null) {
-        print('[Onboarding] Profile not found, creating...');
+        if (kDebugMode) {
+          print('[Onboarding] Profile not found, creating...');
+        }
         profile = await service.createUserProfile(userId);
         if (profile == null) {
           throw Exception('Failed to create user profile');
@@ -130,7 +133,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
-      print('Error completing onboarding: $e');
+      if (kDebugMode) {
+        print('Error completing onboarding: $e');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error saving profile: $e')),

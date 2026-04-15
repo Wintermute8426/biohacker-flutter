@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class Cycle {
   final String id;
@@ -107,7 +108,9 @@ class CyclesDatabase {
 
       return Cycle.fromJson(response);
     } catch (e) {
-      print('Error saving cycle: $e');
+      if (kDebugMode) {
+        print('Error saving cycle: $e');
+      }
       return null;
     }
   }
@@ -130,7 +133,9 @@ class CyclesDatabase {
 
       return cycles;
     } catch (e) {
-      print('Error loading cycles: $e');
+      if (kDebugMode) {
+        print('Error loading cycles: $e');
+      }
       return [];
     }
   }
@@ -141,7 +146,9 @@ class CyclesDatabase {
       final cycles = await getUserCycles();
       return cycles.where((c) => c.isActive).toList();
     } catch (e) {
-      print('Error loading active cycles: $e');
+      if (kDebugMode) {
+        print('Error loading active cycles: $e');
+      }
       return [];
     }
   }
@@ -183,7 +190,9 @@ class CyclesDatabase {
 
       return Cycle.fromJson(response);
     } catch (e) {
-      print('Error updating cycle: $e');
+      if (kDebugMode) {
+        print('Error updating cycle: $e');
+      }
       return null;
     }
   }
@@ -202,7 +211,9 @@ class CyclesDatabase {
 
       return true;
     } catch (e) {
-      print('Error deleting cycle: $e');
+      if (kDebugMode) {
+        print('Error deleting cycle: $e');
+      }
       return false;
     }
   }

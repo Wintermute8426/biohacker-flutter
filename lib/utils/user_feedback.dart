@@ -205,6 +205,21 @@ class UserFeedback {
   /// Convert technical error messages to user-friendly messages
   static String getFriendlyErrorMessage(dynamic error) {
     final errorString = error.toString().toLowerCase();
+    final rawError = error.toString();
+
+    // Supabase/Postgrest errors — surface the real message, don't hide it
+    // These show as: PostgrestException(message: ..., code: ..., details: ..., hint: ...)
+    if (rawError.contains('PostgrestException') || rawError.contains('postgrest')) {
+      // Extract the message field from the exception string if possible
+      final msgMatch = RegExp(r'message:\s*([^,)]+)').firstMatch(rawError);
+      final codeMatch = RegExp(r'code:\s*(\w+)').firstMatch(rawError);
+      final code = codeMatch?.group(1) ?? '';
+      final msg = msgMatch?.group(1)?.trim() ?? rawError;
+      if (code == '42501' || errorString.contains('row-level security') || errorString.contains('rls')) {
+        return 'Permission denied — please log out and log back in';
+      }
+      return 'Database error: $msg';
+    }
 
     // Network errors
     if (errorString.contains('network') ||

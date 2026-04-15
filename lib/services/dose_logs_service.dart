@@ -125,7 +125,9 @@ class DoseLogsService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[DoseLogsService] Failed to generate doses: $e');
-        print('[DoseLogsService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DoseLogsService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -147,7 +149,9 @@ class DoseLogsService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[DoseLogsService] Failed to fetch dose logs: $e');
-        print('[DoseLogsService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DoseLogsService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -173,7 +177,9 @@ class DoseLogsService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[DoseLogsService] Failed to fetch dose logs for date: $e');
-        print('[DoseLogsService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DoseLogsService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -207,7 +213,9 @@ class DoseLogsService {
 
       if (kDebugMode) {
         final record = existingRecords.first;
-        print('[DoseLogsService] Marking dose as MISSED: ${record['cycle_id']}, ${record['logged_at']}');
+        if (kDebugMode) {
+          print('[DoseLogsService] Marking dose as MISSED: ${record['cycle_id']}, ${record['logged_at']}');
+        }
       }
 
       // Perform UPDATE
@@ -224,7 +232,9 @@ class DoseLogsService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[DoseLogsService] ERROR in markAsMissed(): $e');
-        print('[DoseLogsService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DoseLogsService] Stack trace: $stackTrace');
+        }
       }
       return false;
     }
@@ -257,7 +267,9 @@ class DoseLogsService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[DoseLogsService] Failed to mark dose as completed: $e');
-        print('[DoseLogsService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DoseLogsService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -274,7 +286,9 @@ class DoseLogsService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[DoseLogsService] Failed to add symptoms: $e');
-        print('[DoseLogsService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DoseLogsService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -288,7 +302,9 @@ class DoseLogsService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[DoseLogsService] Failed to delete dose log: $e');
-        print('[DoseLogsService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DoseLogsService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }

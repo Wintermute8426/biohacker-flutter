@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../models/lab_result.dart';
 
@@ -21,11 +20,11 @@ class BloodworkService {
     String? cycleId,
     String? notes,
   }) async {
-    final apiKey = dotenv.env['BLOODWORK_AI_API_KEY'] ?? '';
+    const apiKey = String.fromEnvironment('BLOODWORK_AI_API_KEY');
     if (apiKey.isEmpty) {
       throw Exception(
         'BloodworkAI is not configured. '
-        'Set BLOODWORK_AI_API_KEY in .env to enable this feature.',
+        'Pass --dart-define=BLOODWORK_AI_API_KEY=... at build time to enable this feature.',
       );
     }
 

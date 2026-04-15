@@ -118,7 +118,9 @@ class DashboardAnalyticsService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[DashboardAnalyticsService] Error: $e');
-        print('[DashboardAnalyticsService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DashboardAnalyticsService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -512,7 +514,9 @@ class DashboardAnalyticsService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[DashboardAnalyticsService] Failed to get active peptides: $e');
-        print('[DashboardAnalyticsService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DashboardAnalyticsService] Stack trace: $stackTrace');
+        }
       }
       return [];
     }
@@ -666,7 +670,9 @@ class DashboardAnalyticsService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[DashboardAnalyticsService] Force refresh failed: $e');
-        print('[DashboardAnalyticsService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DashboardAnalyticsService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }

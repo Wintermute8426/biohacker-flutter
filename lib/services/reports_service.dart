@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/cycle_review.dart';
+import 'package:flutter/foundation.dart';
 
 class DoseTimelineData {
   final String peptideName;
@@ -224,7 +225,9 @@ class ReportsService {
         );
       }).toList();
     } catch (e) {
-      print('Error fetching dose timeline: $e');
+      if (kDebugMode) {
+        print('Error fetching dose timeline: $e');
+      }
       return [];
     }
   }
@@ -276,7 +279,9 @@ class ReportsService {
         );
       }).toList();
     } catch (e) {
-      print('Error fetching side effects heatmap: $e');
+      if (kDebugMode) {
+        print('Error fetching side effects heatmap: $e');
+      }
       return [];
     }
   }
@@ -332,7 +337,9 @@ class ReportsService {
         );
       }).toList();
     } catch (e) {
-      print('Error fetching weight trends: $e');
+      if (kDebugMode) {
+        print('Error fetching weight trends: $e');
+      }
       return [];
     }
   }
@@ -363,7 +370,9 @@ class ReportsService {
         );
       }).toList();
     } catch (e) {
-      print('Error fetching cycles: $e');
+      if (kDebugMode) {
+        print('Error fetching cycles: $e');
+      }
       return [];
     }
   }
@@ -445,7 +454,9 @@ class ReportsService {
 
       return correlations;
     } catch (e) {
-      print('Error fetching cycle-lab correlation: $e');
+      if (kDebugMode) {
+        print('Error fetching cycle-lab correlation: $e');
+      }
       return [];
     }
   }
@@ -476,7 +487,9 @@ class ReportsService {
         );
       }).toList();
     } catch (e) {
-      print('Error fetching cycle effectiveness: $e');
+      if (kDebugMode) {
+        print('Error fetching cycle effectiveness: $e');
+      }
       return [];
     }
   }
@@ -523,7 +536,9 @@ class ReportsService {
         return CycleReview.fromJson(response);
       }
     } catch (e) {
-      print('Error saving cycle review: $e');
+      if (kDebugMode) {
+        print('Error saving cycle review: $e');
+      }
       return null;
     }
   }
@@ -648,7 +663,9 @@ class ReportsService {
 
       return insights;
     } catch (e) {
-      print('Error generating AI insights: $e');
+      if (kDebugMode) {
+        print('Error generating AI insights: $e');
+      }
       return [];
     }
   }
@@ -674,7 +691,9 @@ class ReportsService {
           .order('upload_date', ascending: false);
 
       final labs = labsResponse as List;
-      print('DEBUG: Found ${labs.length} lab results');
+      if (kDebugMode) {
+        print('DEBUG: Found ${labs.length} lab results');
+      }
       final List<LabResultWithContext> results = [];
 
       for (int i = 0; i < labs.length; i++) {
@@ -682,7 +701,9 @@ class ReportsService {
         final labDate = DateTime.parse(lab['upload_date'] as String);
         final windowStart = labDate.subtract(const Duration(days: 90));
 
-        print('DEBUG: Processing lab from $labDate');
+        if (kDebugMode) {
+          print('DEBUG: Processing lab from $labDate');
+        }
 
         // Get cycles active during 3 months prior
         final cyclesResponse = await supabase
@@ -700,7 +721,9 @@ class ReportsService {
           dose: (c['dose'] as num).toDouble(),
         )).toList();
 
-        print('DEBUG: Found ${activeCycles.length} active cycles');
+        if (kDebugMode) {
+          print('DEBUG: Found ${activeCycles.length} active cycles');
+        }
 
         // Extract current biomarkers - handle nested structure
         final extractedData = lab['extracted_data'];
@@ -717,7 +740,9 @@ class ReportsService {
           });
         }
 
-        print('DEBUG: Extracted ${currentBiomarkers.length} biomarkers');
+        if (kDebugMode) {
+          print('DEBUG: Extracted ${currentBiomarkers.length} biomarkers');
+        }
 
         // Get previous lab for comparison
         Map<String, dynamic>? previousBiomarkers;
@@ -767,10 +792,14 @@ class ReportsService {
         ));
       }
 
-      print('DEBUG: Returning ${results.length} lab results with context');
+      if (kDebugMode) {
+        print('DEBUG: Returning ${results.length} lab results with context');
+      }
       return results;
     } catch (e) {
-      print('Error fetching labs with cycle context: $e');
+      if (kDebugMode) {
+        print('Error fetching labs with cycle context: $e');
+      }
       return [];
     }
   }
@@ -918,7 +947,9 @@ class ReportsService {
 
       return comparisons;
     } catch (e) {
-      print('Error fetching cycle comparisons: $e');
+      if (kDebugMode) {
+        print('Error fetching cycle comparisons: $e');
+      }
       return [];
     }
   }

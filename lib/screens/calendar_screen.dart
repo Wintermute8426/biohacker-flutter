@@ -14,6 +14,7 @@ import '../widgets/app_header.dart';
 import '../widgets/dose_display.dart';
 import '../widgets/crt_card.dart';
 import '../widgets/common/scanlines_painter.dart' as common;
+import 'package:flutter/foundation.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -77,7 +78,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
     _weekStart = _getWeekStart(DateTime.now());
     _monthStart = _getMonthStart(DateTime.now());
     WidgetsBinding.instance.addObserver(this);
-    print('[Calendar] SYNC FIX: initState called, lifecycle observer added for missed dose sync');
+    if (kDebugMode) {
+      print('[Calendar] SYNC FIX: initState called, lifecycle observer added for missed dose sync');
+    }
   }
 
   @override
@@ -90,7 +93,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // SYNC FIX: Aggressively refresh when app resumes
     if (state == AppLifecycleState.resumed) {
-      print('[Calendar] SYNC FIX: App resumed, forcing immediate refresh');
+      if (kDebugMode) {
+        print('[Calendar] SYNC FIX: App resumed, forcing immediate refresh');
+      }
       ref.refresh(upcomingDosesProvider);
       ref.refresh(doseSchedulesProvider);
     }
@@ -196,9 +201,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
                       upcomingDoses.when(
               data: (doses) {
           // ISSUE 1 FIX: Log dose data to verify missed status is reflected
-          print('[Calendar] ISSUE 1 DEBUG: Got ${doses.length} doses from provider');
+          if (kDebugMode) {
+            print('[Calendar] ISSUE 1 DEBUG: Got ${doses.length} doses from provider');
+          }
           final missedCount = doses.where((d) => d.status == 'MISSED').length;
-          print('[Calendar] ISSUE 1 DEBUG: Found $missedCount missed doses');
+          if (kDebugMode) {
+            print('[Calendar] ISSUE 1 DEBUG: Found $missedCount missed doses');
+          }
 
           if (doses.isEmpty) {
             return Center(
@@ -752,15 +761,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
             // ISSUE 1 DEBUG: Log every day that has doses
             if (dayDoses.isNotEmpty) {
-              print('[ISSUE1 DEBUG] WEEK VIEW - Date ${date.year}-${date.month}-${date.day}: ${dayDoses.length} doses');
-              for (final d in dayDoses) {
-                print('[ISSUE1 DEBUG]   - ${d.peptideName} ${d.doseAmount}mg');
-                print('[ISSUE1 DEBUG]     status: ${d.status}');
-                print('[ISSUE1 DEBUG]     doseLogId: ${d.doseLogId}');
-                print('[ISSUE1 DEBUG]     cycleId: ${d.cycleId}');
-                print('[ISSUE1 DEBUG]     date: ${d.date}');
+              if (kDebugMode) {
+                print('[ISSUE1 DEBUG] WEEK VIEW - Date ${date.year}-${date.month}-${date.day}: ${dayDoses.length} doses');
               }
-              print('[ISSUE1 DEBUG]   Status counts: completed=$completed, scheduled=$scheduled, missed=$missed');
+              for (final d in dayDoses) {
+                if (kDebugMode) {
+                  print('[ISSUE1 DEBUG]   - ${d.peptideName} ${d.doseAmount}mg');
+                }
+                if (kDebugMode) {
+                  print('[ISSUE1 DEBUG]     status: ${d.status}');
+                }
+                if (kDebugMode) {
+                  print('[ISSUE1 DEBUG]     doseLogId: ${d.doseLogId}');
+                }
+                if (kDebugMode) {
+                  print('[ISSUE1 DEBUG]     cycleId: ${d.cycleId}');
+                }
+                if (kDebugMode) {
+                  print('[ISSUE1 DEBUG]     date: ${d.date}');
+                }
+              }
+              if (kDebugMode) {
+                print('[ISSUE1 DEBUG]   Status counts: completed=$completed, scheduled=$scheduled, missed=$missed');
+              }
             }
 
             final isToday = date.year == DateTime.now().year &&
@@ -934,15 +957,29 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
             // ISSUE 1 DEBUG: Log every day that has doses
             if (dayDoses.isNotEmpty) {
-              print('[ISSUE1 DEBUG] MONTH VIEW - Date ${date.year}-${date.month}-${date.day}: ${dayDoses.length} doses');
-              for (final d in dayDoses) {
-                print('[ISSUE1 DEBUG]   - ${d.peptideName} ${d.doseAmount}mg');
-                print('[ISSUE1 DEBUG]     status: ${d.status}');
-                print('[ISSUE1 DEBUG]     doseLogId: ${d.doseLogId}');
-                print('[ISSUE1 DEBUG]     cycleId: ${d.cycleId}');
-                print('[ISSUE1 DEBUG]     date: ${d.date}');
+              if (kDebugMode) {
+                print('[ISSUE1 DEBUG] MONTH VIEW - Date ${date.year}-${date.month}-${date.day}: ${dayDoses.length} doses');
               }
-              print('[ISSUE1 DEBUG]   Status counts: completed=$completed, scheduled=$scheduled, missed=$missed');
+              for (final d in dayDoses) {
+                if (kDebugMode) {
+                  print('[ISSUE1 DEBUG]   - ${d.peptideName} ${d.doseAmount}mg');
+                }
+                if (kDebugMode) {
+                  print('[ISSUE1 DEBUG]     status: ${d.status}');
+                }
+                if (kDebugMode) {
+                  print('[ISSUE1 DEBUG]     doseLogId: ${d.doseLogId}');
+                }
+                if (kDebugMode) {
+                  print('[ISSUE1 DEBUG]     cycleId: ${d.cycleId}');
+                }
+                if (kDebugMode) {
+                  print('[ISSUE1 DEBUG]     date: ${d.date}');
+                }
+              }
+              if (kDebugMode) {
+                print('[ISSUE1 DEBUG]   Status counts: completed=$completed, scheduled=$scheduled, missed=$missed');
+              }
             }
 
             final isToday = date.year == DateTime.now().year &&
@@ -1648,7 +1685,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
       final userId = ref.read(currentUserIdProvider);
 
       if (userId == null) {
-        print('Error: No user ID found');
+        if (kDebugMode) {
+          print('Error: No user ID found');
+        }
         return;
       }
 
@@ -1656,7 +1695,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
 
       // If no dose_log exists yet, create one first
       if (doseLogId.isEmpty) {
-        print('[DEBUG] Creating new dose_log entry for missed dose');
+        if (kDebugMode) {
+          print('[DEBUG] Creating new dose_log entry for missed dose');
+        }
         final supabase = Supabase.instance.client;
 
         // Parse time to create proper DateTime
@@ -1686,7 +1727,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             .single();
 
         doseLogId = response['id'] as String;
-        print('[DEBUG] Created dose_log with ID: $doseLogId');
+        if (kDebugMode) {
+          print('[DEBUG] Created dose_log with ID: $doseLogId');
+        }
       } else {
         // Update existing dose_log
         await service.markAsMissed(doseLogId);
@@ -1699,7 +1742,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         // ref.invalidate only marks for rebuild, ref.refresh forces immediate refetch
         ref.refresh(upcomingDosesProvider);
         ref.refresh(doseSchedulesProvider);
-        print('[Calendar] SYNC FIX: Forced immediate provider refresh after marking missed');
+        if (kDebugMode) {
+          print('[Calendar] SYNC FIX: Forced immediate provider refresh after marking missed');
+        }
         // Show feedback
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1712,7 +1757,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
         );
       }
     } catch (e) {
-      print('Error marking dose as missed: $e');
+      if (kDebugMode) {
+        print('Error marking dose as missed: $e');
+      }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1743,7 +1790,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> with WidgetsBin
             // SYNC FIX: Use ref.refresh for immediate calendar sync
             ref.refresh(upcomingDosesProvider);
             ref.refresh(doseSchedulesProvider);
-            print('[Calendar] SYNC FIX: Side effects saved, providers refreshed');
+            if (kDebugMode) {
+              print('[Calendar] SYNC FIX: Side effects saved, providers refreshed');
+            }
           },
         );
       },

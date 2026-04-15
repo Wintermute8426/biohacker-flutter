@@ -5,6 +5,7 @@ import '../theme/wintermute_styles.dart';
 import '../services/dose_schedule_service.dart';
 import '../services/side_effects_database.dart';
 import 'full_screen_modal.dart';
+import 'package:flutter/foundation.dart';
 
 class SideEffectsModal extends ConsumerStatefulWidget {
   final DoseInstance dose;
@@ -90,7 +91,9 @@ class _SideEffectsModalState extends ConsumerState<SideEffectsModal> {
         );
       }
     } catch (e) {
-      print('Error logging side effects: $e');
+      if (kDebugMode) {
+        print('Error logging side effects: $e');
+      }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

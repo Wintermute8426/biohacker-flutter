@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' show Color;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
+import '../main.dart' show navigatorKey;
 
 /// Core notification service — init, permissions, schedule, cancel.
 /// Singleton. Call [initialize] once at app startup.
@@ -118,7 +119,40 @@ class NotificationService {
 
   static void _onTap(NotificationResponse res) {
     if (kDebugMode) print('[NotificationService] Tapped: ${res.payload}');
-    // TODO: push to relevant screen via global navigator key
+    _routeFromPayload(res.payload);
+  }
+
+  static void _routeFromPayload(String? payload) {
+    if (payload == null) return;
+    final nav = navigatorKey.currentState;
+    if (nav == null) return;
+
+    // payload format: 'type:cycleId:extra'
+    final parts = payload.split(':');
+    if (parts.isEmpty) return;
+
+    final type = parts[0];
+    switch (type) {
+      case 'dose_reminder':
+      case 'missed_dose':
+        // Navigate home — Calendar is tab index 4
+        nav.pushNamedAndRemoveUntil('/home', (route) => false);
+        if (kDebugMode) {
+          print('[NotificationService] Routed to /home for dose notification');
+        }
+        break;
+      case 'milestone':
+      case 'sideeffect':
+        nav.pushNamedAndRemoveUntil('/home', (route) => false);
+        break;
+      case 'lab':
+        nav.pushNamedAndRemoveUntil('/home', (route) => false);
+        break;
+      default:
+        // Unknown payload — bring app to foreground at home
+        nav.pushNamedAndRemoveUntil('/home', (route) => false);
+        break;
+    }
   }
 
   @pragma('vm:entry-point')
@@ -126,6 +160,7 @@ class NotificationService {
     if (kDebugMode) {
       print('[NotificationService] Background tap: ${res.payload}');
     }
+    // Routing handled on next resume via _onTap
   }
 
   // ─── ID Generation ───────────────────────────────────────────────────────────

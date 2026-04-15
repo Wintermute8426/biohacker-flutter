@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../services/secure_storage_service.dart';
 import '../services/session_manager.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthProvider with ChangeNotifier {
   final supabase = Supabase.instance.client;
@@ -44,7 +45,9 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
       });
     } catch (e) {
-      print('Auth init error: $e');
+      if (kDebugMode) {
+        print('Auth init error: $e');
+      }
       _isLoading = false;
       notifyListeners();
     }

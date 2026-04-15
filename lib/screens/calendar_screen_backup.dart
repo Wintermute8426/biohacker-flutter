@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../theme/colors.dart';
 import '../services/calendar_service.dart';
+import 'package:flutter/foundation.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({Key? key}) : super(key: key);
@@ -45,7 +46,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
         });
       }
     } catch (e) {
-      print('Error loading calendar events: $e');
+      if (kDebugMode) {
+        print('Error loading calendar events: $e');
+      }
       if (mounted) {
         setState(() => _isLoading = false);
         _showError('Failed to load calendar: $e');

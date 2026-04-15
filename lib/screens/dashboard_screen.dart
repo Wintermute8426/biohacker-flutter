@@ -22,6 +22,7 @@ import 'research_screen.dart';
 import '../main.dart' show authProviderProvider;
 // Import providers for invalidation after marking dose as missed
 import '../services/dose_schedule_service.dart' show upcomingDosesProvider, doseSchedulesProvider;
+import 'package:flutter/foundation.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -99,7 +100,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         setState(() => _isLoading = false);
       }
     } catch (e) {
-      print('[Dashboard] Error loading data: $e');
+      if (kDebugMode) {
+        print('[Dashboard] Error loading data: $e');
+      }
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -110,21 +113,39 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     try {
       final userId = ref.read(authProviderProvider).user?.id;
       if (userId == null) {
-        print('[Dashboard] ERROR: No user ID found');
+        if (kDebugMode) {
+          print('[Dashboard] ERROR: No user ID found');
+        }
         return;
       }
 
-      print('[Dashboard] === MARKING DOSE AS MISSED ===');
-      print('[Dashboard] Dose Log ID: ${dose.doseLogId}');
-      print('[Dashboard] Cycle ID: ${dose.cycleId}');
-      print('[Dashboard] Peptide: ${dose.peptideName}');
-      print('[Dashboard] Date: ${dose.date}');
-      print('[Dashboard] Amount: ${dose.doseAmount}mg');
-      print('[Dashboard] Current Status: ${dose.status}');
+      if (kDebugMode) {
+        print('[Dashboard] === MARKING DOSE AS MISSED ===');
+      }
+      if (kDebugMode) {
+        print('[Dashboard] Dose Log ID: ${dose.doseLogId}');
+      }
+      if (kDebugMode) {
+        print('[Dashboard] Cycle ID: ${dose.cycleId}');
+      }
+      if (kDebugMode) {
+        print('[Dashboard] Peptide: ${dose.peptideName}');
+      }
+      if (kDebugMode) {
+        print('[Dashboard] Date: ${dose.date}');
+      }
+      if (kDebugMode) {
+        print('[Dashboard] Amount: ${dose.doseAmount}mg');
+      }
+      if (kDebugMode) {
+        print('[Dashboard] Current Status: ${dose.status}');
+      }
 
       // If dose_log doesn't exist, create it first
       if (dose.doseLogId.isEmpty) {
-        print('[Dashboard] No dose_log exists, creating new one');
+        if (kDebugMode) {
+          print('[Dashboard] No dose_log exists, creating new one');
+        }
         final supabase = Supabase.instance.client;
 
         // Parse time to create proper DateTime
@@ -153,20 +174,28 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             .select()
             .single();
 
-        print('[Dashboard] SUCCESS: Created dose_log with ID: ${response['id']}');
+        if (kDebugMode) {
+          print('[Dashboard] SUCCESS: Created dose_log with ID: ${response['id']}');
+        }
       } else {
         // Update existing dose_log
-        print('[Dashboard] Updating existing dose_log with ID: ${dose.doseLogId}');
+        if (kDebugMode) {
+          print('[Dashboard] Updating existing dose_log with ID: ${dose.doseLogId}');
+        }
         final doseLogsService = ref.read(doseLogsServiceProvider);
 
         final success = await doseLogsService.markAsMissed(dose.doseLogId);
 
         if (!success) {
-          print('[Dashboard] ERROR: markAsMissed returned false - database save failed');
+          if (kDebugMode) {
+            print('[Dashboard] ERROR: markAsMissed returned false - database save failed');
+          }
           throw Exception('Database save failed - markAsMissed returned false');
         }
 
-        print('[Dashboard] SUCCESS: Updated dose_log ${dose.doseLogId} to MISSED');
+        if (kDebugMode) {
+          print('[Dashboard] SUCCESS: Updated dose_log ${dose.doseLogId} to MISSED');
+        }
       }
 
       if (mounted) {
@@ -187,19 +216,29 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
         );
 
-        print('[Dashboard] SYNC FIX: Refreshing providers immediately...');
+        if (kDebugMode) {
+          print('[Dashboard] SYNC FIX: Refreshing providers immediately...');
+        }
         // CRITICAL FIX: Use ref.refresh for immediate calendar sync
         // ref.invalidate only marks for rebuild, ref.refresh forces immediate refetch
         ref.refresh(upcomingDosesProvider);
         ref.refresh(doseSchedulesProvider);
 
-        print('[Dashboard] Reloading dashboard data...');
+        if (kDebugMode) {
+          print('[Dashboard] Reloading dashboard data...');
+        }
         await _loadData();
-        print('[Dashboard] === MARK AS MISSED COMPLETE - CALENDAR SYNCED ===');
+        if (kDebugMode) {
+          print('[Dashboard] === MARK AS MISSED COMPLETE - CALENDAR SYNCED ===');
+        }
       }
     } catch (e, stackTrace) {
-      print('[Dashboard] ERROR: Failed to mark dose as missed - $e');
-      print('[Dashboard] Dose details: cycleId=${dose.cycleId}, scheduleId=${dose.scheduleId}');
+      if (kDebugMode) {
+        print('[Dashboard] ERROR: Failed to mark dose as missed - $e');
+      }
+      if (kDebugMode) {
+        print('[Dashboard] Dose details: cycleId=${dose.cycleId}, scheduleId=${dose.scheduleId}');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -324,7 +363,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   double calculateMLDraw(String peptideName, double doseMg) {
     final reconInfo = _reconstitutionData[peptideName];
     if (reconInfo == null) {
-      print('[Dashboard] WARNING: No recon data for $peptideName, using default 5mg/2mL');
+      if (kDebugMode) {
+        print('[Dashboard] WARNING: No recon data for $peptideName, using default 5mg/2mL');
+      }
       return (doseMg / 5.0) * 2.0;
     }
     final totalMg = reconInfo[0];
@@ -332,7 +373,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final concentration = totalMg / totalML; // mg/mL
     final mlDraw = doseMg / concentration;
 
-    print('[Dashboard] mL calc for $peptideName: ${doseMg}mg dose, ${totalMg}mg/${totalML}mL = ${concentration}mg/mL → ${mlDraw}mL');
+    if (kDebugMode) {
+      print('[Dashboard] mL calc for $peptideName: ${doseMg}mg dose, ${totalMg}mg/${totalML}mL = ${concentration}mg/mL → ${mlDraw}mL');
+    }
 
     return mlDraw;
   }

@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class WeightLog {
   final String? id;
@@ -48,7 +49,9 @@ class WeightLogsDatabase {
         throw Exception('User not authenticated');
       }
 
-      print('DEBUG: Saving weight log - User: ${user.id}, Weight: $weightLbs');
+      if (kDebugMode) {
+        print('DEBUG: Saving weight log - User: ${user.id}, Weight: $weightLbs');
+      }
 
       final data = {
         'user_id': user.id,
@@ -58,7 +61,9 @@ class WeightLogsDatabase {
         'notes': notes,
       };
 
-      print('DEBUG: Data being inserted: $data');
+      if (kDebugMode) {
+        print('DEBUG: Data being inserted: $data');
+      }
 
       final response = await supabase
           .from(tableName)
@@ -66,10 +71,14 @@ class WeightLogsDatabase {
           .select()
           .single();
 
-      print('DEBUG: Weight log saved successfully: $response');
+      if (kDebugMode) {
+        print('DEBUG: Weight log saved successfully: $response');
+      }
       return WeightLog.fromJson(response);
     } catch (e) {
-      print('ERROR saving weight log: $e');
+      if (kDebugMode) {
+        print('ERROR saving weight log: $e');
+      }
       rethrow; // Re-throw so caller can see the error
     }
   }
@@ -89,7 +98,9 @@ class WeightLogsDatabase {
 
       return (response as List).map((e) => WeightLog.fromJson(e)).toList();
     } catch (e) {
-      print('Error fetching weight logs: $e');
+      if (kDebugMode) {
+        print('Error fetching weight logs: $e');
+      }
       return [];
     }
   }
@@ -108,7 +119,9 @@ class WeightLogsDatabase {
 
       return true;
     } catch (e) {
-      print('Error deleting weight log: $e');
+      if (kDebugMode) {
+        print('Error deleting weight log: $e');
+      }
       return false;
     }
   }
@@ -130,7 +143,9 @@ class WeightLogsDatabase {
 
       return (response as List).map((e) => WeightLog.fromJson(e)).toList();
     } catch (e) {
-      print('Error fetching weight trend: $e');
+      if (kDebugMode) {
+        print('Error fetching weight trend: $e');
+      }
       return [];
     }
   }

@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class SideEffect {
   final String id;
@@ -97,7 +98,9 @@ class SideEffectsDatabase {
 
       return SideEffect.fromJson(response);
     } catch (e) {
-      print('Error logging side effect: $e');
+      if (kDebugMode) {
+        print('Error logging side effect: $e');
+      }
       return null;
     }
   }
@@ -121,7 +124,9 @@ class SideEffectsDatabase {
 
       return sideEffects;
     } catch (e) {
-      print('Error loading side effects: $e');
+      if (kDebugMode) {
+        print('Error loading side effects: $e');
+      }
       return [];
     }
   }
@@ -144,7 +149,9 @@ class SideEffectsDatabase {
 
       return sideEffects;
     } catch (e) {
-      print('Error loading side effects: $e');
+      if (kDebugMode) {
+        print('Error loading side effects: $e');
+      }
       return [];
     }
   }
@@ -163,7 +170,9 @@ class SideEffectsDatabase {
 
       return true;
     } catch (e) {
-      print('Error deleting side effect: $e');
+      if (kDebugMode) {
+        print('Error deleting side effect: $e');
+      }
       return false;
     }
   }

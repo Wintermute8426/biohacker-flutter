@@ -1,29 +1,55 @@
 {
-  "project_info": {
-    "project_number": "597734941366",
-    "project_id": "biohacker-9a929",
-    "storage_bucket": "biohacker-9a929.firebasestorage.app"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:597734941366:android:c5d529ed6c5f0b3ff77c17",
-        "android_client_info": {
-          "package_name": "com.example.biohacker"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAAGQkcBfGxX3Bfs0P6gV9dNbQsFCvYqAo"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    }
-  ],
-  "configuration_version": "1"
+ "project_info": {
+ "project_number": "597734941366",
+ "project_id": "biohacker-9a929",
+ "storage_bucket": "biohacker-9a929.firebasestorage.app"
+ },
+ "client": [
+ {
+ "client_info": {
+ "mobilesdk_app_id": "1:597734941366:android:a13c86e4cd918ba7f77c17",
+ "android_client_info": {
+ "package_name": "com.biohacker.biohacker_app"
+ }
+ },
+ "oauth_client": [
+ {
+ "client_id": "597734941366-5vpmon4neo9niljdaspatffma3565l32.apps.googleusercontent.com",
+ "client_type": 1,
+ "android_info": {
+ "package_name": "com.biohacker.biohacker_app",
+ "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+ }
+ },
+ {
+ "client_id": "597734941366-vc41lllps84uh24aae5u691kh3s8k11t.apps.googleusercontent.com",
+ "client_type": 1,
+ "android_info": {
+ "package_name": "com.biohacker.biohacker_app",
+ "certificate_hash": "0b7ad96ee965b529897e4b35e132ac7b89c4b1a9"
+ }
+ },
+ {
+ "client_id": "597734941366-4g3379a370j233ugg8hrb9f76t5eir5e.apps.googleusercontent.com",
+ "client_type": 3
+ }
+ ],
+ "api_key": [
+ {
+ "current_key": "AIzaSyAAGQkcBfGxX3Bfs0P6gV9dNbQsFCvYqAo"
+ }
+ ],
+ "services": {
+ "appinvite_service": {
+ "other_platform_oauth_client": [
+ {
+ "client_id": "597734941366-4g3379a370j233ugg8hrb9f76t5eir5e.apps.googleusercontent.com",
+ "client_type": 3
+ }
+ ]
+ }
+ }
+ }
+ ],
+ "configuration_version": "1"
 }

@@ -164,10 +164,14 @@ class DoseScheduleService {
       return DoseSchedule.fromJson(response);
     } catch (e, stackTrace) {
       final errorMsg = 'Supabase Error: ${e.toString()}';
-      print('[DoseScheduleService] Error creating dose schedule: $errorMsg');
+      if (kDebugMode) {
+        print('[DoseScheduleService] Error creating dose schedule: $errorMsg');
+      }
       if (kDebugMode) {
         print('[DoseScheduleService] Exception type: ${e.runtimeType}');
-        print('[DoseScheduleService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[DoseScheduleService] Stack trace: $stackTrace');
+        }
       }
 
       // Throw the error so caller can see it

@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/dose_logs_service.dart';
+import 'package:flutter/foundation.dart';
 
 class MarkMissedModal extends StatefulWidget {
   final String doseLogId;
@@ -45,7 +46,9 @@ class _MarkMissedModalState extends State<MarkMissedModal> {
       final service = DoseLogsService(Supabase.instance.client);
       await service.markAsMissed(widget.doseLogId);
 
-      print('[DEBUG] Dose marked as MISSED');
+      if (kDebugMode) {
+        print('[DEBUG] Dose marked as MISSED');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +62,9 @@ class _MarkMissedModalState extends State<MarkMissedModal> {
         widget.onCompleted();
       }
     } catch (e) {
-      print('[ERROR] Failed to mark dose as missed: $e');
+      if (kDebugMode) {
+        print('[ERROR] Failed to mark dose as missed: $e');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

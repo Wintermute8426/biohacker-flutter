@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/dose_logs_service.dart';
+import 'package:flutter/foundation.dart';
 
 class AddSymptomsModal extends StatefulWidget {
   final String doseLogId;
@@ -83,7 +84,9 @@ class _AddSymptomsModalState extends State<AddSymptomsModal> {
       // Auto-mark as COMPLETED after symptoms logged
       await service.markAsCompleted(widget.doseLogId);
 
-      print('[DEBUG] Symptoms added and dose marked as COMPLETED');
+      if (kDebugMode) {
+        print('[DEBUG] Symptoms added and dose marked as COMPLETED');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -97,7 +100,9 @@ class _AddSymptomsModalState extends State<AddSymptomsModal> {
         widget.onCompleted();
       }
     } catch (e) {
-      print('[ERROR] Failed to add symptoms: $e');
+      if (kDebugMode) {
+        print('[ERROR] Failed to add symptoms: $e');
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

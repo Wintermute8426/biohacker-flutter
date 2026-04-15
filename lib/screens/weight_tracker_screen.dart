@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/weight_logs_database.dart';
+import 'package:flutter/foundation.dart';
 
 class WeightTrackerWidget extends StatefulWidget {
   const WeightTrackerWidget({Key? key}) : super(key: key);
@@ -198,7 +199,9 @@ class _WeightTrackerWidgetState extends State<WeightTrackerWidget> {
                       );
                     }
                   } catch (e) {
-                    print('Error in save button: $e');
+                    if (kDebugMode) {
+                      print('Error in save button: $e');
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('❌ Error: $e'),

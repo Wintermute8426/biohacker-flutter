@@ -245,7 +245,9 @@ class UserProfileService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[UserProfileService] Error fetching user profile: $e');
-        print('[UserProfileService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[UserProfileService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -271,7 +273,9 @@ class UserProfileService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[UserProfileService] Error creating user profile: $e');
-        print('[UserProfileService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[UserProfileService] Stack trace: $stackTrace');
+        }
       }
       rethrow;
     }
@@ -352,9 +356,15 @@ class UserProfileService {
 
       if (kDebugMode) {
         print('[UserProfile] ========================================');
-        print('[UserProfile] Updating profile for user: $userId');
-        print('[UserProfile] Updates: $updates');
-        print('[UserProfile] ========================================');
+        if (kDebugMode) {
+          print('[UserProfile] Updating profile for user: $userId');
+        }
+        if (kDebugMode) {
+          print('[UserProfile] Updates: $updates');
+        }
+        if (kDebugMode) {
+          print('[UserProfile] ========================================');
+        }
       }
 
       final response = await _supabase
@@ -370,10 +380,18 @@ class UserProfileService {
       if (response.isEmpty) {
         if (kDebugMode) {
           print('[UserProfile] ⚠️  WARNING: Empty response from update.');
-          print('[UserProfile] This usually means:');
-          print('[UserProfile]   1. User profile does not exist (creating new one...)');
-          print('[UserProfile]   2. RLS policy is blocking the UPDATE');
-          print('[UserProfile]   3. Database columns do not exist (run migration!)');
+          if (kDebugMode) {
+            print('[UserProfile] This usually means:');
+          }
+          if (kDebugMode) {
+            print('[UserProfile]   1. User profile does not exist (creating new one...)');
+          }
+          if (kDebugMode) {
+            print('[UserProfile]   2. RLS policy is blocking the UPDATE');
+          }
+          if (kDebugMode) {
+            print('[UserProfile]   3. Database columns do not exist (run migration!)');
+          }
         }
 
         // Try to create if doesn't exist
@@ -383,27 +401,49 @@ class UserProfileService {
       final profile = UserProfile.fromJson(response.first);
       if (kDebugMode) {
         print('[UserProfile] ✅ Successfully updated profile');
-        print('[UserProfile] Profile data: ${profile.toJson()}');
+        if (kDebugMode) {
+          print('[UserProfile] Profile data: ${profile.toJson()}');
+        }
       }
       return profile;
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[UserProfile] ❌ ERROR updating user profile');
-        print('[UserProfile] Error type: ${e.runtimeType}');
-        print('[UserProfile] Error message: $e');
-        print('[UserProfile] Stack trace:');
-        print(stackTrace);
+        if (kDebugMode) {
+          print('[UserProfile] Error type: ${e.runtimeType}');
+        }
+        if (kDebugMode) {
+          print('[UserProfile] Error message: $e');
+        }
+        if (kDebugMode) {
+          print('[UserProfile] Stack trace:');
+        }
+        if (kDebugMode) {
+          print(stackTrace);
+        }
 
         // Check for specific error types
         if (e.toString().contains('column') && e.toString().contains('does not exist')) {
-          print('[UserProfile] 🚨 DATABASE SCHEMA MISMATCH!');
-          print('[UserProfile] Run DATABASE_MIGRATION_IMPERIAL.sql in Supabase SQL Editor');
+          if (kDebugMode) {
+            print('[UserProfile] 🚨 DATABASE SCHEMA MISMATCH!');
+          }
+          if (kDebugMode) {
+            print('[UserProfile] Run DATABASE_MIGRATION_IMPERIAL.sql in Supabase SQL Editor');
+          }
         } else if (e.toString().contains('duplicate key')) {
-          print('[UserProfile] 🚨 DUPLICATE USERNAME!');
-          print('[UserProfile] Username already exists. Choose a different one.');
+          if (kDebugMode) {
+            print('[UserProfile] 🚨 DUPLICATE USERNAME!');
+          }
+          if (kDebugMode) {
+            print('[UserProfile] Username already exists. Choose a different one.');
+          }
         } else if (e.toString().contains('violates check constraint')) {
-          print('[UserProfile] 🚨 VALIDATION FAILED!');
-          print('[UserProfile] Data does not meet database constraints.');
+          if (kDebugMode) {
+            print('[UserProfile] 🚨 VALIDATION FAILED!');
+          }
+          if (kDebugMode) {
+            print('[UserProfile] Data does not meet database constraints.');
+          }
         }
       }
 
@@ -444,7 +484,9 @@ class UserProfileService {
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('[UserProfileService] Error fetching latest weight: $e');
-        print('[UserProfileService] Stack trace: $stackTrace');
+        if (kDebugMode) {
+          print('[UserProfileService] Stack trace: $stackTrace');
+        }
       }
       return 'Error loading weight';
     }
@@ -472,7 +514,9 @@ class UserProfileService {
       if (!e.toString().contains('duplicate key')) {
         if (kDebugMode) {
           print('[UserProfileService] Error initializing notification preferences: $e');
-          print('[UserProfileService] Stack trace: $stackTrace');
+          if (kDebugMode) {
+            print('[UserProfileService] Stack trace: $stackTrace');
+          }
         }
       }
     }

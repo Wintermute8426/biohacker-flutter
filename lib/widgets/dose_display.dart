@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 class DoseDisplay extends StatelessWidget {
   final double doseMg;
@@ -39,7 +40,9 @@ class DoseDisplay extends StatelessWidget {
 
     final reconInfo = reconstitutionData[normalizedName];
     if (reconInfo == null) {
-      print('[DoseDisplay] WARNING: No recon data for "$peptideName" (normalized: "$normalizedName"), using default 5mg/2mL');
+      if (kDebugMode) {
+        print('[DoseDisplay] WARNING: No recon data for "$peptideName" (normalized: "$normalizedName"), using default 5mg/2mL');
+      }
       return (doseMg / 5.0) * 2.0;
     }
 
@@ -48,7 +51,9 @@ class DoseDisplay extends StatelessWidget {
     final concentration = totalMg / totalML; // mg/mL
     final mlDraw = doseMg / concentration;
 
-    print('[DoseDisplay] $normalizedName: ${doseMg}mg from ${totalMg}mg/${totalML}mL = ${concentration}mg/mL → ${mlDraw.toStringAsFixed(3)}mL');
+    if (kDebugMode) {
+      print('[DoseDisplay] $normalizedName: ${doseMg}mg from ${totalMg}mg/${totalML}mL = ${concentration}mg/mL → ${mlDraw.toStringAsFixed(3)}mL');
+    }
 
     return mlDraw;
   }

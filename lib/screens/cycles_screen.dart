@@ -21,6 +21,7 @@ import '../widgets/cyberpunk_background.dart';
 import '../widgets/expandable_cycle_card.dart';
 import '../widgets/app_header.dart';
 import '../widgets/common/empty_state.dart';
+import 'package:flutter/foundation.dart';
 
 class CyclesScreen extends StatefulWidget {
   const CyclesScreen({Key? key}) : super(key: key);
@@ -968,13 +969,21 @@ class _CyclesScreenState extends State<CyclesScreen> {
                         return;
 
                         // OLD LOGIC BELOW - DEPRECATED
-                        print('[DEBUG CREATE CYCLE] Button pressed');
-                        print('[DEBUG CREATE CYCLE] Peptide: "${_peptideController.text}"');
-                        print('[DEBUG CREATE CYCLE] Dose: "${_doseController.text}"');
+                        if (kDebugMode) {
+                          print('[DEBUG CREATE CYCLE] Button pressed');
+                        }
+                        if (kDebugMode) {
+                          print('[DEBUG CREATE CYCLE] Peptide: "${_peptideController.text}"');
+                        }
+                        if (kDebugMode) {
+                          print('[DEBUG CREATE CYCLE] Dose: "${_doseController.text}"');
+                        }
                         
                         if (_peptideController.text.isEmpty ||
                             _doseController.text.isEmpty) {
-                          print('[DEBUG CREATE CYCLE] Validation failed - showing snackbar');
+                          if (kDebugMode) {
+                            print('[DEBUG CREATE CYCLE] Validation failed - showing snackbar');
+                          }
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Please fill in peptide and dose'),
@@ -984,14 +993,20 @@ class _CyclesScreenState extends State<CyclesScreen> {
                           return;
                         }
 
-                        print('[DEBUG CREATE CYCLE] Validation passed');
+                        if (kDebugMode) {
+                          print('[DEBUG CREATE CYCLE] Validation passed');
+                        }
                         final peptideName = _peptideController.text;
                         final dose = double.tryParse(_doseController.text) ?? 0;
                         final weeks = int.tryParse(_weeksController.text) ?? 8;
-                        print('[DEBUG CREATE CYCLE] Parsed values - peptide: $peptideName, dose: $dose, weeks: $weeks');
+                        if (kDebugMode) {
+                          print('[DEBUG CREATE CYCLE] Parsed values - peptide: $peptideName, dose: $dose, weeks: $weeks');
+                        }
 
                         // Save cycle and capture the actual returned cycle with real UUID
-                        print('[DEBUG CREATE CYCLE] Calling db.saveCycle()...');
+                        if (kDebugMode) {
+                          print('[DEBUG CREATE CYCLE] Calling db.saveCycle()...');
+                        }
                         late Cycle createdCycle;
                         try {
                           final result = await db.saveCycle(
@@ -1004,10 +1019,14 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             advancedSchedule: _selectedDosingSchedule?.toJson(),
                           );
                           
-                          print('[DEBUG CREATE CYCLE] saveCycle returned: ${result?.id}');
+                          if (kDebugMode) {
+                            print('[DEBUG CREATE CYCLE] saveCycle returned: ${result?.id}');
+                          }
                           
                           if (result == null) {
-                            print('[DEBUG CREATE CYCLE] result is null');
+                            if (kDebugMode) {
+                              print('[DEBUG CREATE CYCLE] result is null');
+                            }
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -1019,7 +1038,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             return;
                           }
                           createdCycle = result;
-                          print('[DEBUG CREATE CYCLE] createdCycle is valid - peptideName: ${createdCycle.peptideName}, id: ${createdCycle.id}');
+                          if (kDebugMode) {
+                            print('[DEBUG CREATE CYCLE] createdCycle is valid - peptideName: ${createdCycle.peptideName}, id: ${createdCycle.id}');
+                          }
                           
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -1028,8 +1049,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
                             ),
                           );
                         } catch (e, stackTrace) {
-                          print('[DEBUG CREATE CYCLE] Exception in saveCycle: $e');
-                          print('[DEBUG CREATE CYCLE] Stack trace: $stackTrace');
+                          if (kDebugMode) {
+                            print('[DEBUG CREATE CYCLE] Exception in saveCycle: $e');
+                          }
+                          if (kDebugMode) {
+                            print('[DEBUG CREATE CYCLE] Stack trace: $stackTrace');
+                          }
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -1212,11 +1237,15 @@ class _CyclesScreenState extends State<CyclesScreen> {
     );
 
     if (result == null) {
-      print('[DEBUG UNIFIED] Setup cancelled');
+      if (kDebugMode) {
+        print('[DEBUG UNIFIED] Setup cancelled');
+      }
       return;
     }
 
-    print('[DEBUG UNIFIED] Setup result: $result');
+    if (kDebugMode) {
+      print('[DEBUG UNIFIED] Setup result: $result');
+    }
 
     try {
       final peptideName = result['peptideName'] as String?;
@@ -1236,7 +1265,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
       }
 
       // 1. Create the cycle
-      print('[DEBUG UNIFIED] Creating cycle for $peptideName');
+      if (kDebugMode) {
+        print('[DEBUG UNIFIED] Creating cycle for $peptideName');
+      }
       final firstDose = schedule!.isNotEmpty 
           ? ((schedule![0]['dose'] as num?)?.toDouble() ?? desiredDosageMg ?? 1.0)
           : (desiredDosageMg ?? 1.0);
@@ -1255,7 +1286,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
         throw Exception('Failed to create cycle');
       }
 
-      print('[DEBUG UNIFIED] Cycle created: ${createdCycle.id}');
+      if (kDebugMode) {
+        print('[DEBUG UNIFIED] Cycle created: ${createdCycle.id}');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1289,14 +1322,18 @@ class _CyclesScreenState extends State<CyclesScreen> {
         throw Exception('Failed to create dose schedule');
       }
 
-      print('[DEBUG UNIFIED] Master schedule created: ${masterSchedule!.id}');
+      if (kDebugMode) {
+        print('[DEBUG UNIFIED] Master schedule created: ${masterSchedule!.id}');
+      }
 
       // 3. Create dose_logs for each day in the ramp schedule
       final doseLogsService = DoseLogsService(Supabase.instance.client);
       int createdDoseLogs = 0;
 
       if (schedule!.isEmpty) {
-        print('[DEBUG UNIFIED] No doses in schedule, skipping dose log creation');
+        if (kDebugMode) {
+          print('[DEBUG UNIFIED] No doses in schedule, skipping dose log creation');
+        }
       } else {
         for (final dose in schedule!) {
         final dayOffset = dose['dayOffset'] as int? ?? 0;
@@ -1312,7 +1349,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
         final doseDateTime = DateTime(actualDoseDate.year, actualDoseDate.month, actualDoseDate.day, hour, minute);
 
         // Insert into dose_logs
-        print('[DEBUG UNIFIED] Inserting dose_log: amount=${doseAmount}mg, date=$doseDateTime, phase=$phase');
+        if (kDebugMode) {
+          print('[DEBUG UNIFIED] Inserting dose_log: amount=${doseAmount}mg, date=$doseDateTime, phase=$phase');
+        }
         try {
           final insertData = {
             'user_id': userId,
@@ -1321,21 +1360,31 @@ class _CyclesScreenState extends State<CyclesScreen> {
             'logged_at': doseDateTime.toIso8601String(),
             'notes': 'Phase: $phase',
           };
-          print('[DEBUG UNIFIED]   Data: $insertData');
+          if (kDebugMode) {
+            print('[DEBUG UNIFIED]   Data: $insertData');
+          }
           
           final doseLog = await Supabase.instance.client.from('dose_logs').insert(insertData).select().single();
 
           createdDoseLogs++;
-          print('[DEBUG UNIFIED] ✓ Created dose_log: ${doseLog['id']} for ${doseAmount}mg (phase: $phase)');
+          if (kDebugMode) {
+            print('[DEBUG UNIFIED] ✓ Created dose_log: ${doseLog['id']} for ${doseAmount}mg (phase: $phase)');
+          }
         } catch (e, stackTrace) {
-          print('[DEBUG UNIFIED] ✗ FAILED to create dose_log for day $dayOffset: $e');
-          print('[DEBUG UNIFIED]   Stack: $stackTrace');
+          if (kDebugMode) {
+            print('[DEBUG UNIFIED] ✗ FAILED to create dose_log for day $dayOffset: $e');
+          }
+          if (kDebugMode) {
+            print('[DEBUG UNIFIED]   Stack: $stackTrace');
+          }
           rethrow; // Re-throw so outer catch sees it
         }
       }
       }
 
-      print('[DEBUG UNIFIED] Created $createdDoseLogs dose logs');
+      if (kDebugMode) {
+        print('[DEBUG UNIFIED] Created $createdDoseLogs dose logs');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1350,8 +1399,12 @@ class _CyclesScreenState extends State<CyclesScreen> {
       // 4. Reload cycles
       _loadCycles();
     } catch (e, stackTrace) {
-      print('[DEBUG UNIFIED] Error: $e');
-      print('[DEBUG UNIFIED] Stack trace: $stackTrace');
+      if (kDebugMode) {
+        print('[DEBUG UNIFIED] Error: $e');
+      }
+      if (kDebugMode) {
+        print('[DEBUG UNIFIED] Stack trace: $stackTrace');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1480,7 +1533,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
           .where((log) => log['status'] == 'MISSED')
           .toList();
 
-      print('[ISSUE2 DEBUG] Cycle $cycleId: ${missedDoseLogs.length} missed doses out of $totalDoses total');
+      if (kDebugMode) {
+        print('[ISSUE2 DEBUG] Cycle $cycleId: ${missedDoseLogs.length} missed doses out of $totalDoses total');
+      }
 
       // Build missed dose list with date + amount
       final missedDoses = missedDoseLogs.take(5).map((log) {
@@ -1511,7 +1566,9 @@ class _CyclesScreenState extends State<CyclesScreen> {
         'missedDoses': missedDoses,
       };
     } catch (e) {
-      print('[ISSUE2 ERROR] Error loading cycle summary: $e');
+      if (kDebugMode) {
+        print('[ISSUE2 ERROR] Error loading cycle summary: $e');
+      }
       return {
         'totalDoses': 0,
         'lastDose': null,

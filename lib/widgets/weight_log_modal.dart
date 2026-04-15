@@ -4,6 +4,7 @@ import '../theme/colors.dart';
 import '../theme/wintermute_styles.dart';
 import '../services/weight_logs_database.dart';
 import 'full_screen_modal.dart';
+import 'package:flutter/foundation.dart';
 
 class WeightLogModal extends ConsumerStatefulWidget {
   final VoidCallback onSaved;
@@ -126,7 +127,9 @@ class _WeightLogModalState extends ConsumerState<WeightLogModal> {
         widget.onSaved();
       }
     } catch (e) {
-      print('Error saving weight: $e');
+      if (kDebugMode) {
+        print('Error saving weight: $e');
+      }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

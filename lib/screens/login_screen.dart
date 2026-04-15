@@ -25,6 +25,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   bool _isLoading = false;
   String? _error;
 
+  // Rate limiting
+  int _failedAttempts = 0;
+  bool _isLockedOut = false;
+  int _lockoutSecondsRemaining = 0;
+  Timer? _lockoutTimer;
+
   // Boot sequence
   int _bootStep = 0;
   bool _loginSuccess = false;
@@ -55,8 +61,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     _emailController.dispose();
     _passwordController.dispose();
     _bootTimer?.cancel();
+    _lockoutTimer?.cancel();
     _glowController.dispose();
     super.dispose();
+  }
+
+  void _startLockout() {
+    _lockoutSecondsRemaining = 30;
+    _isLockedOut = true;
+    _lockoutTimer?.cancel();
+    _lockoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) { timer.cancel(); return; }
+      setState(() {
+        _lockoutSecondsRemaining--;
+        if (_lockoutSecondsRemaining <= 0) {
+          _isLockedOut = false;
+          _failedAttempts = 0;
+          timer.cancel();
+        }
+      });
+    });
   }
 
   void _startBootSequence() {
@@ -111,6 +135,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
             _passwordController.text,
           );
       _completeBootSequence(true);
+      _failedAttempts = 0;
+      _isLockedOut = false;
       // Success is handled by navigation in main.dart via auth state change
     } catch (e) {
       _completeBootSequence(false);
@@ -119,6 +145,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         setState(() {
           _error = 'ACCESS DENIED: $friendlyMessage';
           _isLoading = false;
+          _failedAttempts++;
+          if (_failedAttempts >= 5) _startLockout();
         });
       }
     }
@@ -541,23 +569,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         boxShadow: WintermmuteStyles.cyanGlowShadow,
       ),
       child: ElevatedButton(
-        onPressed: _handleLogin,
+        onPressed: (_isLockedOut) ? null : _handleLogin,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: _isLockedOut ? AppColors.error.withOpacity(0.3) : AppColors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
           ),
         ),
-        child: const Text(
-          'AUTHENTICATE',
-          style: TextStyle(
-            color: AppColors.background,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            fontFamily: 'JetBrains Mono',
-            letterSpacing: 2,
-          ),
-        ),
+        child: _isLockedOut
+            ? Text(
+                'TRY AGAIN IN ${_lockoutSecondsRemaining}s',
+                style: const TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  fontFamily: 'JetBrains Mono',
+                  letterSpacing: 1.5,
+                ),
+              )
+            : const Text(
+                'AUTHENTICATE',
+                style: TextStyle(
+                  color: AppColors.background,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  fontFamily: 'JetBrains Mono',
+                  letterSpacing: 2,
+                ),
+              ),
       ),
     );
   }

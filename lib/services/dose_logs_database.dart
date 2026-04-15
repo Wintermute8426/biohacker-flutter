@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 class DoseLog {
   final String id;
@@ -86,7 +87,9 @@ class DoseLogsDatabase {
 
       return DoseLog.fromJson(response);
     } catch (e) {
-      print('Error logging dose: $e');
+      if (kDebugMode) {
+        print('Error logging dose: $e');
+      }
       return null;
     }
   }
@@ -110,7 +113,9 @@ class DoseLogsDatabase {
 
       return logs;
     } catch (e) {
-      print('Error loading dose logs: $e');
+      if (kDebugMode) {
+        print('Error loading dose logs: $e');
+      }
       return [];
     }
   }
@@ -133,7 +138,9 @@ class DoseLogsDatabase {
 
       return logs;
     } catch (e) {
-      print('Error loading dose logs: $e');
+      if (kDebugMode) {
+        print('Error loading dose logs: $e');
+      }
       return [];
     }
   }
@@ -152,7 +159,9 @@ class DoseLogsDatabase {
 
       return true;
     } catch (e) {
-      print('Error deleting dose log: $e');
+      if (kDebugMode) {
+        print('Error deleting dose log: $e');
+      }
       return false;
     }
   }

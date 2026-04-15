@@ -20,6 +20,7 @@ import 'reports_screen.dart';
 import 'calendar_screen.dart';
 import 'profile_screen.dart';
 import 'about_screen.dart';
+import 'package:flutter/foundation.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -82,13 +83,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         displayName = user?.email?.split('@')[0].toUpperCase();
       }
       
-      print('[Drawer] User ID: $userId, Username: $displayName');
+      if (kDebugMode) {
+        print('[Drawer] User ID: $userId, Username: $displayName');
+      }
       
       setState(() {
         _userName = displayName ?? 'OPERATOR';
       });
     } catch (e) {
-      print('[HomeScreen] Error loading username: $e');
+      if (kDebugMode) {
+        print('[HomeScreen] Error loading username: $e');
+      }
       setState(() {
         _userName = 'OPERATOR';
       });
@@ -118,7 +123,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         });
       }
     } catch (e) {
-      print('[HomeScreen] Error loading profile photo: $e');
+      if (kDebugMode) {
+        print('[HomeScreen] Error loading profile photo: $e');
+      }
     }
   }
 
