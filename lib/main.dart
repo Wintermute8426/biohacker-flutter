@@ -13,6 +13,7 @@ import 'services/notification_scheduler.dart';
 import 'services/secure_storage_service.dart';
 import 'services/biometric_auth_service.dart';
 import 'services/subscription_service.dart';
+import 'models/subscription_status.dart';
 import 'screens/paywall_screen.dart';
 import 'theme/colors.dart';
 
@@ -332,16 +333,47 @@ class _SubscriptionGateState extends State<_SubscriptionGate> {
 
   Future<void> _checkSubscription() async {
     try {
-      final status = await SubscriptionService().getSubscriptionStatus();
+      final subscriptionService = SubscriptionService();
+      SubscriptionStatus? status = await subscriptionService.getSubscriptionStatus();
+
+      // Auto-start trial for new users who have no subscription data at all
+      if (status == null || (status.tier == 'free' && status.subscriptionStartsAt == null)) {
+        try {
+          await subscriptionService.startFreeTrial();
+          status = await subscriptionService.getSubscriptionStatus();
+        } catch (trialError) {
+          if (kDebugMode) {
+            print('[SubscriptionGate] Auto-trial start failed (non-fatal): $trialError');
+          }
+          // Fail open: proceed without trial if it can't be started
+        }
+      }
+
+      final shouldShowPaywall = status?.isExpired == true && status?.hasPremiumAccess != true;
+
+      if (!mounted) return;
       setState(() {
-        _shouldShowPaywall = status?.isExpired == true && status?.hasPremiumAccess != true;
+        _shouldShowPaywall = shouldShowPaywall;
         _checkingSubscription = false;
       });
+
+      if (shouldShowPaywall && mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (!mounted) return;
+          await Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => PaywallScreen()),
+          );
+          if (mounted) {
+            _checkSubscription();
+          }
+        });
+      }
     } catch (e) {
       if (kDebugMode) {
         print('[SubscriptionGate] Error checking subscription: $e');
       }
       // On error, let user proceed (fail open)
+      if (!mounted) return;
       setState(() {
         _checkingSubscription = false;
       });
@@ -359,10 +391,6 @@ class _SubscriptionGateState extends State<_SubscriptionGate> {
           ),
         ),
       );
-    }
-
-    if (_shouldShowPaywall) {
-      return PaywallScreen();
     }
 
     return const HomeScreen();

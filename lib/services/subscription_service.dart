@@ -101,7 +101,13 @@ class SubscriptionService with ChangeNotifier {
           .from('user_profiles')
           .select('subscription_tier, subscription_starts_at, subscription_ends_at, user_number')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        _status = null;
+        notifyListeners();
+        return;
+      }
 
       _status = SubscriptionStatus.fromJson(response);
       notifyListeners();
@@ -110,14 +116,14 @@ class SubscriptionService with ChangeNotifier {
     }
   }
 
-  /// Start free 30-day trial for new user
+  /// Start free 14-day trial for new user
   Future<void> startFreeTrial() async {
     try {
       final userId = supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('User not authenticated');
 
       final now = DateTime.now();
-      final trialEnd = now.add(const Duration(days: 30));
+      final trialEnd = now.add(const Duration(days: 14));
 
       await supabase.from('user_profiles').update({
         'subscription_tier': 'trial',
