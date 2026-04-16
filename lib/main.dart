@@ -125,6 +125,7 @@ class MyApp extends ConsumerWidget {
     }
 
     final authProvider = ref.watch(authProviderProvider);
+    print('[MAIN] MyApp.build: isLoading=${authProvider.isLoading}, user=${authProvider.user?.email}');
 
     return MaterialApp(
       title: 'Biohacker',
@@ -181,13 +182,15 @@ class _OnboardingCheckState extends ConsumerState<OnboardingCheck> {
   }
 
   Future<void> _checkHipaaAcknowledgment() async {
+    print('[ONBOARDING] _checkHipaaAcknowledgment() started');
     bool acknowledged = false;
     try {
       acknowledged = await _secureStorage.getHipaaAcknowledged();
+      print('[ONBOARDING] HIPAA acknowledged: $acknowledged');
     } catch (e) {
       // flutter_secure_storage can throw PlatformException on some Android
       // devices on first use. Default to false (show HIPAA notice).
-      if (kDebugMode) print('[OnboardingCheck] SecureStorage error reading HIPAA ack: $e');
+      print('[ONBOARDING] SecureStorage error reading HIPAA ack: $e');
     }
     if (!mounted) return;
     setState(() {
@@ -198,6 +201,8 @@ class _OnboardingCheckState extends ConsumerState<OnboardingCheck> {
     // If HIPAA acknowledged, check for biometric authentication
     if (acknowledged && mounted) {
       _checkBiometricAuth();
+    } else {
+      print('[ONBOARDING] HIPAA not acknowledged — showing HipaaNoticeScreen');
     }
   }
 

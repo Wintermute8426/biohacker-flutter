@@ -91,6 +91,7 @@ class OnboardingService {
   OnboardingService(this._supabase);
 
   Future<bool> isOnboardingCompleted(String userId) async {
+    print('[ONBOARDING] isOnboardingCompleted() called for userId: $userId');
     try {
       final response = await _supabase
           .from('user_profiles')
@@ -98,15 +99,17 @@ class OnboardingService {
           .eq('id', userId)
           .maybeSingle();
 
-      if (response == null) return false;
-      return response['onboarding_completed'] ?? false;
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('[OnboardingService] Error checking onboarding status: $e');
-        if (kDebugMode) {
-          print('[OnboardingService] Stack trace: $stackTrace');
-        }
+      print('[ONBOARDING] isOnboardingCompleted: response=$response');
+      if (response == null) {
+        print('[ONBOARDING] No user_profiles row found — onboarding NOT complete');
+        return false;
       }
+      final result = response['onboarding_completed'] ?? false;
+      print('[ONBOARDING] onboarding_completed=$result');
+      return result;
+    } catch (e, stackTrace) {
+      print('[ONBOARDING] isOnboardingCompleted ERROR: $e');
+      print('[ONBOARDING] Stack trace: $stackTrace');
       rethrow;
     }
   }

@@ -24,9 +24,11 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> _initAuth() async {
+    print('[AUTH] _initAuth() started');
     try {
       final session = supabase.auth.currentSession;
       _user = session?.user;
+      print('[AUTH] _initAuth: currentSession=${session != null}, user=${_user?.email}');
       
       // Store session token securely if logged in
       if (session?.accessToken != null) {
@@ -34,14 +36,12 @@ class AuthProvider with ChangeNotifier {
       }
       
       _isLoading = false;
+      print('[AUTH] _initAuth: isLoading set to false, notifying listeners');
       notifyListeners();
 
       _authSubscription = supabase.auth.onAuthStateChange.listen((data) {
+        print('[AUTH] onAuthStateChange: event=${data.event}, user=${data.session?.user?.email}, session=${data.session != null}');
         _user = data.session?.user;
-        
-        if (kDebugMode) {
-          print('[AuthProvider] Auth state changed: event=${data.event}, user=${_user?.email}');
-        }
         
         // Update secure storage with new session token
         if (data.session?.accessToken != null) {
@@ -52,49 +52,48 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
       });
     } catch (e) {
-      if (kDebugMode) {
-        print('Auth init error: $e');
-      }
+      print('[AUTH] _initAuth ERROR: $e');
       _isLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> signUp(String email, String password, String firstName) async {
+    // NOTE: Do NOT set _isLoading here — it causes MyApp to swap LoginScreen
+    // out and back in (destroying widget state). Local screen loading state handles UX.
+    print('[AUTH] signUp() called for email: $email');
     try {
-      _isLoading = true;
-      notifyListeners();
-
-      await supabase.auth.signUp(
+      final response = await supabase.auth.signUp(
         email: email,
         password: password,
         data: {'first_name': firstName},
       );
-
-      _isLoading = false;
-      notifyListeners();
+      print('[AUTH] signUp() complete: user=${response.user?.email}, session=${response.session != null}, needsConfirmation=${response.user?.emailConfirmedAt == null}');
+      // If email confirmation is disabled, onAuthStateChange will fire SIGNED_IN
+      // and _user will be set by the listener automatically.
     } catch (e) {
-      _isLoading = false;
-      notifyListeners();
+      print('[AUTH] signUp() ERROR: $e');
       rethrow;
     }
   }
 
   Future<void> signIn(String email, String password) async {
+    // NOTE: Do NOT set _isLoading here — it causes MyApp to swap LoginScreen
+    // out and back in (destroying widget state and swallowing error display).
+    // Local screen loading state handles UX. This is the root cause of the
+    // silent-redirect-to-login bug.
+    print('[AUTH] signIn() called for email: $email');
     try {
-      _isLoading = true;
-      notifyListeners();
-
       final response = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
+      print('[AUTH] signIn() success: user=${response.user?.email}, session=${response.session != null}');
 
       // Explicitly set user from response to guarantee navigation
       _user = response.user;
-      _isLoading = false;
       
-      // Notify immediately so navigation happens before storage operations
+      // Notify so MyApp navigates to OnboardingCheck
       notifyListeners();
       
       // Store token in background (don't block navigation on this)
@@ -102,8 +101,8 @@ class AuthProvider with ChangeNotifier {
         _secureStorage.setSessionToken(response.session!.accessToken);
       }
     } catch (e) {
-      _isLoading = false;
-      notifyListeners();
+      print('[AUTH] signIn() ERROR: $e');
+      // Do NOT call notifyListeners() here — no state changed
       rethrow;
     }
   }
