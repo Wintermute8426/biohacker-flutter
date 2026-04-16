@@ -141,7 +141,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       if (mounted) setState(() { _isLoading = false; });
     } catch (e) {
       _completeBootSequence(false);
-      final friendlyMessage = UserFeedback.getFriendlyErrorMessage(e);
+      final friendlyMessage = e.toString(); // Show raw error for debugging
       if (mounted) {
         setState(() {
           _error = 'ACCESS DENIED: $friendlyMessage';
