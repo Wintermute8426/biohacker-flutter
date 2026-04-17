@@ -77,6 +77,7 @@ jobs:
           LAB_PDF_ENDPOINT: ${{ secrets.LAB_PDF_ENDPOINT }}
           LAB_PDF_API_KEY: ${{ secrets.LAB_PDF_API_KEY }}
           BLOODWORK_AI_API_KEY: ${{ secrets.BLOODWORK_AI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           KEY_ALIAS: biohacker
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
@@ -94,7 +95,8 @@ jobs:
             --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY}" \
             --dart-define=LAB_PDF_ENDPOINT="${LAB_PDF_ENDPOINT}" \
             --dart-define=LAB_PDF_API_KEY="${LAB_PDF_API_KEY}" \
-            --dart-define=BLOODWORK_AI_API_KEY="${BLOODWORK_AI_API_KEY}"
+            --dart-define=BLOODWORK_AI_API_KEY="${BLOODWORK_AI_API_KEY}" \
+            --dart-define=ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY}"
       
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
