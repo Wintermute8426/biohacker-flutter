@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Color;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import '../main.dart' show navigatorKey;
+import 'notification_navigation.dart';
 
 /// Core notification service — init, permissions, schedule, cancel.
 /// Singleton. Call [initialize] once at app startup.
@@ -21,6 +23,7 @@ class NotificationService {
   static const String _labChannel = 'biohacker_labs';
   static const String _milestonesChannel = 'biohacker_milestones';
   static const String _updatesChannel = 'biohacker_updates';
+  static const String _hrvChannel = 'biohacker_hrv';
 
   // ─── Initialize ─────────────────────────────────────────────────────────────
 
@@ -85,6 +88,13 @@ class NotificationService {
       description: 'New peptide intelligence and study updates',
       importance: Importance.low,
     ));
+
+    await android.createNotificationChannel(const AndroidNotificationChannel(
+      _hrvChannel,
+      'HRV & Recovery',
+      description: 'Daily morning HRV and recovery check-in prompts',
+      importance: Importance.defaultImportance,
+    ));
   }
 
   // ─── Permissions ─────────────────────────────────────────────────────────────
@@ -123,35 +133,23 @@ class NotificationService {
   }
 
   static void _routeFromPayload(String? payload) {
-    if (payload == null) return;
+    if (payload == null || payload.isEmpty) return;
     final nav = navigatorKey.currentState;
     if (nav == null) return;
 
-    // payload format: 'type:cycleId:extra'
-    final parts = payload.split(':');
-    if (parts.isEmpty) return;
+    try {
+      final Map<String, dynamic> data =
+          jsonDecode(payload) as Map<String, dynamic>;
+      final type = data['type'] as String? ?? '';
 
-    final type = parts[0];
-    switch (type) {
-      case 'dose_reminder':
-      case 'missed_dose':
-        // Navigate home — Calendar is tab index 4
-        nav.pushNamedAndRemoveUntil('/home', (route) => false);
-        if (kDebugMode) {
-          print('[NotificationService] Routed to /home for dose notification');
-        }
-        break;
-      case 'milestone':
-      case 'sideeffect':
-        nav.pushNamedAndRemoveUntil('/home', (route) => false);
-        break;
-      case 'lab':
-        nav.pushNamedAndRemoveUntil('/home', (route) => false);
-        break;
-      default:
-        // Unknown payload — bring app to foreground at home
-        nav.pushNamedAndRemoveUntil('/home', (route) => false);
-        break;
+      // Set pending navigation target
+      NotificationNavigation.pendingType = type;
+      NotificationNavigation.pendingData = data;
+
+      nav.pushNamedAndRemoveUntil('/home', (route) => false);
+    } catch (e) {
+      // Legacy colon-delimited format fallback
+      nav.pushNamedAndRemoveUntil('/home', (route) => false);
     }
   }
 
@@ -216,7 +214,7 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'dose_reminder:$cycleId:${doseTime.toIso8601String()}',
+      payload: jsonEncode({'type': 'dose_reminder', 'cycleId': cycleId, 'date': doseTime.toIso8601String().substring(0, 10)}),
     );
 
     if (scheduleMissedAlert) {
@@ -245,7 +243,7 @@ class NotificationService {
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
-          payload: 'missed_dose:$cycleId:${doseTime.toIso8601String()}',
+          payload: jsonEncode({'type': 'missed_dose', 'cycleId': cycleId, 'date': doseTime.toIso8601String().substring(0, 10)}),
         );
       }
     }
@@ -307,7 +305,7 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'milestone:$milestoneType:$cycleId',
+      payload: jsonEncode({'type': 'milestone', 'milestoneType': milestoneType, 'cycleId': cycleId}),
     );
   }
 
@@ -345,7 +343,7 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'lab:$reminderType:$userId',
+      payload: jsonEncode({'type': 'lab', 'reminderType': reminderType, 'userId': userId}),
     );
   }
 
@@ -378,7 +376,63 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'sideeffect:$cycleId:$weekNumber',
+      payload: jsonEncode({'type': 'sideeffect', 'cycleId': cycleId, 'week': weekNumber}),
+    );
+  }
+
+  // ─── Schedule: Research Update ───────────────────────────────────────────────
+
+  Future<void> scheduleResearchUpdate({required DateTime scheduledTime}) async {
+    if (!_initialized) await initialize();
+    if (scheduledTime.isBefore(DateTime.now())) return;
+
+    final weekKey = scheduledTime.toIso8601String().substring(0, 10);
+    await _plugin.zonedSchedule(
+      _id('research_update_$weekKey'),
+      '📚 PEPTIDE INTELLIGENCE',
+      'New research available this week. Check your Research Library.',
+      tz.TZDateTime.from(scheduledTime, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _updatesChannel, 'Research Updates',
+          channelDescription: 'Weekly peptide research updates',
+          importance: Importance.low,
+          priority: Priority.low,
+        ),
+        iOS: DarwinNotificationDetails(sound: 'default'),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      payload: jsonEncode({'type': 'research_update'}),
+    );
+  }
+
+  // ─── Schedule: HRV Check-In ──────────────────────────────────────────────────
+
+  Future<void> scheduleHrvCheckIn({required DateTime scheduledTime}) async {
+    if (!_initialized) await initialize();
+    if (scheduledTime.isBefore(DateTime.now())) return;
+
+    final dateKey = scheduledTime.toIso8601String().substring(0, 10);
+    await _plugin.zonedSchedule(
+      _id('hrv_checkin_$dateKey'),
+      '📈 MORNING PROTOCOL',
+      'Log your HRV and start your protocol. How is your recovery today?',
+      tz.TZDateTime.from(scheduledTime, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          _hrvChannel, 'HRV & Recovery',
+          channelDescription: 'Daily morning HRV check-in',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+        iOS: DarwinNotificationDetails(sound: 'default'),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      payload: jsonEncode({'type': 'hrv_checkin'}),
     );
   }
 

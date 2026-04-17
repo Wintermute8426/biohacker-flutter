@@ -83,6 +83,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _sideEffectsEnabled = true;
   bool _researchUpdates = true;
   String _labReminderFrequency = 'every_3_months';
+  bool _hrvCheckIn = false;
+  String _hrvCheckInTime = '07:00';
 
   // State
   bool _isLoading = true;
@@ -173,6 +175,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _sideEffectsEnabled = notifPrefs.sideEffectsEnabled;
           _researchUpdates = notifPrefs.researchUpdatesEnabled;
           _labReminderFrequency = notifPrefs.labReminderFrequency;
+          _hrvCheckIn = notifPrefs.hrvCheckInEnabled;
+          _hrvCheckInTime = notifPrefs.hrvCheckInTime;
         });
       }
     } catch (e) {
@@ -540,6 +544,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         sideEffectsEnabled: _sideEffectsEnabled,
         researchUpdatesEnabled: _researchUpdates,
         labReminderFrequency: _labReminderFrequency,
+        hrvCheckInEnabled: _hrvCheckIn,
+        hrvCheckInTime: _hrvCheckInTime,
       );
 
       await NotificationScheduler().savePrefs(userId, prefs);
@@ -1737,6 +1743,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _researchUpdates,
                 (v) {
                   setState(() => _researchUpdates = v);
+                  _saveNotificationPrefs();
+                },
+              ),
+              const Divider(height: 20, color: Color(0xFF1A1A1A)),
+              _buildInteractiveToggle(
+                'HRV Check-in',
+                'Daily morning prompt to log HRV and start protocol',
+                _hrvCheckIn,
+                (v) {
+                  setState(() => _hrvCheckIn = v);
                   _saveNotificationPrefs();
                 },
               ),

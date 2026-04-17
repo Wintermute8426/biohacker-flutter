@@ -10,6 +10,7 @@ import '../widgets/city_background.dart';
 import '../widgets/cyberpunk_rain.dart';
 import '../widgets/subscription_banner.dart';
 import '../main.dart';
+import '../services/notification_navigation.dart';
 import 'onboarding_screen.dart';
 import 'dashboard_screen.dart';
 import 'cycles_screen.dart';
@@ -29,7 +30,8 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with WidgetsBindingObserver {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
@@ -53,8 +55,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadUserName();
     _loadProfilePhoto();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _handlePendingNavigation());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _handlePendingNavigation();
+    }
+  }
+
+  void _handlePendingNavigation() {
+    final nav = NotificationNavigation.consume();
+    if (nav.type == null) return;
+
+    final tabIdx = NotificationNavigation.tabForType(nav.type!);
+    if (tabIdx != null) {
+      setState(() => _selectedIndex = tabIdx);
+    } else if (NotificationNavigation.pushesScreen(nav.type!)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const ResearchScreen()),
+        );
+      });
+    }
   }
 
   /// Record user activity for session timeout tracking

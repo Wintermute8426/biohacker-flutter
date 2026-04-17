@@ -12,6 +12,8 @@ class NotificationPrefs {
   final bool sideEffectsEnabled;
   final bool researchUpdatesEnabled;
   final String labReminderFrequency; // 'never' | 'monthly' | 'every_3_months' | 'every_6_months'
+  final bool hrvCheckInEnabled;
+  final String hrvCheckInTime; // HH:MM, default '07:00'
 
   const NotificationPrefs({
     this.doseRemindersEnabled = true,
@@ -20,6 +22,8 @@ class NotificationPrefs {
     this.sideEffectsEnabled = true,
     this.researchUpdatesEnabled = true,
     this.labReminderFrequency = 'every_3_months',
+    this.hrvCheckInEnabled = false,
+    this.hrvCheckInTime = '07:00',
   });
 
   factory NotificationPrefs.fromJson(Map<String, dynamic> json) {
@@ -33,6 +37,8 @@ class NotificationPrefs {
           json['research_updates_enabled'] as bool? ?? true,
       labReminderFrequency:
           json['lab_reminder_frequency'] as String? ?? 'every_3_months',
+      hrvCheckInEnabled: json['hrv_check_in_enabled'] as bool? ?? false,
+      hrvCheckInTime: json['hrv_check_in_time'] as String? ?? '07:00',
     );
   }
 
@@ -43,6 +49,8 @@ class NotificationPrefs {
         'side_effects_enabled': sideEffectsEnabled,
         'research_updates_enabled': researchUpdatesEnabled,
         'lab_reminder_frequency': labReminderFrequency,
+        'hrv_check_in_enabled': hrvCheckInEnabled,
+        'hrv_check_in_time': hrvCheckInTime,
       };
 
   /// How many days between lab reminders.
@@ -160,6 +168,16 @@ class NotificationScheduler {
         await _scheduleLabReminders(userId: userId, prefs: prefs);
       }
 
+      // Research updates (weekly, Fridays)
+      if (prefs.researchUpdatesEnabled) {
+        await _scheduleResearchUpdates();
+      }
+
+      // HRV check-ins (daily, morning)
+      if (prefs.hrvCheckInEnabled) {
+        await _scheduleHrvCheckIns(prefs: prefs);
+      }
+
       if (kDebugMode) print('[NotificationScheduler] Reschedule complete');
     } catch (e) {
       if (kDebugMode) print('[NotificationScheduler] rescheduleAll error: $e');
@@ -266,6 +284,41 @@ class NotificationScheduler {
           weekNumber: week,
           scheduledTime: checkTime,
         );
+      }
+    }
+  }
+
+  // ─── Research updates ────────────────────────────────────────────────────────
+
+  Future<void> _scheduleResearchUpdates() async {
+    final now = DateTime.now();
+    // Schedule next 4 Fridays
+    for (int i = 0; i < 28; i++) {
+      final candidate = now.add(Duration(days: i));
+      if (candidate.weekday == DateTime.friday) {
+        final t = DateTime(
+            candidate.year, candidate.month, candidate.day, 9, 0);
+        if (t.isAfter(now)) {
+          await _svc.scheduleResearchUpdate(scheduledTime: t);
+        }
+      }
+    }
+  }
+
+  // ─── HRV check-ins ───────────────────────────────────────────────────────────
+
+  Future<void> _scheduleHrvCheckIns({required NotificationPrefs prefs}) async {
+    final now = DateTime.now();
+    final parts = prefs.hrvCheckInTime.split(':');
+    final h = int.tryParse(parts[0]) ?? 7;
+    final m = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
+
+    // Schedule next 14 days
+    for (int i = 0; i < 14; i++) {
+      final d = now.add(Duration(days: i));
+      final t = DateTime(d.year, d.month, d.day, h, m);
+      if (t.isAfter(now)) {
+        await _svc.scheduleHrvCheckIn(scheduledTime: t);
       }
     }
   }
