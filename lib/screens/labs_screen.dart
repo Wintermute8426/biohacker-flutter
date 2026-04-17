@@ -25,6 +25,8 @@ class LabsScreen extends StatefulWidget {
 }
 
 class _LabsScreenState extends State<LabsScreen> {
+  static const String _anthropicApiKey = String.fromEnvironment('ANTHROPIC_API_KEY');
+
   final LabsDatabase _labsDb = LabsDatabase();
   late String _userId;
   List<LabResult> _labResults = [];
@@ -163,20 +165,104 @@ class _LabsScreenState extends State<LabsScreen> {
   Future<void> _uploadImage(XFile image) async {
     setState(() => _isUploading = true);
     try {
-      if (kDebugMode) print('Image upload started: ${image.name}');
+      if (kDebugMode) print('[Labs] Starting Claude extraction for: ${image.name}');
 
-      // TODO: Call real extraction API once available.
-      // For now, save a stub record so the entry persists across app restarts.
+      // Read image bytes and convert to base64
+      final bytes = await image.readAsBytes();
+      final base64Image = base64Encode(bytes);
+
+      // Determine media type
+      final fileName = image.name.toLowerCase();
+      String mediaType = 'image/jpeg';
+      if (fileName.endsWith('.png')) mediaType = 'image/png';
+      else if (fileName.endsWith('.webp')) mediaType = 'image/webp';
+      else if (fileName.endsWith('.gif')) mediaType = 'image/gif';
+
+      Map<String, dynamic> extractedData = {};
+
+      if (_anthropicApiKey.isNotEmpty) {
+        // Call Claude claude-haiku-4-5 for biomarker extraction
+        final response = await http.post(
+          Uri.parse('https://api.anthropic.com/v1/messages'),
+          headers: {
+            'x-api-key': _anthropicApiKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+          },
+          body: jsonEncode({
+            'model': 'claude-haiku-4-5',
+            'max_tokens': 2048,
+            'messages': [{
+              'role': 'user',
+              'content': [
+                {
+                  'type': 'image',
+                  'source': {
+                    'type': 'base64',
+                    'media_type': mediaType,
+                    'data': base64Image,
+                  }
+                },
+                {
+                  'type': 'text',
+                  'text': r'Extract all biomarker values from this lab result image. Return ONLY valid JSON (no markdown, no explanation): {"biomarkers": [{"name": "Testosterone", "value": 847, "unit": "ng/dL", "reference_range": "300-1000", "status": "OPTIMAL"}]}. Status must be one of: OPTIMAL, NORMAL, SUBOPTIMAL, LOW, HIGH, CRITICAL. Use standard biomarker names. If no lab results visible, return {"biomarkers": []}.'
+                }
+              ]
+            }]
+          }),
+        ).timeout(const Duration(seconds: 60));
+
+        if (kDebugMode) print('[Labs] Claude response status: ${response.statusCode}');
+
+        if (response.statusCode == 200) {
+          final apiResponse = jsonDecode(response.body);
+          final content = apiResponse['content']?[0]?['text'] ?? '{}';
+          if (kDebugMode) print('[Labs] Claude raw response: $content');
+
+          // Parse biomarker JSON - strip any markdown code blocks if present
+          String jsonStr = content.trim();
+          if (jsonStr.startsWith('```')) {
+            jsonStr = jsonStr.replaceAll(RegExp(r'```[a-z]*\n?'), '').trim();
+          }
+
+          final biomarkerJson = jsonDecode(jsonStr);
+          final biomarkers = biomarkerJson['biomarkers'] as List? ?? [];
+
+          for (final bm in biomarkers) {
+            if (bm['name'] == null) continue;
+            // Convert name to snake_case key
+            final key = (bm['name'] as String)
+                .toLowerCase()
+                .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+                .replaceAll(RegExp(r'^_+|_+$'), '');
+
+            extractedData[key] = {
+              'value': bm['value'],
+              'unit': bm['unit'] ?? '',
+              'reference_range': bm['reference_range'] ?? '',
+              'status': (bm['status'] ?? 'NORMAL').toString().toUpperCase(),
+            };
+          }
+
+          if (kDebugMode) print('[Labs] Extracted ${extractedData.length} biomarkers');
+        } else {
+          if (kDebugMode) print('[Labs] Claude API error: ${response.statusCode} ${response.body}');
+        }
+      } else {
+        if (kDebugMode) print('[Labs] ANTHROPIC_API_KEY not set - saving stub record');
+      }
+
       final result = LabResult(
         id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
         userId: _userId,
-        pdfPath: image.path.isNotEmpty ? image.path : (image.name.isNotEmpty ? image.name : 'image_${DateTime.now().millisecondsSinceEpoch}'),
+        pdfPath: image.path.isNotEmpty ? image.path : image.name,
         uploadDate: DateTime.now(),
-        notes: 'Image Upload - Pending Extraction',
-        extractedData: {}, // Empty until extraction API is integrated
+        notes: extractedData.isNotEmpty
+            ? 'Image Upload - ${extractedData.length} markers extracted'
+            : 'Image Upload - Pending Extraction',
+        extractedData: extractedData,
       );
 
-      // Persist to database so the record survives app restarts (FUNC-001)
       await _labsDb.saveLabResult(result);
 
       if (mounted) {
@@ -184,12 +270,11 @@ class _LabsScreenState extends State<LabsScreen> {
           _labResults.insert(0, result);
           _isUploading = false;
         });
-      }
-
-      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Lab result added successfully'),
+          SnackBar(
+            content: Text(extractedData.isNotEmpty
+                ? 'Extracted ${extractedData.length} biomarkers'
+                : 'Lab result saved (no biomarkers detected)'),
             backgroundColor: AppColors.accent,
           ),
         );
@@ -198,11 +283,9 @@ class _LabsScreenState extends State<LabsScreen> {
       if (kDebugMode) {
         print('[LabsScreen] _uploadImage ERROR: $e');
         print('[LabsScreen] Stack trace: $stackTrace');
-        print('[LabsScreen] userId: \'$_userId\'');
       }
       if (mounted) {
         setState(() => _isUploading = false);
-        // Show real error in debug mode; friendly message in production
         final errorMsg = kDebugMode
             ? 'Upload failed: $e'
             : UserFeedback.getFriendlyErrorMessage(e);
@@ -464,7 +547,7 @@ class _LabsScreenState extends State<LabsScreen> {
                         const SizedBox(width: 6),
                       ],
                       Text(
-                        _isUploading ? 'PROCESSING...' : 'UPLOAD REPORT',
+                        _isUploading ? 'ANALYZING...' : 'UPLOAD REPORT',
                         style: TextStyle(
                           color: _isUploading ? AppColors.textDim : labGreen,
                           fontSize: 11,
