@@ -183,6 +183,14 @@ class _OnboardingCheckState extends ConsumerState<OnboardingCheck> {
   }
 
   Future<void> _checkHipaaAcknowledgment() async {
+    // HIPAA notice disabled — personal use disclaimer shown at signup instead
+    setState(() {
+      _hipaaAcknowledged = true;
+      _checkingHipaa = false;
+    });
+    _checkBiometricAuth();
+    return;
+    // ignore: dead_code
     print('[ONBOARDING] _checkHipaaAcknowledgment() started');
     bool acknowledged = false;
     try {
