@@ -76,9 +76,25 @@ class _LabsScreenState extends State<LabsScreen> {
   }
 
   Future<void> _handleUpload() async {
+    ImagePicker? picker;
     try {
-      final picker = ImagePicker();
-      showModalBottomSheet(
+      picker = ImagePicker();
+    } catch (e, st) {
+      if (kDebugMode) print('[Labs] ImagePicker init error: $e\n$st');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload error: $e'),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 10),
+          ),
+        );
+      }
+      return;
+    }
+
+    try {
+      await showModalBottomSheet(
         context: context,
         backgroundColor: const Color(0xFF0A0A0A),
         shape: const RoundedRectangleBorder(
@@ -120,7 +136,7 @@ class _LabsScreenState extends State<LabsScreen> {
                 sublabel: 'Photograph lab report',
                 onTap: () async {
                   Navigator.pop(context);
-                  final image = await picker.pickImage(source: ImageSource.camera);
+                  final image = await picker!.pickImage(source: ImageSource.camera);
                   if (image != null) await _uploadImage(image);
                 },
               ),
@@ -132,7 +148,7 @@ class _LabsScreenState extends State<LabsScreen> {
                 sublabel: 'Upload image from device',
                 onTap: () async {
                   Navigator.pop(context);
-                  final image = await picker.pickImage(source: ImageSource.gallery);
+                  final image = await picker!.pickImage(source: ImageSource.gallery);
                   if (image != null) await _uploadImage(image);
                 },
               ),
@@ -303,76 +319,121 @@ class _LabsScreenState extends State<LabsScreen> {
   }
 
   Future<void> _uploadPDF(File pdfFile) async {
-    // SEC-001: PDF endpoint must be a production HTTPS URL.
-    // Set via --dart-define=LAB_PDF_ENDPOINT=... at build time.
-    // Never use a plaintext HTTP or private-IP endpoint in production.
-    const endpoint = String.fromEnvironment('LAB_PDF_ENDPOINT');
-    if (endpoint.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('PDF upload is not yet available — coming soon'),
-          backgroundColor: AppColors.surface,
-        ),
-      );
-      return;
-    }
-
     setState(() => _isUploading = true);
     try {
-      if (kDebugMode) print('PDF upload started: ${pdfFile.path}');
+      if (kDebugMode) print('[Labs] PDF upload started: ${pdfFile.path}');
 
-      // Read PDF file
-      final bytes = await pdfFile.readAsBytes();
       final fileName = pdfFile.path.split('/').last;
+      final bytes = await pdfFile.readAsBytes();
+      final base64Pdf = base64Encode(bytes);
 
-      // Send to backend for extraction (HTTPS endpoint loaded from env)
-      final request = http.MultipartRequest('POST', Uri.parse(endpoint));
+      if (kDebugMode) print('[Labs] PDF size: ${bytes.length} bytes, filename: $fileName');
 
-      request.headers['Authorization'] = 'Bearer ${const String.fromEnvironment('LAB_PDF_API_KEY')}';
+      Map<String, dynamic> extractedData = {};
 
-      request.files.add(
-        http.MultipartFile.fromBytes('file', bytes, filename: fileName),
-      );
+      if (_anthropicApiKey.isNotEmpty) {
+        if (kDebugMode) print('[Labs] Sending PDF to Claude for multi-page extraction...');
 
-      final response = await request.send();
-      final responseData = await response.stream.bytesToString();
+        final response = await http.post(
+          Uri.parse('https://api.anthropic.com/v1/messages'),
+          headers: {
+            'x-api-key': _anthropicApiKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+          },
+          body: jsonEncode({
+            'model': 'claude-haiku-4-5',
+            'max_tokens': 4096,
+            'messages': [
+              {
+                'role': 'user',
+                'content': [
+                  {
+                    'type': 'document',
+                    'source': {
+                      'type': 'base64',
+                      'media_type': 'application/pdf',
+                      'data': base64Pdf,
+                    }
+                  },
+                  {
+                    'type': 'text',
+                    'text': r'Extract ALL biomarker values from every page of this lab result PDF. Return ONLY valid JSON (no markdown, no explanation): {"biomarkers": [{"name": "Testosterone", "value": 847, "unit": "ng/dL", "reference_range": "300-1000", "status": "OPTIMAL"}]}. Status must be one of: OPTIMAL, NORMAL, SUBOPTIMAL, LOW, HIGH, CRITICAL. Use standard biomarker names. Include every biomarker found across all pages. If no lab results visible, return {"biomarkers": []}.'
+                  }
+                ]
+              }
+            ]
+          }),
+        ).timeout(const Duration(seconds: 120));
 
-      if (response.statusCode == 200) {
-        final result = jsonDecode(responseData);
-        final extractedBiomarkers = Map<String, dynamic>.from(result['biomarkers'] ?? {});
+        if (kDebugMode) print('[Labs] Claude PDF response status: ${response.statusCode}');
 
-        if (kDebugMode) print('Extracted ${extractedBiomarkers.length} biomarkers from PDF');
+        if (response.statusCode == 200) {
+          final apiResponse = jsonDecode(response.body);
+          final content = apiResponse['content']?[0]?['text'] ?? '{}';
+          if (kDebugMode) print('[Labs] Claude raw PDF response: $content');
 
-        final labResult = LabResult(
-          id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
-          userId: _userId,
-          pdfPath: pdfFile.path,
-          uploadDate: DateTime.now(),
-          notes: 'PDF Upload ($fileName)',
-          extractedData: extractedBiomarkers,
-        );
+          // Parse biomarker JSON - strip any markdown code blocks if present
+          String jsonStr = content.trim();
+          if (jsonStr.startsWith('```')) {
+            jsonStr = jsonStr.replaceAll(RegExp(r'```[a-z]*\n?'), '').trim();
+          }
 
-        if (kDebugMode) print('[Labs] Saving lab result to database...');
-        await _labsDb.saveLabResult(labResult);
-        if (kDebugMode) print('[Labs] Lab result saved successfully');
+          final biomarkerJson = jsonDecode(jsonStr);
+          final biomarkers = biomarkerJson['biomarkers'] as List? ?? [];
 
-        if (mounted) {
-          setState(() {
-            _labResults.insert(0, labResult);
-            _isUploading = false;
-          });
-        }
+          for (final bm in biomarkers) {
+            if (bm['name'] == null) continue;
+            final key = (bm['name'] as String)
+                .toLowerCase()
+                .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+                .replaceAll(RegExp(r'^_+|_+$'), '');
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Extracted ${extractedBiomarkers.length} biomarkers'),
-              backgroundColor: AppColors.accent,
-            ),
-          );
+            extractedData[key] = {
+              'value': bm['value'],
+              'unit': bm['unit'] ?? '',
+              'reference_range': bm['reference_range'] ?? '',
+              'status': (bm['status'] ?? 'NORMAL').toString().toUpperCase(),
+            };
+          }
+
+          if (kDebugMode) print('[Labs] Extracted ${extractedData.length} biomarkers from PDF');
+        } else {
+          if (kDebugMode) print('[Labs] Claude API error: ${response.statusCode} ${response.body}');
+          throw Exception('Claude API error: ${response.statusCode}');
         }
       } else {
-        throw Exception('Backend error: ${response.statusCode}');
+        if (kDebugMode) print('[Labs] ANTHROPIC_API_KEY not set - saving stub record');
+      }
+
+      final labResult = LabResult(
+        id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
+        userId: _userId,
+        pdfPath: pdfFile.path,
+        uploadDate: DateTime.now(),
+        notes: extractedData.isNotEmpty
+            ? 'PDF Upload ($fileName) - ${extractedData.length} markers extracted'
+            : 'PDF Upload ($fileName) - Pending Extraction',
+        extractedData: extractedData,
+      );
+
+      if (kDebugMode) print('[Labs] Saving lab result to database...');
+      await _labsDb.saveLabResult(labResult);
+      if (kDebugMode) print('[Labs] Lab result saved successfully');
+
+      if (mounted) {
+        setState(() {
+          _labResults.insert(0, labResult);
+          _isUploading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(extractedData.isNotEmpty
+                ? 'Extracted ${extractedData.length} biomarkers from PDF'
+                : 'Lab result saved (no biomarkers detected)'),
+            backgroundColor: AppColors.accent,
+          ),
+        );
       }
     } catch (e, stackTrace) {
       if (kDebugMode) {
