@@ -152,11 +152,13 @@ class _LabsScreenState extends State<LabsScreen> {
           ),
         ),
       );
-    } catch (e) {
+    } catch (e, st) {
+      if (kDebugMode) print('[Labs] _handleUpload error: $e\n$st');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(UserFeedback.getFriendlyErrorMessage(e)),
+          content: Text('Upload error: $e'),
           backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 10),
         ),
       );
     }
