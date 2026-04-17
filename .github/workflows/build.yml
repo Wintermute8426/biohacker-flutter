@@ -89,6 +89,7 @@ jobs:
           LAB_PDF_ENDPOINT=$(echo "${LAB_PDF_ENDPOINT}" | tr -d '\n' | xargs)
           LAB_PDF_API_KEY=$(echo "${LAB_PDF_API_KEY}" | tr -d '\n' | xargs)
           BLOODWORK_AI_API_KEY=$(echo "${BLOODWORK_AI_API_KEY}" | tr -d '\n' | xargs)
+          ANTHROPIC_API_KEY=$(echo "${ANTHROPIC_API_KEY}" | tr -d '\n' | xargs)
           
           flutter build apk --split-per-abi --release \
             --dart-define=SUPABASE_URL="${SUPABASE_URL}" \
