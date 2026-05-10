@@ -9,6 +9,9 @@ class DoseDisplay extends StatelessWidget {
   final TextStyle? mlStyle;
   final bool showLabel;
   final bool showSyringe;
+  /// If provided, use this draw volume directly instead of calculating from hardcoded data.
+  /// Pass dose.concentrationMl (parsed from cycle setup notes) for accurate display.
+  final double? concentrationMl;
 
   const DoseDisplay({
     Key? key,
@@ -19,9 +22,12 @@ class DoseDisplay extends StatelessWidget {
     this.mlStyle,
     this.showLabel = false,
     this.showSyringe = true, // Show syringe by default
+    this.concentrationMl,
   }) : super(key: key);
 
-  static double calculateMLDraw(String peptideName, double doseMg) {
+  static double calculateMLDraw(String peptideName, double doseMg, {double? concentrationMl}) {
+    // If the caller supplies the actual draw volume from cycle setup, use it directly.
+    if (concentrationMl != null) return concentrationMl;
     // Normalize peptide name (remove extra text in parentheses and trim)
     final normalizedName = peptideName.split('(')[0].trim();
 
@@ -60,7 +66,7 @@ class DoseDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mlDraw = calculateMLDraw(peptideName, doseMg);
+    final mlDraw = calculateMLDraw(peptideName, doseMg, concentrationMl: concentrationMl);
     final displayColor = color ?? Color(0xFF00FF00);
 
     return Column(

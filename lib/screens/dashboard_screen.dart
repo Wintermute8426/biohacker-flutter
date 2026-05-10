@@ -647,6 +647,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         color: peptideColor,
                         showLabel: false,
                         showSyringe: true,
+                        concentrationMl: dose.concentrationMl,
                       ),
                     ],
                   ),

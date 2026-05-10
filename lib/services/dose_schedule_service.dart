@@ -79,6 +79,7 @@ class DoseInstance {
   final bool? isLogged;
   final String doseLogId;
   final String status; // SCHEDULED, COMPLETED, MISSED
+  final String? notes; // Contains reconstitution info, e.g. 'Draw 0.1ml for 0.25mg dose'
 
   DoseInstance({
     required this.date,
@@ -91,7 +92,16 @@ class DoseInstance {
     this.isLogged,
     required this.doseLogId,
     required this.status,
+    this.notes,
   });
+
+  /// Parse the draw volume (mL per injection) from the schedule notes.
+  /// Notes format: 'Peptide: Xmg | Add Yml BAC | Draw Zml for Wmg dose'
+  double? get concentrationMl {
+    if (notes == null) return null;
+    final match = RegExp(r'Draw ([\d.]+)ml').firstMatch(notes!);
+    return match != null ? double.tryParse(match.group(1)!) : null;
+  }
 }
 
 // Service
@@ -248,6 +258,7 @@ class DoseScheduleService {
               isLogged: status != 'SCHEDULED',
               doseLogId: doseLogId,
               status: status,
+              notes: schedule.notes,
             ));
           }
         }
@@ -342,6 +353,7 @@ class DoseScheduleService {
               isLogged: status != 'SCHEDULED',
               doseLogId: doseLogId,
               status: status,
+              notes: schedule.notes,
             ));
           }
         }

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Subscription status model for the Biohacker app
 /// Tracks free trial and paid subscription state
 class SubscriptionStatus {
@@ -24,7 +26,9 @@ class SubscriptionStatus {
 
   /// Check if user has premium access (trial or paid)
   bool get hasPremiumAccess {
-    return isActive && (tier == 'premium' || isInTrial);
+    // Developer bypass: always grant access in debug builds
+    if (kDebugMode) return true;
+    return isActive && (tier == 'premium' || tier == 'admin' || isInTrial);
   }
 
   /// Days remaining in trial
@@ -57,7 +61,9 @@ class SubscriptionStatus {
           ? DateTime.parse(json['subscription_ends_at'] as String)
           : null,
       userNumber: json['user_number'] as int?,
-      isActive: json['subscription_tier'] == 'premium' ||
+      isActive: kDebugMode ||
+          json['subscription_tier'] == 'premium' ||
+          json['subscription_tier'] == 'admin' ||
           (json['subscription_tier'] == 'trial' &&
               json['subscription_ends_at'] != null &&
               DateTime.now().isBefore(
