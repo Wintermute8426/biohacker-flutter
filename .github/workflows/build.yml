@@ -97,7 +97,8 @@ jobs:
             --dart-define=LAB_PDF_ENDPOINT="${LAB_PDF_ENDPOINT}" \
             --dart-define=LAB_PDF_API_KEY="${LAB_PDF_API_KEY}" \
             --dart-define=BLOODWORK_AI_API_KEY="${BLOODWORK_AI_API_KEY}" \
-            --dart-define=ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY}"
+            --dart-define=ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY}" \
+            --dart-define=OWNER_BYPASS=true
       
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4

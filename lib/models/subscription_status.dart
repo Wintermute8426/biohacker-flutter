@@ -26,8 +26,9 @@ class SubscriptionStatus {
 
   /// Check if user has premium access (trial or paid)
   bool get hasPremiumAccess {
-    // Developer bypass: always grant access in debug builds
+    // Developer bypass: always grant access in debug builds or owner builds
     if (kDebugMode) return true;
+    if (const bool.fromEnvironment('OWNER_BYPASS')) return true;
     return isActive && (tier == 'premium' || tier == 'admin' || isInTrial);
   }
 
@@ -62,6 +63,7 @@ class SubscriptionStatus {
           : null,
       userNumber: json['user_number'] as int?,
       isActive: kDebugMode ||
+          const bool.fromEnvironment('OWNER_BYPASS') ||
           json['subscription_tier'] == 'premium' ||
           json['subscription_tier'] == 'admin' ||
           (json['subscription_tier'] == 'trial' &&

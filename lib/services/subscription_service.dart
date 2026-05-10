@@ -257,8 +257,9 @@ class SubscriptionService with ChangeNotifier {
 
   /// Check if paywall should be shown
   bool shouldShowPaywall() {
-    // Never show paywall in debug/dev builds
+    // Never show paywall in debug/dev builds or owner builds
     if (kDebugMode) return false;
+    if (const bool.fromEnvironment('OWNER_BYPASS')) return false;
     if (_status == null) return false;
     return !_status!.hasPremiumAccess;
   }
