@@ -42,6 +42,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // Track locally marked missed doses to update UI immediately
   final Set<String> _locallyMarkedMissed = {};
 
+  // Scroll controller for SOVEREIGN DOSING card
+  final ScrollController _dosingScrollController = ScrollController();
+
   // Cache for expensive computations to avoid rebuilds
   final Map<String, double> _cycleProgressCache = {};
   final Map<String, int> _currentDayCache = {};
@@ -66,6 +69,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   void initState() {
     super.initState();
     _loadData();
+    _dosingScrollController.addListener(_onDosingScroll);
+  }
+
+  void _onDosingScroll() {
+    // Intentionally empty — we only care about post-frame overflow detection
+  }
+
+  @override
+  void dispose() {
+    _dosingScrollController.removeListener(_onDosingScroll);
+    _dosingScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -571,11 +586,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildTodaysScheduleCard() {
+    // Approximate visible items at 320px card height:
+    // Card height 320 - top/bottom padding 70 - header ~32 = ~218px usable
+    // Each item is ~28px (row + 12px gap) → ~7 visible
+    const int kVisibleItemThreshold = 7;
+    final int overflowCount = (_todaysDoses.length - kVisibleItemThreshold).clamp(0, 99);
+    final bool showOverflowHint = overflowCount > 0;
+
     return CRTCard(
       title: 'SOVEREIGN DOSING',
       subtitle: 'SELF-ADMINISTERED',
       color: CRTColor.green,
-      height: 240, // Taller
+      height: 320,
       trailing: Icon(Icons.schedule, color: Color(0xFF00FF00), size: 20),
       rogueId: 'ROGUE-1',
       child: _todaysDoses.isEmpty
@@ -589,70 +611,124 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ),
             )
-          : ListView.builder(
-              itemCount: _todaysDoses.length,
-              itemBuilder: (context, i) {
-                final dose = _todaysDoses[i];
-                final isCompleted = dose.status == 'COMPLETED';
-                final isMissed = dose.status == 'MISSED';
-                final peptideColor = getPeptideColor(dose.peptideName);
-                final mlDraw = calculateMLDraw(dose.peptideName, dose.doseAmount);
+          : Stack(
+              children: [
+                // Scrollable dose list
+                ListView.builder(
+                  controller: _dosingScrollController,
+                  itemCount: _todaysDoses.length,
+                  itemBuilder: (context, i) {
+                    final dose = _todaysDoses[i];
+                    final isCompleted = dose.status == 'COMPLETED';
+                    final isMissed = dose.status == 'MISSED';
+                    final peptideColor = getPeptideColor(dose.peptideName);
+                    final mlDraw = calculateMLDraw(dose.peptideName, dose.doseAmount);
 
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 12), // More spacing
-                  child: Row(
-                    children: [
-                      // Status indicator with peptide color
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: isCompleted
-                              ? AppColors.accent
-                              : isMissed
-                                  ? Color(0xFFFF6B00)
-                                  : peptideColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      SizedBox(width: 8),
-
-                      // Time
-                      Text(
-                        dose.time,
-                        style: TextStyle(
-                          color: peptideColor.withOpacity(0.7),
-                          fontSize: 10,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                      SizedBox(width: 8),
-
-                      // Peptide name
-                      Expanded(
-                        child: Text(
-                          dose.peptideName.toUpperCase(),
-                          style: TextStyle(
-                            color: peptideColor.withOpacity(0.85),
-                            fontSize: 11,
-                            fontFamily: 'monospace',
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          // Status indicator with peptide color
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: isCompleted
+                                  ? AppColors.accent
+                                  : isMissed
+                                      ? Color(0xFFFF6B00)
+                                      : peptideColor,
+                              shape: BoxShape.circle,
+                            ),
                           ),
-                        ),
-                      ),
+                          SizedBox(width: 8),
 
-                      // Dose display with syringe
-                      DoseDisplay(
-                        doseMg: dose.doseAmount,
-                        peptideName: dose.peptideName,
-                        color: peptideColor,
-                        showLabel: false,
-                        showSyringe: true,
-                        concentrationMl: dose.concentrationMl,
+                          // Time
+                          Text(
+                            dose.time,
+                            style: TextStyle(
+                              color: peptideColor.withOpacity(0.7),
+                              fontSize: 10,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                          SizedBox(width: 8),
+
+                          // Peptide name
+                          Expanded(
+                            child: Text(
+                              dose.peptideName.toUpperCase(),
+                              style: TextStyle(
+                                color: peptideColor.withOpacity(0.85),
+                                fontSize: 11,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ),
+
+                          // Dose display with syringe
+                          DoseDisplay(
+                            doseMg: dose.doseAmount,
+                            peptideName: dose.peptideName,
+                            color: peptideColor,
+                            showLabel: false,
+                            showSyringe: true,
+                            concentrationMl: dose.concentrationMl,
+                          ),
+                        ],
                       ),
-                    ],
+                    );
+                  },
+                ),
+
+                // Gradient fade + overflow hint (only when content overflows)
+                if (showOverflowHint)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: 48,
+                    child: IgnorePointer(
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.black.withOpacity(0.0),
+                                    Colors.black.withOpacity(0.92),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            color: Colors.black.withOpacity(0.92),
+                            padding: EdgeInsets.only(bottom: 2),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '▼ $overflowCount MORE',
+                                  style: TextStyle(
+                                    color: Color(0xFF00FF00).withOpacity(0.75),
+                                    fontSize: 9,
+                                    fontFamily: 'monospace',
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                );
-              },
+              ],
             ),
     );
   }
