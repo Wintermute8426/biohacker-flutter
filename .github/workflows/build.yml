@@ -3,7 +3,8 @@
 #   SUPABASE_ANON_KEY    - Your Supabase anonymous/public key
 #   LAB_PDF_ENDPOINT     - (optional) Lab PDF processing endpoint
 #   LAB_PDF_API_KEY      - (optional) Lab PDF API authentication key
-#   BLOODWORK_AI_API_KEY - (optional) Bloodwork AI API key
+#   GEMINI_API_KEY        - (optional) Google AI Studio key (gemini-2.5-flash, primary extractor)
+#   ANTHROPIC_API_KEY    - (optional) Anthropic key (claude-sonnet-4-6, fallback extractor)
 
 name: Build APK
 
@@ -76,7 +77,7 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           LAB_PDF_ENDPOINT: ${{ secrets.LAB_PDF_ENDPOINT }}
           LAB_PDF_API_KEY: ${{ secrets.LAB_PDF_API_KEY }}
-          BLOODWORK_AI_API_KEY: ${{ secrets.BLOODWORK_AI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           KEY_ALIAS: biohacker
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -88,7 +89,7 @@ jobs:
           SUPABASE_ANON_KEY=$(echo "${SUPABASE_ANON_KEY}" | tr -d '\n' | xargs)
           LAB_PDF_ENDPOINT=$(echo "${LAB_PDF_ENDPOINT}" | tr -d '\n' | xargs)
           LAB_PDF_API_KEY=$(echo "${LAB_PDF_API_KEY}" | tr -d '\n' | xargs)
-          BLOODWORK_AI_API_KEY=$(echo "${BLOODWORK_AI_API_KEY}" | tr -d '\n' | xargs)
+          GEMINI_API_KEY=$(echo "${GEMINI_API_KEY}" | tr -d '\n' | xargs)
           ANTHROPIC_API_KEY=$(echo "${ANTHROPIC_API_KEY}" | tr -d '\n' | xargs)
           
           flutter build apk --split-per-abi --release \
@@ -96,7 +97,7 @@ jobs:
             --dart-define=SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY}" \
             --dart-define=LAB_PDF_ENDPOINT="${LAB_PDF_ENDPOINT}" \
             --dart-define=LAB_PDF_API_KEY="${LAB_PDF_API_KEY}" \
-            --dart-define=BLOODWORK_AI_API_KEY="${BLOODWORK_AI_API_KEY}" \
+            --dart-define=GEMINI_API_KEY="${GEMINI_API_KEY}" \
             --dart-define=ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY}" \
             --dart-define=OWNER_BYPASS=true
       

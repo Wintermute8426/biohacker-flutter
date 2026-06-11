@@ -12,6 +12,7 @@ import '../utils/user_feedback.dart';
 import '../models/lab_result.dart';
 import '../services/labs_database.dart';
 import '../services/android_file_picker.dart';
+import '../services/lab_extraction_service.dart';
 import '../widgets/cyberpunk_background.dart';
 import '../widgets/app_header.dart';
 import '../widgets/common/empty_state.dart';
@@ -25,7 +26,7 @@ class LabsScreen extends StatefulWidget {
 }
 
 class _LabsScreenState extends State<LabsScreen> {
-  static const String _anthropicApiKey = String.fromEnvironment('ANTHROPIC_API_KEY');
+  // API keys handled by LabExtractionService (dart-define GEMINI_API_KEY + ANTHROPIC_API_KEY)
 
   final LabsDatabase _labsDb = LabsDatabase();
   late String _userId;
@@ -183,92 +184,23 @@ class _LabsScreenState extends State<LabsScreen> {
   Future<void> _uploadImage(XFile image) async {
     setState(() => _isUploading = true);
     try {
-      if (kDebugMode) print('[Labs] Starting Claude extraction for: ${image.name}');
+      if (kDebugMode) print('[Labs] Starting extraction for image: ${image.name}');
 
-      // Read image bytes and convert to base64
       final bytes = await image.readAsBytes();
       final base64Image = base64Encode(bytes);
 
-      // Determine media type
       final fileName = image.name.toLowerCase();
       String mediaType = 'image/jpeg';
       if (fileName.endsWith('.png')) mediaType = 'image/png';
       else if (fileName.endsWith('.webp')) mediaType = 'image/webp';
       else if (fileName.endsWith('.gif')) mediaType = 'image/gif';
 
-      Map<String, dynamic> extractedData = {};
-
-      if (_anthropicApiKey.isNotEmpty) {
-        // Call Claude claude-haiku-4-5 for biomarker extraction
-        final response = await http.post(
-          Uri.parse('https://api.anthropic.com/v1/messages'),
-          headers: {
-            'x-api-key': _anthropicApiKey,
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json',
-          },
-          body: jsonEncode({
-            'model': 'claude-haiku-4-5',
-            'max_tokens': 2048,
-            'messages': [{
-              'role': 'user',
-              'content': [
-                {
-                  'type': 'image',
-                  'source': {
-                    'type': 'base64',
-                    'media_type': mediaType,
-                    'data': base64Image,
-                  }
-                },
-                {
-                  'type': 'text',
-                  'text': r'Extract all biomarker values from this lab result image. Return ONLY valid JSON (no markdown, no explanation): {"biomarkers": [{"name": "Testosterone", "value": 847, "unit": "ng/dL", "reference_range": "300-1000", "status": "OPTIMAL"}]}. Status must be one of: OPTIMAL, NORMAL, SUBOPTIMAL, LOW, HIGH, CRITICAL. Use standard biomarker names. If no lab results visible, return {"biomarkers": []}.'
-                }
-              ]
-            }]
-          }),
-        ).timeout(const Duration(seconds: 60));
-
-        if (kDebugMode) print('[Labs] Claude response status: ${response.statusCode}');
-
-        if (response.statusCode == 200) {
-          final apiResponse = jsonDecode(response.body);
-          final content = apiResponse['content']?[0]?['text'] ?? '{}';
-          if (kDebugMode) print('[Labs] Claude raw response: $content');
-
-          // Parse biomarker JSON - strip any markdown code blocks if present
-          String jsonStr = content.trim();
-          if (jsonStr.startsWith('```')) {
-            jsonStr = jsonStr.replaceAll(RegExp(r'```[a-z]*\n?'), '').trim();
-          }
-
-          final biomarkerJson = jsonDecode(jsonStr);
-          final biomarkers = biomarkerJson['biomarkers'] as List? ?? [];
-
-          for (final bm in biomarkers) {
-            if (bm['name'] == null) continue;
-            // Convert name to snake_case key
-            final key = (bm['name'] as String)
-                .toLowerCase()
-                .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
-                .replaceAll(RegExp(r'^_+|_+$'), '');
-
-            extractedData[key] = {
-              'value': bm['value'],
-              'unit': bm['unit'] ?? '',
-              'reference_range': bm['reference_range'] ?? '',
-              'status': (bm['status'] ?? 'NORMAL').toString().toUpperCase(),
-            };
-          }
-
-          if (kDebugMode) print('[Labs] Extracted ${extractedData.length} biomarkers');
-        } else {
-          if (kDebugMode) print('[Labs] Claude API error: ${response.statusCode} ${response.body}');
-        }
-      } else {
-        if (kDebugMode) print('[Labs] ANTHROPIC_API_KEY not set - saving stub record');
-      }
+      final extraction = await LabExtractionService.extractFromImage(
+        base64Image: base64Image,
+        mediaType: mediaType,
+      );
+      final extractedData = extraction.data;
+      if (kDebugMode) print('[Labs] Extracted ${extraction.count} markers via ${extraction.model}');
 
       final result = LabResult(
         id: 'lab-${DateTime.now().millisecondsSinceEpoch}',
@@ -329,82 +261,12 @@ class _LabsScreenState extends State<LabsScreen> {
 
       if (kDebugMode) print('[Labs] PDF size: ${bytes.length} bytes, filename: $fileName');
 
-      Map<String, dynamic> extractedData = {};
-
-      if (_anthropicApiKey.isNotEmpty) {
-        if (kDebugMode) print('[Labs] Sending PDF to Claude for multi-page extraction...');
-
-        final response = await http.post(
-          Uri.parse('https://api.anthropic.com/v1/messages'),
-          headers: {
-            'x-api-key': _anthropicApiKey,
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json',
-          },
-          body: jsonEncode({
-            'model': 'claude-haiku-4-5',
-            'max_tokens': 4096,
-            'messages': [
-              {
-                'role': 'user',
-                'content': [
-                  {
-                    'type': 'document',
-                    'source': {
-                      'type': 'base64',
-                      'media_type': 'application/pdf',
-                      'data': base64Pdf,
-                    }
-                  },
-                  {
-                    'type': 'text',
-                    'text': r'Extract ALL biomarker values from every page of this lab result PDF. Return ONLY valid JSON (no markdown, no explanation): {"biomarkers": [{"name": "Testosterone", "value": 847, "unit": "ng/dL", "reference_range": "300-1000", "status": "OPTIMAL"}]}. Status must be one of: OPTIMAL, NORMAL, SUBOPTIMAL, LOW, HIGH, CRITICAL. Use standard biomarker names. Include every biomarker found across all pages. If no lab results visible, return {"biomarkers": []}.'
-                  }
-                ]
-              }
-            ]
-          }),
-        ).timeout(const Duration(seconds: 120));
-
-        if (kDebugMode) print('[Labs] Claude PDF response status: ${response.statusCode}');
-
-        if (response.statusCode == 200) {
-          final apiResponse = jsonDecode(response.body);
-          final content = apiResponse['content']?[0]?['text'] ?? '{}';
-          if (kDebugMode) print('[Labs] Claude raw PDF response: $content');
-
-          // Parse biomarker JSON - strip any markdown code blocks if present
-          String jsonStr = content.trim();
-          if (jsonStr.startsWith('```')) {
-            jsonStr = jsonStr.replaceAll(RegExp(r'```[a-z]*\n?'), '').trim();
-          }
-
-          final biomarkerJson = jsonDecode(jsonStr);
-          final biomarkers = biomarkerJson['biomarkers'] as List? ?? [];
-
-          for (final bm in biomarkers) {
-            if (bm['name'] == null) continue;
-            final key = (bm['name'] as String)
-                .toLowerCase()
-                .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
-                .replaceAll(RegExp(r'^_+|_+$'), '');
-
-            extractedData[key] = {
-              'value': bm['value'],
-              'unit': bm['unit'] ?? '',
-              'reference_range': bm['reference_range'] ?? '',
-              'status': (bm['status'] ?? 'NORMAL').toString().toUpperCase(),
-            };
-          }
-
-          if (kDebugMode) print('[Labs] Extracted ${extractedData.length} biomarkers from PDF');
-        } else {
-          if (kDebugMode) print('[Labs] Claude API error: ${response.statusCode} ${response.body}');
-          throw Exception('Claude API error: ${response.statusCode}');
-        }
-      } else {
-        if (kDebugMode) print('[Labs] ANTHROPIC_API_KEY not set - saving stub record');
-      }
+      final extraction = await LabExtractionService.extractFromPdf(
+        base64Pdf: base64Pdf,
+        fileName: fileName,
+      );
+      final extractedData = extraction.data;
+      if (kDebugMode) print('[Labs] Extracted ${extraction.count} markers via ${extraction.model}');
 
       final labResult = LabResult(
         id: 'lab-${DateTime.now().millisecondsSinceEpoch}',

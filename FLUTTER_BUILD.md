@@ -43,9 +43,21 @@ This launches the app on your Android emulator or connected device with **hot re
 
 ## 📱 Build APK for Android Phone
 
+### Required dart-defines (lab extraction models)
+
 ```bash
-flutter build apk --release
+flutter build apk --release \
+  --dart-define=GEMINI_API_KEY=YOUR_GEMINI_KEY \
+  --dart-define=ANTHROPIC_API_KEY=sk-ant-...
 ```
+
+- **GEMINI_API_KEY** — Google AI Studio key (gemini-2.5-flash, primary extractor, ~$0.15/M)
+- **ANTHROPIC_API_KEY** — Anthropic key (claude-sonnet-4-6, fallback, ~$3/M)
+- Both optional: if neither is set, uploads save as stub records with no biomarkers.
+- Gemini only: works without Anthropic key (no fallback).
+- Anthropic only: skips Gemini, goes straight to Sonnet.
+
+Get Gemini key: https://aistudio.google.com/apikey
 
 APK will be at: `build/app/outputs/flutter-app/release/app-release.apk`
 
