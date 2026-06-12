@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:biohacker_app/services/cycles_database.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   // A sample cycle JSON as it would arrive from Supabase.
   Map<String, dynamic> _sampleJson({bool isActive = true}) => {
         'id': 'abc-123',

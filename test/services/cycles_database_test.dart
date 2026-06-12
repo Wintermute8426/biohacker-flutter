@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:biohacker_app/services/cycles_database.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   // ---------------------------------------------------------------------------
   // Cycle model – pure data tests (no Supabase needed)
   // ---------------------------------------------------------------------------

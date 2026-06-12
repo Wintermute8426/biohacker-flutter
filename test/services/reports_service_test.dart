@@ -74,6 +74,8 @@ String _determineBiomarkerStatus(String key, double? value) {
 // ---------------------------------------------------------------------------
 
 void main() {
+  // supabase_flutter uses platform channels; this prevents MissingPluginException in CI.
+  TestWidgetsFlutterBinding.ensureInitialized();
   // --------------------------------------------------------------------------
   // beautifyBiomarkerName
   // --------------------------------------------------------------------------
