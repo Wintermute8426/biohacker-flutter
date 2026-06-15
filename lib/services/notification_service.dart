@@ -61,7 +61,7 @@ class NotificationService {
     await android.createNotificationChannel(AndroidNotificationChannel(
       _doseChannel,
       'Dose Reminders',
-      description: 'Dose scheduling and missed dose alerts',
+      description: 'Dose scheduling and missed dose report reminders',
       importance: Importance.high,
       playSound: true,
       enableVibration: true,
@@ -168,8 +168,10 @@ class NotificationService {
 
   // ─── Schedule: Dose Reminder ─────────────────────────────────────────────────
 
-  /// Schedule a dose reminder at [doseTime]. Automatically schedules a missed
-  /// dose alert 2 hours later if [scheduleMissedAlert] is true.
+  /// Schedule a dose reminder at [doseTime]. Automatically schedules a gentle
+  /// missed-dose report reminder 2 hours later if [scheduleMissedAlert] is true.
+  /// We assume doses are taken; this reminder simply prompts users to log it
+  /// if they happened to miss one — no accusatory framing.
   Future<void> scheduleDoseReminder({
     required String cycleId,
     required String peptideName,
@@ -192,7 +194,7 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       _id('dose_${cycleId}_$dateKey'),
-      '⚗️ PROTOCOL ACTIVE',
+      '⚗️ DOSE REMINDER',
       '$peptideName • $doseStr $route • $timeStr',
       tz.TZDateTime.from(doseTime, tz.local),
       NotificationDetails(
@@ -203,7 +205,7 @@ class NotificationService {
           importance: Importance.high,
           priority: Priority.high,
           styleInformation: BigTextStyleInformation(
-            'Protocol Active\n$peptideName $doseStr $route\nScheduled: $timeStr\nTap to log your dose.',
+            'Time to take your dose.\n$peptideName $doseStr $route\nScheduled: $timeStr',
           ),
         ),
         iOS: const DarwinNotificationDetails(
@@ -222,22 +224,20 @@ class NotificationService {
       if (alertTime.isAfter(now)) {
         await _plugin.zonedSchedule(
           _id('missed_${cycleId}_$dateKey'),
-          '⚠️ PROTOCOL BREACH',
-          '$peptideName dose missed • Log now?',
+          '📋 LOG A MISSED DOSE?',
+          '$peptideName • $timeStr — If you missed this dose, tap to report it.',
           tz.TZDateTime.from(alertTime, tz.local),
-          NotificationDetails(
+          const NotificationDetails(
             android: AndroidNotificationDetails(
               _doseChannel,
               'Dose Reminders',
-              channelDescription: 'Missed dose alerts',
-              importance: Importance.max,
-              priority: Priority.max,
-              color: const Color(0xFFFF0040),
+              channelDescription: 'Missed dose report reminders',
+              importance: Importance.defaultImportance,
+              priority: Priority.defaultPriority,
             ),
-            iOS: const DarwinNotificationDetails(
+            iOS: DarwinNotificationDetails(
               badgeNumber: 1,
               sound: 'default',
-              interruptionLevel: InterruptionLevel.timeSensitive,
             ),
           ),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -476,7 +476,7 @@ class NotificationService {
 
     switch (type) {
       case 'dose_reminder':
-        title = '⚗️ PROTOCOL ACTIVE';
+        title = '⚗️ DOSE REMINDER';
         body = 'BPC-157 • 5.0mg SubQ • 08:00';
         channelId = _doseChannel;
         channelName = 'Dose Reminders';
@@ -484,12 +484,11 @@ class NotificationService {
         priority = Priority.high;
         break;
       case 'missed_dose':
-        title = '⚠️ PROTOCOL BREACH';
-        body = 'BPC-157 dose missed • Log now?';
+        title = '📋 LOG A MISSED DOSE?';
+        body = 'BPC-157 • 08:00 — If you missed this dose, tap to report it.';
         channelId = _doseChannel;
         channelName = 'Dose Reminders';
-        importance = Importance.max;
-        priority = Priority.max;
+        // Default importance — this is a soft reminder, not an alert
         break;
       case 'cycle_start':
         title = '⚗️ PROTOCOL INITIATED';
