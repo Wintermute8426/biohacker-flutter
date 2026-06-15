@@ -42,8 +42,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   // Track locally marked missed doses to update UI immediately
   final Set<String> _locallyMarkedMissed = {};
 
-  // Scroll controller for SOVEREIGN DOSING card
+  // Scroll controllers + scroll-state flags for card scroll indicators
   final ScrollController _dosingScrollController = ScrollController();
+  final ScrollController _protocolsScrollController = ScrollController();
+  bool _dosingHasMoreBelow = false;
+  bool _dosingHasMoreAbove = false;
+  bool _protocolsHasMoreBelow = false;
 
   // Cache for expensive computations to avoid rebuilds
   final Map<String, double> _cycleProgressCache = {};
@@ -70,16 +74,51 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     super.initState();
     _loadData();
     _dosingScrollController.addListener(_onDosingScroll);
+    _protocolsScrollController.addListener(_onProtocolsScroll);
   }
 
   void _onDosingScroll() {
-    // Intentionally empty — we only care about post-frame overflow detection
+    if (!_dosingScrollController.hasClients) return;
+    final pos = _dosingScrollController.position;
+    setState(() {
+      _dosingHasMoreBelow = pos.pixels < pos.maxScrollExtent - 4;
+      _dosingHasMoreAbove = pos.pixels > 4;
+    });
+  }
+
+  void _onProtocolsScroll() {
+    if (!_protocolsScrollController.hasClients) return;
+    final pos = _protocolsScrollController.position;
+    setState(() {
+      _protocolsHasMoreBelow = pos.pixels < pos.maxScrollExtent - 4;
+    });
+  }
+
+  /// Called after data loads to detect initial scroll state (content may already overflow).
+  void _checkInitialScrollState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_dosingScrollController.hasClients) {
+        final pos = _dosingScrollController.position;
+        setState(() {
+          _dosingHasMoreBelow = pos.maxScrollExtent > 4;
+          _dosingHasMoreAbove = pos.pixels > 4;
+        });
+      }
+      if (_protocolsScrollController.hasClients) {
+        final pos = _protocolsScrollController.position;
+        setState(() {
+          _protocolsHasMoreBelow = pos.maxScrollExtent > 4;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _dosingScrollController.removeListener(_onDosingScroll);
     _dosingScrollController.dispose();
+    _protocolsScrollController.removeListener(_onProtocolsScroll);
+    _protocolsScrollController.dispose();
     super.dispose();
   }
 
@@ -113,6 +152,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
       if (mounted) {
         setState(() => _isLoading = false);
+        _checkInitialScrollState();
       }
     } catch (e) {
       if (kDebugMode) {
@@ -120,6 +160,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       }
       if (mounted) {
         setState(() => _isLoading = false);
+        _checkInitialScrollState();
       }
     }
   }
@@ -503,7 +544,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ),
             )
-          : ListView.builder(
+          : Stack(
+              children: [
+                ListView.builder(
+              controller: _protocolsScrollController,
               itemCount: _activeCycles.length,
               itemBuilder: (context, i) {
                 final cycle = _activeCycles[i];
@@ -582,16 +626,66 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 );
               },
             ),
+
+            // Bottom scroll indicator for protocols card
+            if (_protocolsHasMoreBelow)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 40,
+                child: IgnorePointer(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.0),
+                                Colors.black.withOpacity(0.90),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        color: Colors.black.withOpacity(0.90),
+                        padding: const EdgeInsets.only(bottom: 2),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.keyboard_arrow_down,
+                              color: AppColors.amber.withOpacity(0.8),
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'SCROLL',
+                              style: TextStyle(
+                                color: AppColors.amber.withOpacity(0.75),
+                                fontSize: 8,
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
     );
   }
 
   Widget _buildTodaysScheduleCard() {
-    // Approximate visible items at 320px card height:
-    // Card height 320 - top/bottom padding 70 - header ~32 = ~218px usable
-    // Each item is ~28px (row + 12px gap) → ~7 visible
-    const int kVisibleItemThreshold = 7;
-    final int overflowCount = (_todaysDoses.length - kVisibleItemThreshold).clamp(0, 99);
-    final bool showOverflowHint = overflowCount > 0;
 
     return CRTCard(
       title: 'SOVEREIGN DOSING',
@@ -681,8 +775,31 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   },
                 ),
 
-                // Gradient fade + overflow hint (only when content overflows)
-                if (showOverflowHint)
+                // Top fade — visible when scrolled down (more content above)
+                if (_dosingHasMoreAbove)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 24,
+                    child: IgnorePointer(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.85),
+                              Colors.black.withOpacity(0.0),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Bottom fade + scroll cue — visible when more content below
+                if (_dosingHasMoreBelow)
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -707,18 +824,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                           Container(
                             color: Colors.black.withOpacity(0.92),
-                            padding: EdgeInsets.only(bottom: 2),
+                            padding: const EdgeInsets.only(bottom: 2),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                Icon(
+                                  Icons.keyboard_arrow_down,
+                                  color: Color(0xFF00FF00).withOpacity(0.8),
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
                                 Text(
-                                  '▼ $overflowCount MORE',
+                                  'SCROLL',
                                   style: TextStyle(
                                     color: Color(0xFF00FF00).withOpacity(0.75),
-                                    fontSize: 9,
+                                    fontSize: 8,
                                     fontFamily: 'monospace',
                                     fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.5,
+                                    letterSpacing: 2,
                                   ),
                                 ),
                               ],
