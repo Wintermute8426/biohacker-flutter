@@ -31,7 +31,8 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen>
+    with SingleTickerProviderStateMixin {
   final cycleDb = CyclesDatabase();
   final doseDb = DoseLogsDatabase();
 
@@ -48,6 +49,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   bool _dosingHasMoreBelow = false;
   bool _dosingHasMoreAbove = false;
   bool _protocolsHasMoreBelow = false;
+
+  // Scroll pulse animation
+  late AnimationController _scrollPulseController;
+  late Animation<double> _scrollPulseAnim;
 
   // Cache for expensive computations to avoid rebuilds
   final Map<String, double> _cycleProgressCache = {};
@@ -75,6 +80,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     _loadData();
     _dosingScrollController.addListener(_onDosingScroll);
     _protocolsScrollController.addListener(_onProtocolsScroll);
+    _scrollPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    )..repeat(reverse: true);
+    _scrollPulseAnim = Tween<double>(begin: 0.35, end: 1.0).animate(
+      CurvedAnimation(parent: _scrollPulseController, curve: Curves.easeInOut),
+    );
   }
 
   void _onDosingScroll() {
@@ -119,6 +131,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     _dosingScrollController.dispose();
     _protocolsScrollController.removeListener(_onProtocolsScroll);
     _protocolsScrollController.dispose();
+    _scrollPulseController.dispose();
     super.dispose();
   }
 
@@ -546,7 +559,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             )
           : Stack(
               children: [
-                ListView.builder(
+                Scrollbar(
+              controller: _protocolsScrollController,
+              thumbVisibility: true,
+              thickness: 3,
+              radius: const Radius.circular(2),
+              child: ListView.builder(
               controller: _protocolsScrollController,
               itemCount: _activeCycles.length,
               itemBuilder: (context, i) {
@@ -626,6 +644,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 );
               },
             ),
+            ), // end Scrollbar
 
             // Bottom scroll indicator for protocols card
             if (_protocolsHasMoreBelow)
@@ -633,50 +652,59 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                height: 40,
+                height: 56,
                 child: IgnorePointer(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.0),
-                                Colors.black.withOpacity(0.90),
-                              ],
+                  child: AnimatedBuilder(
+                    animation: _scrollPulseAnim,
+                    builder: (context, _) => Column(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withOpacity(0.95),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Container(
-                        color: Colors.black.withOpacity(0.90),
-                        padding: const EdgeInsets.only(bottom: 2),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.keyboard_arrow_down,
-                              color: AppColors.amber.withOpacity(0.8),
-                              size: 14,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'SCROLL',
-                              style: TextStyle(
-                                color: AppColors.amber.withOpacity(0.75),
-                                fontSize: 8,
-                                fontFamily: 'monospace',
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 2,
+                        Container(
+                          color: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.keyboard_double_arrow_down,
+                                color: AppColors.amber.withOpacity(_scrollPulseAnim.value),
+                                size: 18,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 6),
+                              Text(
+                                'SCROLL FOR MORE',
+                                style: TextStyle(
+                                  color: AppColors.amber.withOpacity(_scrollPulseAnim.value),
+                                  fontSize: 10,
+                                  fontFamily: 'monospace',
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.keyboard_double_arrow_down,
+                                color: AppColors.amber.withOpacity(_scrollPulseAnim.value),
+                                size: 18,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -708,7 +736,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           : Stack(
               children: [
                 // Scrollable dose list
-                ListView.builder(
+                Scrollbar(
+                  controller: _dosingScrollController,
+                  thumbVisibility: true,
+                  thickness: 3,
+                  radius: const Radius.circular(2),
+                  child: ListView.builder(
                   controller: _dosingScrollController,
                   itemCount: _todaysDoses.length,
                   itemBuilder: (context, i) {
@@ -774,6 +807,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     );
                   },
                 ),
+                ), // end Scrollbar
 
                 // Top fade — visible when scrolled down (more content above)
                 if (_dosingHasMoreAbove)
@@ -781,7 +815,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: 24,
+                    height: 28,
                     child: IgnorePointer(
                       child: Container(
                         decoration: BoxDecoration(
@@ -789,8 +823,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.black.withOpacity(0.85),
-                              Colors.black.withOpacity(0.0),
+                              Colors.black,
+                              Colors.transparent,
                             ],
                           ),
                         ),
@@ -804,50 +838,59 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    height: 48,
+                    height: 56,
                     child: IgnorePointer(
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.black.withOpacity(0.0),
-                                    Colors.black.withOpacity(0.92),
-                                  ],
+                      child: AnimatedBuilder(
+                        animation: _scrollPulseAnim,
+                        builder: (context, _) => Column(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.black.withOpacity(0.95),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Container(
-                            color: Colors.black.withOpacity(0.92),
-                            padding: const EdgeInsets.only(bottom: 2),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.keyboard_arrow_down,
-                                  color: Color(0xFF00FF00).withOpacity(0.8),
-                                  size: 14,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'SCROLL',
-                                  style: TextStyle(
-                                    color: Color(0xFF00FF00).withOpacity(0.75),
-                                    fontSize: 8,
-                                    fontFamily: 'monospace',
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 2,
+                            Container(
+                              color: Colors.black,
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.keyboard_double_arrow_down,
+                                    color: Color(0xFF00FF00).withOpacity(_scrollPulseAnim.value),
+                                    size: 18,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'SCROLL FOR MORE',
+                                    style: TextStyle(
+                                      color: Color(0xFF00FF00).withOpacity(_scrollPulseAnim.value),
+                                      fontSize: 10,
+                                      fontFamily: 'monospace',
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.keyboard_double_arrow_down,
+                                    color: Color(0xFF00FF00).withOpacity(_scrollPulseAnim.value),
+                                    size: 18,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -804,6 +804,27 @@ class ReportsService {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Test-visible helpers
+  // ---------------------------------------------------------------------------
+
+  /// Exposed for unit tests only.
+  @visibleForTesting
+  String beautifyBiomarkerNameForTest(String key) => _beautifyBiomarkerName(key);
+
+  /// Exposed for unit tests only.
+  @visibleForTesting
+  String determineBiomarkerStatusForTest(String key, double? value) =>
+      _determineBiomarkerStatus(key, value);
+
+  /// Exposed for unit tests only.
+  @visibleForTesting
+  double? extractValueForTest(dynamic data) => _extractValue(data);
+
+  // ---------------------------------------------------------------------------
+  // Private helpers
+  // ---------------------------------------------------------------------------
+
   // Helper: Extract numeric value from biomarker data
   String _beautifyBiomarkerName(String key) {
     // Convert snake_case or camelCase to Title Case

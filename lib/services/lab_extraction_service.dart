@@ -291,6 +291,11 @@ class LabExtractionService {
   // Shared JSON parser
   // ---------------------------------------------------------------------------
 
+  /// Exposed for unit tests only.
+  @visibleForTesting
+  static Map<String, dynamic> parseBiomarkerJsonForTest(String raw) =>
+      _parseBiomarkerJson(raw);
+
   static Map<String, dynamic> _parseBiomarkerJson(String raw) {
     String jsonStr = raw.trim();
 
